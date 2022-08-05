@@ -1,0 +1,13 @@
+*.bbl
+*.log
+*.aux
+*.out
+*.Renviron
+*.Rout
+*.toc
+*.Rhistory
+cache/*
+figure/*
+*concordance.tex
+*.DS_Store
+*.synctex.gz
