@@ -242,7 +242,7 @@ options(
   xtable.comment = FALSE
 )
 
-true_agg_cases <- haitiCholera %>%
+dep_plot_df <- haitiCholera %>%
   select(-report) %>%
   pivot_longer(
     data = .,
@@ -256,7 +256,9 @@ true_agg_cases <- haitiCholera %>%
   ) %>%
   mutate(
     dep = case_when(dep == "Grand_Anse" ~ "Grande_Anse", TRUE ~ dep)
-  ) %>%
+  )
+
+true_agg_cases <- dep_plot_df %>%
   tidyr::pivot_wider(
     data = .,
     id_cols = c(date),
@@ -958,6 +960,8 @@ Therefore the reported parameters were obtained using the PanelPOMP version of M
 % Simulations from the fitted version of the PanelPOMP model are shown in Fig.~\ref{h3panelsims}.
 
 <<Model 3 PanelSims,echo=FALSE>>=
+h3_panel_sims <- switch(RUN_LEVEL, 20, 100, 500)
+
 departements <-
   c(
     'Artibonite',
@@ -974,57 +978,44 @@ departements <-
 
 registerDoRNG(5317865)
 
-stew(
-  file = "model3/output/sims_FinalPanel.rda", {
-    foreach(dep=departements, .combine = rbind) %dopar% {
+h3_panel_sims <- bake(
+  file = paste0('model3/', rl_dir, 'panelPompSims.rds'), {
+    foreach(dep = departements, .combine = rbind) %dopar% {
       SIRB <- unitobjects(h3)[[dep]]
       shared <- h3@shared
       specific <- h3@specific[, dep]
 
-      pomp::simulate(SIRB,
-                     params = c(shared, specific),
-                     nsim = 500, format = 'data.frame',
-                     include.data = TRUE) -> sims
+      pomp::simulate(
+        SIRB,
+        params = c(shared, specific),
+        nsim = h3_panel_sims,
+        format = 'data.frame'
+      ) -> sims
 
       sims$dep <- dep
       sims
-    } -> h3_panel_all_sims
-
-    h3_panel_quantiles <- h3_panel_all_sims %>%
-      mutate(isdata = .id == 'data') %>%
-      # filter(!isdata) %>%
-      group_by(isdata, dep, time) %>%
-      summarise(
-        q05 = quantile(cases, 0.025, na.rm = T),
-        mean = mean(cases, na.rm = T),
-        q50 = quantile(cases, 0.5, na.rm = T),
-        q95 = quantile(cases, 0.975, na.rm = T)
-      )
-
-    h3_panel_real_data <- h3_panel_quantiles %>%
-      filter(isdata)
-
-    h3_panel_sim_data <- h3_panel_quantiles %>%
-      filter(!isdata)
-
+    }
   }
 )
 
-h3_panel_sim_data <- h3_panel_sim_data %>%
+h3_panel_quantiles <- h3_panel_sims %>%
   mutate(
-    dep = gsub("-", "_", dep),
-    date = yearsToDateTime(time)
+    date = as.Date(
+      lubridate::round_date(lubridate::date_decimal(time), unit = 'day')
+    )
   ) %>%
-  filter(date >= yearsToDate(h3@unit.objects$Artibonite@t0)) %>%
-  mutate(date = as.Date(lubridate::round_date(date)))
-
-h3_panel_real_data <- h3_panel_real_data %>%
+  group_by(dep, date) %>%
+  summarise(
+    q05 = quantile(cases, 0.025, na.rm = T),
+    mean = mean(cases, na.rm = T),
+    q50 = quantile(cases, 0.5, na.rm = T),
+    q95 = quantile(cases, 0.975, na.rm = T)
+  ) %>%
+  ungroup() %>%
   mutate(
-    dep = gsub("-", "_", dep),
-    date = yearsToDateTime(time)
+    dep = gsub("-", "_", dep)
   ) %>%
-  filter(date >= yearsToDate(h3@unit.objects$Artibonite@t0)) %>%
-  mutate(date = as.Date(lubridate::round_date(date)))
+  filter(date >= yearsToDate(h3@unit.objects$Artibonite@t0))
 
 plot_order <- c(
   'Artibonite',
@@ -1043,11 +1034,10 @@ plot_order <- c(
 
 \begin{figure}[ht]
 <<Model3_PanelSims_Figure, echo=FALSE, fig.height=3>>=
-
 ggplot() +
-  geom_line(data = h3_panel_sim_data, aes(x = date, y = q50 + 1), col = 'blue') +
-  geom_line(data = h3_panel_real_data, aes(x = date, y = q50 + 1), col = 'black') +
-  geom_ribbon(data = h3_panel_sim_data, aes(x = date, ymin = q05 + 1, ymax = q95 + 1),
+  geom_line(data = h3_panel_quantiles, aes(x = date, y = q50 + 1), col = 'blue') +
+  geom_line(data = dep_plot_df, aes(x = date, y = cases + 1), col = 'black') +
+  geom_ribbon(data = h3_panel_quantiles, aes(x = date, ymin = q05 + 1, ymax = q95 + 1),
               alpha = 0.4) +
   facet_wrap(~factor(dep, levels = plot_order), nrow = 2,
              labeller = dep_labeller) +
@@ -1055,9 +1045,7 @@ ggplot() +
   theme(axis.title.x = element_blank()) +
   scale_x_date(date_labels = "'%y", breaks = seq.Date(from = as.Date("2011-01-01"), as.Date("2019-01-01"), by = '2 years')) +
   scale_y_log10(labels = scales::trans_format("log10", scales::math_format(10^.x)))
-  # theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1,
-  #                                  size = 7),
-        # axis.title.x = element_blank())
+
 @
 \caption{\label{h3panelsims}
 Simulations from initial conditions using panelPOMP version of Model~3.
@@ -1066,7 +1054,7 @@ The black curve represents true case count, the blue curve the median of 500 sim
 \end{figure}
 
 <<Remove Model3 panelSims, cache=FALSE, include=FALSE, message=FALSE, echo=FALSE>>=
-rm(h3_panel_all_sims, h3_panel_sim_data)
+rm(h3_panel_quantiles, h3_panel_sims)
 gc()
 @
 
@@ -1081,46 +1069,34 @@ Simulations from the SpatPOMP version of the model, using the parameters that we
 <<Model 3 SpatPOMP sims, echo=FALSE>>=
 # load('output/FinalPanelAsSpatPomp_PF.rda')
 
-h3Spat <- haiti3_spatPomp()
-coef(h3Spat) <- haitipkg:::panelParms_toSpatParms3(p3)
+h3_spat_nsim <- switch(RUN_LEVEL, 20, 100, 500)
 
-registerDoRNG(6687147)
+h3Spat_quants <- bake(
+  file = paste0('model3/', rl_dir, 'SpatPompSims.rds'), {
+    h3Spat <- haiti3_spatPomp()
+    coef(h3Spat) <- haitipkg:::panelParms_toSpatParms3(p3)
 
-stew(
-  file = "model3/output/SpatPompSims.rda", {
-    h3Spat_sims <- simulate(h3Spat, nsim = 500, seed = 784713,
-                     format = "data.frame", include.data = TRUE)
+    h3Spat_sims <- simulate(
+      h3Spat, nsim = h3_spat_nsim, format = 'data.frame'
+    )
 
-    h3Spat_quants <- h3Spat_sims %>%
-      mutate(is.data = .id == 'data') %>%
-      filter(!is.data) %>%
+    h3Spat_sims %>%
       rename(dep = unitname) %>%
       group_by(dep, time) %>%
-      summarise(q05 = quantile(cases, 0.025, na.rm = T),
-                mean = mean(cases, na.rm = T),
-                q50 = quantile(cases, 0.5, na.rm = T),
-                q95 = quantile(cases, 0.975, na.rm = T)) %>%
+      summarise(
+        q05 = quantile(cases, 0.025, na.rm = T),
+        mean = mean(cases, na.rm = T),
+        q50 = quantile(cases, 0.5, na.rm = T),
+        q95 = quantile(cases, 0.975, na.rm = T)
+      ) %>%
       ungroup() %>%
-      mutate(date = yearsToDateTime(time)) %>%
+      mutate(
+        date = lubridate::date_decimal(time)
+      ) %>%
       filter(date >= yearsToDate(h3Spat@t0)) %>%
-      mutate(date = as.Date(lubridate::round_date(date)))
-
-    h3Spat_truth <- h3Spat_sims %>%
-      # select(time, .id, starts_with("cases")) %>%
-      mutate(is.data = .id == 'data') %>%
-      filter(is.data) %>%
-      rename(dep = unitname) %>%
-      group_by(dep, time) %>%
-      summarise(q05 = quantile(cases, 0.025, na.rm = T),
-                mean = mean(cases, na.rm = T),
-                q50 = quantile(cases, 0.5, na.rm = T),
-                q95 = quantile(cases, 0.975, na.rm = T)) %>%
-      ungroup() %>%
-      mutate(date = yearsToDateTime(time)) %>%
-      filter(date >= yearsToDate(h3Spat@t0)) %>%
-      mutate(date = as.Date(lubridate::round_date(date)))
-
-  }
+      mutate(date = as.Date(lubridate::round_date(date, unit = 'day')))
+  },
+  timing = FALSE
 )
 
 @
@@ -1129,7 +1105,7 @@ stew(
 <<Model3_SpatPOMP_sims_Figure, fig.height=3>>=
 ggplot() +
   geom_line(data = h3Spat_quants, aes(x = date, y = q50 + 1), col = 'blue') +
-  geom_line(data = h3Spat_truth, aes(x = date, y = q50 + 1), col = 'black') +
+  geom_line(data = dep_plot_df, aes(x = date, y = cases + 1), col = 'black') +
   geom_ribbon(data = h3Spat_quants,
               aes(x = date, ymin = q05 + 1, ymax = q95 + 1),
               alpha = 0.4) +
@@ -1139,9 +1115,6 @@ ggplot() +
   scale_x_date(date_labels = "'%y", breaks = seq.Date(from = as.Date("2011-01-01"), as.Date("2019-01-01"), by = '2 years')) +
   theme(axis.title.x = element_blank()) +
   scale_y_log10(labels = scales::trans_format("log10", scales::math_format(10^.x)))
-  # theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1,
-  #                                  size = 6),
-  #       axis.title.x = element_blank())
 @
 \caption{\label{h3spatsims}
 Simulations from initial conditions using SpatPOMP version of Model~3.
@@ -1150,7 +1123,7 @@ The black curve represents true case count, the blue line the median of 500 simu
 \end{figure}
 
 <<Remove Model3 spatSims, cache=FALSE, include=FALSE, message=FALSE, echo=FALSE>>=
-rm(h3Spat_sims, h3Spat_truth, h3Spat_quants)
+rm(h3Spat_quants, h3_spat_nsim)
 gc()
 @
 
@@ -1422,6 +1395,9 @@ mod2_lee_aic <- 2 * h2_fit$leeFit_n_params - 2 * h2_fit$leeFit_ll
 @
 
 <<Lee3 Sub Calculations, echo=FALSE, include=FALSE, message=FALSE>>=
+lee3_NP   <- switch(RUN_LEVEL, 50, 250, 5000)
+lee3_NREP <- switch(RUN_LEVEL,  3,   8,   36)
+
 registerDoRNG(49637421)
 
 # Create Lee et al (2020a) version of model 3 on sub-data
@@ -1441,9 +1417,8 @@ lee3_all <- haiti3(start_time = "2010-10-23")
 rm(set_as_na, temp_ouest_cases)
 gc()
 
-stew(
-  # Save the file
-  file = 'model3/output/lee3_results.rda', {
+lee3_results <- bake(
+  file = paste0('model3/', rl_dir, 'lee3_results.rds'), {
 
     # Create lists to save results
     lee3_results <- list()
@@ -1453,9 +1428,9 @@ stew(
 
       # Save all likelihood evaluations
       lee3_results[["sub_ll_evals"]] <- foreach(
-        i = 1:36, .combine = c
+        i = 1:lee3_NREP, .combine = c
       ) %dopar% {
-        logLik(pfilter(lee3_sub, Np = 5000))  # Get likelihood evaluations
+        logLik(pfilter(lee3_sub, Np = lee3_NP))  # Get likelihood evaluations
       }
     })
 
@@ -1466,14 +1441,17 @@ stew(
 
       # Save all likelihood evaluations
       lee3_results[["all_ll_evals"]] <- foreach(
-        i = 1:36, .combine = c
+        i = 1:lee3_NREP, .combine = c
       ) %dopar% {
-        logLik(pfilter(lee3_all, Np = 5000))  # Get likelihood evaluations
+        logLik(pfilter(lee3_all, Np = lee3_NP))  # Get likelihood evaluations
       }
     })
 
     lee3_results[["n_params"]] <- 29
-  }
+
+    lee3_results
+  },
+  timing = FALSE
 )
 
 rm(lee3_sub, lee3_all)
@@ -1921,7 +1899,7 @@ h1_S1_sims <- bake(
 # Clean-up simulations for analysis/visualization
 mod1_V4_sims <- agg_mod1_sims(h1_S1_sims)
 mod1_V4_probs <- get_elimProbs(h1_S1_sims, model = 1)
-rm(h1_S1_sims)
+rm(h1_S1_sims, h1_scen_NP, h1_scen_sims)
 
 gc()
 @
