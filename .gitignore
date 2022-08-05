@@ -11,3 +11,7 @@ figure/*
 *concordance.tex
 *.DS_Store
 *.synctex.gz
+model1/run_level*
+model2/run_level*
+model3/run_level*
+model1/output/*
