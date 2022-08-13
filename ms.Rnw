@@ -1207,9 +1207,9 @@ The use of a common benchmark may also be beneficial when developing models with
 Likelihoods of Models~1--3 and their respective ARMA(2, 1) benchmark models are provided in Table~\ref{tab:likes}.
 \jwc{WE SAY THAT WE HAVE AN IN-DEPTH DESCRIPTION OFMODEL VALIDATION, BUT ONLY PROPOSE/DEMONSTRATE TWO WAYS TO DO THIS. SHOULD WE MENTION OTHER THINGS, LIKE CONDITIONAL LIKELIHOODS / ESS, CHECKING PLAUSABILITY OF FIT MODEL PARAMETERS, OR COMPARING AUTO-CORRELATIONS BETWEEN SIMULATIONS AND OBSERVATIONS (LIKE AARON KING HAS DONE)? I DON'T THINK WE NECESSARILY HAVE TO SHOW ALL OF THESE, SINCE THE ARTICLE IS ALREADY TOO LONG, BUT MAYBE MENTIONING THEM? WOULD MENTIONING THESE WITHOUT DEMONSTRATING THEM RAISE CONCERNS FROM REVIEWERS?}
 
-
-
 <<Table 2 Input, echo=FALSE, eval=TRUE>>=
+NREPS_EVAL <- switch(RUN_LEVEL,  3,   8,    36)
+NP_EVAL    <- switch(RUN_LEVEL, 50, 500, 10000)
 
 # Objective function of model 2, epidemic phase
 epi_ofun <- traj_objfun(
@@ -1232,7 +1232,6 @@ arima_lik2 <- 0
 mod2_n_params <- 21  # Number of parameters fit in Model 2
 mod2_aic <- 2 * mod2_n_params - 2 * mod2_ll
 
-
 # Load pre-calculated model 1 likelihood
 mod1_ll <- h1_ll['ll']  # Comes from model1/output/recal_mcap_results.rda
 
@@ -1250,12 +1249,50 @@ mod3_ll <- ll_mod3 %>%
 mod3_n_params <- 39
 mod3_aic <- 2 * mod3_n_params - 2 * mod3_ll
 
-load('model3/output/FinalPanelAsSpatPomp_PF.rda')
-rm(pf, ll)
-mod3_spatPomp_ll <- ll_est[1]
-rm(ll_est)
+h3Spat <- haiti3_spatPomp()
+coef(h3Spat) <- haitipkg:::panelParms_toSpatParms3(p3)
+
+# Calculate likelihood via block-particle filter
+mod3_spatPomp_res <- bake(
+  file = paste0('model3/', rl_dir, 'SpatPomp_res.rds'), {
+
+    # Create a list to store results
+    results <- list()
+
+    # Perform block-particle filter
+    h3_bpf <- foreach(i = 1:NREPS_EVAL, .combine = c) %dopar% {
+      bpfilter(h3Spat, Np = NP_EVAL, block_size = 1)
+    }
+
+
+    ll <- logLik(h3_bpf)
+    results$ll <- logmeanexp(ll[!is.na(ll)], se = FALSE)
+
+    ### Get likelihood for subset of the data
+
+    # Find appropriate sub-set
+    in_subset_cols <- h3_bpf[[1]]@times >= as.numeric(dateToYears(as.Date("2014-03-01")))
+    in_subset_rows <- h3_bpf[[1]]@unit_names != 'Ouest'
+
+    mod3_coupled_subset_evals <- c()
+    for (i in 1:length(pf)) {
+      mod3_coupled_subset_evals <- c(
+        mod3_coupled_subset_evals,
+        sum(h3_bpf[[i]]@block.cond.loglik[in_subset_rows, in_subset_cols])
+      )
+    }
+
+    results$subset_ll <- logmeanexp(mod3_coupled_subset_evals)
+    results
+  },
+  timing = FALSE
+)
+
 mod3_spatPomp_n_params <- 39
-mod3_spatPomp_aic <- 2 * mod3_spatPomp_n_params - 2 * mod3_spatPomp_ll
+mod3_spatPomp_aic <- 2 * mod3_spatPomp_n_params - 2 * mod3_spatPomp_res$ll
+mod3_spatPomp_res$subset_aic <- 2 * mod3_spatPomp_n_params - 2 * mod3_spatPomp_res$subset_ll
+
+rm(NREPS_EVAL, NP_EVAL)
 @
 
 <<CalculateARMA, echo=FALSE, message=FALSE, include=FALSE, cache=TRUE>>=
@@ -1454,31 +1491,14 @@ lee3_results <- bake(
   timing = FALSE
 )
 
-rm(lee3_sub, lee3_all)
+rm(lee3_sub, lee3_all, lee3_NP, lee3_NREP)
 gc()
-@
 
-
-<<old TODO: Replace this with the above>>=
-# Load Lee et al Model 3 likelihood for entire data
-# load('model3/output/lee_mod3_coupled_allData_ll.rda')
-# mod3_lee_coupled_ll <- max(lee3_results[["ll_evals_sub_data"]])
-# mod3_lee_coupled_n_params <- 29
 mod3_lee_coupled_aic <- 2 * lee3_results$n_params - 2 * max(lee3_results$all_ll_evals)
 
-# rm(coupled_ll_evals_all_data, coupled_ll_results_all_data, tPfilter_lee_coupled)
-# gc()
-
-# Load Lee et al Model 3 likelihood on partial data
-# load('model3/output/lee_mod3_coupled_ll.rda')
-# mod3_lee_coupled_partial_ll <- max(coupled_ll_evals_sub_data)
 mod3_lee_coupled_partial_aic <- 2 * lee3_results$n_params - 2 * max(lee3_results$sub_ll_evals)
 
-# Load our spatPOMP Model 3 on likelihood on partial data
-load('model3/output/mod3_coupled_subset_ll.rda')
-mod3_coupled_subset_aic <- 2 * mod3_spatPomp_n_params - 2 * mod3_coupled_subset_ll
 @
-
 
 \begin{table}[ht]
 \centering
@@ -1493,7 +1513,7 @@ mod3_coupled_subset_aic <- 2 * mod3_spatPomp_n_params - 2 * mod3_coupled_subset_
   $\Sexpr{myround(mod1_ll, 1)}$ &
   $\Sexpr{myround(mod2_ll, 1)}$ &
   \multirow{2}{*}{$\Sexpr{myround(mod3_ll[1], 1)}$\footnotemark[2]} &
-  $\Sexpr{myround(mod3_spatPomp_ll, 1)}$ \\
+  $\Sexpr{myround(mod3_spatPomp_res$ll, 1)}$ \\
     & ($\Sexpr{myround(mod1_lee_ll, 1)}$)\footnotemark[1] &
   ($\Sexpr{myround(h2_fit$leeFit_ll, 1)}$) &
   & ($\Sexpr{myround(max(lee3_results[["all_ll_evals"]]), 1)}$)\footnotemark[3]
@@ -1527,7 +1547,7 @@ Values in parenthesis are corresponding values using \citet{lee20} parameter est
 \footnotetext[2]{Parameters to department-specific models not provided by \citet{lee20}, as department fits were only used as an intermediary step to obtain parameter estimates of the coupled model.}
 \footnotetext[3]{Model 3 was originally fit to only a subset of the data starting from March 2014 and did not include a large portion of data from Ouest in 2015-2016.
 On this subset, the parameters provided by \citet{lee20} achieved a likelihood of $\Sexpr{myround(max(lee3_results$sub_ll_evals), 1)}$.
-On this same subset of data, our model achieved a likelihood of $\Sexpr{myround(mod3_coupled_subset_ll, 1)}$.}
+On this same subset of data, our model achieved a likelihood of $\Sexpr{myround(mod3_spatPomp_res$subset_ll, 1)}$.}
 As previously noted, simulations from a well-fit mechanistic model may closely resemble the observed data $y_{1:N}^*$.
 In such comparisons, these simulations are random draws from the complete estimated joint distribution $f_{\bm{X}^{(\modelCounter)}_{0:N}, \bm{Y}^{(\modelCounter)}_{1:N}}\left(x_{0:N}, y_{1:N}\mid \hat{\theta}\right)$, where $\modelCounter$ identifies the model used for simulations.
 It can therefore be tempting to use simulations from this model up to time $N+s$, $f_{\bm{X}^{(\modelCounter)}_{0:N+s}, \bm{Y}^{(\modelCounter)}_{1:N+s}}\left(x_{0:N+s}, y_{1:N+s}\mid \hat{\theta}\right)$, with $s\geq 0$ to project the dynamic system up to a future time $N+s$, as it has been done in previous studies \citep{lee20,???}.
@@ -1543,8 +1563,6 @@ Let $\hat{\bm{X}}^{(\modelCounter), i}_N, \, i \in {1, 2, \ldots, J}$ be $\iid$ 
 A single model projection can then be obtained by simulating from the model $f_{\bm{X}^{(\modelCounter)}_{N:s}, \bm{Y}^{(\modelCounter)}_{N:s}}\big(x_{N:s}, y_{N:s}\mid \hat{\theta}, \bm{X}^{(\modelCounter)}_{N} = \hat{\bm{X}}^{(\modelCounter), i}_N\big)$.
 Intuitively, simulating the model starting at the filtering distribution of the most recently available time point is a more appropriate way to project a stochastic dynamic system into the future, as it is not expected that each simulation from initial conditions will result in a latent state at time $N$ consistent with the model and the observation $\bm{Y}^{(\modelCounter)}_N = y_N^*$.
 In this particular case study, projecting the future state of the cholera epidemic in Haiti starting from the draws from the filtering distribution allows the proposed models to benefit from the fact that very few cholera cases had been observed between 2018 and 2019, and that cases appear to be decreasing (i.e., the number of susceptible individuals may be small).
-% Model projections given in the following section have been obtained using the technique suggested in this subsection.
-% Sentence above is unecessary - Jesse
 
 An additional consideration to make when obtaining model forecasts is that of parameter uncertainty.
 It has been noted that the uncertainty in just a single parameter can lead to drastically different projections \citep{saltelli20}.
@@ -1922,35 +1940,146 @@ mod2_VaccScenarios <- bake(
 @
 
 <<Load Model 3 Vacc Scenarios, message=FALSE, include=FALSE>>=
-load('model3/output/sims_spatPomp_S0.rda')
-mod3_V0_sims <- agg_mod3_sims(sims)
-mod3_V0_probs <- get_elimProbs(sims, model = 3)
-rm(sims)
-gc()
+NP_BPF <- switch(RUN_LEVEL, 50, 200, 1000)
+NSIM   <- switch(RUN_LEVEL, 10,  50,  500)
 
-load('model3/output/sims_spatPomp_S2.rda')
-mod3_V1_sims <- agg_mod3_sims(sims)
-mod3_V1_probs <- get_elimProbs(sims, model = 3)
-rm(sims)
-gc()
+h3_bpf <- bake(
+  file = paste0("model3/", rl_dir, "h3_bpf.rds"),
+  expr = {
+    bpfilter(h3Spat, Np = NP_BPF, block_size = 1, save_states = TRUE)
+  },
+  timing = FALSE
+)
 
-load('model3/output/sims_spatPomp_S4.rda')
-mod3_V2_sims <- agg_mod3_sims(sims)
-mod3_V2_probs <- get_elimProbs(sims, model = 3)
-rm(sims)
-gc()
+mod3_V0_res <- bake(
+  file = paste0("model3/", rl_dir, "mod3_V0_res"), {
 
-load('model3/output/sims_spatPomp_S3.rda')
-mod3_V3_sims <- agg_mod3_sims(sims)
-mod3_V3_probs <- get_elimProbs(sims, model = 3)
-rm(sims)
-gc()
+    # Create a list to store results
+    h3_V0_res <- list()
 
-load('model3/output/sims_spatPomp_S1.rda')
-mod3_V4_sims <- agg_mod3_sims(sims)
-mod3_V4_probs <- get_elimProbs(sims, model = 3)
-rm(sims)
-gc()
+    # Get "noVacc" scenario parameters
+    h3_S0_par <- get_model3_vacc_scenario_params(scenario = "noVacc")
+    coef(h3Spat)[names(h3_S0_par)] <- h3_S0_par
+
+    # Using parameters and filtered distribution, project system
+    h3_V0_sims <- project_from_filter2(
+      h3Spat, PF = h3_bpf, covarGen = project_rain,
+      nsims = NSIM, seed = 6897154
+    )
+
+    # Store nationally aggregated results
+    h3_V0_res$mod3_V0_sims <- agg_mod3_sims(h3_V0_sims)
+    h3_V0_res$mod3_V0_probs <- get_elimProbs(h3_V0_sims, model = 3)
+
+    # Return results
+    h3_V0_res
+
+  }
+)
+
+mod3_V1_res <- bake(
+  file = paste0("model3/", rl_dir, "mod3_V1_res"), {
+
+    # Create a list to store results
+    h3_V1_res <- list()
+
+    # Get "noVacc" scenario parameters
+    h3_V1_par <- get_model3_vacc_scenario_params(scenario = "2dep")
+    coef(h3Spat)[names(h3_V1_par)] <- h3_V1_par
+
+    # Using parameters and filtered distribution, project system
+    h3_V1_sims <- project_from_filter2(
+      h3Spat, PF = h3_bpf, covarGen = project_rain,
+      nsims = NSIM, seed = 6897154
+    )
+
+    # Store nationally aggregated results
+    h3_V1_res$mod3_V1_sims <- agg_mod3_sims(h3_V1_sims)
+    h3_V1_res$mod3_V1_probs <- get_elimProbs(h3_V1_sims, model = 3)
+
+    # Return results
+    h3_V1_res
+
+  }
+)
+
+mod3_V2_res <- bake(
+  file = paste0("model3/", rl_dir, "mod3_V2_res"), {
+
+    # Create a list to store results
+    h3_V2_res <- list()
+
+    # Get "noVacc" scenario parameters
+    h3_V2_par <- get_model3_vacc_scenario_params(scenario = "3dep")
+    coef(h3Spat)[names(h3_V2_par)] <- h3_V2_par
+
+    # Using parameters and filtered distribution, project system
+    h3_V2_sims <- project_from_filter2(
+      h3Spat, PF = h3_bpf, covarGen = project_rain,
+      nsims = NSIM, seed = 6897154
+    )
+
+    # Store nationally aggregated results
+    h3_V2_res$mod3_V2_sims <- agg_mod3_sims(h3_V2_sims)
+    h3_V2_res$mod3_V2_probs <- get_elimProbs(h3_V2_sims, model = 3)
+
+    # Return results
+    h3_V2_res
+
+  }
+)
+
+mod3_V3_res <- bake(
+  file = paste0("model3/", rl_dir, "mod3_V3_res"), {
+
+    # Create a list to store results
+    h3_V3_res <- list()
+
+    # Get "noVacc" scenario parameters
+    h3_V3_par <- get_model3_vacc_scenario_params(scenario = "slowNation")
+    coef(h3Spat)[names(h3_V3_par)] <- h3_V3_par
+
+    # Using parameters and filtered distribution, project system
+    h3_V3_sims <- project_from_filter2(
+      h3Spat, PF = h3_bpf, covarGen = project_rain,
+      nsims = NSIM, seed = 6897154
+    )
+
+    # Store nationally aggregated results
+    h3_V3_res$mod3_V3_sims <- agg_mod3_sims(h3_V3_sims)
+    h3_V3_res$mod3_V3_probs <- get_elimProbs(h3_V3_sims, model = 3)
+
+    # Return results
+    h3_V3_res
+
+  }
+)
+
+mod3_V4_res <- bake(
+  file = paste0("model3/", rl_dir, "mod3_V4_res"), {
+
+    # Create a list to store results
+    h3_V4_res <- list()
+
+    # Get "noVacc" scenario parameters
+    h3_V4_par <- get_model3_vacc_scenario_params(scenario = "fastNation")
+    coef(h3Spat)[names(h3_V4_par)] <- h3_V4_par
+
+    # Using parameters and filtered distribution, project system
+    h3_V4_sims <- project_from_filter2(
+      h3Spat, PF = h3_bpf, covarGen = project_rain,
+      nsims = NSIM, seed = 6897154
+    )
+
+    # Store nationally aggregated results
+    h3_V4_res$mod3_V4_sims <- agg_mod3_sims(h3_V4_sims)
+    h3_V4_res$mod3_V4_probs <- get_elimProbs(h3_V4_sims, model = 3)
+
+    # Return results
+    h3_V4_res
+
+  }
+)
 @
 
 Simulations from probabilistic models (Models~1 and~3) represent possible trajectories of the dynamic system under the scientific assumptions of the models.
@@ -1962,7 +2091,7 @@ These results suggest that cholera elimination was likely, even without intense 
 This conclusion is consistent with the fact that cholera was eradicated from Haiti without additional vaccination efforts \citep{ferguson22}.
 
 In additional to probability of elimination estimates, we are also able to estimate the cumulative number of infections under each vaccination scenario from February 2019 -- February 2024.
-Notably, the median number of cumulative cholera infections under the no-vaccination scenario using Models 1 and 3 were $\Sexpr{prettyNum(round(as.numeric(mod1_V0_probs$cumInf['q50'])), big.mark = ",")}$ and $\Sexpr{prettyNum(round(as.numeric(mod3_V0_probs$cumInf['q50'])), big.mark = ",")}$, respectively.
+Notably, the median number of cumulative cholera infections under the no-vaccination scenario using Models 1 and 3 were $\Sexpr{prettyNum(round(as.numeric(mod1_V0_probs$cumInf['q50'])), big.mark = ",")}$ and $\Sexpr{prettyNum(round(as.numeric(mod3_V0_res$mod3_V0_probs$cumInf['q50'])), big.mark = ",")}$, respectively.
 So far, these estimates are far more consistent with the observed number of reported cholera cases than the corresponding estimates from \cite{lee20}, which were approximately $400,000$ and $1,000,000$.
 
 <<Create Model 1 VaccScen plots>>=
@@ -2076,8 +2205,8 @@ so this had very little effect on cholera transmission.
 
 <<Create Model 3 VaccScen Plots>>=
 gg_m3_V0 <- ggplot() +
-  geom_line(data = mod3_V0_sims, aes(x = date, y = q50 + 1), col = 'blue') +
-  geom_ribbon(data = mod3_V0_sims, aes(x = date, ymin = q05 + 1, ymax = q95 + 1), alpha = 0.5) +
+  geom_line(data = mod3_V0_res$mod3_V0_sims, aes(x = date, y = q50 + 1), col = 'blue') +
+  geom_ribbon(data = mod3_V0_res$mod3_V0_sims, aes(x = date, ymin = q05 + 1, ymax = q95 + 1), alpha = 0.5) +
   geom_line(data = true_agg_cases, aes(x = date, y = ReportedAll + 1)) +
   ylab("Log reported cases") +
   theme(axis.title.x = element_blank()) +
@@ -2086,8 +2215,8 @@ gg_m3_V0 <- ggplot() +
   scale_y_log10(labels = scales::trans_format("log10", scales::math_format(10^.x)))
 
 gg_m3_V1 <- ggplot() +
-  geom_line(data = mod3_V1_sims, aes(x = date, y = q50 + 1), col = 'blue') +
-  geom_ribbon(data = mod3_V1_sims, aes(x = date, ymin = q05 + 1, ymax = q95 + 1), alpha = 0.5) +
+  geom_line(data = mod3_V1_res$mod3_V1_sims, aes(x = date, y = q50 + 1), col = 'blue') +
+  geom_ribbon(data = mod3_V1_res$mod3_V1_sims, aes(x = date, ymin = q05 + 1, ymax = q95 + 1), alpha = 0.5) +
   geom_line(data = true_agg_cases, aes(x = date, y = ReportedAll + 1)) +
   ylab("Log reported cases") +
   theme(axis.title = element_blank(),
@@ -2098,8 +2227,8 @@ gg_m3_V1 <- ggplot() +
   scale_y_log10(labels = scales::trans_format("log10", scales::math_format(10^.x)))
 
 gg_m3_V2 <- ggplot() +
-  geom_line(data = mod3_V2_sims, aes(x = date, y = q50 + 1), col = 'blue') +
-  geom_ribbon(data = mod3_V2_sims, aes(x = date, ymin = q05 + 1, ymax = q95 + 1), alpha = 0.5) +
+  geom_line(data = mod3_V2_res$mod3_V2_sims, aes(x = date, y = q50 + 1), col = 'blue') +
+  geom_ribbon(data = mod3_V2_res$mod3_V2_sims, aes(x = date, ymin = q05 + 1, ymax = q95 + 1), alpha = 0.5) +
   geom_line(data = true_agg_cases, aes(x = date, y = ReportedAll + 1)) +
   ylab("Log reported cases") +
     theme(axis.title = element_blank(),
@@ -2110,8 +2239,8 @@ gg_m3_V2 <- ggplot() +
   scale_y_log10(labels = scales::trans_format("log10", scales::math_format(10^.x)))
 
 gg_m3_V3 <- ggplot() +
-  geom_line(data = mod3_V3_sims, aes(x = date, y = q50 + 1), col = 'blue') +
-  geom_ribbon(data = mod3_V3_sims, aes(x = date, ymin = q05 + 1, ymax = q95 + 1), alpha = 0.5) +
+  geom_line(data = mod3_V3_res$mod3_V3_sims, aes(x = date, y = q50 + 1), col = 'blue') +
+  geom_ribbon(data = mod3_V3_res$mod3_V3_sims, aes(x = date, ymin = q05 + 1, ymax = q95 + 1), alpha = 0.5) +
   geom_line(data = true_agg_cases, aes(x = date, y = ReportedAll + 1)) +
   ylab("Log reported cases") +
     theme(axis.title = element_blank(),
@@ -2122,8 +2251,8 @@ gg_m3_V3 <- ggplot() +
   scale_y_log10(labels = scales::trans_format("log10", scales::math_format(10^.x)))
 
 gg_m3_V4 <- ggplot() +
-  geom_line(data = mod3_V4_sims, aes(x = date, y = q50 + 1), col = 'blue') +
-  geom_ribbon(data = mod3_V4_sims, aes(x = date, ymin = q05 + 1, ymax = q95 + 1), alpha = 0.5) +
+  geom_line(data = mod3_V4_res$mod3_V4_sims, aes(x = date, y = q50 + 1), col = 'blue') +
+  geom_ribbon(data = mod3_V4_res$mod3_V4_sims, aes(x = date, ymin = q05 + 1, ymax = q95 + 1), alpha = 0.5) +
   geom_line(data = true_agg_cases, aes(x = date, y = ReportedAll + 1)) +
   ylab("Log reported cases") +
     theme(axis.title = element_blank(),
@@ -2259,18 +2388,18 @@ mod1_probElims <- rbind(
   mod1_V4_probs$ElimTime
 )
 
-mod3_V0_probs$ElimTime$scenario = "V0"
-mod3_V1_probs$ElimTime$scenario = "V1"
-mod3_V2_probs$ElimTime$scenario = "V2"
-mod3_V3_probs$ElimTime$scenario = "V3"
-mod3_V4_probs$ElimTime$scenario = "V4"
+mod3_V0_res$mod3_V0_probs$ElimTime$scenario = "V0"
+mod3_V1_res$mod3_V1_probs$ElimTime$scenario = "V1"
+mod3_V2_res$mod3_V2_probs$ElimTime$scenario = "V2"
+mod3_V3_res$mod3_V3_probs$ElimTime$scenario = "V3"
+mod3_V4_res$mod3_V4_probs$ElimTime$scenario = "V4"
 
 mod3_probElims <- rbind(
-  mod3_V0_probs$ElimTime,
-  mod3_V1_probs$ElimTime,
-  mod3_V2_probs$ElimTime,
-  mod3_V3_probs$ElimTime,
-  mod3_V4_probs$ElimTime
+  mod3_V0_res$mod3_V0_probs$ElimTime,
+  mod3_V1_res$mod3_V1_probs$ElimTime,
+  mod3_V2_res$mod3_V2_probs$ElimTime,
+  mod3_V3_res$mod3_V3_probs$ElimTime,
+  mod3_V4_res$mod3_V4_probs$ElimTime
 )
 
 mod1_probElims$mod <- "Model 1"
