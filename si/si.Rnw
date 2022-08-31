@@ -1,0 +1,1359 @@
+\documentclass[11pt]{article}
+
+%%% JASA. Attention Mac Users. The latest version of the pdfTex compiler for Mac (pdfTeX-1.40.11) outputs files not currently supported by ScholarOne Manuscripts. To resolve this and have a PDF file that will convert properly, the PDF file will need to be distilled to Adobe version 1.4 or earlier. To create a PDF file that uploads correctly, place the command \pdfminorversion=4 in the preamble (before the begin{document}) of your LaTeX file and run pdfLaTeX again.
+
+\pdfminorversion=4
+
+<<debug,echo=F>>=
+run_level <- 1
+
+if(run_level=="manual"){
+}
+
+@
+
+\newcommand\secTitleSpace{\hspace{3mm}}
+
+<<packages, include=FALSE, cache=FALSE, echo=FALSE>>=
+library(tidyverse)
+#library(xtable)
+library(pomp)
+library(haitipkg)
+# library(spatPomp)
+library(doParallel)
+library(doRNG)
+
+cores <-  as.numeric(Sys.getenv('SLURM_NTASKS_PER_NODE', unset = NA))
+# if(is.na(cores)) cores <- detectCores()
+cores <- 20
+registerDoParallel(cores)
+theme_set(theme_bw())
+@
+
+<<set-opts, include=FALSE, cache=FALSE, echo=FALSE>>=
+
+options(
+  scipen = 2,
+  help_type = "html",
+  stringsAsFactors = FALSE,
+  # prompt = "R> ",
+  continue = "+  ",
+  width = 70,
+  useFancyQuotes = FALSE,
+  reindent.spaces = 2,
+  xtable.comment = FALSE
+)
+@
+
+<<knitr-opts, include=FALSE, cache=FALSE, purl=FALSE>>=
+library("knitr")
+opts_knit$set(concordance=TRUE)
+opts_chunk$set(
+  progress=TRUE,prompt=TRUE,highlight=FALSE,
+  tidy=TRUE,
+  tidy.opts=list(
+    keep.blank.line=FALSE
+  ),
+  comment="",
+  warning=FALSE,
+  message=FALSE,
+  error=TRUE,
+  echo=TRUE,
+  cache=FALSE,
+  strip.white=TRUE,
+  results="markup",
+  background="#FFFFFF00",
+  size="normalsize",
+  fig.path="figure/",
+  fig.lp="fig:",
+  fig.align="center",
+  fig.show="asis",
+  #    dpi=300,
+  dev="pdf",
+  dev.args=list(
+    bg="transparent",
+    pointsize=9
+  )
+)
+
+myround <- function (x, digits = 1) {
+  # taken from the broman package
+  if (digits < 1)
+    stop("This is intended for the case digits >= 1.")
+  if (length(digits) > 1) {
+    digits <- digits[1]
+    warning("Using only digits[1]")
+  }
+  tmp <- sprintf(paste("%.", digits, "f", sep = ""), x)
+  zero <- paste0("0.", paste(rep("0", digits), collapse = ""))
+  tmp[tmp == paste0("-", zero)] <- zero
+  tmp
+}
+
+@
+
+%% copied from pnas-new.cls
+\usepackage{amsmath,amsfonts,amssymb,graphicx}
+
+\input{header-ms.tex}
+
+\bibliographystyle{apalike}
+%% added or modified from pnas-new.cls
+\usepackage{natbib}
+\usepackage{fullpage}
+
+\newcommand\myeqref[1]{(\ref{#1})}
+
+
+%\usepackage{relsize}
+
+%\templatetype{pnassupportinginfo}
+
+% \readytosubmit %% Uncomment this line before submitting, so that the instruction page is removed.
+
+%\author{Author1, Author2 and Author3 (Complete author list)}
+%\correspondingauthor{Corresponding Author Name.\\E-mail: author.two@email.com}
+
+\renewcommand{\contentsname}{Supplementary Content}
+\renewcommand{\refname}{Supplementary References}
+\renewcommand\thefigure{S-\arabic{figure}}
+\renewcommand\thetable{S-\arabic{table}}
+%\renewcommand\thepage{S-\arabic{page}}
+\renewcommand\thesection{S\arabic{section}}
+\renewcommand\theequation{S\arabic{equation}}
+\renewcommand\theprop{S\arabic{prop}}
+\renewcommand\thelemma{S\arabic{lemma}}
+\renewcommand\thealgocf{S\arabic{algocf}}
+
+\setcounter{tocdepth}{1}
+
+\begin{document}
+
+%% Comment/remove this line before generating final copy for submission
+%\instructionspage
+
+\date{\today}
+\title{Supplement to ``{\mytitle}''}
+  \author{   Provisional author list\\
+ Jesse Wheeler, Anna Rosengart, Zhuoxun Jiang, Kevin Hao En Tan, Noah Treutle, Edward L. Ionides
+ \\ \hspace{.2cm}\\
+    Department of Statistics, University of Michigan\\
+}
+
+\newcommand{\blind}{1}
+
+\if1\blind
+{
+\maketitle
+}
+\fi
+
+\if0\blind
+{
+  \bigskip
+  \bigskip
+  \bigskip
+  \begin{center}
+    {\LARGE\bf \mytitle}
+\end{center}
+  \bigskip
+  \bigskip
+}\fi
+
+%% Adds the main heading for the SI text. Comment out this line if you do not have any supporting information text.
+
+%\SItext
+
+%Draft: \today
+
+\tableofcontents
+
+\newpage
+
+\section{Markov chain and differential equation interpretations of compartment flow rates}
+
+In Sections 2.1, 2.2 and 2.3 we define compartment models in terms of their flow rates.
+For a discrete population model, these rates define a Markov chain.
+For a continuous and deterministic model, the rates define a system of ordinary differential equations.
+Here, we add additional details to clarify the mapping from a collection of rate functions to a fully specified process.
+Our treatment follows \citet{breto09}.
+
+A general compartment model is a vector-valued process $X(t)=(X_1(t),\dots,X_c(t))$ denoting the (integer or real-valued) counts in each of $c$ compartments.
+The compartments may also have names, but to set up general notation we simply refer to them by their numerical index.
+The basic characteristic of a compartment model is that $X(t)$ can be written in terms of the flows $N_{ij}(t)$ from $i$ to $j$, together with flows into and out of each compartment denoted by $N_{\bullet i}(t)$ and $N_{i\bullet}(t)$ respectively.
+These flows are required to satisfy a ``conservation of mass'' identity:
+\begin{equation}
+X_i(t)=X_i(0)+N_{\bullet i}(t) - N_{i\bullet}(t) + \sum_{j\neq
+i}N_{ji}(t)-\sum_{j\neq i}N_{ij}(t). \label{eq:conservation}
+\end{equation}
+Each {\em flow} $N_{ij}(t)$ is associated with a {\em rate} function
+$\mu_{ij}=\mu_{ij}(t,X(t))$, where we include the possibility that $i$ or $j$ takes value $\bullet$.
+
+There are different ways to use a collection of rate functions to build a fully specified model.
+We proceed to describe the ones we use in this paper: via a system of ordinary differential equations (Sec.~\ref{subsec:ode}), a simple Markov counting system (Sec.~\ref{subsec:smcs}), and an overdispersed Markov counting system (Sec.~\ref{subsec:odmcs}). Other representations include stochastic differential equations driven by Gaussian noise or Gamma noise \citep{bhadra11}.
+
+\subsection{Ordinary differential equation (ODE) interpretation}
+\label{subsec:ode}
+
+A basic deterministic specification is
+\begin{equation}
+\label{eq:ode1}
+dN_{ij}/dt = \mu_{ij}\big(t,X(t) \big) X_i(t), \medskip i\in \seq{1}{c}, \medskip j\in \seq{1}{c} \cup\{\bullet\}, \medskip i\neq j,
+\end{equation}
+where $\mu_{ij}\big(t,X(t)\big)$ is called a per-capita rate or a unit rate.
+Flows into the system require special treatment since $X_i(t)$ in \myeqref{eq:ode1} is not defined for $i=\bullet$.
+Instead, we specify
+\begin{equation}
+\label{eq:ode2}
+dN_{\bullet i}/dt = \mu_{\bullet i}\big(t,X(t) \big).
+\end{equation}
+
+\subsection{Simple Markov counting system interpretation}
+\label{subsec:smcs}
+A continuous time Markov chain can be specified via its infinitesimal transition probabilities.
+A basic approach to this is to define
+\begin{eqnarray}
+\label{eq:smcs1}
+\prob\big[ N_{ij}(t+\delta)-N_{ij}(t)=0 \given X(t)\big]
+ &=& 1-\delta \mu_{ij}\big(t,X(t)\big) + o(\delta),
+\\
+\label{eq:smcs2}
+\prob\big[ N_{ij}(t+\delta)-N_{ij}(t)=1 \given X(t)\big]
+ &=& \delta \mu_{ij}\big(t,X(t)\big) + o(\delta),
+\end{eqnarray}
+for $i\in \seq{1}{c}$ and $j\in\seq{1}{c}\cup\{\bullet\}$ with $i\neq j$.
+As with the ODE case, we need special attention for flows into the system, and we define
+\begin{eqnarray}
+\label{eq:smcs3}
+\prob\big[ N_{\bullet i}(t+\delta)-N_{\bullet i}(t)=0 \given X(t)\big]
+ &=& 1-\delta \mu_{\bullet i}\big(t,X(t)\big) + o(\delta),
+\\
+\label{eq:smcs4}
+\prob\big[ N_{\bullet i}(t+\delta)-N_{\bullet i}(t)=1 \given X(t)\big]
+ &=& \delta \mu_{\bullet i}\big(t,X(t)\big) + o(\delta).
+\end{eqnarray}
+Together with the initial conditions $X(0)$, equations \myeqref{eq:smcs1}--\myeqref{eq:smcs4} define a Markov chain.
+Each flow is a simple counting process, meaning a non-decreasing integer-valued process that only has jumps of size one.
+We therefore call the Markov chain a simple Markov counting system (SMCS).
+The infinitesimal mean of every flow is equal to its infinitesimal variance \citep{breto11} and so an SMCS is called equidispersed.
+To permit more general mean-variance relationships for a Markov counting system, we must permit jumps of size greater than one.
+The utility of overdispersed models, where the infinitesimal variance of the flow exceeds the infinitesimal mean, has become widely recongized \eic{REFS}.
+
+\subsection{Overdispersed Markov counting system interpretation}
+\label{subsec:odmcs}
+
+Including white noise in the rate function enables the possibility of an overdispersed Markov counting system \citep{breto11,breto09,he10}.
+Since rates should be non-negative, Gaussian noise is not appropriate and gamma noise is a convenient option that has found various applications \eic{REFS}.
+Specifically, we consider a model given by
+\begin{equation}
+\label{eq:odmcs1}
+\mu_{ij}\big(t,X(t)\big) = \bar\mu_{ij}\big(t,X(t)\big) \, d\Gamma_{ij}(t)/dt,
+\end{equation}
+where $\Gamma_{ij}(t)$ is a stochastic process having independent gamma distributed increments, with
+\begin{equation}
+\label{eq:odmcs2}
+\E\big[\Gamma_{ij}(t)\big] = t, \quad \var\big[\Gamma_{ij}(t)\big] = \sigma_{ij}^2 t.
+\end{equation}
+Formally interpreting the meaning of \myeqref{eq:odmcs1} is not trivial, and we do so by defining the solution of \myeqref{eq:odmcs1} to be the limit of an Euler scheme.
+% This is equivalent to interpreting a stochastic differential equation via its Ito solution \eic{CHECK THIS CLAIM. I THINK IT MIGHT BE TRUE. IF SO, IT WOULD PROVIDE A NICE BRIDGE BETWEEN DEVELOPMENT OF IMPLICIT MODELS (I.E., DEFINING MODELS VIA NUMERICAL SOLUTIONS, OFTEN DONE USING AN EULER METHOD) AND THE SUCCESSFUL THEORY OF ITO SOLUTIONS TO STOCHASTIC DIFFERENTIAL EQUATIONS.}
+Therefore, the numerical scheme in Sec.~\ref{sec:numerics} can be taken as a definition of the meaning of \myeqref{eq:odmcs1}.
+The Markov chain defined by the limit of this Euler scheme as the step size decreases is an overdispersed Markov counting system, with the possibility of instantaneus jumps of size greater than one \citep{breto11}.
+
+\section{Numerical solutions to compartment models}
+\label{sec:numerics}
+
+Models may be fitted and their implications assessed via numerical solutions (i.e., simulations) from the model equations.
+All the analyses we consider have this simulation-based property, known as plug-and-play or equation-free or likelihood-free.
+The numerical solutions to the model are arguably of more direct scientific interest than the exact solutions to the postulated equations.
+For ODE models, numerical methods are well studied and a standard numerical solution package such as deSolve in R is adequate for our purposes.
+For SMCS and ODMCS models, exact schemes are feasible when the number of events is small, which may be the case for small populations.
+However, for applicability to larger populations, we use instead the following Euler scheme.
+Write $\delta$ for an Euler time step, and $\Delta N_{ij}$ for the numerical approximation to $N_{ij}(t+\delta)-N_{ij}(t)$ given $X(t)$.
+For each $i$ and $j$ in $\seq{1}{c} \cup \{\bullet\}$ with $i \neq j$, we draw independent Gamma distributed noise increments with mean $\delta$ and variance $\sigma_{ij}^2 \delta$, denoted using a mean-variance parameterization of the gamma distribution as
+\begin{equation}
+\label{eq:numerics1}
+\Delta\Gamma_{ij} \sim \mathrm{gamma}(\delta, \sigma_{ij}^2 \delta).
+\end{equation}
+In the case of an SMCS model, $\sigma_{ij}=0$ for all $i$ and $j$, so we have $\Delta\Gamma_{ij}=\delta$.
+Then, for $i\neq\bullet$ and $j\neq i$, and writing
+\begin{equation}
+\label{eq:numerics2}
+\mu_{ij}=\bar\mu_{ij}\big(t,X(t)\big) \Delta\Gamma_{ij} / \delta,
+\end{equation}
+we calculate transition probabilities
+\begin{eqnarray}
+\label{eq:numerics3}
+p_{ij} &=& \exp\left\{-\sum_{k\in 1:c \, \cup \{\bullet\}} \mu_{ik} \, \delta \right\}
+\frac{\mu_{ij}}{\sum_{k\in 1:c\cup \{\bullet\}} \mu_{ik}},
+\\
+\label{eq:numerics4}
+p_{ii} &=& 1 - \sum_{j\neq i} p_{ij}.
+\end{eqnarray}
+These probabilities correspond to competing hazards for every individual in compartment $i$ to transition to some compartment $j$, interpreting $j=i$ to mean that the individual remains in $i$.
+Then, $\big(\Delta N_{i1},\dots,\Delta N_{ic},\Delta N_{i\bullet}\big)$ has the multinomial distribution where $X_i(t)$ individuals are allocated independently to $\seq{1}{c}\cup\{\bullet\}$ with probabilities given by \eqref{eq:numerics3} and \eqref{eq:numerics4}.
+We use the \code{reulermultinom} function in the \code{pomp} package to draw from this multionomial distribution.
+
+For the case $i=\bullet$, one can use
+\begin{equation}
+\label{eq:numerics6}
+\Delta N_{\bullet j} \sim \mathrm{poisson}( \mu_{\bullet j} \delta),
+\end{equation}
+an independent Poisson random variable with mean $\mu_{\bullet j} \delta$.
+To address the issue of making our model consistent with total population as a known quantity, based on census data, in practice we use a deterministic specification of $\Delta N_{\bullet j}$ rather than the Poisson form in \eqref{eq:numerics6}.
+\eic{CHECK THIS. DO WE HAVE A CONSTANT POPULATION, OR A POPULATION OF DETERMINISTICALLY GROWING SIZE? DO WE USE BIRTH DATA OR TOTAL POPULATION DATA?}
+To make birth/immigration events consistent with death/emigration events and population census, we formally model the death rate as a rate of returning to the susceptible class $S$, and use external transitions from $\bullet$ into $S$ to describe only net population increase.
+\jwc{CHECK THIS}.
+
+\section{Initial Values}
+
+To perform inference on POMP models, it is necessary to propose an initial density for the latent process $f_{X_0}(x_0;\theta)$.
+This density is used to obtain initial values of the latent state when fitting and evaluating the model.
+For each of the models considered in this analysis, the initial conditions are derived by enforcing the model dynamics on reported cholera cases.
+For example, in a deterministic model, the total number of Infected and Asymptomatic individuals may be calculated using the observed number of cholera cases at time time of model initialization based on model parameters such as reporting rate $\reportRate$ and fraction of symptomatic cases $\symptomFrac$.
+It is also sometimes necessary to fit some initial value parameters in order to help determine starting values for weakly identifiable compartments.
+In the following subsections, we mention initial value parameters that were fit for each model.
+
+\subsection{Model~1}
+
+For this model, the number of individuals in the Recovered and Asymptomatic compartments are set to zero, but the initial proportion of Infected and Exposed individuals is estimated as initial value parameters ($I_0$ and $E_0$, respectively) using the MIF2 algorithm.
+Finally, the initial proportion of Susceptible individuals $S_0$ is calculated as $S_0 = 1 - I_0 - E_0$.
+
+\subsection{Model~3}
+
+We use the reported cases at the start of the pandemic to approximate the number of Asymptomatic, Infectious, and Recovered individuals in each department $u \in 1:U$ using the same approximation as provided in Eq.~\myeqref{eq:model3:approx}.
+The susceptible compartment is initialized so that the sum $S_{u}(0) + I_u(0) + A_u(0) + \sum_k R_{u, k}(0) = \text{population}_u$.
+The bacteria compartment is then initialized using Eq.~\myeqref{eq:model3:b0}:
+
+\begin{equation}
+  B_u(0) = \big[1 + \seasAmplitude \big(\xi_u)^r \big] D_i \, \Wshed \big[ I_{u}(0)+ \asymptomRelativeShed A_{u}(0) \big]\label{eq:model3:b0}
+\end{equation}
+
+Where $\xi_u \in (0, 1)$ are initial value parameters that we introduce in order to allow some flexibility in determining the initial state of the bacteria compartment.
+
+\section{Measurement Models}
+
+Each POMP requires specification of a measurement model, which is a statistical description of how observations on the system are obtained.
+In general, we used the same measurement models that were reported in \cite{lee20}.
+
+\subsection{Model~1}
+
+In this model, the advantage afforded by vaccination is an increased probability that an infection is asymptomatic.
+Therefore, under the assumptions of this model, all reported cases are assumed to be a fraction of individuals that transition from the exposed to the infected compartment, as noted in Eq.~\myeqref{model1:meas}.
+\begin{equation}
+  \label{model1:meas}
+  y_{t} \mid \Delta N_{E_{k}I_{k}} = z_{t} \sim \text{NB}\left(\reportRate z_{t}, \obsOverdispersion \right)
+\end{equation}
+
+\subsection{Model~2}
+
+Model~2 was fit via trajectory matching and therefore does not have an explicit measurement model.
+Implicitly, however, this fitting process is equivalent to having a Gaussian measurement process.
+Therefore the measurement model can be expressed as Eq.~\myeqref{model2:meas}.
+\begin{equation}
+  \label{model2:meas}
+  y_{u, t} \mid \Delta N_{I_{ud}R_{ud}} = z_{u, t} \sim \text{N}\left(\reportRate z_{u, t}, \obsOverdispersion^2 \right)
+\end{equation}
+
+Where $\Delta N_{I_{ud}R_{ud}}$ is the number of individuals who move from compartment $I_{ud}$ to $R_{ud}$, for unit $u \in 1:U$ and vaccination cohort $d \in 0:5$.
+We also note here that the variance parameter $\obsOverdispersion^2$ is separately fit for the epidemic and endemic phases.
+
+\subsection{Model~3}
+
+In this model, reported cholera cases are assumed to stem from individuals who develop symptoms and seek healthcare.
+Therefore reported cases are assumed to come from an over-dispersed negative binomial model, given the increase in infected individuals:
+\begin{equation}
+  \label{model3:meas}
+  y_{u, t} \mid \Delta N_{S_{ud}I_{ud}} = z_{u, t} \sim \text{NB}\left(\reportRate z_{u, t}, \obsOverdispersion \right)
+\end{equation}
+
+This measurement model is a minor change from that used in \cite{lee20}, which allowed for a change in the reporting rate on January 1st, 2018.
+The fitted values of the reporting rate---before and after January 2018---were $0.97$ and $0.097$, respectively.
+This major change in reporting rate alone could have been the cause that Model~3 originally failed to predict the eradication of cholera, as an overnight change from near perfect to almost non-existent reporting forces the model to explain the observed decrease in cases as a decrease in the reporting of cases rather than of prevalence of cases.
+This shift was justified by a "change of the case definition that occurred on January 1st, 2018";
+this claim was not cited, and we could find no evidence that such a drastic change in the reporting rate would be warranted.
+
+\section{Block Panel Iterated Filter}
+
+The panel iterated filter (PIF) \citep{breto20} has been successfully used to fit parameters $\theta$ of panelPOMPs in several studies \jwc{TODO: REFs}.
+Like other iterated filtering algorithms, PIF iteratively combines particle filter calculations with parameter perturbations.
+Theoretical results show that, as the perturbations are reduced over successive iterations, the perturbed parameters converge to the MLE.
+
+In the case of a panelPOMP, the parameter vector $\theta$ may be composed of a set of shared parameters $\phi$, and a set of unit-specific parameters $\psi_{\seq{1}{U}}$, for units $\seq{1}{U}$.
+Here, we say that a parameter $\psi_{k}$ for $k \in \seq{1}{U}$ is unit-specific if it is not involved in the one-step transition density or the measurement model of any other unit $l \neq k \in \seq{1}{U}$, and shared parameters are those that are not unit-specific.
+The PIF algorithm treats the parameter vector $\theta = (\phi, \psi_{\seq{1}{U}})$ as a complete entity and gives no distinction between shared and unit-specific parameters.
+Even though the random walk standard deviation is set to zero for unit-specific parameters when considering data from other units, this lack of distinction may result in particle depletion for unit-specific parameters as the number of units $U$ grows large.
+
+As a solution to this issue, we propose the block panel iterated filter (BPIF).
+In this algorithm, shared $\phi$ and unit-specific parameters $\psi_{\seq{1}{U}}$ are handled differently when updating the parameter vector $\theta = (\phi, \psi_{\seq{1}{U}})$.
+The BPIF updates $\theta$ by updating the shared vector $\phi$ in the same way that is done with $PIF$, but the indices for weights for unit-specific parameters $\psi_{\seq{1}{U}}$ are only updated using data from the corresponding
+unit.
+In the case where there are many units, we believe that this modification will lead to less particle depletion.
+Pseudo-code for this algorithm is given in Algorithm~\ref{alg:bpif}.
+We note that no theoretical properties of this algorithm have yet been derived, but early empirical results suggest that this algorithm is a an improvement to the PIF algorithm.
+
+\begin{algorithm}[ht]
+   \caption[BPIF]{\textbf{BPIF}. \\
+    {\bf Inputs}:\\\hspace{\textwidth}
+    Simulator of initial density, $f_{X_{u, 0}}(x_{u, 0}; \theta)$ for $u$ in $\seq{1}{U}$.\\\hspace{\textwidth}
+    Simulator of transition density, $f_{X_{u, n}|X_{u, n-1}}(x_{u, n}|x_{u, n-1}; \theta)$ for $u$ in $\seq{1}{U}$, $n$ in $\seq{1}{N_u}$.\\\hspace{\textwidth}
+    Evaluator of measurement density, $f_{Y_{u, n}|X_{u, n}}(y_{u, n}|x_{u, n} ; \theta)$ for $u$ in $\seq{1}{U}$, $n$ in $\seq{1}{N_u}$.\\\hspace{\textwidth}
+    Data $y_{u, n}^*$,for $u$ in $\seq{1}{U}$, $n$ in $\seq{1}{N_u}$.\\\hspace{\textwidth}
+    Number of iterations, $M$.\\\hspace{\textwidth}
+    Number of particles, $J$.\\\hspace{\textwidth}
+    Starting parameter swarm, $\Theta_j^0 = \big(\Phi_j^0, \Psi_{1:U, j}^0\big)$ for $j \in \seq{1}{J}$, $u \in \seq{1}{U}$.\\\hspace{\textwidth}
+    Simulator of perturbation density, $h_{u, n}(\theta | \phi; \sigma)$ for $u \in \seq{1}{U}$, $n \in 0:N_u$.\\\hspace{\textwidth}
+    Perturbation sequence, $\sigma_m$ for $m \in 1:M$.\\\hspace{\textwidth}
+    {\bf Output:} \\\hspace{\textwidth}
+    Final parameter swarm, $\Theta_{j}^{m} = \big(\Phi_j^m, \Psi_{\seq{1}{U}, j}^m\big)$ for $j \in \seq{1}{J}$, $u \in \seq{1}{U}$.
+    \label{alg:bpif}}
+%\BlankLine
+\For{$m \in 1:M$}{
+  Set $\Phi_{0, j}^m = \Phi_j^{m-1}$ for $j \in \seq{1}{J}$\;
+    \For{$u \in \seq{1}{U}$}{
+      Set $\Phi_{u, 0, j}^{F, m} \sim h_{u, 0}(\phi | \Phi_{0, j}^m; \sigma_m)$ for $j \in \seq{1}{J}$\;
+      Set $\Psi_{u, 0, j}^{F, m} \sim h_{u, 0}(\psi | \Psi_{u, j}^{m - 1}; \sigma_m)$ for $j \in \seq{1}{J}$\;
+      Set $\Theta_{u, 0, j}^{F, m} = \big(\Phi_{u, 0, j}^{F, m}, \Psi_{u, 0, j}^{F, m}\big)$ for $j \in \seq{1}{J}$\;
+      Initialize $X_{u, 0, j}^{F, m} \sim f_{X_{u, 0}}(x_{u, 0}; \Theta_{u, 0, j}^{F, m})$ for $j \in \seq{1}{J}$\;
+        \For{$n \in \seq{1}{N_u}$} {
+          Set $\Theta_{u, n, j}^{P, m} \sim h_{u, n}(\theta|\Theta_{u, n-1, j}^{F, m}, \sigma_m)$ for $j \in \seq{1}{J}$\;
+          $X_{u, n, j}^{P, m} \sim f_{X_{u, n}|X_{u, n-1}}(x_{u, n}|X_{u, n-1, j}^{F, m}; \Theta_{u, n, j}^{P, m})$ for $j \in \seq{1}{J}$\;
+          $w_{u, n, j}^m = f_{Y_{u, n}|X_{u, n}}(y_{u, n}^*|X_{u, n, j}^{P, m})$ for $j \in \seq{1}{J}$\;
+          Draw $k_{\seq{1}{j}}$ with $P(k_j = i) = w_{u, n, i}^m / \sum_{v = 1}^J w_{u, n, v}^m$ for $i, j \in \seq{1}{J}$\;
+          Set $\Theta_{u, n, j}^{F, m} = \Theta_{u, n, k_j}^{P, m} = \big(\Phi_{u, n, k_j}^{P, m}, \Psi_{u, n, k_j}^{P, m}\big)$ and $X_{u, n, j}^{F, m} = X_{u, n, k_j}^{P, m}$ for $j \in \seq{1}{J}$\;
+        }
+      Set $\Theta_{u, j}^m = \big(\Phi_{u, N_u, j}^{F, m}, \Psi_{u, N_u, j}^{F, m}\big)$ for $j \in \seq{1}{J}$\;
+    }
+  Set $\Theta_j^m = \big(\Phi_{U, j}^m, \Psi_{1:U, j}^m\big)$ for $j \in \seq{1}{J}$\;
+}
+\end{algorithm}
+
+\section{Translating to \citet{lee20} notation}
+
+Since the models in \citet{lee20} were developed independently, the choice of notation varies inconsistently between models.
+For our reanalysis, we rename parameters to provide a unified notation facilitating comparison between models.
+Table~\ref{tab:translate} maps this notation back to the original notations, for reference.
+
+\begin{table}
+  \begin{center}
+  \begin{tabular}{|c|c|c|c|c|}\hline
+    \multirow{2}{*}{Parameter} & Our & \multicolumn{3}{c|}{Lee et al. (2020a)} \\\cline{3-5}
+     & Notation & 1 & 2 & 3 \\
+    \hline
+    \hline
+    % Table begins here
+    Reporting Rate & $\reportRate$ & $\rho$ & $\rho$ & $\epsilon_1, \epsilon_2$ \\\hline
+    Mixing Coefficient & $\mixExponent$ & $\nu$ & --- & --- \\\hline
+    Measurement Over-Dispersion & $\obsOverdispersion$ & $\tau$ & --- & $p$ \\\hline
+    Birth Rate & $\muBirth$ & $\mu$ & --- & --- \\\hline
+    Natural Mortality Rate & $\muDeath$ & $\delta$ & --- & $\mu$ \\\hline
+    Cholera Mortality Rate & $\choleraDeath$ & --- & --- & $\alpha$ \\\hline
+    Latent Period & $1/\muEI$ & $1/\sigma$ & $1/\gamma_E$ & --- \\\hline
+    Recovery Rate & $\muIR$ & $\gamma$ & $\gamma$ & $\gamma$ \\\hline
+    Loss of Immunity & $\muRS$ & $\alpha$ & $\sigma$ & $\rho$ \\\hline
+    Symptomatic Ratio & $\symptomFrac$ & $1 - \theta_0$ & $k$ & $\sigma$ \\\hline
+    Asymptomatic Relative Infectiousness & $\asymptomRelativeInfect$ & $\kappa$ & $red_\beta$ & --- \\\hline
+    Human-to-Water Shedding & $\Wshed$ & --- & $\mu$ & $\theta_I$ \\\hline
+    Asymptomatic Relative Shedding & $\asymptomRelativeShed$ & --- & $red_\mu$ & $\theta_A/\theta_I$ \\\hline
+    Seasonal Amplitude & $\seasAmplitude$ & --- & $\alpha_s$ & $\lambda$ \\\hline
+    Transmission & $\transmission$ & $\beta$ & $\beta$ & $c$ \\\hline
+    Water-to-Human & $\beta_W$ & --- & $\beta_W$ & $\beta$ \\\hline
+    Bacteria Mortality & $\Wremoval$ & --- & $\delta$ & $\mu_\beta$ \\\hline
+    Vaccination Efficacy & $\vaccineEfficacy$ & $\theta_{vk}$ & $\theta_1, \theta_2, \theta_{1_5}, \theta_{2_5}$ & $\eta_{1d}, \eta_{2d}$ \\\hline
+    Process Over-dispersion & $\sigmaProc$ & --- & --- & $\sigma_w$\\\hline
+    % Table ends here
+  \end{tabular}
+  \end{center}
+  \caption{
+  \label{tab:translate}Translations between our common notation and notation used in \cite{lee20}\eic{TODO: half saturation constant, 2 and 3. Fraction of susceptible, 2.
+  Initial Value parameters.}
+  }
+\end{table}
+
+\section{Lee et al. (2020) Replication}
+
+In this article we claimed that we were able to obtained better fits to the observed data using the same models that were proposed in \cite{lee20}.
+Along with visual comparisons to the data, this claim was supported by comparing likelihoods and AIC values in Table 1.
+Because model likelihoods were not provided in \cite{lee20}, it is necessary to replicate these models in order to obtain likelihood estimates.
+In the following subsections, we use our \code{R} package \code{haitipkg} to reproduce some of the results of \cite{lee20}.
+This reproduction allows us to estimate the likelihoods of the \cite{lee20} version of Models~1--3, and also provides a demonstration on reproducibility.
+
+\subsection{Model~1 Replication}
+
+The model was implemented by a team at Johns Hopkins Bloomberg School of Public Health (hereafter referred to as the Model~1 authors) in the \code{R} programming language using the \code{pomp} package \citep{king16}.
+Original source code is publicly available with DOI: 10.5281/zenodo.3360991.
+Despite having source code available, no point estimates for model parameters were provided in \cite{lee20}.
+According to the supplement materials, this was because model realizations from a single parameter set retained substantial variability, but multiple realizations from a collection of parameter sets resulted in a reasonable visual fit to the data \jwc{REF???}.
+We are also inclined to believe that the use of multiple parameter values was in part intended to account for parameter uncertainty (as mentioned in our main text), an effort by the Model~1 authors that we applaud.
+We note, however, that simulations from each of the parameter sets were treated with equal importance when being used to diagnose the model fit and make inference on the system.
+This practice is problematic given Figures S8 and S9 of the supplement material \jwc{REF???}, which suggest that some parameter sets that were used for inference were several hundred log-likelihood units lower than the best performing sets of parameters.
+When accounting for parameter uncertainty, one should instead weigh resulting model projections based on the likelihood of the set of parameters that were used to obtain the model realizations, as was done in \cite{king15}.
+
+Not providing a point estimate for model parameters also has the effect of making model reproduction a more difficult task.
+Fortunately, the range and median values for each of the final model parameters are provided in Tables S10 and S11 of the supplement, and bivariate relationships between some of the fitted parameters are displayed in Figures S8 and S9.
+We therefore use these basic summaries to reconstruct an approximation to the set of parameters that were used by the Model~1 authors to perform inference.
+
+We begin by constructing 300 different parameter sets based on the basic summaries and figures provided by the Model~1 authors.
+This was primarily done using truncated-bivariate normal distributions, where samples that are drawn outside of the desired range of parameters are re-sampled from the distribution.
+Because the likelihood surface is complex and almost certainly includes higher than two-level interactions between parameter values, we then perform iterated filtering for the epidemic phase of the data using the 300 different parameter sets as starting points.
+
+<<sampleBetaNu, echo=FALSE, cache=TRUE>>=
+set.seed(141837)
+sample_beta_nu <- function(mu_beta = 5.8, mu_nu = 0.96) {
+  # This function is used to sample starting values for beta and nu.
+  #
+  # params:
+  #   mu_beta: Average of the marginal distribution for beta1. Value was fit visually.
+  #   mu_nu: Average of the marginal distribution for nu. Value was fit visually.
+  # returns:
+  #   data.frame of size 300x2, values of beta1 and nu with truncated bivariate
+  #   normal relation.
+
+  # Determine a good value for the marginal standard deviations
+  sd_beta <- (12.1-mu_beta) / qnorm(0.995)
+  sd_nu <- (0.9-mu_nu) / qnorm(0.005)
+
+  # Create covariance matrix for the bivariate-normal distribution
+  cov_mat <- rbind(
+    c(sd_beta^2, -0.7 * sd_beta * sd_nu),
+    c(-0.7 * sd_beta * sd_nu, sd_nu^2)
+  )
+
+  # Sample from the bivariate normal distribution
+  X <- MASS::mvrnorm(n = 300, mu = c(mu_beta, mu_nu), Sigma = cov_mat)
+  colnames(X) <- c("beta1", "nu")
+
+  # Identify values that fell outside of range, so they can be resampled
+  bad_beta <- which(X[, 'beta1'] > 12.1 | X[, 'beta1'] < 0.04)
+  bad_nu <- which(X[, 'nu'] > 1 | X[, 'nu'] < 0.9)
+  n_resamp <- length(unique(c(bad_beta, bad_nu)))
+
+  # Keep resampling values until all values fall within the range.
+  while (n_resamp > 0) {
+    to_resamp <- unique(c(bad_beta, bad_nu))
+    X[to_resamp, ] <- MASS::mvrnorm(n = n_resamp, mu = c(mu_beta, mu_nu), Sigma = cov_mat)
+
+    bad_beta <- which(X[, 'beta1'] > 12.1 | X[, 'beta1'] < 0.04)
+    bad_nu <- which(X[, 'nu'] > 1 | X[, 'nu'] < 0.9)
+    n_resamp <- length(unique(c(bad_beta, bad_nu)))
+  }
+
+  # Return results as a data.frame
+  as.data.frame(X)
+}
+
+# Run the function to get values of beta1 and nu
+starting_params <- sample_beta_nu()
+@
+
+<<sample_rho, echo=FALSE, cache=TRUE>>=
+sample_rho <- function(beta) {
+  # This function is used to get starting values for the parameter rho, based
+  # on it's strong correlation with beta1 and nu. Here, we first sample beta1
+  # and nu, and then sample rho based on a regression on beta1. Additionally,
+  # it is noted that rho has a bi-modal distribution, with lower values of rho
+  # corresponding with high probability to higher values of beta1.
+  #
+  # params:
+  #   beta: previously sampled values of beta1 that will be used to get values
+  #         of rho.
+  # returns:
+  #   vector of length 300 that have an appropriate relationship with the parameter
+  #   beta1.
+
+  rhos <- rep(0, 300)
+
+  # Get slope and intercept for the regression
+  slope <- (0.4/(5.1 - 6.75))
+  intercpt <- -6.75 * slope
+
+  # Determine whice mode should the value of rho belong to, based on regression
+  case_when(
+    beta > 6.75 ~ 0,  # Large beta --> group "0"
+    # Small beta --> more likely to be group "1", with increasing probability as beta gets smaller
+    beta <= 6.75 & beta > (0.95 - intercpt) / slope ~ slope * beta + intercpt,
+    TRUE ~ 0.95
+  ) -> probs
+
+  # Sample the groups that rho belongs to
+  rho_group1 <- rbernoulli(300, probs)
+  rho_group2 <- !rho_group1
+
+  # Keep track of how many values are in each group, used later for resampling
+  n_group1 <- sum(rho_group1)
+  n_group2 <- sum(rho_group2)
+
+  # Resample values of rho that are larger than 1
+  group1 <- rnorm(n_group1, mean = 1, sd = 0.05)
+  n_bad1 <- sum(group1 > 1)
+  while(n_bad1 > 0) {
+    group1[group1 > 1] <- rnorm(n_bad1, mean = 1, sd = 0.175)
+    n_bad1 <- sum(group1 > 1)
+  }
+
+  # get standard deviation for regression
+  std_beta1 <- (beta[rho_group2] - mean(beta[rho_group2])) / sd(beta[rho_group2])
+
+  group2 <- 0.25 - 0.025 * std_beta1 - (rlnorm(n_group2, sdlog = 0.2) - 1)
+
+  # Resample values of rho in group2 as needed
+  which_bad2 <- group2 < .13
+  while(sum(which_bad2) > 0) {
+    group2[group2 < 0.13] <- 0.25 - 0.1 * std_beta1[which_bad2] - (rlnorm(sum(which_bad2), sdlog = 0.2) - 1)
+
+    which_bad2 <- group2 < .13
+  }
+
+  rhos[rho_group1] <- group1
+  rhos[rho_group2] <- group2
+
+  # Return the values of rho
+  rhos
+}
+
+# Sample rho, using already sampled beta1.
+starting_params$rho <- sample_rho(starting_params$beta1)
+@
+
+<<sample_tau, echo=FALSE, cache=TRUE>>=
+sample_tau <- function(mu = 4.1) {
+  # Function used to sample tau. Tau is approximately independent of the other
+  # parameters.
+  #
+  # params:
+  #   mu: mean of the truncated normal distribution
+  # returns:
+  #   vector of length 300, sampled values of tau from truncated normal distribution
+
+  # Sample from normal distribution
+  X <- rnorm(300, mean = mu, sd = (1.7-mu) / qnorm(0.001))
+
+  # Get how many resamples are needed
+  n_resamp <- sum(X > 5.9 | X < 1.7)
+
+  # Keep resampling until all values fall within desired range
+  while (n_resamp > 0) {
+    X[X > 5.9 | X < 1.7] <- rnorm(n_resamp, mean = mu, sd = (1.7-mu) / qnorm(0.001))
+
+    n_resamp <- sum(X > 5.9 | X < 1.7)
+  }
+
+  # Return values of tau
+  X
+}
+
+# Use function to sample tau
+starting_params$tau <- sample_tau()
+@
+
+<<initialValueParams, echo=FALSE, cache=TRUE>>=
+
+# Here we note that there are additional parameters that were fit, but their
+# relationship between the remaining parameters is not given in Lee et al. (2020).
+# Because of this, we simply sample these parameters using a truncated normal distribution:
+
+POP <- 10911819
+
+E_0_probs <- dnorm(seq(1, 1752, 1), mean = 400, sd = (1752-400) / qnorm(0.99))
+I_0_probs <- dnorm(seq(1, 2271, 1), mean = 500, sd = (2271-500) / qnorm(0.99))
+
+starting_params$E_0 <- sample(1:1752, size = 300, replace = TRUE, prob = E_0_probs) / POP
+starting_params$I_0 <- sample(1:2271, size = 300, replace = TRUE, prob = I_0_probs) / POP
+
+starting_params$S_0 <- 1 - starting_params$E_0 - starting_params$I_0
+@
+
+<<RemainingParams, echo=FALSE, cache=FALSE>>=
+h1_epi <- haiti1()
+
+bounds <- tribble(
+  ~param, ~lower, ~upper,
+  "beta2", 1e-08, 10,
+  "beta3", 1e-08, 10,
+  "beta4", 1e-08, 10,
+  "beta5", 1e-08, 10,
+  "beta6", 1e-08, 10
+)
+
+lower <- bounds$lower
+names(lower) <- bounds$param
+
+upper <- bounds$upper
+names(upper) <- bounds$param
+
+betas <- sobol_design(
+  lower = lower,
+  upper = upper,
+  nseq  = 300
+)
+
+epi_params <- cbind(starting_params, betas)
+
+not_in_start_params <- names(coef(h1_epi))[!names(coef(h1_epi)) %in% colnames(epi_params)]
+
+for (i in 1:length(not_in_start_params)) {
+  epi_params[, not_in_start_params[i]] <- coef(h1_epi)[not_in_start_params[i]]
+}
+
+epi_params$sig_sq <- 0
+
+# simply re-ordering to match model order
+epi_params <- epi_params[, names(coef(h1_epi))]
+
+epi_rw <- rw.sd(
+  # Parameters close to desired values
+  beta1 = 0.001,
+  tau   = 0.001,
+  nu    = 0.001,
+  rho   = 0.001,
+  # Parameters not close to desired values
+  beta2 = 0.02,
+  beta3 = 0.02,
+  beta4 = 0.02,
+  beta5 = 0.02,
+  beta6 = 0.02,
+  E_0   = ivp(0.1),
+  I_0   = ivp(0.1)
+)
+
+epi_rw <- rw.sd(
+  # Parameters close to desired values
+  beta1 = 0.005,
+  tau   = 0.005,
+  nu    = 0.005,
+  rho   = 0.005,
+  # Parameters not close to desired values
+  beta2 = 0.02,
+  beta3 = 0.02,
+  beta4 = 0.02,
+  beta5 = 0.02,
+  beta6 = 0.02,
+  E_0   = ivp(0.1),
+  I_0   = ivp(0.1)
+)
+
+registerDoParallel(20)
+registerDoRNG(48963587)
+
+
+# Local MIF near MLE
+stew(
+  file = "output/reprod_epi_MIF2.rda",
+  {
+    # Keep track of how long it takes
+    tLocal <- system.time({
+      foreach(
+        i = 1:nrow(epi_params),
+        .packages = c('pomp'),
+        .combine = c
+      ) %dopar% {
+
+        r_params <- unlist(epi_params[i, ])
+        coef(h1_epi) <- r_params
+        mif2(
+          h1_epi,
+          Np = 100,
+          Nmif = 50,
+          cooling.fraction.50 = 0.5,  # Cooling set so that we will reach smaller rw.sd at the end than the end of the unit3 search.
+          rw.sd = epi_rw
+        ) -> m2
+      } -> MIF2_search
+    })
+  }
+)
+@
+
+<<PlotEpiDist, echo=FALSE, fig.cap="Compare to Figure S8 of Lee et al. (2020) supplement.", fig.width=5.1, fig.height=5.1, fig.align='center'>>=
+epi_results <- as.data.frame(t(coef(MIF2_search)))
+epi_results$logLik <- logLik(MIF2_search)
+
+GGally::ggpairs(
+  filter(epi_results, logLik > -2200),
+  columns = c("rho", "tau", "beta1", "nu", "logLik")
+)
+@
+
+<<SimulateEpi, echo=FALSE, include=FALSE, message=FALSE, cache=TRUE>>=
+epi_complete <- filter(epi_results, logLik > -2200)
+
+# First, we need to simulate the epidemic model using the fitted parameters.
+registerDoParallel(20)
+registerDoRNG(18599687)
+foreach(
+  i = 1:nrow(epi_complete),
+  .combine = rbind
+) %dopar% {
+  guess <- unlist(epi_complete[i, ])
+  sims <- simulate(h1_epi, nsim = 20, format = 'data.frame',
+                   params = guess)  # 20 sims for each set of parameters
+  sims$param_set <- i
+  sims
+} -> all_sims
+
+quants <- all_sims %>%
+  select(.id, week, cases) %>%
+  group_by(week) %>%
+  summarize(
+    q025 = quantile(cases, probs = 0.025, na.rm = TRUE),
+    q50  = quantile(cases, probs = 0.500, na.rm = TRUE),
+    q975 = quantile(cases, probs = 0.975, na.rm = TRUE)
+  ) %>%
+  ungroup() %>%
+  mutate(date = lubridate::ymd("2010-10-16") + lubridate::weeks(week))
+
+true_agg_cases <- haitiCholera %>%
+  select(-report) %>%
+  pivot_longer(
+    data = .,
+    cols = -date_saturday,
+    values_to = 'cases',
+    names_to = 'dep'
+  ) %>%
+  mutate(
+    date = as.Date(date_saturday),
+    dep = gsub("\\.", "_", dep)
+  ) %>%
+  mutate(
+    dep = case_when(dep == "Grand_Anse" ~ "Grande_Anse", TRUE ~ dep)
+  ) %>%
+  tidyr::pivot_wider(
+    data = .,
+    id_cols = c(date),
+    names_from = dep,
+    values_from = cases,
+    names_prefix = 'cases_'
+  ) %>%
+  mutate(
+    ReportedAll = cases_Artibonite + cases_Centre +
+      cases_Grande_Anse + cases_Nippes + cases_Nord +
+      cases_Nord_Est + cases_Ouest + cases_Sud +
+      cases_Sud_Est + cases_Nord_Ouest
+  )
+@
+
+Following the model fitting scheme used by the Model~1 authors, we then use these resulting parameters as starting values for the endemic phase, and refit parameters using MIF2.
+The resulting bivariate relations between $\rho, \tau, \beta_1$ and $\nu$ are given in Figure TODO.
+
+<<FitEnd, echo=FALSE, message=FALSE, include=FALSE>>=
+h1_end <- haiti1(period = "endemic")
+start_states <- all_sims %>% filter(week == max(week))
+
+end_rw <- rw.sd(
+  beta1 = 0.05,
+  tau   = 0.005,
+  nu    = 0.04,
+  rho   = 0.01,
+  beta2 = 0.05,
+  beta3 = 0.05,
+  beta4 = 0.05,
+  beta5 = 0.05,
+  beta6 = 0.05
+)
+
+registerDoParallel(20)
+registerDoRNG(21489587)
+
+end_start <- epi_complete %>%
+  select(-logLik)
+
+# Local MIF near MLE
+stew(
+  file = "output/reprod_end_MIF2.rda",
+  {
+    foreach(
+      i = 1:nrow(end_start),
+      .packages = c('pomp'),
+      .combine = c
+    ) %dopar% {
+
+      output <- list()
+      r_params <- unlist(end_start[i, ])
+
+      start_states %>%
+        filter(param_set == i) %>%
+        select(-.id, -week, -param_set) %>%
+        sapply(., median, na.rm = TRUE) -> rinit_parms
+
+      # rinit_parms["S"] <- POP - (rinit_parms["E"] + rinit_parms["I"] + rinit_parms["A"] + rinit_parms["R"])
+
+      # Set the inital state
+      new_rinit <- Csnippet(
+        sprintf(
+          "
+          S = nearbyint(%f);
+          E = nearbyint(%f);
+          I = nearbyint(%f);
+          A = nearbyint(%f);
+          R = nearbyint(%f);
+          incid = nearbyint(%f);
+          foival = %f;
+          Str0 = nearbyint(%f);
+          Sout = nearbyint(%f);
+          Sin = nearbyint(%f);
+          ",
+          rinit_parms['S'],
+          rinit_parms['E'],
+          rinit_parms['I'],
+          rinit_parms['A'],
+          rinit_parms['R'],
+          rinit_parms['incid'],
+          rinit_parms['foival'],
+          rinit_parms['Str0'],
+          rinit_parms['Sout'],
+          rinit_parms['Sin']
+        )
+      )
+
+      h1_end <- h1_end %>% pomp(
+        rinit = new_rinit,
+        statenames = c("S", "E", "I", "A", "R", "incid", "foival", "Str0", "Sout", "Sin")
+      )
+
+      coef(h1_end) <- r_params
+      mif2(
+        h1_end,
+        Np = 100,
+        Nmif = 100,
+        cooling.type = "hyperbolic",
+        cooling.fraction.50 = 0.05,  # Cooling set so that we will reach smaller rw.sd at the end than the end of the unit3 search.
+        rw.sd = epi_rw
+      ) -> m2
+
+      output[['m2']] <- m2
+
+      coef(h1_end) <- coef(m2)
+      sims <- simulate(
+        h1_end, nsim = 20, format = 'data.frame',
+        params = coef(m2)
+      )
+      sims$param_set <- i
+
+      output[['sims']] <- sims
+      output
+    } -> MIF2_search_end
+  }
+)
+@
+
+<<plotEndParams, fig.width=5.1, fig.height=5.1, fig.align='center', fig.cap="Bivariate relationships between variables after fitting endemic period. Compare to S9 of Lee et al. (2020) supplement.", cache=TRUE, echo=FALSE>>=
+MIF_params <- matrix(nrow = length(MIF2_search_end) / 2, ncol = length(coef(MIF2_search_end[[1]])))
+all_sims_end <- data.frame()
+liks <- rep(0, nrow(end_start))
+for (i in 1:nrow(end_start)) {
+  MIF_params[i, ] <- coef(MIF2_search_end[[(2 * i) - 1]])
+  all_sims_end <- rbind(all_sims_end, MIF2_search_end[[(2 * i)]])
+  liks[i] <- logLik(MIF2_search_end[[(2 * i) - 1]])
+}
+
+colnames(MIF_params) <- names(coef(MIF2_search_end[[1]]))
+end_results <- as.data.frame(MIF_params)
+end_results$logLik <- liks
+
+GGally::ggpairs(
+  filter(end_results, logLik > -2200),
+  columns = c("rho", "tau", "beta1", "nu", "logLik")
+)
+@
+
+Now that we have fit the parameters, we can simulate from the models.
+
+<<plotMod1Sims, echo=FALSE, fig.cap="Simulations from various parameter sets. Simulations from parameter sets with likelihood $<$ -2200 are removed.", cache=TRUE, fig.width=4.5, fig.height=4.25>>=
+end_complete <- filter(end_results, logLik > -2200)
+
+bad_end_pars <- which(end_results$logLik < -2200)
+
+quants_end <- all_sims_end %>%
+  filter(!param_set %in% bad_end_pars) %>%
+  select(.id, week, cases) %>%
+  group_by(week) %>%
+  summarize(
+    q025 = quantile(cases, probs = 0.025, na.rm = TRUE),
+    q50  = quantile(cases, probs = 0.500, na.rm = TRUE),
+    q975 = quantile(cases, probs = 0.975, na.rm = TRUE)
+  ) %>%
+  ungroup() %>%
+  mutate(date = lubridate::ymd("2010-10-16") + lubridate::weeks(week))
+
+ggplot() +
+  geom_point(data = true_agg_cases, aes(x = date, y = ReportedAll)) +
+  geom_line(data = quants, aes(x = date, y = q50), col = '#45ac5f') +
+  geom_ribbon(data = quants, aes(x = date, ymin = q025, ymax = q975), alpha = 0.5,
+              fill = '#45ac5f') +
+  geom_line(data = quants_end, aes(x = date, y = q50), col = '#882871') +
+  geom_ribbon(data = quants_end, aes(x = date, ymin = q025, ymax = q975), alpha = 0.5, fill = '#882871') +
+  ylab("Reported, Symptomatic Incidence") +
+  scale_x_date(date_breaks = "1 year") +
+  theme(axis.title.x = element_blank(),
+        axis.text.x = element_text(hjust = 1, angle = 60))
+@
+
+
+\subsection{Model~2 Replication}
+
+The source code that was used to implement Model~2 in \cite{lee20} was written in the \code{Python} programming language, and is publicly available at \url{https://github.com/lulelita/HaitiCholeraMultiModelingProject}.
+In order to perform our analysis in a unified framework, we re-implemented this model in the \code{R} programming language using the \code{spatPomp} package \citep{asfaw21github}.
+
+
+\subsection{Model~3 Replication}
+
+The code that was originally used to implement Model~3 is archived with the DOI: 10.5281/zenodo.3360723, and also available in the public GitHub repository: \code{jcblemai/haiti-mass-ocv-campaign}.
+Because the code was made publicly available, and final model parameters were reported in the supplementary material of \cite{lee20}, we were able to reproduce Model~3 by directly using the source code.
+In Fig.~\ref{fig:mod3rep}, we plot simulations from this model.
+This figure should be compared to Figure S18 of \cite{lee20}.
+We note that slight differences may be accounted for due to variance in the model simulations and the difference in programming language used to produce the figure.
+
+<<Model3Replication, echo=FALSE, cache=TRUE>>=
+plot_order <- c(
+  'Artibonite',
+  'Sud_Est',
+  'Nippes',
+  'Nord_Est',
+  'Ouest',
+  'Centre',
+  'Nord',
+  'Sud',
+  'Nord_Ouest',
+  'Grande_Anse'
+)
+
+dep_labeller <- as_labeller(
+  c(
+    'Artibonite' = 'Artibonite',
+    'Sud_Est' = 'Sud-Est',
+    'Sud.Est' = 'Sud-Est',
+    'Nippes' = 'Nippes',
+    'Nord_Est' = 'Nord-Est',
+    'Nord.Est' = 'Nord-Est',
+    'Ouest' = 'Ouest',
+    'Centre' = 'Centre',
+    'Nord' = 'Nord',
+    'Sud' = 'Sud',
+    'Nord_Ouest' = 'Nord-Ouest',
+    'Nord.Ouest' = 'Nord-Ouest',
+    'Grande_Anse' = 'Grand\'Anse',
+    'Grand.Anse' = 'Grand\'Anse'
+  )
+)
+
+lee3 <- haiti3()
+lee3_sims <- simulate(lee3, nsim = 1000, seed = 321, format = 'data.frame')
+
+sub_cases <- haitiCholera %>%
+  dplyr::mutate(date = as.Date(date_saturday)) %>%
+  dplyr::select(-report, -date_saturday) %>%
+  dplyr::filter(lubridate::decimal_date(date) >= min(lee3_sims$time)) %>%
+  tidyr::pivot_longer(
+    data = .,
+    cols = -date,
+    names_to = "dep",
+    values_to = "cases"
+  ) %>%
+  dplyr::mutate(
+    dep = dplyr::case_when(
+      dep == "Grand.Anse" ~ "Grande_Anse",
+      dep == "Nord.Est" ~ "Nord_Est",
+      dep == "Nord.Ouest" ~ "Nord_Ouest",
+      dep == "Sud.Est" ~ "Sud_Est",
+      TRUE ~ dep
+    )
+  )
+
+quants <- lee3_sims %>%
+  dplyr::select(-CasesAll) %>%
+  tidyr::pivot_longer(
+    data = .,
+    cols = starts_with("cases"),
+    names_prefix = "cases",
+    names_to = "dep",
+    values_to = "cases"
+  ) %>%
+  dplyr::group_by(dep, time) %>%
+  dplyr::summarise(
+    q05 = quantile(cases, 0.025, na.rm = T),
+    mean = mean(cases, na.rm = T),
+    q50 = quantile(cases, 0.5, na.rm = T),
+    q95 = quantile(cases, 0.975, na.rm = T)
+  ) %>%
+  dplyr::ungroup() %>%
+  dplyr::mutate(
+    date = lubridate::date_decimal(time),
+    date = as.Date(lubridate::round_date(date))
+  )
+
+quants <- quants %>%
+  dplyr::filter(
+    !(dep == "Ouest" & date < '2017-06-10')
+  )
+@
+
+
+\begin{figure}[ht]
+<<PlotMod3Rep, echo=FALSE, message=FALSE, fig.height=3.75>>=
+ggplot() +
+  geom_ribbon(data = quants, aes(x = date, ymin = q05, ymax = q95),
+              fill = 'darkblue', alpha = 0.5) +
+  geom_line(data = quants, aes(x = date, y = q50), col = 'darkblue') +
+  geom_point(data = dplyr::filter(sub_cases, cases < 500), aes(x = date, y = cases), size = 0.2) +
+  facet_wrap(~factor(dep, levels = plot_order), nrow = 2, labeller = dep_labeller) +
+  labs(y = 'Reported Cholera Cases') +
+  scale_x_date(date_breaks = "6 months", date_labels = "%Y-%m") +
+  theme(
+    axis.text.x = element_text(angle = 40, hjust = 1, vjust = 1, size = 7),
+    axis.title.x = element_blank()
+  )
+@
+\caption{\label{fig:mod3rep}
+Simulations from Model~3.
+Compare to Figure S18 of \cite{lee20}.
+}
+\end{figure}
+
+<<lee3Cleanup, echo=FALSE, include=FALSE, message=FALSE>>=
+rm(lee3, lee3_sims, quants, sub_cases)
+gc()
+@
+
+
+% \renewcommand\missing{---}
+%
+% \begin{table}
+% \begin{center}
+% \begin{tabular}{|l|c|c|c|c|}
+% \hline
+% Mechanism & Unified & Old model 1 & Old model 2 & Old model 3
+% \\
+% \hline
+% \hline
+% Recovery rate
+%   & $\muIR$
+%   & $\gamma$
+%   & $\gamma$
+%   & $\gamma$
+% \\
+% Latency
+%   & $\muEI$
+%   & $\sigma$
+%   & $\sigma$
+%   & \missing
+% \\
+% Direct transmission
+%   & $\transmission$
+%   & $\beta_{1:6}$
+%   & $\beta$
+%   & $c^i$
+% \\
+% Rainfall exponent
+%   & \rainfallExponent
+%   & \missing
+%   & \missing
+%   & $r$
+% \\
+% Lost immunity
+%   & $\muRS$
+%   & $\alpha$
+%   & $\alpha$
+%   & $\rho$
+% \\
+%   & $\omega_1$, $\omega_2$
+%   & \missing
+%   & $\omega_1$, $\omega_2$
+%   & \missing
+% \\
+% Vaccine efficacy
+%   & $\vaccineEfficacy_{1:2}$
+%   & \missing
+%   & $\theta_{1:2}$
+%   & \missing
+% \\
+% Birth rate
+%   & $\muBirth$
+%   & $\mu$
+%   &
+%   & $\mu$
+% \\
+% Death rate
+%   & $\muDeath$
+%   & $\delta$
+%   &
+%   & $\mu$
+% \\
+% Symptomatic frac.
+%   & $\symptomFrac$
+%   & $\theta_k(t)=c\theta^*(t-\tau_k)$
+%   & $k$
+%   & $\theta$
+% \\
+% Asympt.~infectivity
+%   & $\asymptomRelativeInfect$
+%   & $(1-\kappa)$
+%   & $\beta_A/\beta$
+%   & 1
+% \\
+% Asympt.~shedding
+%   & $\asymptomRelativeShed$
+%   & \missing
+%   & $\mu_A/\mu$
+%   & $\theta_A/\theta_I$
+% \\
+% Seasonality amplitude
+%   & $\seasAmplitude$
+%   & \missing
+%   & $\alpha_s$
+%   & $a$
+% \\
+% Water to human
+%   & $\Wbeta{}$
+%   & \missing
+%   & $\beta_W$
+%   & $\beta^i$
+% \\
+%   & $\Wsat$
+%   & \missing
+%   & $\mathrm{sat}$
+%   & $1$
+% \\
+% Cholera decay in water
+%   & $\Wremoval$
+%   & \missing
+%   & $\delta$
+%   & $\mu_B$
+% \\
+% Human to water
+%   & $\Wshed$
+%   & \missing
+%   & $\mu$
+%   & $\theta_I$
+% \\
+% Mixing exponent
+%   & $\mixExponent$
+%   & $\nu$
+%   & \missing
+%   & \missing
+% \\
+% Process noise
+%   & $\sigmaProc$
+%   & \missing
+%   & \missing
+%   & $\sigma$
+% \\
+% Reporting rate
+%   & $\reportRate$
+%   & $\rho$
+%   & $\rho$
+%   & $\epsilon$
+% \\
+% Observation overdispersion
+%   & $\obsOverdispersion$
+%   & $\tau$
+%   & \missing
+%   & $k$
+% \\
+% \hline
+% \end{tabular}
+% \end{center}
+% \caption{Translation from the unified notation of this article back into the notations used for Lee et al.~(2020)}
+% \label{tab:translate}
+% \end{table}
+
+
+\section{Investigation into model 2}
+
+As part of our case study into the Haiti paper, model 2 was recreated using the spatPomp package in R. To confirm the validity of our model, we recreated Figure S15 from the supplement. In the original model, the authors reinitialized the state values for the endemic phase starting on March 2014. In particular, the group assumed that 75\% of the population was susceptible to cholera. We believe this choice to be unnatural. Having the state values change in the middle of a simulation has no causal interpretation. Instead, the most logical thing to do when fitting an epidemic and endemic model would be to carry over the state values from the former to the latter. This keeps the integrity of the model intact.
+
+In Figure S-2, we created the same endemic model with the only difference being the state values are carried over from the end of the epidemic phase. Here, we see that the model predicts a much different trajectory than in Figure S-1. This suggests that the decision to reinitialize state values in the middle of a simulation, as in the original model, is likely a poor choice since it has no cause and does not reflect the nature of the epidemic. One consideration is the choice of measurement component. In the original model, we use a linear measurement component. To avoid a situation where the trajectory goes to zero, we can implement a logarithmic measurement component. This is a more natural measure since the fit should be relative to the magnitude of the reported data.
+
+<<cache=T, echo=F, fig.cap="Recreation of model 2 using the pomp package.", fig.height=4>>=
+library(haitipkg)
+library("pomp")
+library("dplyr")
+library("grid")
+library("gridExtra")
+library("lattice")
+theme_set(theme_bw())
+
+h2_data <- haiti2_data()
+h2_epi <- haiti2(region="before")
+h2_end <- haiti2(region="after")
+p2_epi <- coef(h2_epi)
+
+# temporary fix. need to figure out why i cant install panelpomp
+p2_end <- coef(h2_end)
+p2_end[c("VR","Mu","v")] <- c(1.304e-9, 1.897e2, 8.201e1)
+
+traj1 <- trajectory(h2_epi,params=p2_epi,format="data.frame")
+traj1$Ctotal <- rowSums(traj1[,paste0("C",1:10)])*0.2
+traj2 <- trajectory(h2_end,params=p2_end,format="data.frame")
+traj2$Ctotal <- rowSums(traj2[,paste0("C",1:10)])*0.2
+
+traj_agg <- rbind(traj1[,c("year","Ctotal")], traj2[,c("year","Ctotal")])
+names(traj_agg) <- c("year","cases")
+traj_agg$group <- "trajectory"
+
+haiti_agg <- aggregate(h2_data$cases,
+                       by = list(h2_data$year),
+                       FUN = sum)
+names(haiti_agg) <- c("year","cases")
+haiti_agg$group <- "reported data"
+
+final <- rbind(traj_agg, haiti_agg)
+
+pp1 <- ggplot(data=final %>% filter(year<2014.161),
+             aes(x=year,y=cases,group=group)) +
+  geom_line(aes(linetype=group,color=group)) +
+  scale_linetype_manual(values=c("dashed","solid")) +
+  scale_x_continuous(breaks=seq(2010,2020,by=1)) +
+  theme(legend.position=c(0.7,0.7))
+
+pp2 <- ggplot(data=final %>% filter(year>2014.161),
+             aes(x=year,y=cases,group=group)) +
+  geom_line(aes(linetype=group,color=group)) +
+  scale_linetype_manual(values=c("dashed","solid")) +
+  scale_x_continuous(breaks=seq(2010,2020,by=1)) +
+  theme(legend.position=c(0.7,0.7)) +
+  ylim(0,7000)
+
+grid.arrange(pp1,pp2)
+@
+
+<<cache=T, echo=F, fig.cap="Endemic trajectory with state values carried over from epidemic model.", fig.height=2>>=
+library("subplex")
+theme_set(theme_bw())
+
+h2_end_joint <- haiti2(region="after",joint=TRUE) %>% pomp()
+sim <- trajectory(h2_epi,params=p2_epi,format="data.frame")
+end_IVPS <- sim[nrow(sim),-c(321,322)] %>% as.numeric()
+names(end_IVPS) <- names(h2_end_joint@params[24:343])
+
+joint_params <- c(p2_end[1:23],end_IVPS)
+ofun <- traj_objfun(h2_end_joint,est=c("Mu","v","VR"),
+                     params=joint_params)
+theta <- c(Mu=1e3,v=100,VR=2e-11)
+fit <- subplex(par=log(theta), fn=ofun)
+joint_params[c("Mu","v","VR")] <- exp(fit$par)
+
+traj3 <- trajectory(h2_end_joint,params=joint_params, format="data.frame")
+traj3$Ctotal <- rowSums(traj3[,paste0("C",1:10)])*joint_params["Rho"]
+
+traj_agg <- rbind(traj3[,c("year","Ctotal")])
+names(traj_agg) <- c("year","cases")
+traj_agg$group <- "trajectory"
+final <- rbind(traj_agg, haiti_agg)
+
+pp3 <- ggplot(data=final %>% filter(year>2014.161),
+             aes(x=year,y=cases,group=group)) +
+  geom_line(aes(linetype=group,color=group)) +
+  scale_linetype_manual(values=c("dashed","solid")) +
+  scale_x_continuous(breaks=seq(2010,2020,by=1)) +
+  theme(legend.position=c(0.7,0.7)) +
+  ylim(0,7000)
+
+pp3
+@
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\clearpage
+
+\bibliography{../bib-haiti}
+
+\end{document}
+
