@@ -783,7 +783,7 @@ Plug-and-play algorithms include Bayesian approaches like ABC and PMCMC \citep{t
 To our knowledge, the only plug-and-play frequentist methods that can maximize the complete model likelihood are iterated filtering algorithms, which modify the well-known particle filter \citep{arulampalam02} by performing a random walk for each parameter and particle.
 These perturbations are carried out iteratively over multiple filtering operations, using the collection of parameters from the previous filtering pass as the parameter initialization for the next iteration, and decreasing the random walk variance at each step.
 
-The use of likelihood-based inference allows for the statistical testing of potential improvements to the model.
+The ability to maximize the likelihood allows for likelihood-based inference, like performing statistical tests for potential improvements to the model.
 % TODO: We should address somewhere why we included the process noise in Model 1. Anna suggested this below:
 % We first demonstrate this capability by proposing the inclusion of additional stochasticity in the latent process through the force of infection, similar to that in Model~3. Eq.~\myeqref{model1:lambda} becomes
 % \begin{equation}
