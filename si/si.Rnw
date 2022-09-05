@@ -687,301 +687,29 @@ This practice is problematic given Figures S8 and S9 of the supplement material,
 When accounting for parameter uncertainty, one should instead weigh resulting model projections based on the likelihood of the set of parameters that were used to obtain the model realizations, as was done in \cite{king15}.
 
 Not providing a point estimate for model parameters also has the effect of making model reproduction a more difficult task.
-Fortunately, the range and median values for each of the final model parameters are provided in Tables S10 and S11 of the supplement, and bivariate relationships between some of the fitted parameters are displayed in Figures S8 and S9.
-We therefore use these basic summaries to reconstruct an approximation to the set of parameters that were used by the Model~1 authors to perform inference.
+We therefore rely on the range and median values for each of the final model parameters are provided in Tables S10 and S11 of the supplement, and bivariate relationships between some of the fitted parameters (Figures S8 and S9) in order to replicate their results.
 
 We begin by constructing 300 different parameter sets based on the basic summaries and figures provided by the Model~1 authors.
 This was primarily done using truncated-bivariate normal distributions, where samples that are drawn outside of the desired range of parameters are re-sampled from the distribution.
 Because the likelihood surface is complex and almost certainly includes higher than two-level interactions between parameter values, we then perform iterated filtering for the epidemic phase of the data using the 300 different parameter sets as starting points.
 
-<<sampleBetaNu, echo=FALSE, cache=TRUE>>=
-set.seed(141837)
-sample_beta_nu <- function(mu_beta = 5.8, mu_nu = 0.96) {
-  # This function is used to sample starting values for beta and nu.
-  #
-  # params:
-  #   mu_beta: Average of the marginal distribution for beta1. Value was fit visually.
-  #   mu_nu: Average of the marginal distribution for nu. Value was fit visually.
-  # returns:
-  #   data.frame of size 300x2, values of beta1 and nu with truncated bivariate
-  #   normal relation.
-
-  # Determine a good value for the marginal standard deviations
-  sd_beta <- (12.1-mu_beta) / qnorm(0.995)
-  sd_nu <- (0.9-mu_nu) / qnorm(0.005)
-
-  # Create covariance matrix for the bivariate-normal distribution
-  cov_mat <- rbind(
-    c(sd_beta^2, -0.7 * sd_beta * sd_nu),
-    c(-0.7 * sd_beta * sd_nu, sd_nu^2)
-  )
-
-  # Sample from the bivariate normal distribution
-  X <- MASS::mvrnorm(n = 300, mu = c(mu_beta, mu_nu), Sigma = cov_mat)
-  colnames(X) <- c("beta1", "nu")
-
-  # Identify values that fell outside of range, so they can be resampled
-  bad_beta <- which(X[, 'beta1'] > 12.1 | X[, 'beta1'] < 0.04)
-  bad_nu <- which(X[, 'nu'] > 1 | X[, 'nu'] < 0.9)
-  n_resamp <- length(unique(c(bad_beta, bad_nu)))
-
-  # Keep resampling values until all values fall within the range.
-  while (n_resamp > 0) {
-    to_resamp <- unique(c(bad_beta, bad_nu))
-    X[to_resamp, ] <- MASS::mvrnorm(n = n_resamp, mu = c(mu_beta, mu_nu), Sigma = cov_mat)
-
-    bad_beta <- which(X[, 'beta1'] > 12.1 | X[, 'beta1'] < 0.04)
-    bad_nu <- which(X[, 'nu'] > 1 | X[, 'nu'] < 0.9)
-    n_resamp <- length(unique(c(bad_beta, bad_nu)))
-  }
-
-  # Return results as a data.frame
-  as.data.frame(X)
-}
-
-# Run the function to get values of beta1 and nu
-starting_params <- sample_beta_nu()
-@
-
-<<sample_rho, echo=FALSE, cache=TRUE>>=
-sample_rho <- function(beta) {
-  # This function is used to get starting values for the parameter rho, based
-  # on it's strong correlation with beta1 and nu. Here, we first sample beta1
-  # and nu, and then sample rho based on a regression on beta1. Additionally,
-  # it is noted that rho has a bi-modal distribution, with lower values of rho
-  # corresponding with high probability to higher values of beta1.
-  #
-  # params:
-  #   beta: previously sampled values of beta1 that will be used to get values
-  #         of rho.
-  # returns:
-  #   vector of length 300 that have an appropriate relationship with the parameter
-  #   beta1.
-
-  rhos <- rep(0, 300)
-
-  # Get slope and intercept for the regression
-  slope <- (0.4/(5.1 - 6.75))
-  intercpt <- -6.75 * slope
-
-  # Determine whice mode should the value of rho belong to, based on regression
-  case_when(
-    beta > 6.75 ~ 0,  # Large beta --> group "0"
-    # Small beta --> more likely to be group "1", with increasing probability as beta gets smaller
-    beta <= 6.75 & beta > (0.95 - intercpt) / slope ~ slope * beta + intercpt,
-    TRUE ~ 0.95
-  ) -> probs
-
-  # Sample the groups that rho belongs to
-  rho_group1 <- rbernoulli(300, probs)
-  rho_group2 <- !rho_group1
-
-  # Keep track of how many values are in each group, used later for resampling
-  n_group1 <- sum(rho_group1)
-  n_group2 <- sum(rho_group2)
-
-  # Resample values of rho that are larger than 1
-  group1 <- rnorm(n_group1, mean = 1, sd = 0.05)
-  n_bad1 <- sum(group1 > 1)
-  while(n_bad1 > 0) {
-    group1[group1 > 1] <- rnorm(n_bad1, mean = 1, sd = 0.175)
-    n_bad1 <- sum(group1 > 1)
-  }
-
-  # get standard deviation for regression
-  std_beta1 <- (beta[rho_group2] - mean(beta[rho_group2])) / sd(beta[rho_group2])
-
-  group2 <- 0.25 - 0.025 * std_beta1 - (rlnorm(n_group2, sdlog = 0.2) - 1)
-
-  # Resample values of rho in group2 as needed
-  which_bad2 <- group2 < .13
-  while(sum(which_bad2) > 0) {
-    group2[group2 < 0.13] <- 0.25 - 0.1 * std_beta1[which_bad2] - (rlnorm(sum(which_bad2), sdlog = 0.2) - 1)
-
-    which_bad2 <- group2 < .13
-  }
-
-  rhos[rho_group1] <- group1
-  rhos[rho_group2] <- group2
-
-  # Return the values of rho
-  rhos
-}
-
-# Sample rho, using already sampled beta1.
-starting_params$rho <- sample_rho(starting_params$beta1)
-@
-
-<<sample_tau, echo=FALSE, cache=TRUE>>=
-sample_tau <- function(mu = 4.1) {
-  # Function used to sample tau. Tau is approximately independent of the other
-  # parameters.
-  #
-  # params:
-  #   mu: mean of the truncated normal distribution
-  # returns:
-  #   vector of length 300, sampled values of tau from truncated normal distribution
-
-  # Sample from normal distribution
-  X <- rnorm(300, mean = mu, sd = (1.7-mu) / qnorm(0.001))
-
-  # Get how many resamples are needed
-  n_resamp <- sum(X > 5.9 | X < 1.7)
-
-  # Keep resampling until all values fall within desired range
-  while (n_resamp > 0) {
-    X[X > 5.9 | X < 1.7] <- rnorm(n_resamp, mean = mu, sd = (1.7-mu) / qnorm(0.001))
-
-    n_resamp <- sum(X > 5.9 | X < 1.7)
-  }
-
-  # Return values of tau
-  X
-}
-
-# Use function to sample tau
-starting_params$tau <- sample_tau()
-@
-
-<<initialValueParams, echo=FALSE, cache=TRUE>>=
-
-# Here we note that there are additional parameters that were fit, but their
-# relationship between the remaining parameters is not given in Lee et al. (2020).
-# Because of this, we simply sample these parameters using a truncated normal distribution:
-
-POP <- 10911819
-
-E_0_probs <- dnorm(seq(1, 1752, 1), mean = 400, sd = (1752-400) / qnorm(0.99))
-I_0_probs <- dnorm(seq(1, 2271, 1), mean = 500, sd = (2271-500) / qnorm(0.99))
-
-starting_params$E_0 <- sample(1:1752, size = 300, replace = TRUE, prob = E_0_probs) / POP
-starting_params$I_0 <- sample(1:2271, size = 300, replace = TRUE, prob = I_0_probs) / POP
-
-starting_params$S_0 <- 1 - starting_params$E_0 - starting_params$I_0
-@
-
-<<RemainingParams, echo=FALSE, cache=FALSE>>=
+<<Load lee Model1 Params, echo=FALSE>>=
 h1_epi <- haiti1()
 
-bounds <- tribble(
-  ~param, ~lower, ~upper,
-  "beta2", 1e-08, 10,
-  "beta3", 1e-08, 10,
-  "beta4", 1e-08, 10,
-  "beta5", 1e-08, 10,
-  "beta6", 1e-08, 10
-)
-
-lower <- bounds$lower
-names(lower) <- bounds$param
-
-upper <- bounds$upper
-names(upper) <- bounds$param
-
-betas <- sobol_design(
-  lower = lower,
-  upper = upper,
-  nseq  = 300
-)
-
-epi_params <- cbind(starting_params, betas)
-
-not_in_start_params <- names(coef(h1_epi))[!names(coef(h1_epi)) %in% colnames(epi_params)]
-
-for (i in 1:length(not_in_start_params)) {
-  epi_params[, not_in_start_params[i]] <- coef(h1_epi)[not_in_start_params[i]]
-}
-
-epi_params$sig_sq <- 0
-
-# simply re-ordering to match model order
-epi_params <- epi_params[, names(coef(h1_epi))]
-
-epi_rw <- rw.sd(
-  # Parameters close to desired values
-  beta1 = 0.001,
-  tau   = 0.001,
-  nu    = 0.001,
-  rho   = 0.001,
-  # Parameters not close to desired values
-  beta2 = 0.02,
-  beta3 = 0.02,
-  beta4 = 0.02,
-  beta5 = 0.02,
-  beta6 = 0.02,
-  E_0   = ivp(0.1),
-  I_0   = ivp(0.1)
-)
-
-epi_rw <- rw.sd(
-  # Parameters close to desired values
-  beta1 = 0.005,
-  tau   = 0.005,
-  nu    = 0.005,
-  rho   = 0.005,
-  # Parameters not close to desired values
-  beta2 = 0.02,
-  beta3 = 0.02,
-  beta4 = 0.02,
-  beta5 = 0.02,
-  beta6 = 0.02,
-  E_0   = ivp(0.1),
-  I_0   = ivp(0.1)
-)
-
-registerDoParallel(20)
-registerDoRNG(48963587)
-
-
-# Local MIF near MLE
-stew(
-  file = "output/reprod_epi_MIF2.rda",
-  {
-    # Keep track of how long it takes
-    tLocal <- system.time({
-      foreach(
-        i = 1:nrow(epi_params),
-        .packages = c('pomp'),
-        .combine = c
-      ) %dopar% {
-
-        r_params <- unlist(epi_params[i, ])
-        coef(h1_epi) <- r_params
-        mif2(
-          h1_epi,
-          Np = 100,
-          Nmif = 50,
-          cooling.fraction.50 = 0.5,  # Cooling set so that we will reach smaller rw.sd at the end than the end of the unit3 search.
-          rw.sd = epi_rw
-        ) -> m2
-      } -> MIF2_search
-    })
-  }
-)
+RL_dir <- paste0("run_level_", run_level, "/")
+lee1_epi_mif <- readRDS(file = paste0("../model1/", RL_dir, "lee1_epi_fit.rds"))
 @
 
-<<PlotEpiDist, echo=FALSE, fig.cap="Compare to Figure S8 of Lee et al. (2020) supplement.", fig.width=7, fig.height=7, fig.align='center'>>=
-epi_results <- as.data.frame(t(coef(MIF2_search)))
-epi_results$logLik <- logLik(MIF2_search)
+<<Simulate Lee Model 1, echo=FALSE, cache=TRUE>>=
+N_LEE_SIMS <- switch(run_level,  10,  20,   20)
 
-GGally::ggpairs(
-  filter(epi_results, logLik > -2200),
-  columns = c("rho", "tau", "beta1", "nu", "logLik")
-)
-@
-
-<<SimulateEpi, echo=FALSE, include=FALSE, message=FALSE, cache=TRUE>>=
-epi_complete <- filter(epi_results, logLik > -2200)
-
-# First, we need to simulate the epidemic model using the fitted parameters.
-registerDoParallel(20)
 registerDoRNG(18599687)
 foreach(
-  i = 1:nrow(epi_complete),
+  i = 1:length(lee1_epi_mif),
   .combine = rbind
 ) %dopar% {
-  guess <- unlist(epi_complete[i, ])
-  sims <- simulate(h1_epi, nsim = 20, format = 'data.frame',
+  guess <- coef(lee1_epi_mif)
+  sims <- simulate(h1_epi, nsim = N_LEE_SIMS, format = 'data.frame',
                    params = guess)  # 20 sims for each set of parameters
   sims$param_set <- i
   sims
@@ -997,6 +725,26 @@ quants <- all_sims %>%
   ) %>%
   ungroup() %>%
   mutate(date = lubridate::ymd("2010-10-16") + lubridate::weeks(week))
+
+@
+
+
+<<PlotEpiDist, echo=FALSE, fig.cap="Compare to Figure S8 of Lee et al. (2020) supplement.", fig.width=7, fig.height=7, fig.align='center'>>=
+epi_results <- as.data.frame(t(coef(lee1_epi_mif)))
+epi_results$logLik <- logLik(lee1_epi_mif)
+
+GGally::ggpairs(
+  filter(epi_results, logLik > -2200),
+  columns = c("rho", "tau", "beta1", "nu", "logLik")
+)
+@
+
+<<SimulateEpi, echo=FALSE, include=FALSE, message=FALSE, cache=TRUE>>=
+h1_end <- haiti1(period = "endemic")
+
+lee1_end_mif <- readRDS(
+  file = paste0("../model1/", RL_dir, "lee1_end_fit.rds")
+)
 
 true_agg_cases <- haitiCholera %>%
   select(-report) %>%
@@ -1029,122 +777,40 @@ true_agg_cases <- haitiCholera %>%
 @
 
 Following the model fitting scheme used by the Model~1 authors, we then use these resulting parameters as starting values for the endemic phase, and refit parameters using MIF2.
-The resulting bivariate relations between $\rho, \tau, \beta_1$ and $\nu$ are given in Figure TODO.
+To do this, we use the same number of particles and MIF iterations that were used in \citet{lee20}.
+The resulting bivariate relations between $\rho, \tau, \beta_1$ and $\nu$ are given in Figure~\ref{fig:plotEndParams}.
 
 <<FitEnd, echo=FALSE, message=FALSE, include=FALSE>>=
-h1_end <- haiti1(period = "endemic")
-start_states <- all_sims %>% filter(week == max(week))
+foreach(
+  i = 1:length(lee1_end_mif),
+  .combine = rbind
+) %dopar% {
+  guess <- coef(lee1_end_mif)
+  sims <- simulate(
+    lee1_end_mif[[i]], nsim = N_LEE_SIMS,
+    format = 'data.frame',
+    params = guess
+  )
+  sims$param_set <- i
+  sims
+} -> end_sims
 
-end_rw <- rw.sd(
-  beta1 = 0.05,
-  tau   = 0.005,
-  nu    = 0.04,
-  rho   = 0.01,
-  beta2 = 0.05,
-  beta3 = 0.05,
-  beta4 = 0.05,
-  beta5 = 0.05,
-  beta6 = 0.05
-)
-
-registerDoParallel(20)
-registerDoRNG(21489587)
-
-end_start <- epi_complete %>%
-  select(-logLik)
-
-# Local MIF near MLE
-stew(
-  file = "output/reprod_end_MIF2.rda",
-  {
-    foreach(
-      i = 1:nrow(end_start),
-      .packages = c('pomp'),
-      .combine = c
-    ) %dopar% {
-
-      output <- list()
-      r_params <- unlist(end_start[i, ])
-
-      start_states %>%
-        filter(param_set == i) %>%
-        select(-.id, -week, -param_set) %>%
-        sapply(., median, na.rm = TRUE) -> rinit_parms
-
-      # rinit_parms["S"] <- POP - (rinit_parms["E"] + rinit_parms["I"] + rinit_parms["A"] + rinit_parms["R"])
-
-      # Set the inital state
-      new_rinit <- Csnippet(
-        sprintf(
-          "
-          S = nearbyint(%f);
-          E = nearbyint(%f);
-          I = nearbyint(%f);
-          A = nearbyint(%f);
-          R = nearbyint(%f);
-          incid = nearbyint(%f);
-          foival = %f;
-          Str0 = nearbyint(%f);
-          Sout = nearbyint(%f);
-          Sin = nearbyint(%f);
-          ",
-          rinit_parms['S'],
-          rinit_parms['E'],
-          rinit_parms['I'],
-          rinit_parms['A'],
-          rinit_parms['R'],
-          rinit_parms['incid'],
-          rinit_parms['foival'],
-          rinit_parms['Str0'],
-          rinit_parms['Sout'],
-          rinit_parms['Sin']
-        )
-      )
-
-      h1_end <- h1_end %>% pomp(
-        rinit = new_rinit,
-        statenames = c("S", "E", "I", "A", "R", "incid", "foival", "Str0", "Sout", "Sin")
-      )
-
-      coef(h1_end) <- r_params
-      mif2(
-        h1_end,
-        Np = 100,
-        Nmif = 100,
-        cooling.type = "hyperbolic",
-        cooling.fraction.50 = 0.05,  # Cooling set so that we will reach smaller rw.sd at the end than the end of the unit3 search.
-        rw.sd = epi_rw
-      ) -> m2
-
-      output[['m2']] <- m2
-
-      coef(h1_end) <- coef(m2)
-      sims <- simulate(
-        h1_end, nsim = 20, format = 'data.frame',
-        params = coef(m2)
-      )
-      sims$param_set <- i
-
-      output[['sims']] <- sims
-      output
-    } -> MIF2_search_end
-  }
-)
+# quants_end <- end_sims %>%
+#   select(.id, week, cases) %>%
+#   group_by(week) %>%
+#   summarize(
+#     q025 = quantile(cases, probs = 0.025, na.rm = TRUE),
+#     q50  = quantile(cases, probs = 0.500, na.rm = TRUE),
+#     q975 = quantile(cases, probs = 0.975, na.rm = TRUE)
+#   ) %>%
+#   ungroup() %>%
+#   mutate(date = lubridate::ymd("2010-10-16") + lubridate::weeks(week))
 @
 
 <<plotEndParams, fig.width=7, fig.height=7, fig.align='center', fig.cap="Bivariate relationships between variables after fitting endemic period. Compare to S9 of Lee et al. (2020) supplement.", cache=TRUE, echo=FALSE>>=
-MIF_params <- matrix(nrow = length(MIF2_search_end) / 2, ncol = length(coef(MIF2_search_end[[1]])))
-all_sims_end <- data.frame()
-liks <- rep(0, nrow(end_start))
-for (i in 1:nrow(end_start)) {
-  MIF_params[i, ] <- coef(MIF2_search_end[[(2 * i) - 1]])
-  all_sims_end <- rbind(all_sims_end, MIF2_search_end[[(2 * i)]])
-  liks[i] <- logLik(MIF2_search_end[[(2 * i) - 1]])
-}
 
-colnames(MIF_params) <- names(coef(MIF2_search_end[[1]]))
-end_results <- as.data.frame(MIF_params)
-end_results$logLik <- liks
+end_results <- as.data.frame(t(coef(lee1_end_mif)))
+end_results$logLik <- logLik(lee1_end_mif)
 
 GGally::ggpairs(
   filter(end_results, logLik > -2200),
@@ -1153,12 +819,14 @@ GGally::ggpairs(
 @
 
 Now that we have fit the parameters, we can simulate from the models.
+The results of these simulations are shown in Figure~\ref{fig:plotMod1Sims}.
+While not a perfect replication of the results given in \citet{lee20sup}, the similarities between the model simulations, and the fact that we based our implementation of Model~1 primarily on the source code that was provided, makes us confident that we have been able to obtain a reliable representation of the model described in \citet{lee20}.
 
 <<plotMod1Sims, echo=FALSE, fig.cap="Simulations from various parameter sets. Simulations from parameter sets with likelihood $<$ -2200 are removed. Compare to Figure S7 of \\cite{lee20sup}.", cache=TRUE, fig.width=6.5, fig.height=3.75>>=
 end_complete <- filter(end_results, logLik > -2200)
 bad_end_pars <- which(end_results$logLik < -2200)
 
-quants_end <- all_sims_end %>%
+quants_end <- end_sims %>%
   filter(!param_set %in% bad_end_pars) %>%
   select(.id, week, cases) %>%
   group_by(week) %>%
