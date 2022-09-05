@@ -1715,8 +1715,15 @@ end_ofun <- traj_objfun(
   params = h2_fit$end_params
 )
 
+mod2_epi_ll <- -epi_ofun(par = h2_fit$epi_params)
+mod2_end_ll <- -end_ofun(par = h2_fit$end_params)
+
+
+mod2_ll <- mod2_epi_ll - sum(apply(log(h2_epi@data + 1), 1, sum)) + (mod2_end_ll - sum(apply(log(h2_end@data + 1), 1, sum, na.rm = TRUE)))
+
+
 # Evaluate and sum objective functions to get total model likelihood
-mod2_ll <- -(epi_ofun(par = h2_fit$epi_params) + end_ofun(par = h2_fit$end_params))
+# mod2_ll <- -(epi_ofun(par = h2_fit$epi_params) + end_ofun(par = h2_fit$end_params))
 
 arima_lik2 <- 0
 
@@ -3123,7 +3130,7 @@ $\begin{array}{l}
   & $\begin{array}{l}
       \hspace{-1mm} \Wremoval^{-1} = (
       \Sexpr{signif(52/h2_fit$epi_params["Delta"],3)}, \\
-      \Sexpr{myround(52/h2_fit$end_params["Delta"],1)}
+      \Sexpr{signif(52/h2_fit$end_params["Delta"],1)}
       )
       \end{array}$
   & \eqref{model2:from_W}
