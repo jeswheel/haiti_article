@@ -1920,7 +1920,7 @@ lee3_NREP <- switch(RUN_LEVEL,  3,   8,   36)
 registerDoRNG(49637421)
 
 # Create Lee et al (2020a) version of model 3 on sub-data
-lee3_sub <- haiti3()
+lee3_sub <- haiti3_lee_et_al()
 
 # This model is only fit for a subset of the data, so we will set data
 # that are not part of this subset as NA. This will allow us to estimate
@@ -1931,7 +1931,7 @@ temp_ouest_cases <- lee3_sub@data['casesOuest', ]
 temp_ouest_cases[set_as_na] <- NA_real_
 lee3_sub@data['casesOuest', ] <- temp_ouest_cases
 
-lee3_all <- haiti3(start_time = "2010-10-23")
+lee3_all <- haiti3_lee_et_al(start_time = "2010-10-23")
 
 rm(set_as_na, temp_ouest_cases)
 gc()

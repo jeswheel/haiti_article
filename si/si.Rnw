@@ -984,6 +984,9 @@ This figure should be compared to Figure S18 of \cite{lee20}.
 We note that slight differences may be accounted for due to variance in the model simulations and the difference in programming language used to produce the figure.
 
 <<Model3Replication, echo=FALSE, cache=TRUE>>=
+NSIM <- switch(run_level, 50, 100, 1000)
+
+
 plot_order <- c(
   'Artibonite',
   'Sud_Est',
@@ -1016,8 +1019,8 @@ dep_labeller <- as_labeller(
   )
 )
 
-lee3 <- haiti3()
-lee3_sims <- simulate(lee3, nsim = 1000, seed = 321, format = 'data.frame')
+lee3 <- haiti3_lee_et_al()
+lee3_sims <- simulate(lee3, nsim = NSIM, seed = 321, format = 'data.frame')
 
 sub_cases <- haitiCholera %>%
   dplyr::mutate(date = as.Date(date_saturday)) %>%
