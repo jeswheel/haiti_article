@@ -2949,7 +2949,7 @@ Latency (day)
   & \eqref{model1:EA}
   & {\fixed $\muEI^{-1}=\Sexpr{myround(365/h2_fit$epi_params["gammaE"],1)}$}
   & \eqref{model2:mu_EI}
-  & \missing
+  & \multicolumn{1}{c}{\hspace{16pt}\missing}
   &
 \\
 \hline
@@ -2967,7 +2967,7 @@ Seasonality
   & \eqref{model1:beta}
   & {\fixed $\seasAmplitude=0.4$ }
   & \eqref{model2:lambda}
-  & $\begin{array}{l} \seasAmplitude=\Sexpr{myround(p3s["lambdaR"],2)} \\ r=\Sexpr{myround(p3s["r"],2)} \end{array}$
+  & $\begin{array}{l} \seasAmplitude=\Sexpr{myround(p3s["lambdaR"],2)} \\ r=\Sexpr{signif(p3s["r"],2)} \end{array}$
   & \eqref{eq:model3:water}
 \\
 \hline
@@ -2979,7 +2979,7 @@ $\begin{array}{l}
   & \eqref{model1:RS}
   & {\fixed
     $\begin{array}{l}
-    \muRS^{-1}= \Sexpr{myround(1/h2_fit$epi_params["sigma"],1)} \\
+    \muRS^{-1}= \Sexpr{signif(1/h2_fit$epi_params["sigma"],2)} \\
      \omega_1^{-1} = \Sexpr{myround(1/h2_fit$epi_params["Omega1"],1)} \\
     \omega_2^{-1} = \Sexpr{myround(1/h2_fit$epi_params["Omega2"],1)}
     \end{array}$
@@ -2994,7 +2994,7 @@ $\begin{array}{l}
 \\
 \hline
 Vaccine efficacy
-  & \missing
+  & \multicolumn{1}{c}{\hspace{16pt}\missing}
   &
   & $\begin{array}{l}
       \hspace{-1mm} \fixed{\vaccineEfficacy_{1:4} = (
@@ -3013,7 +3013,7 @@ Birth/death (yr)
     \muDeath^{-1} = \Sexpr{myround(1/p1["delta"]/52,1)}
     \end{array}$}
   & \eqref{model1:death}
-  & \missing
+  & \multicolumn{1}{c}{\hspace{16pt}\missing}
   &
   & {\fixed $\muDeath^{-1} = \Sexpr{myround(1/p3s["mu"],1)}$}
   & \eqref{eq:model3:IS}
@@ -3085,7 +3085,7 @@ $\begin{array}{l}
 $\begin{array}{l}
 \text{Water to}\\ \text{human}
 \end{array}$
-  & \missing
+  & \multicolumn{1}{c}{\hspace{16pt}\missing}
   &
   & $\begin{array}{l}
     {\fixed \Wsat = \Sexpr{signif(h2_fit$epi_params["Sat"],2)} }
@@ -3109,7 +3109,7 @@ $\begin{array}{l}
 $\begin{array}{l}
 \text{Human to}\\
 \text{water}\end{array}$
-  & \missing
+  & \multicolumn{1}{c}{\hspace{16pt}\missing}
   &
   & $\begin{array}{l}
       \hspace{-1mm} \Wshed = (
@@ -3125,7 +3125,7 @@ $\begin{array}{l}
 \text{Water} \\
 \text{survival (wk)}
 \end{array}$
-  & \missing
+  & \multicolumn{1}{c}{\hspace{16pt}\missing}
   &
   & $\begin{array}{l}
       \hspace{-1mm} \Wremoval^{-1} = (
@@ -3140,9 +3140,9 @@ $\begin{array}{l}
 Mixing exponent
   & $\mixExponent=\Sexpr{myround(p1["nu"],2)}$
   & \eqref{model1:lambda}
-  & \missing
+  & \multicolumn{1}{c}{\hspace{16pt}\missing}
   &
-  & \missing
+  & \multicolumn{1}{c}{\hspace{16pt}\missing}
   &
 \\
 $\begin{array}{l}
@@ -3151,7 +3151,7 @@ $\begin{array}{l}
 \end{array}$
   & $\sigmaProc=(\Sexpr{myround(sqrt(p1["sig_sq_epi"]),2)}, \Sexpr{myround(sqrt(p1["sig_sq_end"]),2)})$
   & \eqref{model1:lambda}
-  & \missing
+  & \multicolumn{1}{c}{\hspace{16pt}\missing}
   &
   & $\sigmaProc= \Sexpr{myround(p3s["std_W"],3)}$
   & \eqref{eq:model3:SA}
