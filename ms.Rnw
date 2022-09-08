@@ -833,17 +833,13 @@ gc()
 Public health decisions must be made about when and how to implement interventions to control an infectious disease epidemic.
 These decisions should be informed by data on the epidemic as well as current understanding about the transmission dynamics.
 Such decisions can be posed as statistical questions about scientifically motivated dynamic models.
-Thus, we encounter the methodological task of building credible, data-informed decisions for stochastic, partially observed, nonlinear dynamic models.
+Thus, we encounter the methodological task of building credible, data-informed decisions based on stochastic, partially observed, nonlinear dynamic models.
 This necessitates addressing the tradeoff between biological fidelity and model simplicity, and the reality of misspecification for models at all levels of complexity.
-% \eic{EDIT IN THE DIRECTION OF THE PREVIOUS SENTENCE.}
 As a case study, we consider a cholera epidemic in Haiti.
 The 2010 introduction of cholera to Haiti led to an extensive outbreak and sustained transmission until it was eliminated in 2019.
-% with the help of vaccination and other public health measures.
-% \jwc{Kind of the point here is that it went away without vaccination efforts.}
 We study three models developed by expert teams to advise on vaccination policies.
 We assess methods used for fitting and evaluating these models, leading to recommendations for future studies.
-% Methods that lead to better statistical fit include benchmarking mechanistic models against associative statistical models and using state-of-the art tools designed to fit mechanistic models.
-Better statistical fit facilitates interpretation of the fitted model, but caution is nevertheless required in drawing policy conclusions based on causal interpretations of the models.
+Diagnosis of model misspecification and development of alternative models can lead to improved statistical fit, but caution is nevertheless required in drawing policy conclusions based on causal interpretations of the models.
 \end{abstract}
 
 \begin{keyword}
@@ -883,19 +879,17 @@ Model~4 has an agent-based construction, featuring considerable mechanistic deta
 The strengths and weaknesses of the agent-based modeling approach  \citep{tracy18} are outside the scope of this article, and we focus on Models~1--3.
 
 The four independent teams were given the task of estimating the
-potential effect of increased oral cholera vaccine (OCV) efforts across Haiti.
-\jwc{New sentence:}
+potential effect of prospective oral cholera vaccine (OCV) programs.
 OCV is accepted as a safe and effective tool for controlling the spread of cholera, however the available stockpile and production of OCV doses is insufficient to meet global needs \citep{lee20, pezzoli20}.
 In the study, certain data were shared between the groups, including demography and vaccination history; vaccine efficacy was also fixed at a shared value between groups.
 Beyond this, the groups made autonomous decisions on what to include and exclude from their models; this autonomy reduced the possible effect that assumptions about the dynamic system may have on the final conclusion of the study.
 Despite this autonomy, and largely adhering to existing guidelines on creating models to inform policy \citep{behrend20,saltelli20}, the consensus across the four models was that an extensive nationwide vaccination campaign would be necessary to eliminate cholera from Haiti.
 This conclusion is inconsistent with the fact that there have been no confirmed cases since February, 2019 without additional vaccination efforts \citep{ferguson22}.
 
-The failure of \cite{lee20} to correctly predict the elimination of cholera has been the topic of some discussion \citep{francois20,rebaudetComment20,henrys20,leeReply20}.
-We demonstrate that careful attention in model fitting, diagnosing, and forecasting improves each of the proposed model's ability to quantitatively describe observed data and results in forecasts that are more consistent with the observed outcome.
-\jwc{NEXT TWO SENTENCES ARE NEW: }
-Because we focus on the statistical tasks of model fitting, diagnosing, and forecasting, we refrain from commenting on the feasibility of scientific assumptions implicitly made in the models under consideration.
-Our results demonstrate that model-mispecification does not alone explain the discrepancy between model predictions and reality, as has been suggested \citep{rebaudetComment20}.
+The failure of \cite{lee20} to correctly predict the elimination of cholera has been debated \citep{francois20,rebaudetComment20,henrys20,leeReply20}.
+\citet{rebaudetComment20} suggested that the models proposed by \citet{lee20} were too unrealistic.
+We find a more nuanced conclusion: attention to methodological details in model fitting, diagnosis and forecasting can improve each of the proposed model's ability to quantitatively describe observed data.
+These improvements results in forecasts that are more consistent with the observed outcome, without requiring major changes to the model structures.
 Based on this retrospective analysis, we offer suggestions on fitting mechanistic models to dynamic systems for future studies.
 
 We proceed by introducing Models~1--3 in Sec.~\ref{sec:models};
@@ -966,7 +960,7 @@ Reported Cholera cases in the outbreak in Haiti from 2010-2019.
 % prev_vacc_df[prev_vacc_df$Dep == 'Artibonite', 'end'] = as.Date("05-15-2018", format = "%m-%d-%Y")
 %
 
-\section{Models}\label{sec:models}
+\section{Mechanistic models for cholera in Haiti}\label{sec:models}
 We refer to models that focus on learning relationships between variables in a dataset as associative, and we refer to models that incorporate a known scientific property of the system as causal or mechanistic.
 The danger in using forecasting techniques which rely on associative models to predict the consequence of interventions is called the Lucas critique in an econometric context.
 \citet{lucas76} pointed out that it is naive to predict the effects of an intervention on a given system based entirely on historical associations.
@@ -974,21 +968,17 @@ To successfully quantify the effect of an intervention, a model should therefore
 We therefore focus our analysis on mechanistic statistical models, which provides a statistical fit to the available data while also supporting a causal intepretation.
 
 The deliberate limitation of coordination between the groups of \citet{lee20} allows us to treat the models as fairly independently developed expert approaches to understanding cholera transmission.
-However, it results in some differences in notation, and choices of data subsets for analysis, that hinder direct comparison.
+However, it led to differences in notation, and in subsets of the data chosen for analysis, that hinder direct comparison.
 Here, we have put all three models into a common notational framework.
 Translations back to the original notation of \citet{lee20} are given in Table~S-1.
 
-Each model describes the cholera dynamics using a latent state vector $\bm{X}^{(\modelCounter)}(t)$ and an observable response vector $\bm{Y}^{(\modelCounter)}(t)$ for each continuous time-point $t \in \mathcal{T}$, where $\mathcal{T}$ is the set of all time-points and $\modelCounter \in \{1, 2, 3\}$ indexes the model.
+Each model describes the cholera dynamics using a latent state vector $\bm{X}^{(\modelCounter)}(t)$ for each continuous time-point $t \in \mathcal{T}$, where $\mathcal{T}$ is the set of all time-points and $\modelCounter \in \{1, 2, 3\}$ indexes the model.
+The observation at time $t_n$ is modeled by a response vector $\bm{Y}^{(\modelCounter)}_n$.
 The latent state vector $\bm{X}^{(\modelCounter)}$ consists of individuals labeled as susceptible (S), infected (I), asymptomatically infected (A), vaccinated (V), and recovered (R), with various sub-divisions sometimes considered in each model for $\modelCounter \in \{1, 2, 3\}$.
 Models~2 and~3 have metapopulation structure, meaning that each individual is a member of a spatial unit, denoted by $u\in \seq{1}{U}$, which corresponds to membership of the $U=10$ administrative Haitian departments (anglicized version of departements).
-% Model~1 describes the dynamics aggregated at the national level.
 
-% \jwc{Already stated above}
-% In this study, we focus our attention on important statistical, rather than scientific, details that may improve inference on a dynamic system;
-% we therefore refrain from commenting on the assumptions in each model or proposing our own alternative description of cholera dynamics, and instead rely on the scientific expertise of \cite{lee20}.
-\jwc{NEW PARAGRAPH:}
-In the following subsections, detailed descriptions of Models~1--3 are provided.
-While these descriptions are a necessary inclusion for transparency and reproducibility, they do not immediately contribute to our primary goal of model fitting, diagnosing, and forecasting, with the purpose of informing policy.
+In the following subsections, complete descriptions of Models~1--3 are provided.
+While the model description is scientifically critical, as well as being necessary for transparency and reproducibility, the model details are not essential to our methodological discussions of how to diagnose and address model misspecification with the purpose of informing policy.
 A first-time reader may therefore benefit from quickly skimming through Sec.~\ref{sec:methods} and returning to the section later, as needed.
 
 %%%%%%%%% 11111111111 %%%%%%%%%%
@@ -997,7 +987,6 @@ A first-time reader may therefore benefit from quickly skimming through Sec.~\re
 \label{sec:model1}
 $\bm{X}^{(1)}(t) = \big(S_{\vaccCounter}(t),  E_{\vaccCounter}(t), I_{\vaccCounter}(t), A_{\vaccCounter}(t), R_{\vaccCounter}(t), \vaccCounter \in 0:\vaccClass\big)$ describes susceptible, latent (exposed), infected (and symptomatic), asymptomatic, and recovered individuals in vaccine cohort $\vaccCounter$.
 Here, $\vaccCounter=0$ corresponds to unvaccinated individuals, and $\vaccCounter \in \seq{1}{\vaccClass}$ describes hypothetical vaccination programs.
-
 The force of infection is
 \begin{equation}
 \label{model1:lambda}
@@ -1008,9 +997,9 @@ where $\transmission(t)$ is a periodic cubic spline representation of seasonalit
 \label{model1:beta}
 \log\transmission(t) = \sum_{j=1}^6 \transmission_j s_j(t).
 \end{equation}
-The process noise $d\Gamma(t)/dt$ is multiplicative Gamma-distributed white noise, with infinitesimal variance parameter $\sigmaProc^2$, which was held constant at $\sigmaProc^2 = 0$ in \cite{lee20}.
-The inclusion of gamma white noise in the process model permits the construction of an over-dispersed Markov chain \citep{breto11}, and has previously been found to increase a model's ability to fit data \citep{stocks20}.
-
+The process noise $d\Gamma(t)/dt$ is multiplicative Gamma-distributed white noise, with infinitesimal variance parameter $\sigmaProc^2$.
+\cite{lee20} included process noise in Model~3 but not in Model~1, i.e., they set $\sigmaProc^2 = 0$.
+Gamma white noise in the transmission rate gives rise to an over-dispersed latent Markov process \citep{breto11} which has been found to improve the statistical fit of disease transmission models \citep{stocks20,he10}.
 Per-capita transition rates are given in Equations~\ref{model1:SE}-\ref{model1:birth}:
 \begin{eqnarray}
 \label{model1:SE}
@@ -1041,10 +1030,8 @@ where $\vaccCounter\in \seq{0}{\vaccClass}$.
 Here, $\mu_{AB}$ is a transition rate from compartment $A$ to $B$.
 We have an additional demographic source and sink compartment $\demography$ modeling entry into the study population due to birth or immigration, and exit from the study population due to death or immigration.
 Thus, $\mu_{A\demography}$ is a rate of exiting the study population from compartment $A$ and $\mu_{\demography B}$ is a rate of entering the study population into compartment $B$.
-% \eic{TODO: THE LEE ET AL SUPPLEMENTARY EQUATIONS, P14, HAVE A BIRTH RATE INTO THE VACCINE COHORTS, WHICH IS PRESUMABLY A TYPO. IT DOES NOT SHOW IN THE DIAGRAM OR THE CODE.}
-% \arc{Yes, I think it is a typo. It is not in the code, and it does not really make much sense.}
 
-In this model, the advantage afforded to vaccinated individuals is an increased probability that an infection is asymptomatic.
+In Model~1, the advantage afforded to vaccinated individuals is an increased probability that an infection is asymptomatic.
 Conditional on infection status, vaccinated individuals are also less infectious than their non-vaccinated counterparts by a rate of $\asymptomRelativeInfect = 0.05$ in Eq.~\eqref{model1:lambda}.
 In \eqref{model1:EA} and~\eqref{model1:EI} the asymptomatic ratio for non-vaccinated individuals is set $\symptomFrac_0(t)=0$, so that the asymptomatic route is reserved for vaccinated individuals.
 For $\vaccCounter\in\seq{1}{\vaccClass}$, the vaccination cohort $\vaccCounter$ is assigned a time $\tau_{\vaccCounter}$, and we take $\symptomFrac_{\vaccCounter}(t) = c \, \theta^*(t-\tau_{\vaccCounter})$
@@ -1239,30 +1226,24 @@ stew(file = "models.rda", {
 
 \subsection{Model Fitting}
 
-\jwc{NEW PARAGRAPH}
-% Mechanistic modeling is an attempt to account for known or hypothesized features of a dynamic system.
-Proposed mechanistic structures form a family of statistical models that can be indexed by a parameter vector $\paramVec$.
-Because different values of $\paramVec$ result in drastically different modeling outcomes, researchers must be careful when choosing $\paramVec$.
-Elements of $\paramVec$ are either chosen as constants that reflect our understanding of the system, or calibrated to observed data, with the intent of maximizing a proposed model's ability to quantitatively describe observed data according to some measure.
-While this section is focused on the elements of $\paramVec$ that are calibrated to data, we note that the decision of which elements to fix and which to estimate has consequences for model interpretability, as briefly discussed in Sec.~\ref{sec:results}
+Proposed mechanistic structures form a family of statistical models indexed by a parameter vector $\paramVec$.
+Different values of $\paramVec$ can result in qualitative differences in the predicted behavior of the system.
+The complex nature of biological systems necessitates a search for modeling assumptions that combine insightful simplicity with fidelity to biological reality.
+For example, many models commonly used in epidemiology are motivated by reasoning about a homogeneous mixing population \citep{bansal07} which is simultaneously an avenue for powerful simplification and a source of model misspecification.
+Other common considerations include whether the proposed model should be stochastic or deterministic; whether the model should have change points in parameter values or should otherwise make adjustments for changes through time in the dynamic system; and whether the proposed model should include any spatial heterogeneity at a scale permissible by the observed data.
+In addition, elements of $\paramVec$ can either be chosen as constants, based on scientific reasoning and previous knowledge, or calibrated to observed data.
+Suitable methodology for calibrating model parameters may depend on other modeling decisions.
+While this section is focused on the elements of $\paramVec$ that are calibrated to data, we note that the decision of which elements to fix and which to estimate has consequences for model interpretability, as discussed in Sec.~\ref{sec:results}.
 
-The complex nature of the dynamic systems which are of scientific and public interest necessitates the imposition of various modeling assumptions in order to facilitate inference.
-% Many dynamic systems of scientific and public interest are highly complex by nature; therefore when developing a mathematical description of a dynamic system, it is often necessary to impose assumptions on the system in order to make inference possible.
-For example, one common assumption in epidemiology is a homogeneous mixing population \citep{bansal07}.
-Other common considerations include whether the proposed model should be stochastic or deterministic; whether the model should have change points in parameter values or should otherwise make adjustments for changes in the dynamic system; and whether the proposed model should include any spatial heterogeneity at a scale permissible by the observed data.
-Ultimately, these decisions may result in a different approach to calibrating model parameters.
-
-\jwc{MAJOR CHANGE TO THIS PARAGRAPH:}
-Each model considered in this study describes cholera dynamics as a Partially Observed Markov Process (POMP), as each model contains unobservable states that evolve sequentially with time.
+All three model considered in this study describes cholera dynamics via unobservable states that evolve dynamically with time.
 Despite their similarities, these models represent a diverse selection of possible modeling assumptions: namely, the use of stochastic (Models~1 and 2) or deterministic (Model~2) equations; spatially-heterogeneous meta-population (Models~2 and 3) or spatially-aggregated (Model~1) structure; and the use of covariates (Model~3) versus mathematical equations (Models~1 and 2) to describe a seasonal mechanism.
+All these structures can be described in the framework of partially observed Markov process (POMP) models, with the understanding that the deterministic Model~2 is a degenerate case of a stochastic model.
 In the following subsections we describe our approach to fitting these mechanistic models.
 
 \subsubsection{Model~1}
 
 One approach to modeling a dynamic system is through probabilistic models.
-With a probabilistic model,
-% rather than modeling the mean behavior of the system through the use of deterministic differential equations,
-we suppose the existence of a joint density $f_{\bm{X}^{(\modelCounter)}_{\seq{0}{N}}, \bm{Y}^{(\modelCounter)}_{\seq{1}{N}}}$, with $\bm{X}^{(\modelCounter)}_{\seq{0}{N}}$ denoting the unobservable Markov process of model $\modelCounter$ at times $\seq{0}{N} = \{0, 1, \ldots, N\}$, and $\bm{Y}^{(\modelCounter)}_{\seq{1}{N}}$ denoting the observable process of the system at times $\seq{1}{N}$.
+With a probabilistic model, we suppose the existence of a joint density $f_{\bm{X}^{(\modelCounter)}_{\seq{0}{N}}, \bm{Y}^{(\modelCounter)}_{\seq{1}{N}}}$, with $\bm{X}^{(\modelCounter)}_{\seq{0}{N}}$ denoting the unobservable Markov process of model $\modelCounter$ at times $\seq{0}{N} = \{0, 1, \ldots, N\}$, and $\bm{Y}^{(\modelCounter)}_{\seq{1}{N}}$ denoting the observable process of the system at times $\seq{1}{N}$.
 Under this framework, the observed data $y_{\seq{1}{n}}^*$ are assumed to be a single realization of the model $y_{\seq{1}{n}}^* \sim f_{\bm{X}^{(\modelCounter)}_{\seq{0}{N}}, \bm{Y}^{(\modelCounter)}_{\seq{1}{N}}}(x_{\seq{0}{N}}, y_{\seq{1}{N}}; \paramVec)$, where $\paramVec$ is a parameter vector that indexes the model.
 Using a probabilistic model results in several advantages, including the ability to account for variability present in the system.
 % which is of great interest to scientists and policy makers.
@@ -2042,16 +2023,17 @@ On this same subset of data, our model achieved a likelihood of $\Sexpr{myround(
 
 \subsection{Forecasts}\label{sec:filter}
 
-\jwc{NEW PARAGRAPH:}
-Forecasting is a powerful tool that has primarily been used to estimate the future state of a system; when a mechanistic model is used, forecasts may provide estimates of the potential effects interventions may have on a system.
-Forecasts can also be used as a way of testing scientific hypothesis in real time by comparing simulations from models with competing descriptions of a system to newly obtained data \citep{lewis22}.
-In order to have any benefit to the researcher, however, forecasts must be obtained with great care.
-In particular, researchers should be careful to account for various forms of uncertainty present in model forecasts, carefully calibrate the proposed model to observed data, and---to the best of their ability---account for the most recently known state of the system.
+The central goal of a forecast is to provide an accurate estimate of the future state of a system based on currently available data.
+When a mechanistic model is used, forecasts may also provide estimates of the future effects of potential interventions.
+Forecasting models are built using available scientific understanding, but forecasting can also be a way of testing new scientific hypotheses in real time \citep{lewis22}.
+In order to provide trustworthy information, however, the reliability of the forecast should be undersood.
+In particular, researchers should account for various forms of uncertainty present in model forecasts, and  calibrate the proposed model to observed data.
 
+
+\eic{I THINK WE WILL HAVE TO EXPLAIN THIS CAREFULLY IF THE POINT IS TO APPEAR NONTRIVIAL. IT IS WORTH NOTING THAT LEE ET AL DID NOT PROPERLY FORECAST FROM THE BEST ESTIMATE OF THE CURRENT STATE. HOWEVER, IT WILL BE OBVIOUS TO MOST SATISTICAL READERS THAT THIS IS NOT THE BEST THING TO DO. IT MAY NOT BE SO OBVIOUS THAT THE DIFFERENCE IS IMPORTANT IF AND ONLY IF A DETERMINISTIC MODEL IS INADEQUATE. THE QUESTION OF WHETHER TO USE A DETERMINISTIC MODEL REMAINS OF CURRENT INTEREST...}
 As an example, we note that simulations from a well-fit mechanistic model may closely resemble the observed data $y_{1:N}^*$.
 In such comparisons, these simulations are random draws from the complete estimated joint distribution $f_{\bm{X}^{(\modelCounter)}_{0:N}, \bm{Y}^{(\modelCounter)}_{1:N}}\left(x_{0:N}, y_{1:N}\mid \hat{\paramVec}\right)$, where $\modelCounter$ indexes the model used for simulations.
 It can therefore be tempting to use simulations from this model up to time $N+s$, $f_{\bm{X}^{(\modelCounter)}_{0:N+s}, \bm{Y}^{(\modelCounter)}_{1:N+s}}\left(x_{0:N+s}, y_{1:N+s}\mid \hat{\paramVec}\right)$, with $s\geq 0$ to project the dynamic system up to a future time $N+s$, as it has been done in previous studies \citep{lee20,???}.
-% \eic{TODO: I think it's possible that other people have done this too. Could we find another reference?};
 This approach, however, does not take advantage of the information about the state of the system that is contained in the observed data.
 Note that each of the models in question (and, more generally, all models that are described as POMPs) are Markovian, that is, the history of the process $\{\bm{X}^{(\modelCounter)}_s, s\leq t\}$ for model $\modelCounter$ is uninformative about the future of the process $\{\bm{X}^{(\modelCounter)}_s, s\geq t\}$, given the current state $\bm{X}^{(\modelCounter)}_t$.
 In other words, observing the data $\bm{Y}^{(\modelCounter)}_N = y_N^*$ at time $N$ provides more information about the future state of the system than the initial conditions.
@@ -2067,6 +2049,7 @@ In this particular case study, projecting the future state of the cholera epidem
 Another consideration to make when obtaining model forecasts is that of parameter uncertainty.
 It has been noted that the uncertainty in just a single parameter can lead to drastically different projections \citep{saltelli20}.
 One possible approach to account for parameter uncertainty in model forecasts is by obtaining confidence intervals for each parameter, sampling parameters from the confidence intervals, simulating the model with the resulting parameter set, and then weighing the resulting model projections based on the likelihood of the given set of parameters, as was done in \citet{king15}.
+\eic{THE ``OBVIOUS'' THING TO DO HERE IS A BAYESIAN APPROACH. IN SOME SENSE, KING15 IS EMPIRICAL BAYES. IT MAY TAKE CARE TO DISCUSS THIS WITHOUT OPENING UP A CAN OF WORMS - I CAN HAVE A GO AT MAKING SUGGESTIONS, NEXT TIME I'M WORKING ON THE MS.}
 
 Note that in order to obtain projections that are consistent with the observed data, one must first be able to sample from the filtering distribution given each set of parameters.
 This approach can be done for both deterministic and stochastic models, but requires a large number of computations, especially as the number of observations and model parameters increase.
