@@ -2672,19 +2672,13 @@ ggplot() +
                                 "V2" = '#b2182b',
                                 "V3" = '#92c5de',
                                 "V4" = '#4393c3')) +
-  geom_vline(xintercept = yearsToDate(2014.161), linetype = 'dashed') +
+  # geom_vline(xintercept = yearsToDate(2014.161), linetype = 'dashed') +
   scale_y_log10(labels = scales::trans_format("log10", scales::math_format(10^.x))) +
   scale_x_date(date_labels = "'%y", breaks = seq.Date(from = as.Date("2010-01-01"), as.Date("2030-01-01"), by = '2 years'))
 @
 \caption{\label{fig:mod2Traj}
 Simulated trajectory of Model~2 (blue curve) and projections under the various vaccination scenarios.
-Reported cholera incidence is shown in black.
-The dashed vertical line shows where the endemic phase starts and parameter values are re-estimated.
-Note that the various vaccination scenarios had little effect on the projected cholera cases.
-This is because the primary effect of vaccines in Model~2 is to remove individuals from the susceptible pool,
-yet reported number of cholera infections were low and decreasing at the start of the vaccination campaigns (only $\Sexpr{true_agg_cases$ReportedAll[nrow(true_agg_cases)]}$ cases were reported in all of Haiti),
-so this had very little effect on cholera transmission.
-}
+Reported cholera incidence is shown in black.}
 \end{figure}
 
 <<Create Model 3 VaccScen Plots>>=
@@ -2950,7 +2944,7 @@ Seasonality
   & \eqref{model1:beta}
   & {\fixed $\seasAmplitude=0.4$ }
   & \eqref{model2:lambda}
-  & $\begin{array}{l} \seasAmplitude=\Sexpr{myround(p3s["lambdaR"],2)} \\ r=\Sexpr{signif(p3s["r"],2)} \end{array}$
+  & $\begin{array}{l} \seasAmplitude=\Sexpr{myround(p3s["lambdaR"],2)} \\ r=\Sexpr{signif(p3s["r"],3)} \end{array}$
   & \eqref{eq:model3:water}
 \\
 \hline
@@ -3038,11 +3032,7 @@ $\begin{array}{l}
 \text{human}\end{array}$
   & $\transmission_{1:6}$ as above
   & \eqref{model1:lambda}
-  & $\begin{array}{l}
-      \hspace{-1mm} \transmission=(
-      \Sexpr{signif(h2_fit$epi_params["Beta"],2)}, \\
-      \Sexpr{signif(h2_fit$end_params["Beta"],2)}
-      )\end{array}$
+  & $\transmission=$\Sexpr{signif(h2_fit$epi_params["Beta"],3)}
   & \eqref{model2:lambda}
   & $\begin{array}{l}
       \hspace{-1mm} \transmission_{1:10}=(
@@ -3073,7 +3063,7 @@ $\begin{array}{l}
   & $\begin{array}{l}
     {\fixed \Wsat = \Sexpr{signif(h2_fit$epi_params["Sat"],2)} }
     \\
-    \beta_W= (\Sexpr{signif(h2_fit$epi_params["BetaW"],3)}, \Sexpr{signif(h2_fit$end_params["BetaW"],3)})
+    \beta_W= \Sexpr{signif(h2_fit$epi_params["BetaW"],3)}
     \end{array}$
   & \eqref{model2:lambda}
   & $\begin{array}{l}
@@ -3094,12 +3084,7 @@ $\begin{array}{l}
 \text{water}\end{array}$
   & \multicolumn{1}{c}{\hspace{16pt}\missing}
   &
-  & $\begin{array}{l}
-      \hspace{-1mm} \Wshed = (
-      \Sexpr{signif(h2_fit$epi_params["Mu"],3)}, \\
-      \Sexpr{signif(h2_fit$end_params["Mu"],3)}
-      )
-      \end{array}$
+  & $\Wshed = $ \Sexpr{signif(h2_fit$epi_params["Mu"],3)}
   & \eqref{model2:to_W}
   & $\Wshed= \Sexpr{signif(p3s["thetaI"],3)}$
   & \eqref{eq:model3:water}
@@ -3110,12 +3095,7 @@ $\begin{array}{l}
 \end{array}$
   & \multicolumn{1}{c}{\hspace{16pt}\missing}
   &
-  & $\begin{array}{l}
-      \hspace{-1mm} \Wremoval^{-1} = (
-      \Sexpr{signif(52/h2_fit$epi_params["Delta"],3)}, \\
-      \Sexpr{signif(52/h2_fit$end_params["Delta"],1)}
-      )
-      \end{array}$
+  & $\Wremoval^{-1} = $ \Sexpr{signif(52/h2_fit$epi_params["Delta"],3)}
   & \eqref{model2:from_W}
   & $\Wremoval^{-1}=\Sexpr{myround(52/p3s["mu_B"],2)}$
   & \eqref{eq:model3:Decay}
