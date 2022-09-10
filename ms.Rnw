@@ -880,7 +880,8 @@ The strengths and weaknesses of the agent-based modeling approach  \citep{tracy1
 
 The four independent teams were given the task of estimating the
 potential effect of prospective oral cholera vaccine (OCV) programs.
-OCV is accepted as a safe and effective tool for controlling the spread of cholera, however the available stockpile and production of OCV doses is insufficient to meet global needs \citep{lee20, pezzoli20}.
+OCV is accepted as a safe and effective tool for controlling the spread of cholera, however the available stockpile and production of OCV doses is insufficient to meet global needs \citep{lee20, pezzoli20} \eic{NEW CHOLERA VACCINES, NEW STUDIES OF EXISTING VACCINES, AND INCREASED PRODUCTION VOLUMES ALL AROSE DURING 2010-2019. MAYBE SOMETHING LIKE:
+Advances in OCV technology and vaccine availability raised the possibility of planning a national vaccination program \citep{lee20, pezzoli20}}
 In the study, certain data were shared between the groups, including demography and vaccination history; vaccine efficacy was also fixed at a shared value between groups.
 Beyond this, the groups made autonomous decisions on what to include and exclude from their models; this autonomy reduced the possible effect that assumptions about the dynamic system may have on the final conclusion of the study.
 Despite this autonomy, and largely adhering to existing guidelines on creating models to inform policy \citep{behrend20,saltelli20}, the consensus across the four models was that an extensive nationwide vaccination campaign would be necessary to eliminate cholera from Haiti.
@@ -927,45 +928,12 @@ Reported Cholera cases in the outbreak in Haiti from 2010-2019.
 }
 \end{figure}
 
-% prev_vacc_df <- data.frame(
-%   'Departement' = c(
-%     'Artibonite',
-%     'Centre',
-%     'Grand.Anse',
-%     'Ouest',
-%     'Sud'
-%   ),
-%   start = as.Date(NA),
-%   end = as.Date(NA)
-% )
-%
-% # Grande Anse previous vaccs
-% prev_vacc_df[prev_vacc_df$Dep == 'Grand.Anse', 'start'] = as.Date("11-8-2016", format = "%m-%d-%Y")
-% prev_vacc_df[prev_vacc_df$Dep == 'Grand.Anse', 'end'] = as.Date("06-02-2017", format = "%m-%d-%Y")
-%
-% # Sud previous vaccs
-% prev_vacc_df[prev_vacc_df$Dep == 'Sud', 'start'] = as.Date("11-8-2016", format = "%m-%d-%Y")
-% prev_vacc_df[prev_vacc_df$Dep == 'Sud', 'end'] = as.Date("06-02-2017", format = "%m-%d-%Y")
-%
-% # Ouest previous vaccs
-% prev_vacc_df[prev_vacc_df$Dep == 'Ouest', 'start'] = as.Date("07-25-2017", format = "%m-%d-%Y")
-% prev_vacc_df[prev_vacc_df$Dep == 'Ouest', 'end'] = as.Date("08-25-2017", format = "%m-%d-%Y")
-%
-% # Centre previous vaccs
-% prev_vacc_df[prev_vacc_df$Dep == 'Centre', 'start'] = as.Date("11-15-2017", format = "%m-%d-%Y")
-% prev_vacc_df[prev_vacc_df$Dep == 'Centre', 'end'] = as.Date("12-16-2017", format = "%m-%d-%Y")
-%
-% # Artibonite previous vaccs
-% prev_vacc_df[prev_vacc_df$Dep == 'Artibonite', 'start'] = as.Date("04-17-2018", format = "%m-%d-%Y")
-% prev_vacc_df[prev_vacc_df$Dep == 'Artibonite', 'end'] = as.Date("05-15-2018", format = "%m-%d-%Y")
-%
-
 \section{Mechanistic models for cholera in Haiti}\label{sec:models}
-We refer to models that focus on learning relationships between variables in a dataset as associative, and we refer to models that incorporate a known scientific property of the system as causal or mechanistic.
+Models that focus on learning relationships between variables in a dataset are called {\it associative}, whereas models that incorporate a known scientific property of the system are called {\it causal} or {\it mechanistic}.
 The danger in using forecasting techniques which rely on associative models to predict the consequence of interventions is called the Lucas critique in an econometric context.
 \citet{lucas76} pointed out that it is naive to predict the effects of an intervention on a given system based entirely on historical associations.
-To successfully quantify the effect of an intervention, a model should therefore both provide a quantitative explanation of existing data and should additionally have a causal interpretation: a manipulation of the system should correspond quantitatively with the corresponding change to the model.
-We therefore focus our analysis on mechanistic statistical models, which provides a statistical fit to the available data while also supporting a causal intepretation.
+To successfully predict the effect of an intervention, a model should therefore both provide a quantitative explanation of existing data and should have a causal interpretation: a manipulation of the system should correspond quantitatively with the corresponding change to the model.
+This motivates the development of mechanistic statistical models, which provides a statistical fit to the available data while also supporting a causal intepretation.
 
 The deliberate limitation of coordination between the groups of \citet{lee20} allows us to treat the models as fairly independently developed expert approaches to understanding cholera transmission.
 However, it led to differences in notation, and in subsets of the data chosen for analysis, that hinder direct comparison.
@@ -974,12 +942,13 @@ Translations back to the original notation of \citet{lee20} are given in Table~S
 
 Each model describes the cholera dynamics using a latent state vector $\bm{X}^{(\modelCounter)}(t)$ for each continuous time-point $t \in \mathcal{T}$, where $\mathcal{T}$ is the set of all time-points and $\modelCounter \in \{1, 2, 3\}$ indexes the model.
 The observation at time $t_n$ is modeled by a response vector $\bm{Y}^{(\modelCounter)}_n$.
-The latent state vector $\bm{X}^{(\modelCounter)}$ consists of individuals labeled as susceptible (S), infected (I), asymptomatically infected (A), vaccinated (V), and recovered (R), with various sub-divisions sometimes considered in each model for $\modelCounter \in \{1, 2, 3\}$.
-Models~2 and~3 have metapopulation structure, meaning that each individual is a member of a spatial unit, denoted by $u\in \seq{1}{U}$, which corresponds to membership of the $U=10$ administrative Haitian departments (anglicized version of departements).
+The latent state vector $\bm{X}^{(\modelCounter)}(t)$ consists of individuals labeled as susceptible (S), infected (I), asymptomatically infected (A), vaccinated (V), and recovered (R), with various sub-divisions sometimes considered in each model for $\modelCounter \in \{1, 2, 3\}$.
+Models~2 and~3 have metapopulation structure, meaning that each individual is a member of a spatial unit, denoted by a subscript $u\in \seq{1}{U}$.
+Here, the spatial units are the $U=10$ Haitian administrative d\'{e}partements (henceforth anglicized as departments).
 
 In the following subsections, complete descriptions of Models~1--3 are provided.
 While the model description is scientifically critical, as well as being necessary for transparency and reproducibility, the model details are not essential to our methodological discussions of how to diagnose and address model misspecification with the purpose of informing policy.
-A first-time reader may therefore benefit from quickly skimming through Sec.~\ref{sec:methods} and returning to the section later, as needed.
+A first-time reader may choose to skim through the rest of this section, and return later.
 
 %%%%%%%%% 11111111111 %%%%%%%%%%
 
@@ -998,8 +967,9 @@ where $\transmission(t)$ is a periodic cubic spline representation of seasonalit
 \log\transmission(t) = \sum_{j=1}^6 \transmission_j s_j(t).
 \end{equation}
 The process noise $d\Gamma(t)/dt$ is multiplicative Gamma-distributed white noise, with infinitesimal variance parameter $\sigmaProc^2$.
-\cite{lee20} included process noise in Model~3 but not in Model~1, i.e., they set $\sigmaProc^2 = 0$.
+\cite{lee20} included process noise in Model~3 but not in Model~1, i.e., they fixed $\sigmaProc^2 = 0$.
 Gamma white noise in the transmission rate gives rise to an over-dispersed latent Markov process \citep{breto11} which has been found to improve the statistical fit of disease transmission models \citep{stocks20,he10}.
+
 Per-capita transition rates are given in Equations~\ref{model1:SE}-\ref{model1:birth}:
 \begin{eqnarray}
 \label{model1:SE}
@@ -1065,11 +1035,8 @@ The force of infection depends on both direct transmission and an aquatic reserv
 \transmission \left\{\sum_{\vaccCounter=0}^4 I_{u\vaccCounter}(t) + \asymptomRelativeInfect \sum_{\vaccCounter=0}^4 A_{u\vaccCounter}(t) \right\}
 \end{equation}
 The latent state is therefore described by the vector $\bm{X}^{(2)}(t) = \big(S_{u\vaccCounter}(t),\allowbreak E_{u\vaccCounter}(t),\allowbreak I_{u\vaccCounter}(t),\allowbreak A_{u\vaccCounter}(t),\allowbreak R_{u\vaccCounter}(t),\allowbreak R_{u\vaccCounter}^A(t),\allowbreak W_u,\allowbreak u \in \seq{1}{U},\allowbreak \vaccCounter \in \seq{0}{4}\big)$.
-A cosine term is included in Eq.~\myeqref{model2:lambda} in order to account for annual seasonality.
-Here we note the addition of a phase parameter $\phaseParm$ to allow for a possible shift in the seasonality component in the force of infection; the original implementation of Model~2 in \cite{lee20} sets $\phaseParm = 0$, not allowing for such a shift.
-% In Eq.~\myeqref{model2:lambda}, symptomatic individuals are infectious with a rate of $\transmission$, and their asymptotic counterparts are less infectious by a rate of $\asymptomRelativeInfect$.
-% Similarly, asymptomatic individuals have a human-to-water shedding rate $\Wshed$ that is lower by a factor of $\asymptomRelativeShed$.
-% TODO: I don't think the commented out section above is needed. - Jesse
+The cosine term in Eq.~\myeqref{model2:lambda} accounts for annual seasonality, with a phase parameter $\phaseParm$.
+The original implementation of Model~2 in \cite{lee20} fixes the phase at $\phaseParm = 0$.
 
 Individuals move from department $u$ to $v$ at rate $T_{uv}$, and aquatic cholera moves at rate $T^W_{uv}$.
 The nonzero transition rates are
@@ -1104,7 +1071,7 @@ The nonzero transition rates are
 \label{model2:water_transport}
 \mu_{W_uW_{\varv}} &=& w_r T^W_{u\varv}
 \end{eqnarray}
-In \eqref{model2:transport}, we suppose a gravity model:
+In \eqref{model2:transport} the spatial coupling is specified by a gravity model,
 \begin{equation}
 \label{model2:gravity}
 T_{u\varv} = v_{\mathrm{rate}} \times \frac{\mathrm{Pop}_u \mathrm{Pop}_{\varv}}{D_{u\varv}^2},
@@ -1157,14 +1124,13 @@ The force of infection is
 \end{eqnarray}
 
 As with Model~1, $d\Gamma_u(t)/dt$ is multiplicative Gamma-distributed white noise in \myeqref{eq:model3:SI} and \myeqref{eq:model3:SA}.
-In \eqref{eq:model3:water}, $J_u(t)$ is a unit-less measurement of precipitation that has been standardized by dividing the observed rainfall at time $t$ by the maximum recorded rainfall in department $u$ during the epidemic, and $D_u$ is the average population density.
+In \eqref{eq:model3:water}, $J_u(t)$ is a dimensionless measurement of precipitation that has been standardized by dividing the observed rainfall at time $t$ by the maximum recorded rainfall in department $u$ during the epidemic, and $D_u$ is the average population density.
 Demographic stochasticity is accounted for by modeling non-cholera related death rate $\muDeath$ in each compartment, along with an additional death rate $\choleraDeath$ in \myeqref{eq:model3:IS} to account for cholera induced deaths among infected individuals.
 We note that all deaths are balanced by births into the susceptible compartment in \myeqref{eq:model3:AS} and \myeqref{eq:model3:RS}, thereby maintaining constant population in each department.
-% Movement into each vaccination cohort is determined by previous and future vaccination campaigns.
-% Here we note that only Model 3 accounted for previous vaccination efforts in the model.
-% TODO: The commented lines above seemed unecessary - Jesse
 
-\section{Methods}\label{sec:methods}
+\section{Statistical Analysis}\label{sec:methods}
+
+We consider model fitting (Sec.~\ref{model_fitting}) followed by diagnostic investigations (Sec.~\ref{model_diagnostics}) and forecasting (Sec.~\ref{sec:filter}).
 
 <<Load Model Parameters, echo=FALSE, results='hide'>>=
 load('model3/output/PanelLocalAll_PF.rda')  # Final model 3 evaluations
@@ -1224,7 +1190,7 @@ stew(file = "models.rda", {
 @
 
 
-\subsection{Model Fitting}
+\subsection{Model Fitting}\label{model_fitting}
 
 Proposed mechanistic structures form a family of statistical models indexed by a parameter vector $\paramVec$.
 Different values of $\paramVec$ can result in qualitative differences in the predicted behavior of the system.
@@ -1610,20 +1576,18 @@ Unfortunately, the answer to this question would require the ability to accurate
 This highlights the need for advancements in statistical methodology that permit inference on models with coupled metapopulation dynamics.
 
 % \subsection{Comparing mechanistic models with associative benchmarks} %AAAAAAAAAAAAAAA
-\subsection{Model Diagnostics}
+\subsection{Model Diagnostics} \label{model_diagnostics}
 
-\jwc{NEW PARAGRAPH/EDIT: }
-The purpose of parameter calibration, irrespective of the approach taken, frequentist versus Bayesian), is to ensure that the proposed model provides the best possible description of the observed data under the assumptions of the model, as measured by some metric.
-Obtaining the best set of parameters for a given model does not, however, guarantee that the model provides an approximate representation of the system in question.
-Model mispecification, which may be thought of as the omission (or inclusion) of a mechanism in the model that is an important (or distracting) feature of the dynamic system, is inevitable at all levels of model complexity.
-In fact, we echo the sentiment of George Box, to whom the aphorism ``all models are wrong, but some are useful" is often attributed: we assume that some degree of model mispecification is always present, and it is necessary to subjectively determine whether or not the model mispecification is severe enough to render the model ``useless".
-It is often impossible to know, however, the extent to which a model provides a faithful representation of the system in question.
-In this section, we discuss some tools and suggestions for diagnosing mechanistic models with the goal of making the subjective assessment of model ``usefulness" more objective by relying on the quantitative and statistical ability of the model to match the observed data, which we call the model's goodness-of-fit.
+Parameter calibration (whether Bayesian or frequentist) aims to find the best description of the observed data under the assumptions of the model.
+Obtaining the best fitting set of parameters for a given model does not, however, guarantee that the model provides an accurate representation of the system in question.
+Model misspecification, which may be thought of as the omission of a mechanism in the model that is an important feature of the dynamic system, is inevitable at all levels of model complexity.
+To make progress, while accepting proper limitations, one must bear in mind the much-quoted observation of \citet{box79} that ``all models are wrong but some are useful.''
+\eic{I WAS WONDERING WHETHER TO SAY SOMETHING LIKE, This is not just good practical advice for applied statistics, but matches broader appreciation of the limitations of all scientific knowledge (REF). DO YOU THINK THIS IS USEFUL, OR A DISTRACTION?}
+In this section, we discuss some tools and suggestions for diagnosing mechanistic models with the goal of making the subjective assessment of model ``usefulness" more objective by relying on the quantitative and statistical ability of the model to match the observed data, which we call the model's goodness-of-fit
+\eic{GOODNESS-OF-FIT SEEMED INITIALLY TO ME A MEASURE OF "RIGHT VS WRONG" RATHER THAN "USEFUL VS USELESS". I THINK NOW I SEE YOUR POINT: GOODNESS OF FIT CAN GIVE US SOME INDICATION OF HOW WRONG A MODEL IS, WITH THE GUIDING PRINCIPLE THAT A MODEL WHICH IS TOO FAR WRONG IS PROBABLY NOT RELIABLE FOR USEFUL PURPOSES. MAYBE WE HAVE TO EXPLAIN THIS TO THE READER?}
 Goodness-of-fit may provide evidence supporting the causal interpretation of one model versus another, but cannot by itself rule out the possibility of alternative explanations.
 
 One common approach to assess a mechanistic model's goodness-of-fit is to compare several simulations from the fitted model to the observed data;
-% similar to those in Figures~\ref{fig:mod1fit}--\ref{h3panelsims};
-% TODO: citation here? \citep{???}
 this is done to determine whether or not the observed data are a plausible realization of the fitted model.
 While these comparisons are informative, they provide only a naive measure of the goodness-of-fit of a model.
 A relevant example of these comparisons leading to overconfidence in a model's goodness-of-fit is the original parameter estimates provided by \citet{lee20}:
