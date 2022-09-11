@@ -1606,7 +1606,7 @@ Consequently, we should not require a candidate mechanistic model to beat all be
 However, a mechanistic model which falls far short against benchmarks is evidently failing to explain some substantial aspect of the data.
 A convenient measure of fit should have interpretable differences that help to operationalize the meaning of far short.
 Ideally, the measure should also have favorable theoretical properties.
-Consequently, we focus on log-likelihood as a measure of goodness of fit, and we adjust for the degrees of freedom of the models to be compared by using Aka-Ike's information criterion (AIC).
+Consequently, we focus on log-likelihood as a measure of goodness of fit, and we adjust for the degrees of freedom of the models to be compared by using the Akaike information criterion (AIC) \eic{REF}.
 
 It should be universal practice to present measures of goodness of fit for published models, and mechanistic models should be compared against benchmarks.
 This alone would assist authors and readers to confront any major statistical limitations of the proposed mechanistic models.
