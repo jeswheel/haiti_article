@@ -1587,61 +1587,42 @@ In this section, we discuss some tools and suggestions for diagnosing mechanisti
 \eic{GOODNESS-OF-FIT SEEMED INITIALLY TO ME A MEASURE OF "RIGHT VS WRONG" RATHER THAN "USEFUL VS USELESS". I THINK NOW I SEE YOUR POINT: GOODNESS OF FIT CAN GIVE US SOME INDICATION OF HOW WRONG A MODEL IS, WITH THE GUIDING PRINCIPLE THAT A MODEL WHICH IS TOO FAR WRONG IS PROBABLY NOT RELIABLE FOR USEFUL PURPOSES. MAYBE WE HAVE TO EXPLAIN THIS TO THE READER?}
 Goodness-of-fit may provide evidence supporting the causal interpretation of one model versus another, but cannot by itself rule out the possibility of alternative explanations.
 
-One common approach to assess a mechanistic model's goodness-of-fit is to compare several simulations from the fitted model to the observed data;
-this is done to determine whether or not the observed data are a plausible realization of the fitted model.
-While these comparisons are informative, they provide only a naive measure of the goodness-of-fit of a model.
-A relevant example of these comparisons leading to overconfidence in a model's goodness-of-fit is the original parameter estimates provided by \citet{lee20}:
-these parameters resulted in simulations that closely resembled the observed data, yet resulted in model likelihoods that were---in some cases---remarkably smaller than likelihoods that can be achieved via the likelihood based optimization techniques that were used (see Table~\ref{tab:likes}).
-% \eic{TODO: Could we maybe put an example of this here? }
+One common approach to assess a mechanistic model's goodness-of-fit is to compare simulations from the fitted model to the observed data.
+Visual inspection may indicate defects in the model, or may  suggest that the observed data are a plausible realization of the fitted model.
+While visual comparisons can be informative, they provide only a weak and informal measure of the goodness-of-fit of a model.
+The study by \citet{lee20} provides an example of this: their models and parameter estimates resulted in simulations that visually resembled the observed data, yet resulted in model likelihoods that were---in some cases---remarkably smaller than likelihoods that can be achieved via the likelihood based optimization techniques that were used (see Table~\ref{tab:likes}).
 Alternative forms of model validation should therefore be used in conjunction with visual comparisons of simulations to observed data.
 
-Another approach is to compare a quantitative description of the model fit (such as MSE, predictive accuracy, or model likelihood) to that of other proposed models.
-This type of comparison provides insight into how each model performs relative to the others, but does not provide insight on the performance of each model on a given dataset unless the performance of one of the models is widely understood.
-% "each other" -> "the others", based on Anna's suggestion.
-We refer to such a model as a benchmark, and examples of these models include logistic regression and ordinary least squares.
+Another approach is to compare a quantitative measure of the model fit (such as MSE, predictive accuracy, or model likelihood) among all proposed models.
+These comparisons provide insight into how each model performs relative to the others.
+To calibrate relative measures of fit, it is useful to compare against a model that has well-understood statistical ability to fit data, and we call this model a {\it benchmarks}.
+Standard statistical models, interpreted as associative models without requiring any mechanistic interpretation of their parameters, provide suitable benchmarks. 
+Examples include linear regression, auto-regressive moving average time series models, or even independent and identically distributed measurements.
+The benchmarks enable us to evaluate the goodness of fit that can be expected of a suitable mechanistic model.
 
-Comparing associative models using an objective function seems natural, as these models are designed to optimize objective functions given the available data.
-In the case of mechanistic modeling, however, comparing models based on an objective measure is less natural because each model is designed to provide a scientific description of the dynamic system.
-Any comparison between mechanistic models would therefore ideally be based on the scientific validity of each proposed model, which is often impossible to know.
-Still, parameters in mechanistic models are fit using techniques that are designed to maximize an objective
-% TODO: Anna suggests "objective function". Maybe "objective value" as well, or is it okay to leave as it is?
-such as likelihood, and it is expected that a good scientific description of the dynamic system should result in more optimal values of an objective evaluation than would a poor description of the system.
-In this sense, one could justify comparing mechanistic models based on some objective measurement such as model likelihoods.
-% When performing such a comparison, however,
-We do not suggest that the model with the highest likelihood given the data automatically provides a better scientific description of the dynamic system.
-Still, a comparison based on model likelihoods may help guide researchers to know the plausibility of a proposed model compared to another given their relative ability to describe the observed data.
+Goodness-of-fit alone does not guarantee that a model provides a correct causal interpretation of the model.
+Indeed, associative models are not constrained to have a causal interpretation, and typically are designed with the sole goal of providing a statistical fit to data.
+Consequently, we should not require a candidate mechanistic model to beat all benchmarks.
+However, a mechanistic model which falls far short against benchmarks is evidently failing to explain some substantial aspect of the data.
+A convenient measure of fit should have interpretable differences that help to operationalize the meaning of far short.
+Ideally, the measure should also have favorable theoretical properties.
+Consequently, we focus on log-likelihood as a measure of goodness of fit, and we adjust for the degrees of freedom of the models to be compared by using Aka-Ike's information criterion (AIC).
 
-The comparison across models still only provides a relative measure of model fit compared to other mechanistic models.
-The resulting challenge is that no general benchmark exists for mechanistic models that would allow researchers to assess the goodness-of-fit by comparing to a known standard.
-In some cases, a possible benchmark model could be a generally accepted truth, but often no such truth is available.
-% In the case of Cholera infections in Haiti, for example, it has been debated whether or not bacteria buildup in the environment is a cause of Cholera infections \cite{???}.
-Because of this, we propose the use of a log-linear ARMA model as a potential benchmark.
-Despite being an associative model, the reason that an ARMA model is an appealing benchmark is because the performance of this class of models is widely understood, and often provides a good description of the data with very limited effort.
-% For us, the defining feature of an associative model is that it is assessed primarily on its quantitative ability to explain historical data.
-% Mechanistic models, on the other hand, must provide a scientific hypothesis about the system as well as having some quantitative ability to explain observed data.
-% By this definition, mechanistic models are a subset of associative models;
-% this subset relationship is enough to see that one cannot expect the class of mechanistic models to provide the highest levels of statistical fit.
-% In general one should expect a statistical cost to the constraint of requiring mechanistic interpretation of the model.
-One question that follows is whether it is useful to assess mechanistic models by their statistical fit, if this is not their primary purpose?
-To what extent can we say the data support a scientific model ($A$) over another model ($B$) based on improved fit to data, if neither fit better than an associative model ($C$)?
-% An answer is to think in terms of the shortfall between a mechanistic model and the best known associative model.
-% If the shortfall is small, on a suitable scale, then the mechanistic model may be considered a valid view of the system from the point of view of these data.
-% While the ARMA(2, 1) certainly will not automatically provide the best fit of all associative models,
-% This does not demonstrate the correctness of the mechanistic interpretation, but also it does not refute it.
-% If the shortfall is large, we conclude that there is some substantial aspect of the system that is not incorporated into the model.
-% we cannot necessarily tell which part of the model is invalid, but we know there is a weakness somewhere.
-% To assess whether shortfalls are small or large, we may consider using formal statistical hypothesis tests or model selection techniques.
-% These can give us a scale for chance variation: a difference small enough to be explained by randomness in the data generating mechanism should not be considered as strong evidence.
-% However, the comparison of primary interest is one of practical significance rather than statistical significance.
-% We would like a mechanistic model whose statistical fit is close to the best associative models regardless of whether there is enough statistical power to distinguish the difference.
+It should be universal practice to present measures of goodness of fit for published models, and mechanistic models should be compared against benchmarks.
+This alone would assist authors and readers to confront any major statistical limitations of the proposed mechanistic models.
+In addition, the published goodness of fit provides a concrete measure for subsequent research to identify and remedy limitations in the analysis, or to update the investigation based on new data or new scientific understanding.
+When combined with online availability of data and code, objective measures of fit provide a powerful tool to accelerate scientific progress, following the paradigm of the {\it common task framework} \citep[][Sec.~6]{donoho17}.
+In our literature review of the Haiti cholera epidemic \eic{CHECK THIS. HOW/WHERE SHOULD WE DESCRIBE THIS?} no quantitative measures of goodness of fit, and no benchmark models, were considered in any of the ?? papers which calibrated a mechanistic model to data in order to obtain scientific conclusions.
 
-% I like the above addition because it provides a little bit more of the philosophy behind the paragraph below. Perhaps we can combine them? - Anna
 
-When comparing mechanistic models to non-mechanistic benchmarks, we do not require the benchmark model to optimize a measure of statistical fit, nor do we suggest that a mechanistic model must have superior fit to the benchmark in order to be of scientific interest.
-It is possible that a successful mechanistic model may have better statistical fit than simple benchmarks such as log-linear models;
-still, the specific threshold of beating, or failing to beat, an arbitrary benchmark is similarly arbitrary.
-In this case, however, a large shortfall in the fit of a mechanistic model to that of a log-linear model may demonstrate room for substantial improvement.
+
+In some cases, a possible benchmark model could be a generally accepted mechanistic model, but often no such model is available.
+Because of this, we use a log-linear Gaussian ARMA model as an associative benchmark, as recommended by \citet{he10}.
+The theory and practice of ARMA models is well developed, but the exponential growth and decay characteristic of biological dynamics suggests applying these linear models on a log scale.
+
+
 The use of a common benchmark may also be beneficial when developing models with varying spatial scale, as direct comparisons between models fit to data with different levels of spatial aggregation are meaningless (e.g. comparing Model~1 to Model~3).
+\eic{I DON'T QUITE UNDERSTAND THIS YET. BENCHMARKS TEND TO APPLY TO SPECIFIC DATA SETS, SO CANNOT READILY BE USED TO COMPARE DIFFERENT LEVELS OF AGGREGATION. LIKELIHOOD BENCHMARKS CAN BE USED TO STUDY THE VALUE OF EXPLICIT SPATIAL COUPLING. HOW TO BENCHMARK ACROSS AGGREGATION LEVELS IS, I THINK, SOMETHING OF AN OPEN PROBLEM.}
 Likelihoods of Models~1--3 and their respective ARMA benchmark models are provided in Table~\ref{tab:likes}.
 
 <<Table 2 Input, echo=FALSE, eval=TRUE>>=
