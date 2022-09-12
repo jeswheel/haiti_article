@@ -134,6 +134,8 @@
 \newcommand\kt[2]{\sout{#1} \textcolor{lightbrown}{#2}}
 \newcommand\ktc[1]{\textcolor{lightbrown}{#1}}
 
+\newcolumntype{t}{>{\tiny}c}
+
 \endlocaldefs
 
 \begin{document}
@@ -880,8 +882,8 @@ The strengths and weaknesses of the agent-based modeling approach  \citep{tracy1
 
 The four independent teams were given the task of estimating the
 potential effect of prospective oral cholera vaccine (OCV) programs.
-OCV is accepted as a safe and effective tool for controlling the spread of cholera, however the available stockpile and production of OCV doses is insufficient to meet global needs \citep{lee20, pezzoli20} \eic{NEW CHOLERA VACCINES, NEW STUDIES OF EXISTING VACCINES, AND INCREASED PRODUCTION VOLUMES ALL AROSE DURING 2010-2019. MAYBE SOMETHING LIKE:
-Advances in OCV technology and vaccine availability raised the possibility of planning a national vaccination program \citep{lee20, pezzoli20}}
+While OCV is accepted as a safe and effective tool for controlling the spread of cholera, the global stockpile of OCV doses remains limited \citep{pezzoli20}.
+Advances in OCV technology and vaccine availability, however, raised the possibility of planning a national vaccination program \citep{lee20}.
 In the study, certain data were shared between the groups, including demography and vaccination history; vaccine efficacy was also fixed at a shared value between groups.
 Beyond this, the groups made autonomous decisions on what to include and exclude from their models; this autonomy reduced the possible effect that assumptions about the dynamic system may have on the final conclusion of the study.
 Despite this autonomy, and largely adhering to existing guidelines on creating models to inform policy \citep{behrend20,saltelli20}, the consensus across the four models was that an extensive nationwide vaccination campaign would be necessary to eliminate cholera from Haiti.
@@ -1919,8 +1921,8 @@ mod3_lee_coupled_partial_aic <- 2 * lee3_results$n_params - 2 * max(lee3_results
 \\
 \hline
 Number of &
-  $\Sexpr{as.character(mod1_n_params)}$ & $\Sexpr{as.character(mod2_n_params)}$ & $\Sexpr{as.character(mod3_n_params)}$ & $\Sexpr{mod3_spatPomp_n_params}$ \\
- Fit Parameters & (\Sexpr{as.character(mod1_lee_n_params)}) & ($\Sexpr{as.character(h2_fit$leeFit_n_params)}$) & (29) & ($\Sexpr{as.character(lee3_results$n_params, 1)}$)
+  $\Sexpr{as.character(mod1_n_params)}$ & $\Sexpr{as.character(mod2_n_params)}$ & \multirow{2}{*}{$\Sexpr{as.character(mod3_n_params)}$} & $\Sexpr{mod3_spatPomp_n_params}$ \\
+ Fit Parameters & (\Sexpr{as.character(mod1_lee_n_params)}) & ($\Sexpr{as.character(h2_fit$leeFit_n_params)}$) && ($\Sexpr{as.character(lee3_results$n_params, 1)}$)
 \\
 \hline
 \multirow{2}{*}{AIC} &
@@ -1962,21 +1964,27 @@ In order to provide trustworthy information, however, the reliability of the for
 In particular, researchers should account for various forms of uncertainty present in model forecasts, and  calibrate the proposed model to observed data.
 
 
-\eic{I THINK WE WILL HAVE TO EXPLAIN THIS CAREFULLY IF THE POINT IS TO APPEAR NONTRIVIAL. IT IS WORTH NOTING THAT LEE ET AL DID NOT PROPERLY FORECAST FROM THE BEST ESTIMATE OF THE CURRENT STATE. HOWEVER, IT WILL BE OBVIOUS TO MOST SATISTICAL READERS THAT THIS IS NOT THE BEST THING TO DO. IT MAY NOT BE SO OBVIOUS THAT THE DIFFERENCE IS IMPORTANT IF AND ONLY IF A DETERMINISTIC MODEL IS INADEQUATE. THE QUESTION OF WHETHER TO USE A DETERMINISTIC MODEL REMAINS OF CURRENT INTEREST...}
-As an example, we note that simulations from a well-fit mechanistic model may closely resemble the observed data $y_{1:N}^*$.
-In such comparisons, these simulations are random draws from the complete estimated joint distribution $f_{\bm{X}^{(\modelCounter)}_{0:N}, \bm{Y}^{(\modelCounter)}_{1:N}}\left(x_{0:N}, y_{1:N}\mid \hat{\paramVec}\right)$, where $\modelCounter$ indexes the model used for simulations.
-It can therefore be tempting to use simulations from this model up to time $N+s$, $f_{\bm{X}^{(\modelCounter)}_{0:N+s}, \bm{Y}^{(\modelCounter)}_{1:N+s}}\left(x_{0:N+s}, y_{1:N+s}\mid \hat{\paramVec}\right)$, with $s\geq 0$ to project the dynamic system up to a future time $N+s$, as it has been done in previous studies \citep{lee20,???}.
-This approach, however, does not take advantage of the information about the state of the system that is contained in the observed data.
-Note that each of the models in question (and, more generally, all models that are described as POMPs) are Markovian, that is, the history of the process $\{\bm{X}^{(\modelCounter)}_s, s\leq t\}$ for model $\modelCounter$ is uninformative about the future of the process $\{\bm{X}^{(\modelCounter)}_s, s\geq t\}$, given the current state $\bm{X}^{(\modelCounter)}_t$.
-In other words, observing the data $\bm{Y}^{(\modelCounter)}_N = y_N^*$ at time $N$ provides more information about the future state of the system than the initial conditions.
-In this case, draws from the conditional density $f_{\bm{X}^{(\modelCounter)}_{N:s}, \bm{Y}^{\modelCounter}_{N:s}}\big(x_{N:s}, y_{N:s}\mid \hat{\paramVec}, \bm{X}^{(\modelCounter)}_{N} = \bm{x}^{(\modelCounter)}_N\big)$ should be preferred as forecasts, as these simulations account for the most recent known state of the system.
+% \eic{I THINK WE WILL HAVE TO EXPLAIN THIS CAREFULLY IF THE POINT IS TO APPEAR NONTRIVIAL. IT IS WORTH NOTING THAT LEE ET AL DID NOT PROPERLY FORECAST FROM THE BEST ESTIMATE OF THE CURRENT STATE. HOWEVER, IT WILL BE OBVIOUS TO MOST SATISTICAL READERS THAT THIS IS NOT THE BEST THING TO DO. IT MAY NOT BE SO OBVIOUS THAT THE DIFFERENCE IS IMPORTANT IF AND ONLY IF A DETERMINISTIC MODEL IS INADEQUATE.}
 
-$\bm{X}^{(\modelCounter)}_N$, however, is unobservable and therefore draws from the desired conditional density are unobtainable.
-Informed estimates of $\bm{X}^{(\modelCounter)}_N$ given the observed data $\bm{Y}^{(\modelCounter)}_{1:N} = y_{1:N}^*$ can easily be obtained, however, via the filtering distribution.
+% As an example, we note that simulations from a well-fit mechanistic model may closely resemble the observed data $y_{1:N}^*$.
+% In such comparisons, these simulations are random draws from the complete estimated joint distribution $f_{\bm{X}^{(\modelCounter)}_{0:N}, \bm{Y}^{(\modelCounter)}_{1:N}}\left(x_{0:N}, y_{1:N}\mid \hat{\paramVec}\right)$, where $\modelCounter$ indexes the model used for simulations.
+% It can therefore be tempting to use simulations from this model up to time $N+s$, $f_{\bm{X}^{(\modelCounter)}_{0:N+s}, \bm{Y}^{(\modelCounter)}_{1:N+s}}\left(x_{0:N+s}, y_{1:N+s}\mid \hat{\paramVec}\right)$, with $s\geq 0$ to project the dynamic system up to a future time $N+s$, as it has been done in previous studies \citep{lee20,???}.
+% This approach, however, does not take advantage of the information about the state of the system that is contained in the observed data.
+% Note that each of the models in question (and, more generally, all models that are described as POMPs) are Markovian, that is, the history of the process $\{\bm{X}^{(\modelCounter)}_s, s\leq t\}$ for model $\modelCounter$ is uninformative about the future of the process $\{\bm{X}^{(\modelCounter)}_s, s\geq t\}$, given the current state $\bm{X}^{(\modelCounter)}_t$.
+% In other words, observing the data $\bm{Y}^{(\modelCounter)}_N = y_N^*$ at time $N$ provides more information about the future state of the system than the initial conditions.
+% In this case, draws from the conditional density $f_{\bm{X}^{(\modelCounter)}_{N:s}, \bm{Y}^{\modelCounter}_{N:s}}\big(x_{N:s}, y_{N:s}\mid \hat{\paramVec}, \bm{X}^{(\modelCounter)}_{N} = \bm{x}^{(\modelCounter)}_N\big)$ should be preferred as forecasts, as these simulations account for the most recent known state of the system.
+The most recently available information about a dynamic system should be used to obtain reliable forecasts.
+Using state space model $m$, this means that in order to obtain a forecast up to time $N+s$, where $s\geq 0$ and $N$ is the index for the last available data, we should simulate from the conditional density $f_{\bm{X}^{(\modelCounter)}_{N:s}, \bm{Y}^{\modelCounter}_{N:s}}\big(x_{N:s}, y_{N:s}\mid \hat{\paramVec}, \bm{X}^{(\modelCounter)}_{N} = \bm{x}^{(\modelCounter)}_N\big)$.
+We note, however, that $\bm{X}^{(\modelCounter)}_N$ is unobservable and therefore draws from the desired conditional density are unobtainable.
+Informed estimates of $\bm{X}^{(\modelCounter)}_N$ given the observed data $\bm{Y}^{(\modelCounter)}_{1:N} = y_{1:N}^*$ can easily be obtained using the filtering distribution.
 Let $\hat{\bm{X}}^{(\modelCounter), i}_N, \, i \in {1, 2, \ldots, J}$ be $\iid$ draws from the filtering distribution at time $N$, with density $\hat{\bm{X}}^{(\modelCounter), i}_N \sim f_{\bm{X}^{(\modelCounter)}_N|\bm{Y}^{(\modelCounter)}_{1:N}}(x_N \mid \hat{\paramVec}, y_{1:N}^*)$.
 A single model forecast can then be obtained by simulating from the model $f_{\bm{X}^{(\modelCounter)}_{N:s}, \bm{Y}^{(\modelCounter)}_{N:s}}\big(x_{N:s}, y_{N:s}\mid \hat{\paramVec}, \bm{X}^{(\modelCounter)}_{N} = \hat{\bm{X}}^{(\modelCounter), i}_N\big)$.
-Intuitively, simulating the model starting at the filtering distribution of the most recently available time point is a more appropriate way to project a stochastic dynamic system into the future, as it is not expected that each simulation from initial conditions will result in a latent state at time $N$ consistent with the model and the observation $\bm{Y}^{(\modelCounter)}_N = y_N^*$.
+Obtaining forecasts in this fashion allows us to get results that are consistent with the model assumptions and the observed data.
+% Intuitively, simulating the model starting at the filtering distribution of the most recently available time point is a more appropriate way to project a stochastic dynamic system into the future, as it is not expected that each simulation from initial conditions will result in a latent state at time $N$ consistent with the model and the observation $\bm{Y}^{(\modelCounter)}_N = y_N^*$.
 In this particular case study, projecting the future state of the cholera epidemic in Haiti starting from the draws from the filtering distribution allows the proposed models to benefit from the fact that very few cholera cases had been observed between 2018 and 2019, and that cases appear to be decreasing (i.e., the number of susceptible individuals may be small).
+This alone partially explains the unrealistic forecasts of \cite{lee20}, which were obtained by simulating the model from initial conditions;
+Table~S7 of their supplement material shows that of their simulations that were consistent with observing zero cases in 2019, all forecasts resulted in the elimination of cholera.
+\eic{THE QUESTION OF WHETHER TO USE A DETERMINISTIC MODEL REMAINS OF CURRENT INTEREST...}
 
 Another consideration to make when obtaining model forecasts is that of parameter uncertainty.
 It has been noted that the uncertainty in just a single parameter can lead to drastically different projections \citep{saltelli20}.
@@ -2030,7 +2038,8 @@ Examples of this are as diverse as estimating the effective reproductive number 
 In our analysis, we demonstrate this ability by examining the results of fitting the flexible cubic spline term in Model~1 (Eq.~\myeqref{model1:lambda}--\myeqref{model1:beta}), which allows for a flexible estimation of seasonality in the force of infection.
 After fitting the model, we explore potential patterns in the seasonal transmission rate by plotting the average value of $\transmission$ in a typical year.
 Fig.~\ref{fig:h1SeasRain} shows that the estimated seasonal transmission rate $\transmission$ mimics the rainfall dynamics in Haiti, despite Model~1 not having access to rainfall data.
-This result provides evidence that rainfall is a potential driver of cholera infections in Haiti.
+This result provides evidence that rainfall plays an important role in cholera transmission in Haiti, which is consistent with previous studies \citep{eisenberg13,rinaldo12}.
+We also note the increase in the transmission rate during the Fall, which was also noticed at an earlier stage of the epidemic \citep{rinaldo12}.
 
 <<Get Model 1 Seasonality>>=
 plot_model_fun <- function(mod) {
@@ -2507,7 +2516,7 @@ mod3_V4_res <- bake(
 Simulations from probabilistic models (Models~1 and~3) represent possible trajectories of the dynamic system under the scientific assumptions of the models.
 In this case study, estimates of the probability of cholera elimination can therefore be obtained as the proportion of simulations from the fitted model that result in cholera elimination.
 The results of these projections are summarized in Figs.~\ref{fig:Mod1Scenarios}--\ref{fig:elimProbs}.
-These results suggest that cholera elimination was likely, even without increased vaccination efforts, which is consistent with observed reality \citep{ferguson22}. \eic{I LIKE THE IDEA OF REFERENCING POST-EPIDEMIC REFLECTIONS. UNLESS THERE ARE NO ALTERNATIVES, IT IS BEST TO AVOID CITING A NON-PEER-REVIEWED ARTICLE SUCH AS THIS. HOW ABOUT \citep{piarroux22} OR \citep{trevisin22}?}
+These results suggest that cholera elimination was likely, even without increased vaccination efforts, which is consistent with observed reality \citep{trevisin22}.
 
 Probability of elimination estimates of this form are not meaningful for deterministic models, as the trajectory of these models only represent the mean behavior of the system rather than individual potential outcomes.
 We therefore do not provide probability of elimination estimates under Model~2.
@@ -2844,9 +2853,9 @@ Compare to Figure 3A of \cite{lee20}.}
 %%% table tttttttttt
 
 \begin{table}
-\small
-
-\hspace{-10mm}\begin{tabular}{|l@{}|l@{}c@{}|l@{}c@{}|l@{}c@{}|}
+% \small
+\resizebox{\textwidth}{!}{
+\hspace{-10mm}\begin{tabular}{|l@{}|l@{}t@{}|l@{}t@{}|l@{}t@{}|}
 \hline
 Mechanism & Model 1 && Model 2 && Model 3 &
 \\
@@ -3078,7 +3087,7 @@ $\begin{array}{l}
   & (S18)
 \\
 \hline
-\end{tabular}
+\end{tabular}}
 \caption{References to the relevant equation are given in parentheses.
 Parameters in blue were fixed based on scientific reasoning and not fitted to the data.
 [N] denotes parameters added during our re-analysis, not considered by Lee et al.
