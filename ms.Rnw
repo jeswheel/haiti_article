@@ -1174,12 +1174,9 @@ stew(file = "models.rda", {
   h1 <- haiti1_joint()
   coef(h1) <- p1
 
-  h2_epi <- haiti2(region = 'before')
-  h2_end <- haiti2(region = 'after', joint = TRUE)
+  h2_epi <- haiti2(region = 'before', cutoff = 10000, measure = 'log')
 
-  coef(h2_epi) <- h2_fit$epi_params
-  coef(h2_end) <- h2_fit$end_params
-  # p2 <- coef(h2)
+  coef(h2_epi) <- h2_fit$h2_params
 
   h3 <- haiti3_panel(start_time = "2010-10-23", B0 = TRUE)
   coef(h3) <- p3
@@ -1327,7 +1324,7 @@ gc()
 
 \subsubsection{Model~2}
 
-Model~2 is a deterministic model, which can be viewed as a special case of a POMP (or SpatPOMP) with no randomness in the dynamic model.
+Model~2 is a deterministic model, which can be viewed as a special case of a POMP (or SpatPOMP) with no randomness in the dynamic process or measurement.
 By combining a deterministic process model with a simple Gaussian measurement model, Model~2 reduces model fitting to a least squares calculation over parameters in a set of differential equations.
 Deterministic compartment models have a long history in the field of infectious disease epidemiology \citep{kermack1927,brauer2017,varghese21},
 and can be justified by asymptotic considerations in a large-population limit \citep{dadlani2020,ndii17}.
@@ -1350,16 +1347,12 @@ The model was then fit using the subplex algorithm, implemented in the  \code{su
 A comparison of the trajectory of the fitted model to the data is given in Fig~\ref{fig:mod2Traj}.
 
 <<Model 2 Trajectory, echo=FALSE>>=
-h2_epi_traj <- trajectory(h2_epi, params = h2_fit$epi_params, format = 'data.frame')
-h2_epi_traj$Ctotal <- rowSums(h2_epi_traj[, paste0("C", 1:10)]) * h2_fit$epi_params['Rho']
+h2_epi_traj <- trajectory(h2_epi, params = h2_fit$h2_params, format = 'data.frame')
+h2_epi_traj$Ctotal <- rowSums(h2_epi_traj[, paste0("C", 1:10)]) * h2_fit$h2_params['Rho']
 
-h2_end_traj <- trajectory(h2_end, params = h2_fit$end_params, format = 'data.frame')
-h2_end_traj$Ctotal <- rowSums(h2_end_traj[, paste0("C", 1:10)]) * h2_fit$end_params['Rho']
 
-h2_traj <- rbind(
-  h2_epi_traj[, c('year', 'Ctotal')],
-  h2_end_traj[, c('year', 'Ctotal')]
-) %>%
+h2_traj <- h2_epi_traj %>%
+  select(year, Ctotal) %>%
   mutate(
     date = yearsToDate(year)
   )
@@ -1651,21 +1644,14 @@ NP_EVAL    <- switch(RUN_LEVEL, 50, 500, 10000)
 # Objective function of model 2, epidemic phase
 epi_ofun <- traj_objfun(
   h2_epi,
-  params = h2_fit$epi_params
+  params = h2_fit$h2_params
 )
 
-# Objective function of model 2, endemic phase
-end_ofun <- traj_objfun(
-  h2_end,
-  params = h2_fit$end_params
-)
-
-mod2_epi_ll <- -epi_ofun(par = h2_fit$epi_params)
-mod2_end_ll <- -end_ofun(par = h2_fit$end_params)
+mod2_epi_ll <- -epi_ofun(par = h2_fit$h2_params)
+# mod2_end_ll <- -end_ofun(par = h2_fit$end_params)
 
 
-mod2_ll <- mod2_epi_ll - sum(apply(log(h2_epi@data + 1), 1, sum)) + (mod2_end_ll - sum(apply(log(h2_end@data + 1), 1, sum, na.rm = TRUE)))
-
+mod2_ll <- mod2_epi_ll - sum(log(h2_epi@data + 1), na.rm = TRUE)
 
 # Evaluate and sum objective functions to get total model likelihood
 # mod2_ll <- -(epi_ofun(par = h2_fit$epi_params) + end_ofun(par = h2_fit$end_params))
@@ -1673,7 +1659,7 @@ mod2_ll <- mod2_epi_ll - sum(apply(log(h2_epi@data + 1), 1, sum)) + (mod2_end_ll
 arima_lik2 <- 0
 
 # model 2 AIC
-mod2_n_params <- 21  # Number of parameters fit in Model 2
+mod2_n_params <- 21  # TODO: adjust Number of parameters fit in Model 2
 mod2_aic <- 2 * mod2_n_params - 2 * mod2_ll
 
 # Load pre-calculated model 1 likelihood
@@ -2375,8 +2361,7 @@ gc()
 mod2_VaccScenarios <- bake(
   file = paste0("model2/", rl_dir, "VaccinationScenarios.rds"), {
     haiti2_vaccScenario(
-      end_params = h2_fit$end_params,
-      epi_params = h2_fit$epi_params
+      h2_params = h2_fit$h2_params
     )
   },
   timing = FALSE
@@ -2871,7 +2856,7 @@ Compare to Figure 3A of \cite{lee20}.}
 \begin{table}
 \small
 
-\hspace{-10mm}\begin{tabular}{|l|l@{\hskip3pt}c@{\hskip3pt}|l@{\hskip3pt}c@{\hskip3pt}|l@{\hskip3pt}c@{\hskip3pt}|}
+\hspace{-10mm}\begin{tabular}{|l@{}|l@{}c@{}|l@{}c@{}|l@{}c@{}|}
 \hline
 Mechanism & Model 1 && Model 2 && Model 3 &
 \\
@@ -2880,7 +2865,7 @@ Mechanism & Model 1 && Model 2 && Model 3 &
 Infection (day)
   & {\fixed $\muIR^{-1}=\Sexpr{myround(7/p1["gamma"],1)}$}
   & \eqref{model1:toR}
-  & {\fixed $\muIR^{-1}=\Sexpr{myround(365/h2_fit$epi_params["gamma"],1)}$}
+  & {\fixed $\muIR^{-1}=\Sexpr{myround(365/h2_fit$h2_params["gamma"],1)}$}
   & \eqref{model2:mu_IR}
   & {\fixed $\muIR^{-1}=\Sexpr{myround(365/p3["gamma"],1)}$ }
   & \eqref{eq:model3:IR}
@@ -2888,7 +2873,7 @@ Infection (day)
 Latency (day)
   & {\fixed $\muEI^{-1}=\Sexpr{myround(7/p1["sigma"],1)}$}
   & \eqref{model1:EA}
-  & {\fixed $\muEI^{-1}=\Sexpr{myround(365/h2_fit$epi_params["gammaE"],1)}$}
+  & {\fixed $\muEI^{-1}=\Sexpr{myround(365/h2_fit$h2_params["gammaE"],1)}$}
   & \eqref{model2:mu_EI}
   & \multicolumn{1}{c}{\hspace{16pt}\missing}
   &
@@ -2920,9 +2905,9 @@ $\begin{array}{l}
   & \eqref{model1:RS}
   & {\fixed
     $\begin{array}{l}
-    \muRS^{-1}= \Sexpr{signif(1/h2_fit$epi_params["sigma"],2)} \\
-     \omega_1^{-1} = \Sexpr{myround(1/h2_fit$epi_params["Omega1"],1)} \\
-    \omega_2^{-1} = \Sexpr{myround(1/h2_fit$epi_params["Omega2"],1)}
+    \muRS^{-1}= \Sexpr{signif(1/h2_fit$h2_params["sigma"],2)} \\
+     \omega_1^{-1} = \Sexpr{myround(1/h2_fit$h2_params["Omega1"],1)} \\
+    \omega_2^{-1} = \Sexpr{myround(1/h2_fit$h2_params["Omega2"],1)}
     \end{array}$
     }
   & $\begin{array}{l}
@@ -2939,10 +2924,10 @@ Vaccine efficacy
   &
   & $\begin{array}{l}
       \hspace{-1mm} \fixed{\vaccineEfficacy_{1:4} = (
-        \Sexpr{myround(1 - h2_fit$epi_params["VE1"] * 0.4688, 2)},
-        \Sexpr{myround(1 - h2_fit$epi_params["VE2"] * 0.4688, 2)}} \\
-        \fixed{\Sexpr{myround(1 - h2_fit$epi_params["VE1"], 2)},
-        \Sexpr{myround(1 - h2_fit$epi_params["VE2"], 2)}})
+        \Sexpr{myround(1 - h2_fit$h2_params["VE1"] * 0.4688, 2)},
+        \Sexpr{myround(1 - h2_fit$h2_params["VE2"] * 0.4688, 2)}} \\
+        \fixed{\Sexpr{myround(1 - h2_fit$h2_params["VE1"], 2)},
+        \Sexpr{myround(1 - h2_fit$h2_params["VE2"], 2)}})
         \end{array}$
   & \eqref{model2:mu_SE}
   & \fixed{$\eta_{ud}(t)$}
@@ -2962,7 +2947,7 @@ Birth/death (yr)
 Symptomatic frac.
   & {\fixed $\symptomFrac_z(t)=c\theta^*(t-\tau_d)$}
   & (\ref{model1:EI}-\ref{model1:EA})
-  & {\fixed $\symptomFrac=\Sexpr{myround(h2_fit$epi_params["k"],1)}$}
+  & {\fixed $\symptomFrac=\Sexpr{myround(h2_fit$h2_params["k"],1)}$}
   & \eqref{model2:mu_EI}
   & {\fixed $\symptomFrac=\Sexpr{myround(p3s["sigma"],2)}$}
   & \eqref{eq:model3:SA}
@@ -2996,7 +2981,7 @@ $\begin{array}{l}
 \text{human}\end{array}$
   & $\transmission_{1:6}$ as above
   & \eqref{model1:lambda}
-  & $\transmission=$\Sexpr{signif(h2_fit$epi_params["Beta"],3)}
+  & $\transmission=$\Sexpr{signif(h2_fit$h2_params["Beta"],3)}
   & \eqref{model2:lambda}
   & $\begin{array}{l}
       \hspace{-1mm} \transmission_{1:10}=(
@@ -3025,9 +3010,9 @@ $\begin{array}{l}
   & \multicolumn{1}{c}{\hspace{16pt}\missing}
   &
   & $\begin{array}{l}
-    {\fixed \Wsat = \Sexpr{signif(h2_fit$epi_params["Sat"],2)} }
+    {\fixed \Wsat = \Sexpr{signif(h2_fit$h2_params["Sat"],2)} }
     \\
-    \beta_W= \Sexpr{signif(h2_fit$epi_params["BetaW"],3)}
+    \beta_W= \Sexpr{signif(h2_fit$h2_params["BetaW"],3)}
     \end{array}$
   & \eqref{model2:lambda}
   & $\begin{array}{l}
@@ -3048,7 +3033,7 @@ $\begin{array}{l}
 \text{water}\end{array}$
   & \multicolumn{1}{c}{\hspace{16pt}\missing}
   &
-  & $\Wshed = $ \Sexpr{signif(h2_fit$epi_params["Mu"],3)}
+  & $\Wshed = $ \Sexpr{signif(h2_fit$h2_params["Mu"],3)}
   & \eqref{model2:to_W}
   & $\Wshed= \Sexpr{signif(p3s["thetaI"],3)}$
   & \eqref{eq:model3:water}
@@ -3059,7 +3044,7 @@ $\begin{array}{l}
 \end{array}$
   & \multicolumn{1}{c}{\hspace{16pt}\missing}
   &
-  & $\Wremoval^{-1} = $ \Sexpr{signif(52/h2_fit$epi_params["Delta"],3)}
+  & $\Wremoval^{-1} = $ \Sexpr{signif(52/h2_fit$h2_params["Delta"],3)}
   & \eqref{model2:from_W}
   & $\Wremoval^{-1}=\Sexpr{myround(52/p3s["mu_B"],2)}$
   & \eqref{eq:model3:Decay}
@@ -3086,7 +3071,7 @@ $\begin{array}{l}
 Reporting rate
   & $\reportRate=(\Sexpr{myround(p1["rho_epi"],3)}, \Sexpr{myround(p1["rho_end"],3)})$
   & (S16) % TODO: Make sure manual equations match!
-  & {\fixed $\reportRate=\Sexpr{myround(h2_fit$epi_params["Rho"],2)}$}
+  & {\fixed $\reportRate=\Sexpr{myround(h2_fit$h2_params["Rho"],2)}$}
   & (S17)
   & $\reportRate=\Sexpr{myround(p3s["epsilon"],2)}$
   & (S18)
