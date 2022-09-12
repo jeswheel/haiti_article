@@ -1369,11 +1369,10 @@ h2_traj <- rbind(
 \subsubsection{Model~3}
 Model~3 is also of a probabilistic model.
 In this model, both the latent and observable processes can be factored into department specific processes which interact with each other.
-We denote the latent and measurement processes for Model~3 as $\bm{X}^{(3)}(t_{0:N}) = X^{(3)}_{1:U, 0:N}$, and $\bm{Y}^{(3)}(t_{1:N}) = Y_{1:U, 1:N}$.
+We denote the latent and measurement processes for Model~3 as $\bm{X}^{(3)}(t_{0:N}) = X^{(3)}_{1:U, 0:N}$, and $\bm{Y}^{(3)}(t_{1:N}) = Y_{1:U, 1:N}$ \eic{IS THIS NEEDED HERE?}.
 The decision to model the system via metapopulation models versus a model aggregated to a larger spatial scale is one of great scientific interest, and evidence for the former approach has been provided in previous studies \citep{king15}.
-Note that this evidence alone does not automatically discredit conclusions drawn via nationally aggregated models, as an argument can easily be made that one should prefer a simple model over a complex one \citep{saltelli20,green15}.
-Still, researchers that intend to use a mechanistic model to describe a dynamic system should design the model to be as realistic as their scientific understanding of the system and their computational abilities permit.
-% As such, there is strong motivation to include spatial structure in the model designed to approximate the system.
+Note that this evidence alone does not automatically discredit conclusions drawn via nationally aggregated models, as there are also good reasons to prefer a simple model over a complex one \citep{saltelli20,green15}.
+Still, researchers that intend to use a mechanistic model to describe a dynamic system should design the model to be as realistic as their scientific understanding of the system and their computational abilities permit \eic{THIS SENTENCE SEEMS TO DISMISS THE ARGUMENTS IN THE PREVIOUS SENTENCE. PERHAPS THIS SENTENCE CAN JUST BE DELETED}.
 Fitting scientifically flexible metapopulation models, however, remains a challenging statistical problem;
 this is due to the fact that the approximation error of particle filters grows exponentially in the dimension of the model \citep{rebeschini15,park20}.
 Algorithms that are based on the particle filter therefore become computationally intractable as the number of spatial units increase.
@@ -1381,7 +1380,7 @@ Algorithms that are based on the particle filter therefore become computationall
 Parameters that must be fit in Model~3 are primarily shared between each department, the exception to this being the parameters $\beta_{W_u}$, and $\beta_u$, which are unique for each department $u \in \seq{1}{10}$.
 To fit this model, \citet{lee20} simplified the parameter estimation problem by fitting independent department-level models to the data.
 The shared parameters were calibrated using the cholera incidence data from Artibonite, and the department-specific parameters ($\beta_{W_u}$ and $\beta_u$) were fit using the data from their respective department.
-Reducing a spatially-heterogeneous model to individual units in this fashion requires special treatment of any interactive mechanisms between spatial units, such as found in Eq.~\myeqref{eq:model3:foi}.
+Reducing a spatially coupled \eic{not spatially heterogeneous, as previously written} model to individual units in this fashion requires special treatment of any interactive mechanisms between spatial units, such as found in Eq.~\myeqref{eq:model3:foi}.
 In particular, when considering a model for department $u$, the values $I_\nu(t)$ and $A_\nu(t)$, are unknown for $u \neq v \in \seq{1}{10}$.
 A first order approximation of Eq.~\myeqref{eq:model3:foi} for each department $v \in \seq{1}{10}$ can be obtained using the weekly number of observed cholera cases in each department:
 \begin{equation}
@@ -1613,7 +1612,6 @@ This alone would assist authors and readers to confront any major statistical li
 In addition, the published goodness of fit provides a concrete measure for subsequent research to identify and remedy limitations in the analysis, or to update the investigation based on new data or new scientific understanding.
 When combined with online availability of data and code, objective measures of fit provide a powerful tool to accelerate scientific progress, following the paradigm of the {\it common task framework} \citep[][Sec.~6]{donoho17}.
 In our literature review of the Haiti cholera epidemic \eic{CHECK THIS. HOW/WHERE SHOULD WE DESCRIBE THIS?} no quantitative measures of goodness of fit, and no benchmark models, were considered in any of the ?? papers which calibrated a mechanistic model to data in order to obtain scientific conclusions.
-
 
 
 In some cases, a possible benchmark model could be a generally accepted mechanistic model, but often no such model is available.
@@ -1924,7 +1922,7 @@ mod3_lee_coupled_partial_aic <- 2 * lee3_results$n_params - 2 * max(lee3_results
 \\
 \hline
 \hline
-\multirow{2}{*}{Log Likelihood} &
+\multirow{2}{*}{Log-likelihood} &
   $\Sexpr{myround(mod1_ll, 1)}$ &
   $\Sexpr{myround(mod2_ll, 1)}$ &
   \multirow{2}{*}{$\Sexpr{myround(mod3_ll[1], 1)}$\footnotemark[2]} &
@@ -1944,7 +1942,7 @@ Number of &
   & ($\Sexpr{myround(mod1_lee_aic, 1)}$)\footnotemark[1] & ($\Sexpr{myround(mod2_lee_aic, 1)}$) &  & ($\Sexpr{myround(mod3_lee_coupled_aic, 1)}$)\footnotemark[3]
 \\
 \hline
-\thead{ARMA(2, 1) \\ Log Likelihood} &
+\thead{Log-ARMA(2,1) \\ Log-likelihood} &
   $\Sexpr{myround(ARMA_benchmarks$m1, 1)}$ &
   $\Sexpr{myround(ARMA_benchmarks$m2, 1)}$ &
   $\Sexpr{myround(ARMA_benchmarks$m3, 1)}$ &
@@ -1953,7 +1951,10 @@ Number of &
 \hline
 \end{tabular}
 \caption{\label{tab:likes}Log-likelihood values for each models compared to their ARMA benchmarks.
-Values in parenthesis are corresponding values using \citet{lee20} parameter estimates.}
+Values in parenthesis are corresponding values using \citet{lee20} parameter estimates.
+\eic{I THINK THAT THE NOTES SHOULD GO IN THE CAPTION RATHER THAN BEING FOOTNOTES.}
+\eic{WE SHOULD REVIEW THIS TABLE IN A MEETING. RIGHT NOW, I'M SURPRISED BY A FEW THINGS. WHY IS THE LEE ET AL MODEL 2 LIKELIHOOD HIGHER THAN OURS? IS THE (29) IN THE PANELPOMP COLUMN A TYPO, SINCE WE DON'T COMPARE TO LEE ET AL IN THIS COLUMN? NESTING RELATIONSHIP FOR THE SPATPOMP VERSION OF MODEL 3 MAKES IT HARD TO EXPLAIN THE RATHER LARGE DECREASE IN LOGLIK. AT FACE VALUE, THIS SEEMS TO MEAN THAT THE COUPLING IS SUFFICIENTLY POORLY SPECIFIED THAT WE ARE BETTER OFF WITHOUT IT. I SEEM TO RECALL THAT OUR UNDERSTANDING INVOLVES THE WAY PANELPOMP USES A COVARIATE THAT DEPENDS ON CASES IN OTHER DEPARTMENTS. SINCE LEE ET AL ALSO DO THAT, COULD IT BE THAT THEIR ANALYSIS IS MORE CLOSELY RELATED TO THE PANELPOMP VERSION THAN THE SPATPOMP VERSION?}
+}
 \end{table}
 
 \jwc{NEW PARAGRAPH: }
@@ -2010,6 +2011,16 @@ As the data analysis becomes more refined, however, the deficiencies of determin
 \section{Results}\label{sec:results}
 
 \jwc{SHOULD THESE FIRST TWO PARAGRAPHS BE MOVED TO THE DISCUSSION?}
+\eic{YES. ALSO, THERE ARE RESULTS IN SEC.~3. PERHAPS, THE RAINFALL ANALYSIS IN SEC 4 COULD BE ANOTHER ASPECT OF THE SEC 3 ANALYSIS: COMPARISON OF MODEL FIT WITH OTHER LINES OF SCIENTIFIC EVIDENCE. THEN THE CURRENT SEC 4 COULD BE DISBANDED. 
+SOMETIMES THE METHODS-RESULTS-DISCUSSION FORMAT DOES NOT FIT SO NATURALLY WITH APPLIED STATS.
+WE CAN DISCUSS THIS. ONE IDEA IS TO HAVE A SECTION NAMED SOMETHING LIKE "LESSONS LEARNED FROM MODELING THE HAITI EPIDEMIC" OR "ADVICE FOR FUTURE STUDIES". THE LATTER CAN SEEM PRESUMPTUOUS, AND SHOULD BE DONE WITH DUE CAUTION, BUT FROM ANOTHER PERSPECTIVE IF WE ARE NOT PROVIDING CONCRETE GUIDANCE FOR FUTURE WORK THEN WHAT ARE WE DOING? OUR RESPONSIBILITY IS TO MAKE THE STRONGEST CLAIM WE THINK WE CAN PROPERLY SUPPORT; THEN THE REFEREES CAN HAVE A GO AT PULLING THE CLAIM DOWN.}
+\eic{I THINK IT IS INTERESTING THAT THE MODEL-SUPPORTED SUGGESTION BY \citep{andrews11} HAS LARGELY PROVED ACCURATE (VACCINATION, NON-PHARMACEUTICAL INTERVENTIONS, AND INFRASTRUCTURE IMPROVEMENTS ALL HAVE A ROLE AND SHOULD BE FOLLOWED SIMULTANEOUSLY)DESPITE LEGITIMATE CONCERNS ABOUT WHETHER THE SCIENTIFIC SUPPORT FOR THE MODEL IS STRONG ENOUGH TO ROBUSTLY GUIDE POLICY \citep{grad12}.
+THE MAIN CLAIM OF ANDREWS11 IS THAT FORECASTS AND POLICY NOT SUPPORTED BY A MODEL SEEM EVEN MORE UN-ROOTED THAN RECOMMENDATIONS BASED ON A WEAKLY SUPPORTED MODEL.
+THE CONCLUSION FROM ALL THIS, WHICH I THINK IS SUPPORTED BY OUR RE-ANALYSIS OF LEE ET AL, IS THAT MECHANISTIC MODELS FITTED TO DATA ARE A STRONG WAY TO ENFORCE CONSISTENT THINKING, BUT WEAKER AS A WAY TO CHECK THAT YOU ARE ACTUALLY RIGHT DUE TO THE LIMITATIONS OF INFERRING CAUSAL MECHANISMS FROM OBSERVATIONAL DATA.
+POLICY-MAKERS SHOULD FOLLOW AN APPROACH WHICH IS SELF-CONSISTENT AND CONSISTENT WITH PREVIOUS EVIDENCE THAT MIGHT WORK (WHICH MODELS CAN HELP WITH) BUT THEY MUST BE AGILE AS NEW EVIDENCE EMERGES.
+MODELS, TOGETHER WITH DATA ANALYSIS, CAN ALSO HELP REVEAL WHEN THE EVIDENCE SUPPORTING A P0LICY IS BREAKING DOWN, FORCING A RE-THINK.
+}
+
 A model which aspires to provide quantitative guidance for assessing interventions should provide a quantitative statistical fit for available data.
 However, strong statistical fit does not guarantee a correct causal structure: it does not even necessarily require the model to assert a causal explanation.
 A causal interpretation is strengthened by corroborative evidence.
@@ -2509,11 +2520,9 @@ mod3_V4_res <- bake(
 @
 
 Simulations from probabilistic models (Models~1 and~3) represent possible trajectories of the dynamic system under the scientific assumptions of the models.
-In this case study, estimates of the probability of cholera elimination can therefore be obtained as the proportion of simulations from the fitted model
-% starting from draws from the filtering distribution, unecessary - Jesse
-that result in cholera elimination.
+In this case study, estimates of the probability of cholera elimination can therefore be obtained as the proportion of simulations from the fitted model that result in cholera elimination.
 The results of these projections are summarized in Figs.~\ref{fig:Mod1Scenarios}--\ref{fig:elimProbs}.
-These results suggest that cholera elimination was likely, even without increased vaccination efforts, which is consistent with observed reality \citep{ferguson22}.
+These results suggest that cholera elimination was likely, even without increased vaccination efforts, which is consistent with observed reality \citep{ferguson22}. \eic{I LIKE THE IDEA OF REFERENCING POST-EPIDEMIC REFLECTIONS. UNLESS THERE ARE NO ALTERNATIVES, IT IS BEST TO AVOID CITING A NON-PEER-REVIEWED ARTICLE SUCH AS THIS. HOW ABOUT \citep{piarroux22} OR \citep{trevisin22}?}
 
 Probability of elimination estimates of this form are not meaningful for deterministic models, as the trajectory of these models only represent the mean behavior of the system rather than individual potential outcomes.
 We therefore do not provide probability of elimination estimates under Model~2.
