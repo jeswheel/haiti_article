@@ -1588,7 +1588,7 @@ Alternative forms of model validation should therefore be used in conjunction wi
 Another approach is to compare a quantitative measure of the model fit (such as MSE, predictive accuracy, or model likelihood) among all proposed models.
 These comparisons provide insight into how each model performs relative to the others.
 To calibrate relative measures of fit, it is useful to compare against a model that has well-understood statistical ability to fit data, and we call this model a {\it benchmarks}.
-Standard statistical models, interpreted as associative models without requiring any mechanistic interpretation of their parameters, provide suitable benchmarks. 
+Standard statistical models, interpreted as associative models without requiring any mechanistic interpretation of their parameters, provide suitable benchmarks.
 Examples include linear regression, auto-regressive moving average time series models, or even independent and identically distributed measurements.
 The benchmarks enable us to evaluate the goodness of fit that can be expected of a suitable mechanistic model.
 
@@ -1997,7 +1997,7 @@ As the data analysis becomes more refined, however, the deficiencies of determin
 \section{Results}\label{sec:results}
 
 \jwc{SHOULD THESE FIRST TWO PARAGRAPHS BE MOVED TO THE DISCUSSION?}
-\eic{YES. ALSO, THERE ARE RESULTS IN SEC.~3. PERHAPS, THE RAINFALL ANALYSIS IN SEC 4 COULD BE ANOTHER ASPECT OF THE SEC 3 ANALYSIS: COMPARISON OF MODEL FIT WITH OTHER LINES OF SCIENTIFIC EVIDENCE. THEN THE CURRENT SEC 4 COULD BE DISBANDED. 
+\eic{YES. ALSO, THERE ARE RESULTS IN SEC.~3. PERHAPS, THE RAINFALL ANALYSIS IN SEC 4 COULD BE ANOTHER ASPECT OF THE SEC 3 ANALYSIS: COMPARISON OF MODEL FIT WITH OTHER LINES OF SCIENTIFIC EVIDENCE. THEN THE CURRENT SEC 4 COULD BE DISBANDED.
 SOMETIMES THE METHODS-RESULTS-DISCUSSION FORMAT DOES NOT FIT SO NATURALLY WITH APPLIED STATS.
 WE CAN DISCUSS THIS. ONE IDEA IS TO HAVE A SECTION NAMED SOMETHING LIKE "LESSONS LEARNED FROM MODELING THE HAITI EPIDEMIC" OR "ADVICE FOR FUTURE STUDIES". THE LATTER CAN SEEM PRESUMPTUOUS, AND SHOULD BE DONE WITH DUE CAUTION, BUT FROM ANOTHER PERSPECTIVE IF WE ARE NOT PROVIDING CONCRETE GUIDANCE FOR FUTURE WORK THEN WHAT ARE WE DOING? OUR RESPONSIBILITY IS TO MAKE THE STRONGEST CLAIM WE THINK WE CAN PROPERLY SUPPORT; THEN THE REFEREES CAN HAVE A GO AT PULLING THE CLAIM DOWN.}
 \eic{I THINK IT IS INTERESTING THAT THE MODEL-SUPPORTED SUGGESTION BY \citep{andrews11} HAS LARGELY PROVED ACCURATE (VACCINATION, NON-PHARMACEUTICAL INTERVENTIONS, AND INFRASTRUCTURE IMPROVEMENTS ALL HAVE A ROLE AND SHOULD BE FOLLOWED SIMULTANEOUSLY)DESPITE LEGITIMATE CONCERNS ABOUT WHETHER THE SCIENTIFIC SUPPORT FOR THE MODEL IS STRONG ENOUGH TO ROBUSTLY GUIDE POLICY \citep{grad12}.
