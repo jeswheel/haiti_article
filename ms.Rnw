@@ -1032,13 +1032,13 @@ Individuals can progress to a latent infection $E_{u\vaccCounter}$ followed by s
 The force of infection depends on both direct transmission and an aquatic reservoir, $W_u(t)$, and is given by
 \begin{equation}
 \label{model2:lambda}
-\lambda_{u}(t) = 0.5\big(1+\seasAmplitude \cos(2\pi t)\big)
+\lambda_{u}(t) = 0.5\big(1+\seasAmplitude \cos(2\pi t + \phaseParm)\big)
 \frac{\beta_W\, W_u(t)}{ \Wsat  + W_u(t)} +
 \transmission \left\{\sum_{\vaccCounter=0}^4 I_{u\vaccCounter}(t) + \asymptomRelativeInfect \sum_{\vaccCounter=0}^4 A_{u\vaccCounter}(t) \right\}
 \end{equation}
 The latent state is therefore described by the vector $\bm{X}^{(2)}(t) = \big(S_{u\vaccCounter}(t),\allowbreak E_{u\vaccCounter}(t),\allowbreak I_{u\vaccCounter}(t),\allowbreak A_{u\vaccCounter}(t),\allowbreak R_{u\vaccCounter}(t),\allowbreak R_{u\vaccCounter}^A(t),\allowbreak W_u,\allowbreak u \in \seq{1}{U},\allowbreak \vaccCounter \in \seq{0}{4}\big)$.
 The cosine term in Eq.~\myeqref{model2:lambda} accounts for annual seasonality, with a phase parameter $\phaseParm$.
-The original implementation of Model~2 in \cite{lee20} fixes the phase at $\phaseParm = 0$.
+The implementation of Model~2 in \cite{lee20} fixes $\phaseParm = 0$.
 
 Individuals move from department $u$ to $v$ at rate $T_{uv}$, and aquatic cholera moves at rate $T^W_{uv}$.
 The nonzero transition rates are
@@ -1213,8 +1213,8 @@ Under this framework, the observed data $y_{\seq{1}{n}}^*$ are assumed to be a s
 Using a probabilistic model results in several advantages, including the ability to account for variability present in the system.
 % which is of great interest to scientists and policy makers.
 Furthermore, because each draw from the joint distribution represents a potential outcome of the dynamic system, best/worst case scenarios under the assumptions of the model can be easily obtained via simulation.
+The added benefits of a stochastic model are coupled with statistical difficulty of fitting the parameter vector $\paramVec$ to observed data.
 
-Once a model for the system has been proposed, the parameter vector $\paramVec$ needs to be estimated using the observed data.
 There exist several algorithms, both frequentist and Bayesian, that can be used to obtain estimates of the parameters in stochastic dynamic models.
 % including the EM algorithm, Kalman Filter (and extensions) \citep{evensen09}, and iterated filtering algorithms \citep{ionides15}.
 In order to retain the ability to propose models that are scientifically meaningful rather than only those that are simply statistically convenient, we restrict ourselves to parameter estimation techniques that have the plug-and-play property, which is that the fitting procedure only requires the ability to simulate the latent process instead of evaluating transition densities \citep{breto09,he10}.
@@ -1252,8 +1252,8 @@ While several factors may contribute to this decrease, one explanation is that c
 
 We perform a statistical test to determine whether or not the data indicate the presence of a linear trend in transmissibility.
 To do this, we perform a profile-likelihood search on the parameter $\transmissionTrend$ and obtain a confidence interval via a Monte Carlo Adjusted Profile (MCAP) \citep{ionides17}.
-Similar to Model~2, this model was originally implemented in two parts: an epidemic phase from October 2010 through March 2015, and an endemic phase from March 2015 onward.
-As before, we continue to allow the re-estimation of some model parameters at the start of the endemic phase ($\reportRate, \sigmaProc^2$ and $\obsOverdispersion$) but require that the latent Markov process $X(t)$ carry over from one phase into the next.
+Model~1 was implemented in \cite{lee20} by fitting two distinct phases: an epidemic phase from October 2010 through March 2015, and an endemic phase from March 2015 onward.
+We similarly allow the re-estimation of process and measurement overdispersion parameters ($\sigmaProc^2$ and $\obsOverdispersion$), and require that the latent Markov process $X(t)$ carry over from one phase into the next.
 The resulting confidence interval for $\transmissionTrend$ is $(\Sexpr{myround(mcap_results$ci[1], digits = 3)}, \Sexpr{myround(mcap_results$ci[2], digits = 3)})$, with the full results displayed in Fig.~\ref{fig:betat}.
 These results are suggestive that the inclusion of a trend in transmission rate improves the quantitative ability of Model~1 to describe the observed data.
 The reported results for Model~1 in the remainder of this article were obtained with the inclusion of the parameter $\transmissionTrend$.
@@ -1331,19 +1331,19 @@ By combining a deterministic process model with a simple Gaussian measurement mo
 Deterministic compartment models have a long history in the field of infectious disease epidemiology \citep{kermack1927,brauer2017,varghese21},
 and can be justified by asymptotic considerations in a large-population limit \citep{dadlani2020,ndii17}.
 
-\citet{lee20} originally fit two versions of model~2 based on a presupposed change in cholera transmission from a epidemic phase to endemic phase that occurred in March, 2014.
-We follow their decision to re-estimate model parameters at this break-point, but we include a requirement that the latent state $\bm{X}^{(2)}(t)$ at the start of the endemic period must be the same as the state at the end of the epidemic period.
-This additional constraint is sensible for a mechanistic interpretation of the latent state, though it adds difficulty to the task of obtaining a model fit that closely resembles the observed data.
-To combat this added difficulty, and to allow for a possible shift in the seasonality component in the force of infection, we introduce an additional phase parameter $\phaseParm$ in Eq.~\ref{model2:lambda}.
-% \begin{equation}
-% \lambda_{u}(t) = 0.5\big(1+\seasAmplitude \cos(2\pi t + \phaseParm)\big)
-% \frac{\beta_W\, W_u(t)}{ \Wsat  + W_u(t)} +
-% \beta \left\{\sum_{d=0}^4 I_{ud}(t) + \asymptomRelativeInfect \sum_{d=0}^4 A_{ud}(t) \right\}\label{eq:model2:phase}
-% \end{equation}
-% \eic{WE COULD SAVE AN EQUATION BY WRITING THE MORE GENERAL ONE INITIALLY AND SAYING THAT THEY ASSUMED $\phaseParm=0$}
+\cite{lee20} fit two versions of model~2 based on a presupposed change in cholera transmission from a epidemic phase to endemic phase that occurred in March, 2014.
+The inclusion of a change-point in model states and parameters increases the flexibility of the model and hence the ability to fit the observed data.
+The increase in model flexibility, however, results in hidden states that are inconsistent between model phases.
+A naive solution to this would be to estimate only model parameters in separate phases and not the hidden states, but this may also result in hidden states in one phase of the model that are inconsistent with the other phase of the outbreak, since only the data from one phase is used to fit model parameters.
 
-% We also note that, without the inclusion of a phase parameter, there is an implicit assumption is that force of infection is greatest around January and weakest around June, and the addition of this parameter allows for the testing of this assumption.
-We further increase model flexibility by fitting the parameter $\Wshed$ rather than treating it as fixed.
+The inclusion of a model break-point in \cite{lee20} is perhaps due to a challenging feature of fitting a deterministic model via least squares: discrepancies between model trajectories and observed case counts in highly infectious periods of a disease outbreak will result in greater penalty than the discrepancies between model trajectories and observed case counts in times of relatively low infectiousness, resulting in a bias towards accurately describing periods of high infectiousness.
+This issue is particularly troublesome for this case study: the inability to accurately fit times of low infectiousness may result in poor model forecasts, as few cases of cholera were observed the last few years epidemic.
+
+To combat this issue, we fit the model to log-transformed case counts, where the difference between periods of high and low infectiousness is less drastic.
+Other solutions include changing the measurement model to include overdispersion, as was done in Models~1 and~3.
+Here we chose to fit the model to transformed case counts rather than adding overdispersion to the measurement model with the goal of making the fewest changes to the model in \cite{lee20} as possible.
+In practice, however, the inclusion of overdispersion in the measurement process may be preferred \jwc{REFS???}.
+
 We implemented this model using the \code{spatPomp} \code{R} package \citep{asfaw21github}.
 The model was then fit using the subplex algorithm, implemented in the  \code{subplex} package \citep{king2020Subplex}.
 A comparison of the trajectory of the fitted model to the data is given in Fig~\ref{fig:mod2Traj}.
@@ -1364,18 +1364,19 @@ h2_traj <- h2_epi_traj %>%
 \subsubsection{Model~3}
 Model~3 is also of a probabilistic model.
 In this model, both the latent and observable processes can be factored into department specific processes which interact with each other.
-We denote the latent and measurement processes for Model~3 as $\bm{X}^{(3)}(t_{0:N}) = X^{(3)}_{1:U, 0:N}$, and $\bm{Y}^{(3)}(t_{1:N}) = Y_{1:U, 1:N}$ \eic{IS THIS NEEDED HERE?}.
+% We denote the latent and measurement processes for Model~3 as $\bm{X}^{(3)}(t_{0:N}) = X^{(3)}_{1:U, 0:N}$, and $\bm{Y}^{(3)}(t_{1:N}) = Y_{1:U, 1:N}$ \eic{IS THIS NEEDED HERE?}.
 The decision to model the system via metapopulation models versus a model aggregated to a larger spatial scale is one of great scientific interest, and evidence for the former approach has been provided in previous studies \citep{king15}.
 Note that this evidence alone does not automatically discredit conclusions drawn via nationally aggregated models, as there are also good reasons to prefer a simple model over a complex one \citep{saltelli20,green15}.
-Still, researchers that intend to use a mechanistic model to describe a dynamic system should design the model to be as realistic as their scientific understanding of the system and their computational abilities permit \eic{THIS SENTENCE SEEMS TO DISMISS THE ARGUMENTS IN THE PREVIOUS SENTENCE. PERHAPS THIS SENTENCE CAN JUST BE DELETED}.
-Fitting scientifically flexible metapopulation models, however, remains a challenging statistical problem;
-this is due to the fact that the approximation error of particle filters grows exponentially in the dimension of the model \citep{rebeschini15,park20}.
-Algorithms that are based on the particle filter therefore become computationally intractable as the number of spatial units increase.
+% Still, researchers that intend to use a mechanistic model to describe a dynamic system should design the model to be as realistic as their scientific understanding of the system and their computational abilities permit \eic{THIS SENTENCE SEEMS TO DISMISS THE ARGUMENTS IN THE PREVIOUS SENTENCE. PERHAPS THIS SENTENCE CAN JUST BE DELETED}.
+
+Fitting scientifically flexible metapopulation models is a challenging statistical problem.
+In particular, parameter estimation techniques based on the particle filter become computationally intractable as the number of spatial units increase.
+This is a result of the approximation error of particle filters growing exponentially in the dimension of the model \citep{rebeschini15,park20}.
 
 Parameters that must be fit in Model~3 are primarily shared between each department, the exception to this being the parameters $\beta_{W_u}$, and $\beta_u$, which are unique for each department $u \in \seq{1}{10}$.
-To fit this model, \citet{lee20} simplified the parameter estimation problem by fitting independent department-level models to the data.
+To avoid the parameter estimation issue in high-dimensional models, \citet{lee20} simplified the problem by fitting independent department-level models to the data.
 The shared parameters were calibrated using the cholera incidence data from Artibonite, and the department-specific parameters ($\beta_{W_u}$ and $\beta_u$) were fit using the data from their respective department.
-Reducing a spatially coupled \eic{not spatially heterogeneous, as previously written} model to individual units in this fashion requires special treatment of any interactive mechanisms between spatial units, such as found in Eq.~\myeqref{eq:model3:foi}.
+Reducing a spatially coupled model to individual units in this fashion requires special treatment of any interactive mechanisms between spatial units, such as found in Eq.~\myeqref{eq:model3:foi}.
 In particular, when considering a model for department $u$, the values $I_\nu(t)$ and $A_\nu(t)$, are unknown for $u \neq v \in \seq{1}{10}$.
 A first order approximation of Eq.~\myeqref{eq:model3:foi} for each department $v \in \seq{1}{10}$ can be obtained using the weekly number of observed cholera cases in each department:
 \begin{equation}
@@ -1640,7 +1641,7 @@ mod2_ll <- mod2_epi_ll - sum(log(h2_epi@data + 1), na.rm = TRUE)
 arima_lik2 <- 0
 
 # model 2 AIC
-mod2_n_params <- 21  # TODO: adjust Number of parameters fit in Model 2
+mod2_n_params <- 16  # TODO: adjust Number of parameters fit in Model 2
 mod2_aic <- 2 * mod2_n_params - 2 * mod2_ll
 
 # Load pre-calculated model 1 likelihood
@@ -1979,7 +1980,7 @@ We note, however, that $\bm{X}^{(\modelCounter)}_N$ is unobservable and therefor
 Informed estimates of $\bm{X}^{(\modelCounter)}_N$ given the observed data $\bm{Y}^{(\modelCounter)}_{1:N} = y_{1:N}^*$ can easily be obtained using the filtering distribution.
 Let $\hat{\bm{X}}^{(\modelCounter), i}_N, \, i \in {1, 2, \ldots, J}$ be $\iid$ draws from the filtering distribution at time $N$, with density $\hat{\bm{X}}^{(\modelCounter), i}_N \sim f_{\bm{X}^{(\modelCounter)}_N|\bm{Y}^{(\modelCounter)}_{1:N}}(x_N \mid \hat{\paramVec}, y_{1:N}^*)$.
 A single model forecast can then be obtained by simulating from the model $f_{\bm{X}^{(\modelCounter)}_{N:s}, \bm{Y}^{(\modelCounter)}_{N:s}}\big(x_{N:s}, y_{N:s}\mid \hat{\paramVec}, \bm{X}^{(\modelCounter)}_{N} = \hat{\bm{X}}^{(\modelCounter), i}_N\big)$.
-Obtaining forecasts in this fashion allows us to get results that are consistent with the model assumptions and the observed data.
+Obtaining forecasts in this fashion allows us to obtain results that are consistent with the model assumptions and the observed data.
 % Intuitively, simulating the model starting at the filtering distribution of the most recently available time point is a more appropriate way to project a stochastic dynamic system into the future, as it is not expected that each simulation from initial conditions will result in a latent state at time $N$ consistent with the model and the observation $\bm{Y}^{(\modelCounter)}_N = y_N^*$.
 In this particular case study, projecting the future state of the cholera epidemic in Haiti starting from the draws from the filtering distribution allows the proposed models to benefit from the fact that very few cholera cases had been observed between 2018 and 2019, and that cases appear to be decreasing (i.e., the number of susceptible individuals may be small).
 This alone partially explains the unrealistic forecasts of \cite{lee20}, which were obtained by simulating the model from initial conditions;
@@ -2788,11 +2789,6 @@ The various vaccination campaigns made no practical difference in the median sce
 % \jwc{MAYBE JUST SUMMARIZE THIS FIGURE IN A PARAGRAPH OR MOVE TO SUPPLEMENT TO MAKE SPACE?}
 % }
 % \end{figure}
-
-\jwc{PARAGRAPH REMOVED}
-% Despite these results suggesting that cholera was likely to be eliminated from Haiti without an increase in vaccination effort, we in no way suggest that vaccinations shouldn't be used to combat cholera---or other infectious diseases---in other parts of the world.
-% In fact, our analysis shows that an increase in vaccination does drastically reduce the negative effects of a worst-case scenario.
-% Avoid comments on vaccination policy recommendations - Jesse
 
 <<Compute Elimination Probs, echo=FALSE>>=
 mod1_V0_probs$ElimTime$scenario = "V0"

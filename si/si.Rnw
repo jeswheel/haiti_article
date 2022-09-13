@@ -537,21 +537,24 @@ In this model, the advantage afforded by vaccination is an increased probability
 Therefore, under the assumptions of this model, all reported cases are assumed to be a fraction of individuals that transition from the exposed to the infected compartment, as noted in Eq.~\myeqref{model1:meas}.
 \begin{equation}
   \label{model1:meas}
-  y_{t} \mid \Delta N_{E_{k}I_{k}} = z_{t} \sim \text{NB}\left(\reportRate z_{t}, \obsOverdispersion \right)
+  y_{t} \mid \Delta N_{E_{\vaccCounter}I_{\vaccCounter}}(t) = z(t) \sim \text{NB}\left(\reportRate z_(t), \obsOverdispersion \right)
 \end{equation}
+
+Where $y_t$ is the reported cholera cases at time $t \in 1:N$ and $\Delta N_{E_{\vaccCounter}I_{\vaccCounter}}(t)$ is the number of individuals who moved from compartment $E_\vaccCounter$ to $I_\vaccCounter$ since observation $t-1 \in 0:N-1$.
 
 \subsection{Model~2}
 
-Model~2 was fit via trajectory matching and therefore does not have an explicit measurement model.
-Implicitly, however, this fitting process is equivalent to having a Gaussian measurement process.
-Therefore the measurement model can be expressed as Eq.~\myeqref{model2:meas}.
+As mentioned in the main text, Model~2 was fit using log-transformed observed cases.
+We fit Model~2 using the subplex algorithm in the \code{subplex} package, using
+a Gaussian measurement model (Eq.~\myeqref{model2:meas}) on the log-transformed cases as the loss function.
+
 \begin{equation}
   \label{model2:meas}
-  y_{u, t} \mid \Delta N_{I_{ud}R_{ud}} = z_{u, t} \sim \text{N}\left(\reportRate z_{u, t}, \obsOverdispersion^2 \right)
+  \log\big(y_{u, t} + 1\big) \mid \bm{X}^{(2)}(t) = \bm{x}^{(2)}(t) \sim \text{N}\left(\log \big(\reportRate \sum_{\vaccCounter} I_{u, \vaccCounter}(t) + 1\big), \obsOverdispersion^2 \right)
 \end{equation}
 
-Where $\Delta N_{I_{ud}R_{ud}}$ is the number of individuals who move from compartment $I_{ud}$ to $R_{ud}$, for unit $u \in 1:U$ and vaccination cohort $d \in 0:5$.
-We also note here that the variance parameter $\obsOverdispersion^2$ is separately fit for the epidemic and endemic phases.
+Where $\sum_{\vaccCounter} I_{u, \vaccCounter}(t)$ is the total number of individuals who are infected at time $t$ in unit $u \in 1:U$, for all vaccination campaigns $\vaccCounter$.
+We note that fitting a model with this loss function is equivalent to fitting using least squares, with $\log(y_{u, t} + 1)$ as the response variable.
 
 \subsection{Model~3}
 
@@ -559,14 +562,18 @@ In this model, reported cholera cases are assumed to stem from individuals who d
 Therefore reported cases are assumed to come from an over-dispersed negative binomial model, given the increase in infected individuals:
 \begin{equation}
   \label{model3:meas}
-  y_{u, t} \mid \Delta N_{S_{ud}I_{ud}} = z_{u, t} \sim \text{NB}\left(\reportRate z_{u, t}, \obsOverdispersion \right)
+  y_{u, t} \mid \Delta N_{S_{u \vaccCounter}I_{u \vaccCounter}}(t) = z_{u}(t) \sim \text{NB}\left(\reportRate z_{u}(t), \obsOverdispersion \right)
 \end{equation}
+
+Where $\Delta N_{S_{u \vaccCounter}I_{u \vaccCounter}}(t)$ is the number of individuals who moved from compartment $S_{u \vaccCounter}$ to $I_{u \vaccCounter}$ since observation $t-1 \in 0:N-1$.
 
 This measurement model is a minor change from that used in \cite{lee20}, which allowed for a change in the reporting rate on January 1st, 2018.
 The fitted values of the reporting rate---before and after January 2018---were $0.97$ and $0.097$, respectively.
-This major change in reporting rate alone could have been the cause that Model~3 originally failed to predict the eradication of cholera, as an overnight change from near perfect to almost non-existent reporting forces the model to explain the observed decrease in cases as a decrease in the reporting of cases rather than of prevalence of cases.
+This major change in reporting rate alone could explain why Model~3 in \cite{lee20} failed to predict the eradication of cholera.
+An overnight change from near perfect to almost non-existent reporting forces the model to explain the observed reduction in reported cases as a decrease in the reporting of cases, rather than a decrease in the prevalence of cholera.
 This shift was justified by a "change of the case definition that occurred on January 1st, 2018";
 this claim was not cited, and we could find no evidence that such a drastic change in the reporting rate would be warranted.
+We therefore do not allow a change in reporting rate when fitting Model~3.
 
 \section{Block Panel Iterated Filter}
 
