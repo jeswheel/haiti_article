@@ -145,6 +145,7 @@ library(knitr)
 library(pomp)
 library(panelPomp)
 library(spatPomp)
+library(foreach)
 library(doParallel)
 library(doRNG)
 library(haitipkg)
@@ -207,8 +208,8 @@ myround <- function(x, digits = 1) {
 theme_set(theme_bw() + theme(plot.title = element_text(hjust = 0.5)))
 
 # 40 cores for doob, 8 for ito
-doob_cores <- 40
-gl_cores <- 36
+# doob_cores <- 40
+# gl_cores <- 36
 
 cores <-  as.numeric(Sys.getenv('SLURM_NTASKS_PER_NODE', unset=NA))
 if(is.na(cores)) cores <- detectCores()
@@ -907,7 +908,7 @@ Advances in OCV technology and vaccine availability, however, raised the possibi
 In the study, certain data were shared between the groups, including demography and vaccination history; vaccine efficacy was also fixed at a shared value between groups.
 Beyond this, the groups made autonomous decisions on what to include and exclude from their models; this autonomy reduced the possible effect that assumptions about the dynamic system may have on the final conclusion of the study.
 Despite this autonomy, and largely adhering to existing guidelines on creating models to inform policy \citep{behrend20,saltelli20}, the consensus across the four models was that an extensive nationwide vaccination campaign would be necessary to eliminate cholera from Haiti.
-This conclusion is inconsistent with the fact that there have been no confirmed cases since February, 2019 without additional vaccination efforts \citep{ferguson22}.
+This conclusion is inconsistent with the fact that there have been no confirmed cases since February, 2019 \citep{trevisin22}, despite the lack of a concentrated vaccination effort.
 
 The failure of \cite{lee20} to correctly predict the elimination of cholera has been debated \citep{francois20,rebaudetComment20,henrys20,leeReply20}.
 \citet{rebaudetComment20} suggested that the models proposed by \citet{lee20} were too unrealistic.
@@ -1153,6 +1154,58 @@ We note that all deaths are balanced by births into the susceptible compartment 
 
 We consider model fitting (Sec.~\ref{model_fitting}) followed by diagnostic investigations (Sec.~\ref{model_diagnostics}) and forecasting (Sec.~\ref{sec:filter}).
 
+<<FitModel1, echo=FALSE, message=FALSE>>=
+set.seed(636813)
+
+NP_H1        <- switch(RUN_LEVEL, 100, 1000,   2000)
+NMIF_H1      <- switch(RUN_LEVEL,  10,   50,    200)
+NUM_TREND    <- switch(RUN_LEVEL,   5,   10,     90)
+NPROF        <- switch(RUN_LEVEL,   4,    4,     24)
+NP_EVAL      <- switch(RUN_LEVEL, 200, 1000,   5000)
+NREPS_EVAL   <- switch(RUN_LEVEL, cores, 20,  cores)
+
+
+if (RUN_LEVEL != 3 & file.exists("model1/run_level_3/haiti1_fit.rds")) {
+  h1_MIF <- readRDS("model1/run_level_3/haiti1_fit.rds")
+} else {
+  h1_MIF <- bake(
+    file = paste0("model1/", rl_dir, "haiti1_fit.rds"), {
+      fit_haiti1(
+        NP = NP_H1, 
+        NMIF = NMIF_H1, 
+        NUM_TREND = NUM_TREND, 
+        NPROF = NPROF,
+        NREPS_EVAL = NREPS_EVAL, 
+        NP_EVAL = NP_EVAL, 
+        ncores = cores
+      )
+    }
+  )
+}
+
+h1_prof_res <- h1_MIF %>%
+  group_by(betat) %>%
+  summarize(logLik = max(ll))
+
+mcap_results <- pomp::mcap(h1_prof_res$logLik, h1_prof_res$betat, span = 1)
+
+# Get the best set of parameters from MIF2 search. 
+p1 <- h1_MIF %>%
+  filter(ll == max(ll)) %>%
+  select(-ll, -ll.se) %>%
+  unlist()
+
+mod1_ll <- h1_MIF %>%
+  filter(ll == max(ll)) %>%
+  select(ll) %>%
+  unlist()
+
+rm(NP_H1, NMIF_H1, NUM_TREND, NPROF, NREPS_EVAL, NP_EVAL, h1_MIF)
+gc()
+
+@
+
+
 <<Load Model Parameters, echo=FALSE, results='hide'>>=
 load('model3/output/PanelLocalAll_PF.rda')  # Final model 3 evaluations
 load('model3/output/PanelLocalAll.rda')  # Final model 3 parameters (MIF search)
@@ -1160,15 +1213,8 @@ ll_mod3 <- mif_logLik
 MIF_mod3 <- local_MIF2_search
 rm(mif_logLik, local_MIF2_search, tLocal)
 
-# load('model1/output/trendResultsJoint.rda')  # Parameters and evaluations
-load('model1/output/recal_mcap_results.rda')
 
-p1 <- best_params
-rm(best_params)
-
-gc()
-
-# Fit model 2. Note that this takes the same ammount of time at all run
+# Fit model 2. Note that this takes the same amount of time at all run
 # levels.
 h2_fit <- bake(
   file = paste0("model2/", rl_dir, "model2_fit.rds"), {
@@ -1281,7 +1327,7 @@ The reported results for Model~1 in the remainder of this article were obtained 
 \centering
 <<Beta_trend_Figure, fig.height=2.5, fig.width=3.7, fig.align='center'>>=
 ggplot() +
-  geom_point(data = maxresults, aes(x = betat, y = logLik)) +
+  geom_point(data = h1_prof_res, aes(x = betat, y = logLik)) +
   geom_line(data = mcap_results$fit, aes(x = parameter, y = smoothed), col = 'blue') +
   # geom_line(data = mcap_results$fit, aes(x = parameter, y = quadratic), col = 'red') +
   geom_vline(xintercept = mcap_results$ci[1], linetype = 'dashed') +
@@ -1432,25 +1478,29 @@ departements <-
 
 registerDoRNG(5317865)
 
-h3_panel_sims <- bake(
-  file = paste0('model3/', rl_dir, 'panelPompSims.rds'), {
-    foreach(dep = departements, .combine = rbind) %dopar% {
-      SIRB <- unitobjects(h3)[[dep]]
-      shared <- h3@shared
-      specific <- h3@specific[, dep]
-
-      pomp::simulate(
-        SIRB,
-        params = c(shared, specific),
-        nsim = h3_panel_sims,
-        format = 'data.frame'
-      ) -> sims
-
-      sims$dep <- dep
-      sims
+if (RUN_LEVEL != 3 & file.exists("model3/run_level_3/panelPompSims.rds")) {
+  h3_panel_sims <- readRDS("model3/run_level_3/panelPompSims.rds")
+} else {
+  h3_panel_sims <- bake(
+    file = paste0('model3/', rl_dir, 'panelPompSims.rds'), {
+      foreach(dep = departements, .combine = rbind) %dopar% {
+        SIRB <- unitobjects(h3)[[dep]]
+        shared <- h3@shared
+        specific <- h3@specific[, dep]
+        
+        pomp::simulate(
+          SIRB,
+          params = c(shared, specific),
+          nsim = h3_panel_sims,
+          format = 'data.frame'
+        ) -> sims
+        
+        sims$dep <- dep
+        sims
+      }
     }
-  }
-)
+  )
+}
 
 h3_panel_quantiles <- h3_panel_sims %>%
   mutate(
@@ -1525,33 +1575,37 @@ Simulations from the SpatPOMP version of the model, using the parameters that we
 
 h3_spat_nsim <- switch(RUN_LEVEL, 20, 100, 500)
 
-h3Spat_quants <- bake(
-  file = paste0('model3/', rl_dir, 'SpatPompSims.rds'), {
-    h3Spat <- haiti3_spatPomp()
-    coef(h3Spat) <- haitipkg:::panelParms_toSpatParms3(p3)
-
-    h3Spat_sims <- simulate(
-      h3Spat, nsim = h3_spat_nsim, format = 'data.frame'
-    )
-
-    h3Spat_sims %>%
-      rename(dep = unitname) %>%
-      group_by(dep, time) %>%
-      summarise(
-        q05 = quantile(cases, 0.025, na.rm = T),
-        mean = mean(cases, na.rm = T),
-        q50 = quantile(cases, 0.5, na.rm = T),
-        q95 = quantile(cases, 0.975, na.rm = T)
-      ) %>%
-      ungroup() %>%
-      mutate(
-        date = lubridate::date_decimal(time)
-      ) %>%
-      filter(date >= yearsToDate(h3Spat@t0)) %>%
-      mutate(date = as.Date(lubridate::round_date(date, unit = 'day')))
-  },
-  timing = FALSE
-)
+if (RUN_LEVEL != 3 & file.exists("model3/run_level_3/SpatPompSims.rds")) {
+  h3Spat_quants <- readRDS("model3/run_level_3/SpatPompSims.rds")
+} else {
+  h3Spat_quants <- bake(
+    file = paste0('model3/', rl_dir, 'SpatPompSims.rds'), {
+      h3Spat <- haiti3_spatPomp()
+      coef(h3Spat) <- haitipkg:::panelParms_toSpatParms3(p3)
+      
+      h3Spat_sims <- simulate(
+        h3Spat, nsim = h3_spat_nsim, format = 'data.frame'
+      )
+      
+      h3Spat_sims %>%
+        rename(dep = unitname) %>%
+        group_by(dep, time) %>%
+        summarise(
+          q05 = quantile(cases, 0.025, na.rm = T),
+          mean = mean(cases, na.rm = T),
+          q50 = quantile(cases, 0.5, na.rm = T),
+          q95 = quantile(cases, 0.975, na.rm = T)
+        ) %>%
+        ungroup() %>%
+        mutate(
+          date = lubridate::date_decimal(time)
+        ) %>%
+        filter(date >= yearsToDate(h3Spat@t0)) %>%
+        mutate(date = as.Date(lubridate::round_date(date, unit = 'day')))
+    },
+    timing = FALSE
+  )
+}
 
 @
 
@@ -1662,9 +1716,6 @@ arima_lik2 <- 0
 mod2_n_params <- 16  # TODO: adjust Number of parameters fit in Model 2
 mod2_aic <- 2 * mod2_n_params - 2 * mod2_ll
 
-# Load pre-calculated model 1 likelihood
-mod1_ll <- h1_ll['ll']  # Comes from model1/output/recal_mcap_results.rda
-
 # model 1 AIC
 mod1_n_params <- 13
 mod1_aic <- 2 * mod1_n_params - 2 * mod1_ll
@@ -1683,40 +1734,44 @@ h3Spat <- haiti3_spatPomp()
 coef(h3Spat) <- haitipkg:::panelParms_toSpatParms3(p3)
 
 # Calculate likelihood via block-particle filter
-mod3_spatPomp_res <- bake(
-  file = paste0('model3/', rl_dir, 'SpatPomp_res.rds'), {
-
-    # Create a list to store results
-    results <- list()
-
-    # Perform block-particle filter
-    h3_bpf <- foreach(i = 1:NREPS_EVAL, .combine = c) %dopar% {
-      bpfilter(h3Spat, Np = NP_EVAL, block_size = 1)
-    }
-
-
-    ll <- logLik(h3_bpf)
-    results$ll <- logmeanexp(ll[!is.na(ll)], se = FALSE)
-
-    ### Get likelihood for subset of the data
-
-    # Find appropriate sub-set
-    in_subset_cols <- h3_bpf[[1]]@times >= as.numeric(dateToYears(as.Date("2014-03-01")))
-    in_subset_rows <- h3_bpf[[1]]@unit_names != 'Ouest'
-
-    mod3_coupled_subset_evals <- c()
-    for (i in 1:length(pf)) {
-      mod3_coupled_subset_evals <- c(
-        mod3_coupled_subset_evals,
-        sum(h3_bpf[[i]]@block.cond.loglik[in_subset_rows, in_subset_cols])
-      )
-    }
-
-    results$subset_ll <- logmeanexp(mod3_coupled_subset_evals)
-    results
-  },
-  timing = FALSE
-)
+if (RUN_LEVEL != 3 & file.exists("model3/run_level_3/SpatPomp_res.rds")) {
+  mod3_spatPomp_res <- readRDS("model3/run_level_3/SpatPomp_res.rds")
+} else{
+  mod3_spatPomp_res <- bake(
+    file = paste0('model3/', rl_dir, 'SpatPomp_res.rds'), {
+      
+      # Create a list to store results
+      results <- list()
+      
+      # Perform block-particle filter
+      h3_bpf <- foreach(i = 1:NREPS_EVAL, .combine = c) %dopar% {
+        bpfilter(h3Spat, Np = NP_EVAL, block_size = 1)
+      }
+      
+      
+      ll <- logLik(h3_bpf)
+      results$ll <- logmeanexp(ll[!is.na(ll)], se = FALSE)
+      
+      ### Get likelihood for subset of the data
+      
+      # Find appropriate sub-set
+      in_subset_cols <- h3_bpf[[1]]@times >= as.numeric(dateToYears(as.Date("2014-03-01")))
+      in_subset_rows <- h3_bpf[[1]]@unit_names != 'Ouest'
+      
+      mod3_coupled_subset_evals <- c()
+      for (i in 1:length(pf)) {
+        mod3_coupled_subset_evals <- c(
+          mod3_coupled_subset_evals,
+          sum(h3_bpf[[i]]@block.cond.loglik[in_subset_rows, in_subset_cols])
+        )
+      }
+      
+      results$subset_ll <- logmeanexp(mod3_coupled_subset_evals)
+      results
+    },
+    timing = FALSE
+  )
+}
 
 mod3_spatPomp_n_params <- 39
 mod3_spatPomp_aic <- 2 * mod3_spatPomp_n_params - 2 * mod3_spatPomp_res$ll
@@ -1874,42 +1929,46 @@ lee3_all <- haiti3_lee_et_al(start_time = "2010-10-23")
 rm(set_as_na, temp_ouest_cases)
 gc()
 
-lee3_results <- bake(
-  file = paste0('model3/', rl_dir, 'lee3_results.rds'), {
-
-    # Create lists to save results
-    lee3_results <- list()
-
-    # Save how long it takes for sub-data
-    lee3_results[["sub_pf_time"]] <- system.time({
-
-      # Save all likelihood evaluations
-      lee3_results[["sub_ll_evals"]] <- foreach(
-        i = 1:lee3_NREP, .combine = c
-      ) %dopar% {
-        logLik(pfilter(lee3_sub, Np = lee3_NP))  # Get likelihood evaluations
-      }
-    })
-
-    registerDoRNG(2789131)
-
-    # Save how long it takes for all data
-    lee3_results[["all_pf_time"]] <- system.time({
-
-      # Save all likelihood evaluations
-      lee3_results[["all_ll_evals"]] <- foreach(
-        i = 1:lee3_NREP, .combine = c
-      ) %dopar% {
-        logLik(pfilter(lee3_all, Np = lee3_NP))  # Get likelihood evaluations
-      }
-    })
-
-    lee3_results[["n_params"]] <- 29
-
-    lee3_results
-  },
-  timing = FALSE
-)
+if (RUN_LEVEL != 3 & file.exists("model3/run_level_3/lee3_results.rds")) {
+  lee3_results <- readRDS("model3/run_level_3/lee3_results.rds")
+} else {
+  lee3_results <- bake(
+    file = paste0('model3/', rl_dir, 'lee3_results.rds'), {
+      
+      # Create lists to save results
+      lee3_results <- list()
+      
+      # Save how long it takes for sub-data
+      lee3_results[["sub_pf_time"]] <- system.time({
+        
+        # Save all likelihood evaluations
+        lee3_results[["sub_ll_evals"]] <- foreach(
+          i = 1:lee3_NREP, .combine = c
+        ) %dopar% {
+          logLik(pfilter(lee3_sub, Np = lee3_NP))  # Get likelihood evaluations
+        }
+      })
+      
+      registerDoRNG(2789131)
+      
+      # Save how long it takes for all data
+      lee3_results[["all_pf_time"]] <- system.time({
+        
+        # Save all likelihood evaluations
+        lee3_results[["all_ll_evals"]] <- foreach(
+          i = 1:lee3_NREP, .combine = c
+        ) %dopar% {
+          logLik(pfilter(lee3_all, Np = lee3_NP))  # Get likelihood evaluations
+        }
+      })
+      
+      lee3_results[["n_params"]] <- 29
+      
+      lee3_results
+    },
+    timing = FALSE
+  )
+}
 
 rm(lee3_sub, lee3_all, lee3_NP, lee3_NREP)
 gc()
@@ -2173,23 +2232,27 @@ h1_scen_sims <- switch(RUN_LEVEL, 20, 100,  500)
 # Simulate vaccination scenario from filtering distribution. The code
 # below creates a model, samples from the filtering distribution, and then
 # projects the vaccination scenario, under the specified model.
-h1_S0_sims <- bake(
-  file = paste0("model1/", rl_dir, "S0_sims.rds"), {
-
-    # Create the model
-    s0 <- haiti1_joint(vacscen = 'id0')
-
-    # Load coefficients
-    coef(s0) <- p1
-
-    # Get samples from filtering distribution
-    s0_pf <- pfilter(s0, save.state = TRUE, Np = h1_scen_NP)
-
-    # project vacc scenario, with filtering dist, and model.
-    project_from_filter2(mod = s0, PF = s0_pf, nsims = h1_scen_sims)
-  },
-  timing = FALSE
-)
+if (RUN_LEVEL != 3 & file.exists("model1/run_level_3/S0_sims.rds")) {
+  h1_S0_sims <- readRDS("model1/run_level_3/S0_sims.rds")
+} else {
+  h1_S0_sims <- bake(
+    file = paste0("model1/", rl_dir, "S0_sims.rds"), {
+      
+      # Create the model
+      s0 <- haiti1_joint(vacscen = 'id0')
+      
+      # Load coefficients
+      coef(s0) <- p1
+      
+      # Get samples from filtering distribution
+      s0_pf <- pfilter(s0, save.state = TRUE, Np = h1_scen_NP)
+      
+      # project vacc scenario, with filtering dist, and model.
+      project_from_filter2(mod = s0, PF = s0_pf, nsims = h1_scen_sims)
+    },
+    timing = FALSE
+  )
+}
 
 # Clean-up simulations for analysis/visualization
 mod1_V0_sims <- agg_mod1_sims(h1_S0_sims)
@@ -2199,34 +2262,38 @@ rm(h1_S0_sims)
 # Simulate vaccination scenario from filtering distribution. The code
 # below creates a model, samples from the filtering distribution, and then
 # projects the vaccination scenario, under the specified model.
-h1_S2_sims <- bake(
-  file = paste0('model1/', rl_dir, 'S2_sims.rds'), {
-
-    # Create the model
-    s2 <- haiti1_joint(vacscen = "id2")
-
-    # Set model parameters that need to be adjusted
-    depts <- 2
-    h1_par_names <- names(p1)
-    h1_params_temp <- c(p1, rep(0.0, 5 * depts))
-    names(h1_params_temp) <- c(
-      h1_par_names,
-      paste0("S", 1:depts, "_0"),
-      paste0("E", 1:depts, "_0"),
-      paste0("I", 1:depts, "_0"),
-      paste0("A", 1:depts, "_0"),
-      paste0("R", 1:depts, "_0")
-    )
-    coef(s2) <- h1_params_temp  # Set model parameters
-
-    # Get samples from filtering distribution for Scenario 2 model:
-    s2_pf <- pfilter(s2, save.state = TRUE, Np = h1_scen_NP)
-
-    # project vacc scenario, with filtering dist, and model.
-    project_from_filter2(mod = s2, PF = s2_pf, nsims = h1_scen_NP)
-  },
-  timing = FALSE
-)
+if (RUN_LEVEL != 3 & file.exists("model1/run_level_3/S2_sims.rds")) {
+  h1_S2_sims <- readRDS("model1/run_level_3/S2_sims.rds")
+} else {
+  h1_S2_sims <- bake(
+    file = paste0('model1/', rl_dir, 'S2_sims.rds'), {
+      
+      # Create the model
+      s2 <- haiti1_joint(vacscen = "id2")
+      
+      # Set model parameters that need to be adjusted
+      depts <- 2
+      h1_par_names <- names(p1)
+      h1_params_temp <- c(p1, rep(0.0, 5 * depts))
+      names(h1_params_temp) <- c(
+        h1_par_names,
+        paste0("S", 1:depts, "_0"),
+        paste0("E", 1:depts, "_0"),
+        paste0("I", 1:depts, "_0"),
+        paste0("A", 1:depts, "_0"),
+        paste0("R", 1:depts, "_0")
+      )
+      coef(s2) <- h1_params_temp  # Set model parameters
+      
+      # Get samples from filtering distribution for Scenario 2 model:
+      s2_pf <- pfilter(s2, save.state = TRUE, Np = h1_scen_NP)
+      
+      # project vacc scenario, with filtering dist, and model.
+      project_from_filter2(mod = s2, PF = s2_pf, nsims = h1_scen_NP)
+    },
+    timing = FALSE
+  )
+}
 
 # Clean-up simulations for analysis/visualization
 mod1_V1_sims <- agg_mod1_sims(h1_S2_sims)
@@ -2236,34 +2303,38 @@ rm(h1_S2_sims)
 # Simulate vaccination scenario from filtering distribution. The code
 # below creates a model, samples from the filtering distribution, and then
 # projects the vaccination scenario, under the specified model.
-h1_S4_sims <- bake(
-  file = paste0('model1/', rl_dir, 'S4_sims.rds'), {
-
-    # Create the model
-    s4 <- haiti1_joint(vacscen = "id4")
-
-    # Set model parameters that need to be adjusted
-    depts <- 3
-    h1_par_names <- names(p1)
-    h1_params_temp <- c(p1, rep(0.0, 5 * depts))
-    names(h1_params_temp) <- c(
-      h1_par_names,
-      paste0("S", 1:depts, "_0"),
-      paste0("E", 1:depts, "_0"),
-      paste0("I", 1:depts, "_0"),
-      paste0("A", 1:depts, "_0"),
-      paste0("R", 1:depts, "_0")
-    )
-    coef(s4) <- h1_params_temp  # Set model parameters
-
-    # Get samples from filtering distribution for Scenario 2 model:
-    s4_pf <- pfilter(s4, save.state = TRUE, Np = h1_scen_NP)
-
-    # project vacc scenario, with filtering dist, and model.
-    project_from_filter2(mod = s4, PF = s4_pf, nsims = h1_scen_NP)
-  },
-  timing = FALSE
-)
+if (RUN_LEVEL != 3 & file.exists("model1/run_level_3/S4_sims.rds")) {
+  h1_S4_sims <- readRDS("model1/run_level_3/S4_sims.rds")
+} else {
+  h1_S4_sims <- bake(
+    file = paste0('model1/', rl_dir, 'S4_sims.rds'), {
+      
+      # Create the model
+      s4 <- haiti1_joint(vacscen = "id4")
+      
+      # Set model parameters that need to be adjusted
+      depts <- 3
+      h1_par_names <- names(p1)
+      h1_params_temp <- c(p1, rep(0.0, 5 * depts))
+      names(h1_params_temp) <- c(
+        h1_par_names,
+        paste0("S", 1:depts, "_0"),
+        paste0("E", 1:depts, "_0"),
+        paste0("I", 1:depts, "_0"),
+        paste0("A", 1:depts, "_0"),
+        paste0("R", 1:depts, "_0")
+      )
+      coef(s4) <- h1_params_temp  # Set model parameters
+      
+      # Get samples from filtering distribution for Scenario 2 model:
+      s4_pf <- pfilter(s4, save.state = TRUE, Np = h1_scen_NP)
+      
+      # project vacc scenario, with filtering dist, and model.
+      project_from_filter2(mod = s4, PF = s4_pf, nsims = h1_scen_NP)
+    },
+    timing = FALSE
+  )
+}
 
 # Clean-up simulations for analysis/visualization
 mod1_V2_sims <- agg_mod1_sims(h1_S4_sims)
@@ -2273,34 +2344,38 @@ rm(h1_S4_sims)
 # Simulate vaccination scenario from filtering distribution. The code
 # below creates a model, samples from the filtering distribution, and then
 # projects the vaccination scenario, under the specified model.
-h1_S3_sims <- bake(
-  file = paste0('model1/', rl_dir, 'S3_sims.rds'), {
-
-    # Create the model
-    s3 <- haiti1_joint(vacscen = "id3")
-
-    # Set model parameters that need to be adjusted
-    depts <- 10
-    h1_par_names <- names(p1)
-    h1_params_temp <- c(p1, rep(0.0, 5 * depts))
-    names(h1_params_temp) <- c(
-      h1_par_names,
-      paste0("S", 1:depts, "_0"),
-      paste0("E", 1:depts, "_0"),
-      paste0("I", 1:depts, "_0"),
-      paste0("A", 1:depts, "_0"),
-      paste0("R", 1:depts, "_0")
-    )
-    coef(s3) <- h1_params_temp  # Set model parameters
-
-    # Get samples from filtering distribution for Scenario 2 model:
-    s3_pf <- pfilter(s3, save.state = TRUE, Np = h1_scen_NP)
-
-    # project vacc scenario, with filtering dist, and model.
-    project_from_filter2(mod = s3, PF = s3_pf, nsims = h1_scen_NP)
-  },
-  timing = FALSE
-)
+if (RUN_LEVEL != 3 & file.exists("model1/run_level_3/S3_sims.rds")) {
+  h1_S3_sims <- readRDS("model1/run_level_3/S3_sims.rds")
+} else {
+  h1_S3_sims <- bake(
+    file = paste0('model1/', rl_dir, 'S3_sims.rds'), {
+      
+      # Create the model
+      s3 <- haiti1_joint(vacscen = "id3")
+      
+      # Set model parameters that need to be adjusted
+      depts <- 10
+      h1_par_names <- names(p1)
+      h1_params_temp <- c(p1, rep(0.0, 5 * depts))
+      names(h1_params_temp) <- c(
+        h1_par_names,
+        paste0("S", 1:depts, "_0"),
+        paste0("E", 1:depts, "_0"),
+        paste0("I", 1:depts, "_0"),
+        paste0("A", 1:depts, "_0"),
+        paste0("R", 1:depts, "_0")
+      )
+      coef(s3) <- h1_params_temp  # Set model parameters
+      
+      # Get samples from filtering distribution for Scenario 2 model:
+      s3_pf <- pfilter(s3, save.state = TRUE, Np = h1_scen_NP)
+      
+      # project vacc scenario, with filtering dist, and model.
+      project_from_filter2(mod = s3, PF = s3_pf, nsims = h1_scen_NP)
+    },
+    timing = FALSE
+  )
+}
 
 # Clean-up simulations for analysis/visualization
 mod1_V3_sims <- agg_mod1_sims(h1_S3_sims)
@@ -2310,34 +2385,38 @@ rm(h1_S3_sims)
 # Simulate vaccination scenario from filtering distribution. The code
 # below creates a model, samples from the filtering distribution, and then
 # projects the vaccination scenario, under the specified model.
-h1_S1_sims <- bake(
-  file = paste0('model1/', rl_dir, 'S1_sims.rds'), {
-
-    # Create the model
-    s1 <- haiti1_joint(vacscen = "id1")
-
-    # Set model parameters that need to be adjusted
-    depts <- 10
-    h1_par_names <- names(p1)
-    h1_params_temp <- c(p1, rep(0.0, 5 * depts))
-    names(h1_params_temp) <- c(
-      h1_par_names,
-      paste0("S", 1:depts, "_0"),
-      paste0("E", 1:depts, "_0"),
-      paste0("I", 1:depts, "_0"),
-      paste0("A", 1:depts, "_0"),
-      paste0("R", 1:depts, "_0")
-    )
-    coef(s1) <- h1_params_temp  # Set model parameters
-
-    # Get samples from filtering distribution for Scenario 2 model:
-    s1_pf <- pfilter(s1, save.state = TRUE, Np = h1_scen_NP)
-
-    # project vacc scenario, with filtering dist, and model.
-    project_from_filter2(mod = s1, PF = s1_pf, nsims = h1_scen_NP)
-  },
-  timing = FALSE
-)
+if (RUN_LEVEL != 3 & file.exists("model1/run_level_3/S1_sims.rds")) {
+  h1_S1_sims <- readRDS("model1/run_level_3/S1_sims.rds")
+} else {
+  h1_S1_sims <- bake(
+    file = paste0('model1/', rl_dir, 'S1_sims.rds'), {
+      
+      # Create the model
+      s1 <- haiti1_joint(vacscen = "id1")
+      
+      # Set model parameters that need to be adjusted
+      depts <- 10
+      h1_par_names <- names(p1)
+      h1_params_temp <- c(p1, rep(0.0, 5 * depts))
+      names(h1_params_temp) <- c(
+        h1_par_names,
+        paste0("S", 1:depts, "_0"),
+        paste0("E", 1:depts, "_0"),
+        paste0("I", 1:depts, "_0"),
+        paste0("A", 1:depts, "_0"),
+        paste0("R", 1:depts, "_0")
+      )
+      coef(s1) <- h1_params_temp  # Set model parameters
+      
+      # Get samples from filtering distribution for Scenario 2 model:
+      s1_pf <- pfilter(s1, save.state = TRUE, Np = h1_scen_NP)
+      
+      # project vacc scenario, with filtering dist, and model.
+      project_from_filter2(mod = s1, PF = s1_pf, nsims = h1_scen_NP)
+    },
+    timing = FALSE
+  )
+}
 
 # Clean-up simulations for analysis/visualization
 mod1_V4_sims <- agg_mod1_sims(h1_S1_sims)
@@ -2367,143 +2446,167 @@ mod2_VaccScenarios <- bake(
 NP_BPF <- switch(RUN_LEVEL, 50, 200, 1000)
 NSIM   <- switch(RUN_LEVEL, 10,  50,  500)
 
-h3_bpf <- bake(
-  file = paste0("model3/", rl_dir, "h3_bpf.rds"),
-  expr = {
-    bpfilter(h3Spat, Np = NP_BPF, block_size = 1, save_states = TRUE)
-  },
-  timing = FALSE
-)
+if (RUN_LEVEL != 3 & file.exists("model3/run_level_3/h3_bpf.rds")) {
+  h3_bpf <- readRDS("model3/run_level_3/h3_bpf.rds")
+} else {
+  h3_bpf <- bake(
+    file = paste0("model3/", rl_dir, "h3_bpf.rds"),
+    expr = {
+      bpfilter(h3Spat, Np = NP_BPF, block_size = 1, save_states = TRUE)
+    },
+    timing = FALSE
+  )
+}
 
-mod3_V0_res <- bake(
-  file = paste0("model3/", rl_dir, "mod3_V0_res"), {
+if (RUN_LEVEL != 3 & file.exists("model3/run_level_3/mod3_V0_res.rds")) {
+  mod3_V0_res <- readRDS("model3/run_level_3/mod3_V0_res.rds")
+} else {
+  mod3_V0_res <- bake(
+    file = paste0("model3/", rl_dir, "mod3_V0_res.rds"), {
+      
+      # Create a list to store results
+      h3_V0_res <- list()
+      
+      # Get "noVacc" scenario parameters
+      h3_S0_par <- get_model3_vacc_scenario_params(scenario = "noVacc")
+      coef(h3Spat)[names(h3_S0_par)] <- h3_S0_par
+      
+      # Using parameters and filtered distribution, project system
+      h3_V0_sims <- project_from_filter2(
+        h3Spat, PF = h3_bpf, covarGen = project_rain,
+        nsims = NSIM, seed = 6897154
+      )
+      
+      # Store nationally aggregated results
+      h3_V0_res$mod3_V0_sims <- agg_mod3_sims(h3_V0_sims)
+      h3_V0_res$mod3_V0_probs <- get_elimProbs(h3_V0_sims, model = 3)
+      
+      # Return results
+      h3_V0_res
+      
+    }
+  )
+}
 
-    # Create a list to store results
-    h3_V0_res <- list()
+if (RUN_LEVEL != 3 & file.exists("model3/run_level_3/mod3_V1_res.rds")) {
+  mod3_V1_res <- readRDS("model3/run_level_3/mod3_V1_res.rds")
+} else {
+  mod3_V1_res <- bake(
+    file = paste0("model3/", rl_dir, "mod3_V1_res.rds"), {
+      
+      # Create a list to store results
+      h3_V1_res <- list()
+      
+      # Get "noVacc" scenario parameters
+      h3_V1_par <- get_model3_vacc_scenario_params(scenario = "2dep")
+      coef(h3Spat)[names(h3_V1_par)] <- h3_V1_par
+      
+      # Using parameters and filtered distribution, project system
+      h3_V1_sims <- project_from_filter2(
+        h3Spat, PF = h3_bpf, covarGen = project_rain,
+        nsims = NSIM, seed = 6897154
+      )
+      
+      # Store nationally aggregated results
+      h3_V1_res$mod3_V1_sims <- agg_mod3_sims(h3_V1_sims)
+      h3_V1_res$mod3_V1_probs <- get_elimProbs(h3_V1_sims, model = 3)
+      
+      # Return results
+      h3_V1_res
+      
+    }
+  )
+}
 
-    # Get "noVacc" scenario parameters
-    h3_S0_par <- get_model3_vacc_scenario_params(scenario = "noVacc")
-    coef(h3Spat)[names(h3_S0_par)] <- h3_S0_par
+if (RUN_LEVEL != 3 & file.exists("model3/run_level_3/mod3_V2_res.rds")) {
+  mod3_V2_res <- readRDS("model3/run_level_3/mod3_V2_res.rds")
+} else {
+  mod3_V2_res <- bake(
+    file = paste0("model3/", rl_dir, "mod3_V2_res.rds"), {
+      
+      # Create a list to store results
+      h3_V2_res <- list()
+      
+      # Get "noVacc" scenario parameters
+      h3_V2_par <- get_model3_vacc_scenario_params(scenario = "3dep")
+      coef(h3Spat)[names(h3_V2_par)] <- h3_V2_par
+      
+      # Using parameters and filtered distribution, project system
+      h3_V2_sims <- project_from_filter2(
+        h3Spat, PF = h3_bpf, covarGen = project_rain,
+        nsims = NSIM, seed = 6897154
+      )
+      
+      # Store nationally aggregated results
+      h3_V2_res$mod3_V2_sims <- agg_mod3_sims(h3_V2_sims)
+      h3_V2_res$mod3_V2_probs <- get_elimProbs(h3_V2_sims, model = 3)
+      
+      # Return results
+      h3_V2_res
+      
+    }
+  )
+}
 
-    # Using parameters and filtered distribution, project system
-    h3_V0_sims <- project_from_filter2(
-      h3Spat, PF = h3_bpf, covarGen = project_rain,
-      nsims = NSIM, seed = 6897154
-    )
+if (RUN_LEVEL != 3 & file.exists("model3/run_level_3/mod3_V3_res.rds")) {
+  mod3_V3_res <- readRDS("model3/run_level_3/mod3_V3_res.rds")
+} else {
+  mod3_V3_res <- bake(
+    file = paste0("model3/", rl_dir, "mod3_V3_res.rds"), {
+      
+      # Create a list to store results
+      h3_V3_res <- list()
+      
+      # Get "noVacc" scenario parameters
+      h3_V3_par <- get_model3_vacc_scenario_params(scenario = "slowNation")
+      coef(h3Spat)[names(h3_V3_par)] <- h3_V3_par
+      
+      # Using parameters and filtered distribution, project system
+      h3_V3_sims <- project_from_filter2(
+        h3Spat, PF = h3_bpf, covarGen = project_rain,
+        nsims = NSIM, seed = 6897154
+      )
+      
+      # Store nationally aggregated results
+      h3_V3_res$mod3_V3_sims <- agg_mod3_sims(h3_V3_sims)
+      h3_V3_res$mod3_V3_probs <- get_elimProbs(h3_V3_sims, model = 3)
+      
+      # Return results
+      h3_V3_res
+      
+    }
+  )
+}
 
-    # Store nationally aggregated results
-    h3_V0_res$mod3_V0_sims <- agg_mod3_sims(h3_V0_sims)
-    h3_V0_res$mod3_V0_probs <- get_elimProbs(h3_V0_sims, model = 3)
-
-    # Return results
-    h3_V0_res
-
-  }
-)
-
-mod3_V1_res <- bake(
-  file = paste0("model3/", rl_dir, "mod3_V1_res"), {
-
-    # Create a list to store results
-    h3_V1_res <- list()
-
-    # Get "noVacc" scenario parameters
-    h3_V1_par <- get_model3_vacc_scenario_params(scenario = "2dep")
-    coef(h3Spat)[names(h3_V1_par)] <- h3_V1_par
-
-    # Using parameters and filtered distribution, project system
-    h3_V1_sims <- project_from_filter2(
-      h3Spat, PF = h3_bpf, covarGen = project_rain,
-      nsims = NSIM, seed = 6897154
-    )
-
-    # Store nationally aggregated results
-    h3_V1_res$mod3_V1_sims <- agg_mod3_sims(h3_V1_sims)
-    h3_V1_res$mod3_V1_probs <- get_elimProbs(h3_V1_sims, model = 3)
-
-    # Return results
-    h3_V1_res
-
-  }
-)
-
-mod3_V2_res <- bake(
-  file = paste0("model3/", rl_dir, "mod3_V2_res"), {
-
-    # Create a list to store results
-    h3_V2_res <- list()
-
-    # Get "noVacc" scenario parameters
-    h3_V2_par <- get_model3_vacc_scenario_params(scenario = "3dep")
-    coef(h3Spat)[names(h3_V2_par)] <- h3_V2_par
-
-    # Using parameters and filtered distribution, project system
-    h3_V2_sims <- project_from_filter2(
-      h3Spat, PF = h3_bpf, covarGen = project_rain,
-      nsims = NSIM, seed = 6897154
-    )
-
-    # Store nationally aggregated results
-    h3_V2_res$mod3_V2_sims <- agg_mod3_sims(h3_V2_sims)
-    h3_V2_res$mod3_V2_probs <- get_elimProbs(h3_V2_sims, model = 3)
-
-    # Return results
-    h3_V2_res
-
-  }
-)
-
-mod3_V3_res <- bake(
-  file = paste0("model3/", rl_dir, "mod3_V3_res"), {
-
-    # Create a list to store results
-    h3_V3_res <- list()
-
-    # Get "noVacc" scenario parameters
-    h3_V3_par <- get_model3_vacc_scenario_params(scenario = "slowNation")
-    coef(h3Spat)[names(h3_V3_par)] <- h3_V3_par
-
-    # Using parameters and filtered distribution, project system
-    h3_V3_sims <- project_from_filter2(
-      h3Spat, PF = h3_bpf, covarGen = project_rain,
-      nsims = NSIM, seed = 6897154
-    )
-
-    # Store nationally aggregated results
-    h3_V3_res$mod3_V3_sims <- agg_mod3_sims(h3_V3_sims)
-    h3_V3_res$mod3_V3_probs <- get_elimProbs(h3_V3_sims, model = 3)
-
-    # Return results
-    h3_V3_res
-
-  }
-)
-
-mod3_V4_res <- bake(
-  file = paste0("model3/", rl_dir, "mod3_V4_res"), {
-
-    # Create a list to store results
-    h3_V4_res <- list()
-
-    # Get "noVacc" scenario parameters
-    h3_V4_par <- get_model3_vacc_scenario_params(scenario = "fastNation")
-    coef(h3Spat)[names(h3_V4_par)] <- h3_V4_par
-
-    # Using parameters and filtered distribution, project system
-    h3_V4_sims <- project_from_filter2(
-      h3Spat, PF = h3_bpf, covarGen = project_rain,
-      nsims = NSIM, seed = 6897154
-    )
-
-    # Store nationally aggregated results
-    h3_V4_res$mod3_V4_sims <- agg_mod3_sims(h3_V4_sims)
-    h3_V4_res$mod3_V4_probs <- get_elimProbs(h3_V4_sims, model = 3)
-
-    # Return results
-    h3_V4_res
-
-  }
-)
+if (RUN_LEVEL != 3 & file.exists("model3/run_level_3/mod3_V4_res.rds")) {
+  mod3_V4_res <- readRDS("model3/run_level_3/mod3_V4_res.rds")
+} else {
+  mod3_V4_res <- bake(
+    file = paste0("model3/", rl_dir, "mod3_V4_res.rds"), {
+      
+      # Create a list to store results
+      h3_V4_res <- list()
+      
+      # Get "noVacc" scenario parameters
+      h3_V4_par <- get_model3_vacc_scenario_params(scenario = "fastNation")
+      coef(h3Spat)[names(h3_V4_par)] <- h3_V4_par
+      
+      # Using parameters and filtered distribution, project system
+      h3_V4_sims <- project_from_filter2(
+        h3Spat, PF = h3_bpf, covarGen = project_rain,
+        nsims = NSIM, seed = 6897154
+      )
+      
+      # Store nationally aggregated results
+      h3_V4_res$mod3_V4_sims <- agg_mod3_sims(h3_V4_sims)
+      h3_V4_res$mod3_V4_probs <- get_elimProbs(h3_V4_sims, model = 3)
+      
+      # Return results
+      h3_V4_res
+      
+    }
+  )
+}
 @
 
 Simulations from probabilistic models (Models~1 and~3) represent possible trajectories of the dynamic system under the scientific assumptions of the models.
