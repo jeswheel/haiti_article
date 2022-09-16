@@ -1835,7 +1835,7 @@ mod1_aic <- 2 * mod1_n_params - 2 * mod1_ll
 #   pull(logLik)
 
 # model 3 AIC
-mod3_n_params <- 39
+mod3_n_params <- 29
 mod3_aic <- 2 * mod3_n_params - 2 * mod3_ll
 
 h3Spat <- haiti3_spatPomp()
@@ -1882,7 +1882,7 @@ if (RUN_LEVEL != 3 & file.exists("model3/run_level_3/SpatPomp_res.rds")) {
   )
 }
 
-mod3_spatPomp_n_params <- 39
+mod3_spatPomp_n_params <- 29
 mod3_spatPomp_aic <- 2 * mod3_spatPomp_n_params - 2 * mod3_spatPomp_res$ll
 mod3_spatPomp_res$subset_aic <- 2 * mod3_spatPomp_n_params - 2 * mod3_spatPomp_res$subset_ll
 
