@@ -890,7 +890,7 @@ These improvements results in forecasts that are more consistent with the observ
 Based on this retrospective analysis, we offer suggestions on fitting mechanistic models to dynamic systems for future studies.
 
 We proceed by introducing Models~1--3 in Sec.~\ref{sec:models};
-in Sec.~\ref{sec:methods}, we present a methodological approach to examining and refining these models, and then use improved model fits to project cholera incidence in Haiti under various vaccination scenarios. 
+in Sec.~\ref{sec:methods}, we present a methodological approach to examining and refining these models, and then use improved model fits to project cholera incidence in Haiti under various vaccination scenarios.
 We then conclude with recommendations on the use of mechanistic models to inform policy decisions in Sec.~\ref{sec:advice}.
 
 \begin{figure}[ht]
@@ -1144,12 +1144,12 @@ if (RUN_LEVEL != 3 & file.exists("model1/run_level_3/haiti1_fit.rds")) {
   h1_MIF <- bake(
     file = paste0("model1/", rl_dir, "haiti1_fit.rds"), {
       fit_haiti1(
-        NP = NP_H1, 
-        NMIF = NMIF_H1, 
-        NUM_TREND = NUM_TREND, 
+        NP = NP_H1,
+        NMIF = NMIF_H1,
+        NUM_TREND = NUM_TREND,
         NPROF = NPROF,
-        NREPS_EVAL = NREPS_EVAL, 
-        NP_EVAL = NP_EVAL, 
+        NREPS_EVAL = NREPS_EVAL,
+        NP_EVAL = NP_EVAL,
         ncores = cores
       )
     }
@@ -1162,7 +1162,7 @@ h1_prof_res <- h1_MIF %>%
 
 mcap_results <- pomp::mcap(h1_prof_res$logLik, h1_prof_res$betat, span = 1)
 
-# Get the best set of parameters from MIF2 search. 
+# Get the best set of parameters from MIF2 search.
 p1 <- h1_MIF %>%
   filter(ll == max(ll)) %>%
   select(-ll, -ll.se) %>%
@@ -1179,12 +1179,133 @@ gc()
 @
 
 
+<<FitModel3, echo=FALSE, include=FALSE, message=FALSE>>=
+set.seed(636813)
+
+if (RUN_LEVEL == 1){
+
+  # Global search, All params
+  SEARCH1 <- list(
+    NP = 50, NMIF = 3, NREPS = 3,
+    NREPS_EVAL = 3, NP_EVAL = 100
+  )
+
+  # Local search, unit specific params
+  SEARCH2 <- list(
+    TOP_N = 1, NP = 50, NMIF = 3, NREPS = 3, NREPS_EVAL = 3,
+    NP_EVAL = 100
+  )
+
+  # Number of searches
+  N_SEARCHES <- 2L
+
+  # THESE SEARCHES AREN'T CONDUCTED
+  SEARCH3 <- list(
+    TOP_N = 1, NP = 20, NMIF = 3, NREPS = 3, NREPS_EVAL = 3, NP_EVAL = 25
+  )
+
+  SEARCH4 <- list(
+    TOP_N = 1, NP = 20, NMIF = 3, NREPS = 3, NREPS_EVAL = 3, NP_EVAL = 25
+  )
+
+  SEARCH5 <- list(
+    TOP_N = 1, NP = 20, NMIF = 3, NREPS = 3, NREPS_EVAL = 3, NP_EVAL = 25
+  )
+} else if (RUN_LEVEL == 2) {
+
+  # Global search, all parameters
+  SEARCH1 <- list(
+    NP = 200, NMIF = 10, NREPS = 36, NREPS_EVAL = 36, NP_EVAL = 500
+  )
+
+  # Local search, unit specific
+  SEARCH2 <- list(
+    TOP_N = 2, NP = 200, NMIF = 20, NREPS = 18, NREPS_EVAL = 36, NP_EVAL = 500
+  )
+
+  # Local search, shared parameters
+  SEARCH3 <- list(
+    TOP_N = 2, NP = 200, NMIF = 10, NREPS = 18, NREPS_EVAL = 36, NP_EVAL = 500
+  )
+
+  # Local search, unit specific
+  SEARCH4 <- list(
+    TOP_N = 2, NP = 200, NMIF = 10, NREPS = 18, NREPS_EVAL = 36, NP_EVAL = 500
+  )
+
+  # Local search, all parameters
+  SEARCH5 <- list(
+    TOP_N = 2, NP = 200, NMIF =  5, NREPS = 18, NREPS_EVAL = 36, NP_EVAL = 500
+  )
+
+  # Number of searches
+  N_SEARCHES <- 5L
+} else if (RUN_LEVEL == 3) {
+
+  # Global search, all parameters
+  SEARCH1 <- list(
+    NP = 1500, NMIF = 100, NREPS = 144, NREPS_EVAL = 36, NP_EVAL = 2000
+  )
+
+  # Local search, unit specific parameters
+  SEARCH2 <- list(
+    TOP_N = 4, NP = 2000, NMIF = 100, NREPS = 18, NREPS_EVAL = 36, NP_EVAL = 4000
+  )
+
+  # Local search, shared parameters
+  SEARCH3 <- list(
+    TOP_N = 3, NP = 4000, NMIF = 50, NREPS = 24, NREPS_EVAL = 36, NP_EVAL = 5000
+  )
+
+  # Local search, unit specific parameters
+  SEARCH4 <- list(
+    TOP_N = 3, NP = 4000, NMIF = 50, NREPS = 24, NREPS_EVAL = 36, NP_EVAL = 5000
+  )
+
+  # Local search, all parameters
+  SEARCH5 <- list(
+    TOP_N = 3, NP = 4000, NMIF = 25, NREPS = 24, NREPS_EVAL = 36, NP_EVAL = 5000
+  )
+
+  # Total number of searches
+  N_SEARCHES <- 5L
+} else {
+  stop("Run level must be 1, 2 or 3.")
+}
+
+haiti3_fit <- bake(
+  file = paste0("model3/", rl_dir, "haiti3_fit.rds"), {
+    fit_haiti3(
+      search1 = SEARCH1,
+      search2 = SEARCH2,
+      search3 = SEARCH3,
+      search4 = SEARCH4,
+      search5 = SEARCH5,
+      n_searches = N_SEARCHES,
+      ncores = cores
+    )
+  }
+)
+
+rm(SEARCH1, SEARCH2, SEARCH3, SEARCH4, SEARCH5, N_SEARCHES)
+gc()
+@
+
+
 <<Load Model Parameters, echo=FALSE, results='hide'>>=
-load('model3/output/PanelLocalAll_PF.rda')  # Final model 3 evaluations
-load('model3/output/PanelLocalAll.rda')  # Final model 3 parameters (MIF search)
-ll_mod3 <- mif_logLik
-MIF_mod3 <- local_MIF2_search
-rm(mif_logLik, local_MIF2_search, tLocal)
+# load('model3/output/PanelLocalAll_PF.rda')  # Final model 3 evaluations
+# load('model3/output/PanelLocalAll.rda')  # Final model 3 parameters (MIF search)
+
+
+# haiti3_fit contains ll estimate for many parameter sets, so we want to find
+# the highest value
+mod3_ll <- max(
+  haiti3_fit[[length(haiti3_fit)]]$logLiks[, 'logLik'],
+  na.rm = TRUE
+)
+
+# MIF_mod3 <- local_MIF2_search
+# rm(mif_logLik, local_MIF2_search, tLocal)
 
 
 # Fit model 2. Note that this takes the same amount of time at all run
@@ -1200,13 +1321,16 @@ h2_fit <- bake(
 
 <<table-input,echo=FALSE,eval=T, include=FALSE, message=FALSE>>=
 
-best_m3 <- ll_mod3 %>%
-  arrange(-logLik) %>%
-  slice_head(n = 1) %>%
+# best_m3 <- ll_mod3 %>%
+#   arrange(-logLik) %>%
+#   slice_head(n = 1) %>%
+#   pull(which)
+
+best_m3 <- haiti3_fit[[length(haiti3_fit)]]$logLiks %>%
+  filter(logLik == max(logLik, na.rm = TRUE)) %>%
   pull(which)
 
-p3 <- coef(MIF_mod3[[best_m3]])
-rm(MIF_mod3)
+p3 <- haiti3_fit[[length(haiti3_fit)]]$params[best_m3, ]
 gc()
 
 
@@ -1432,7 +1556,7 @@ The output of the BPIF algorithm is the MLE $\tilde{\paramVec} = \argmax_{\param
 The BPIF algorithm is implemented in the \code{panelPomp} package \citep{breto20panelPomp} as the argument \code{block = TRUE} in the \code{mif2} function.
 Pseudo-code for this algorithm is provided in Algorithm~S1 in the supplementary material.
 
-% While the reported parameters were obtained using the decoupled representation of Model~3, simulations for the various vaccination campaigns were obtained using fully coupled version of the model, implemented using the \code{spatPomp} package. 
+% While the reported parameters were obtained using the decoupled representation of Model~3, simulations for the various vaccination campaigns were obtained using fully coupled version of the model, implemented using the \code{spatPomp} package.
 
 <<Model 3 PanelSims,echo=FALSE>>=
 h3_panel_sims <- switch(RUN_LEVEL, 20, 100, 500)
@@ -1462,14 +1586,14 @@ if (RUN_LEVEL != 3 & file.exists("model3/run_level_3/panelPompSims.rds")) {
         SIRB <- unitobjects(h3)[[dep]]
         shared <- h3@shared
         specific <- h3@specific[, dep]
-        
+
         pomp::simulate(
           SIRB,
           params = c(shared, specific),
           nsim = h3_panel_sims,
           format = 'data.frame'
         ) -> sims
-        
+
         sims$dep <- dep
         sims
       }
@@ -1546,7 +1670,7 @@ Fitting Model~3 in this fashion simplifies the problem of parameter estimation, 
 One concern is that of obtaining model forecasts, which was the primary goal of \citet{lee20}.
 % "primary output" -> "primary goal", based on Anna's suggestion.
 The simplified PanelPOMP version of Model~3 relies on the observed cholera cases as a covariate, which are unavailable for use in forecasts.
-To address this, we use the MLE obtained for the PanelPOMP approximation of Model~3 as an estimate for the parameters in fully coupled version of the model, which was implemented using the \code{spatPomp} package, similar to what was done in \cite{lee20}. 
+To address this, we use the MLE obtained for the PanelPOMP approximation of Model~3 as an estimate for the parameters in fully coupled version of the model, which was implemented using the \code{spatPomp} package, similar to what was done in \cite{lee20}.
 Simulations from the fully coupled version of the model using the estimated parameter vector $\tilde{\paramVec}$, are displayed in Fig.~\ref{h3spatsims}.
 
 <<Model 3 SpatPOMP sims, echo=FALSE>>=
@@ -1561,11 +1685,11 @@ if (RUN_LEVEL != 3 & file.exists("model3/run_level_3/SpatPompSims.rds")) {
     file = paste0('model3/', rl_dir, 'SpatPompSims.rds'), {
       h3Spat <- haiti3_spatPomp()
       coef(h3Spat) <- haitipkg:::panelParms_toSpatParms3(p3)
-      
+
       h3Spat_sims <- simulate(
         h3Spat, nsim = h3_spat_nsim, format = 'data.frame'
       )
-      
+
       h3Spat_sims %>%
         rename(dep = unitname) %>%
         group_by(dep, time) %>%
@@ -1620,9 +1744,9 @@ If the goal of parameter estimation is to maximize the likelihood of the fully c
 A natural question that arises is if the difference between $\hat{\paramVec}$ and $\tilde{\paramVec}$ is scientifically and statistically meaningful.
 The answer to this question requires the ability to reliably estimate $\hat{\paramVec}$, which is model specific and beyond the scope of this article.
 
-In this case study, a brief analysis of the fitted parameters $\tilde{\paramVec}$ provides some interesting insight. 
+In this case study, a brief analysis of the fitted parameters $\tilde{\paramVec}$ provides some interesting insight.
 Consider the unexpectedly large exponent on rainfall: $r = \Sexpr{signif(p3s["r"],3)}$ (Eq.~\ref{eq:model3:water}).
-Because the value of rainfall $J(t) \in (0, 1)$, the large coefficient results in $J(t)^r \approx 0$. 
+Because the value of rainfall $J(t) \in (0, 1)$, the large coefficient results in $J(t)^r \approx 0$.
 This result may initially be surprising given the importance of rainfall as a seasonal diver of cholera infections in Haiti (see Sec.~\ref{sec:science}).
 One plausible explanation of this result is that the fitting procedure---used to obtain parameter values in the independent department model given the reported cases in other departments---has learned an over-dependence on the reported cholera cases in other departments, and thus the seasonality of cholera incidence in department $u$ depends on the highly correlated covariate of the reported cholera cases in departments $1:U\setminus \{u\}$.
 Whatever the case may be, this fitting procedure results in model likelihoods unable to improve upon a log-linear benchmark (see Sec.~\ref{sec:model_diagnostics} and Tab.~\ref{tab:likes}), and highlights the need for advancements in statistical methodology that permit inference on models with coupled metapopulation dynamics.
@@ -1635,7 +1759,7 @@ Model misspecification, which may be thought of as the omission of a mechanism i
 To make progress, while accepting proper limitations, one must bear in mind the much-quoted observation of \citet{box79} that ``all models are wrong but some are useful.''
 This is not just practical advice for applied statistics, but matches broader appreciation of the limitations of all scientific knowledge \eic{REF???}.
 In this section, we provide some tools and suggestions for diagnosing mechanistic models with the goal of making the subjective assessment of model ``usefulness" more objective.
-To do this, we will rely on the quantitative and statistical ability of the model to match the observed data, which we call the model's {\it goodness-of-fit}, with the guiding principle that a model which cannot adequately describe observed data may not be reliable for useful purposes. 
+To do this, we will rely on the quantitative and statistical ability of the model to match the observed data, which we call the model's {\it goodness-of-fit}, with the guiding principle that a model which cannot adequately describe observed data may not be reliable for useful purposes.
 Goodness-of-fit may provide evidence supporting the causal interpretation of one model versus another, but cannot by itself rule out the possibility of alternative explanations.
 
 One common approach to assess a mechanistic model's goodness-of-fit is to compare simulations from the fitted model to the observed data.
@@ -1676,8 +1800,8 @@ Large advantages (shortcomings) in model likelihood relative to the benchmark fo
 While these comparisons don't provide a formal statistical test of the amount of spatial resolution needed for a given model, they can be quite informative.
 
 <<Table 2 Input, echo=FALSE, eval=TRUE>>=
-NREPS_EVAL <- switch(RUN_LEVEL,  3,   8,    36)
-NP_EVAL    <- switch(RUN_LEVEL, 50, 500, 10000)
+NREPS_EVAL <- switch(RUN_LEVEL,   3,   8,    36)
+NP_EVAL    <- switch(RUN_LEVEL, 100, 500, 10000)
 
 # Objective function of model 2, epidemic phase
 epi_ofun <- traj_objfun(
@@ -1705,10 +1829,10 @@ mod1_n_params <- 13
 mod1_aic <- 2 * mod1_n_params - 2 * mod1_ll
 
 # Load pre-calculated model 3 likelihood
-mod3_ll <- ll_mod3 %>%
-  arrange(-logLik) %>%
-  slice_head(n = 1) %>%
-  pull(logLik)
+# mod3_ll <- ll_mod3 %>%
+#   arrange(-logLik) %>%
+#   slice_head(n = 1) %>%
+#   pull(logLik)
 
 # model 3 AIC
 mod3_n_params <- 39
@@ -1723,25 +1847,26 @@ if (RUN_LEVEL != 3 & file.exists("model3/run_level_3/SpatPomp_res.rds")) {
 } else{
   mod3_spatPomp_res <- bake(
     file = paste0('model3/', rl_dir, 'SpatPomp_res.rds'), {
-      
+
       # Create a list to store results
       results <- list()
-      
+
       # Perform block-particle filter
       h3_bpf <- foreach(i = 1:NREPS_EVAL, .combine = c) %dopar% {
-        bpfilter(h3Spat, Np = NP_EVAL, block_size = 1)
+        bpfilter(h3Spat, Np = NP_EVAL, block_size = 1,
+                 params = haitipkg:::panelParms_toSpatParms3(p3))
       }
-      
-      
+
+
       ll <- logLik(h3_bpf)
       results$ll <- logmeanexp(ll[!is.na(ll)], se = FALSE)
-      
+
       ### Get likelihood for subset of the data
-      
+
       # Find appropriate sub-set
       in_subset_cols <- h3_bpf[[1]]@times >= as.numeric(lubridate::decimal_date(as.Date("2014-03-01")))
       in_subset_rows <- h3_bpf[[1]]@unit_names != 'Ouest'
-      
+
       mod3_coupled_subset_evals <- c()
       for (i in 1:length(h3_bpf)) {
         mod3_coupled_subset_evals <- c(
@@ -1749,7 +1874,7 @@ if (RUN_LEVEL != 3 & file.exists("model3/run_level_3/SpatPomp_res.rds")) {
           sum(h3_bpf[[i]]@block.cond.loglik[in_subset_rows, in_subset_cols])
         )
       }
-      
+
       results$subset_ll <- logmeanexp(mod3_coupled_subset_evals)
       results
     },
@@ -1918,13 +2043,13 @@ if (RUN_LEVEL != 3 & file.exists("model3/run_level_3/lee3_results.rds")) {
 } else {
   lee3_results <- bake(
     file = paste0('model3/', rl_dir, 'lee3_results.rds'), {
-      
+
       # Create lists to save results
       lee3_results <- list()
-      
+
       # Save how long it takes for sub-data
       lee3_results[["sub_pf_time"]] <- system.time({
-        
+
         # Save all likelihood evaluations
         lee3_results[["sub_ll_evals"]] <- foreach(
           i = 1:lee3_NREP, .combine = c
@@ -1932,12 +2057,12 @@ if (RUN_LEVEL != 3 & file.exists("model3/run_level_3/lee3_results.rds")) {
           logLik(pfilter(lee3_sub, Np = lee3_NP))  # Get likelihood evaluations
         }
       })
-      
+
       registerDoRNG(2789131)
-      
+
       # Save how long it takes for all data
       lee3_results[["all_pf_time"]] <- system.time({
-        
+
         # Save all likelihood evaluations
         lee3_results[["all_ll_evals"]] <- foreach(
           i = 1:lee3_NREP, .combine = c
@@ -1945,9 +2070,9 @@ if (RUN_LEVEL != 3 & file.exists("model3/run_level_3/lee3_results.rds")) {
           logLik(pfilter(lee3_all, Np = lee3_NP))  # Get likelihood evaluations
         }
       })
-      
+
       lee3_results[["n_params"]] <- 29
-      
+
       lee3_results
     },
     timing = FALSE
@@ -2080,16 +2205,16 @@ if (RUN_LEVEL != 3 & file.exists("model1/run_level_3/S0_sims.rds")) {
 } else {
   h1_S0_sims <- bake(
     file = paste0("model1/", rl_dir, "S0_sims.rds"), {
-      
+
       # Create the model
       s0 <- haiti1_joint(vacscen = 'id0')
-      
+
       # Load coefficients
       coef(s0) <- p1
-      
+
       # Get samples from filtering distribution
       s0_pf <- pfilter(s0, save.state = TRUE, Np = h1_scen_NP)
-      
+
       # project vacc scenario, with filtering dist, and model.
       project_from_filter2(mod = s0, PF = s0_pf, nsims = h1_scen_sims)
     },
@@ -2110,10 +2235,10 @@ if (RUN_LEVEL != 3 & file.exists("model1/run_level_3/S2_sims.rds")) {
 } else {
   h1_S2_sims <- bake(
     file = paste0('model1/', rl_dir, 'S2_sims.rds'), {
-      
+
       # Create the model
       s2 <- haiti1_joint(vacscen = "id2")
-      
+
       # Set model parameters that need to be adjusted
       depts <- 2
       h1_par_names <- names(p1)
@@ -2127,10 +2252,10 @@ if (RUN_LEVEL != 3 & file.exists("model1/run_level_3/S2_sims.rds")) {
         paste0("R", 1:depts, "_0")
       )
       coef(s2) <- h1_params_temp  # Set model parameters
-      
+
       # Get samples from filtering distribution for Scenario 2 model:
       s2_pf <- pfilter(s2, save.state = TRUE, Np = h1_scen_NP)
-      
+
       # project vacc scenario, with filtering dist, and model.
       project_from_filter2(mod = s2, PF = s2_pf, nsims = h1_scen_NP)
     },
@@ -2151,10 +2276,10 @@ if (RUN_LEVEL != 3 & file.exists("model1/run_level_3/S4_sims.rds")) {
 } else {
   h1_S4_sims <- bake(
     file = paste0('model1/', rl_dir, 'S4_sims.rds'), {
-      
+
       # Create the model
       s4 <- haiti1_joint(vacscen = "id4")
-      
+
       # Set model parameters that need to be adjusted
       depts <- 3
       h1_par_names <- names(p1)
@@ -2168,10 +2293,10 @@ if (RUN_LEVEL != 3 & file.exists("model1/run_level_3/S4_sims.rds")) {
         paste0("R", 1:depts, "_0")
       )
       coef(s4) <- h1_params_temp  # Set model parameters
-      
+
       # Get samples from filtering distribution for Scenario 2 model:
       s4_pf <- pfilter(s4, save.state = TRUE, Np = h1_scen_NP)
-      
+
       # project vacc scenario, with filtering dist, and model.
       project_from_filter2(mod = s4, PF = s4_pf, nsims = h1_scen_NP)
     },
@@ -2192,10 +2317,10 @@ if (RUN_LEVEL != 3 & file.exists("model1/run_level_3/S3_sims.rds")) {
 } else {
   h1_S3_sims <- bake(
     file = paste0('model1/', rl_dir, 'S3_sims.rds'), {
-      
+
       # Create the model
       s3 <- haiti1_joint(vacscen = "id3")
-      
+
       # Set model parameters that need to be adjusted
       depts <- 10
       h1_par_names <- names(p1)
@@ -2209,10 +2334,10 @@ if (RUN_LEVEL != 3 & file.exists("model1/run_level_3/S3_sims.rds")) {
         paste0("R", 1:depts, "_0")
       )
       coef(s3) <- h1_params_temp  # Set model parameters
-      
+
       # Get samples from filtering distribution for Scenario 2 model:
       s3_pf <- pfilter(s3, save.state = TRUE, Np = h1_scen_NP)
-      
+
       # project vacc scenario, with filtering dist, and model.
       project_from_filter2(mod = s3, PF = s3_pf, nsims = h1_scen_NP)
     },
@@ -2233,10 +2358,10 @@ if (RUN_LEVEL != 3 & file.exists("model1/run_level_3/S1_sims.rds")) {
 } else {
   h1_S1_sims <- bake(
     file = paste0('model1/', rl_dir, 'S1_sims.rds'), {
-      
+
       # Create the model
       s1 <- haiti1_joint(vacscen = "id1")
-      
+
       # Set model parameters that need to be adjusted
       depts <- 10
       h1_par_names <- names(p1)
@@ -2250,10 +2375,10 @@ if (RUN_LEVEL != 3 & file.exists("model1/run_level_3/S1_sims.rds")) {
         paste0("R", 1:depts, "_0")
       )
       coef(s1) <- h1_params_temp  # Set model parameters
-      
+
       # Get samples from filtering distribution for Scenario 2 model:
       s1_pf <- pfilter(s1, save.state = TRUE, Np = h1_scen_NP)
-      
+
       # project vacc scenario, with filtering dist, and model.
       project_from_filter2(mod = s1, PF = s1_pf, nsims = h1_scen_NP)
     },
@@ -2306,27 +2431,27 @@ if (RUN_LEVEL != 3 & file.exists("model3/run_level_3/mod3_V0_res.rds")) {
 } else {
   mod3_V0_res <- bake(
     file = paste0("model3/", rl_dir, "mod3_V0_res.rds"), {
-      
+
       # Create a list to store results
       h3_V0_res <- list()
-      
+
       # Get "noVacc" scenario parameters
       h3_S0_par <- get_model3_vacc_scenario_params(scenario = "noVacc")
       coef(h3Spat)[names(h3_S0_par)] <- h3_S0_par
-      
+
       # Using parameters and filtered distribution, project system
       h3_V0_sims <- project_from_filter2(
         h3Spat, PF = h3_bpf, covarGen = project_rain,
         nsims = NSIM, seed = 6897154
       )
-      
+
       # Store nationally aggregated results
       h3_V0_res$mod3_V0_sims <- agg_mod3_sims(h3_V0_sims)
       h3_V0_res$mod3_V0_probs <- get_elimProbs(h3_V0_sims, model = 3)
-      
+
       # Return results
       h3_V0_res
-      
+
     }
   )
 }
@@ -2336,27 +2461,27 @@ if (RUN_LEVEL != 3 & file.exists("model3/run_level_3/mod3_V1_res.rds")) {
 } else {
   mod3_V1_res <- bake(
     file = paste0("model3/", rl_dir, "mod3_V1_res.rds"), {
-      
+
       # Create a list to store results
       h3_V1_res <- list()
-      
+
       # Get "noVacc" scenario parameters
       h3_V1_par <- get_model3_vacc_scenario_params(scenario = "2dep")
       coef(h3Spat)[names(h3_V1_par)] <- h3_V1_par
-      
+
       # Using parameters and filtered distribution, project system
       h3_V1_sims <- project_from_filter2(
         h3Spat, PF = h3_bpf, covarGen = project_rain,
         nsims = NSIM, seed = 6897154
       )
-      
+
       # Store nationally aggregated results
       h3_V1_res$mod3_V1_sims <- agg_mod3_sims(h3_V1_sims)
       h3_V1_res$mod3_V1_probs <- get_elimProbs(h3_V1_sims, model = 3)
-      
+
       # Return results
       h3_V1_res
-      
+
     }
   )
 }
@@ -2366,27 +2491,27 @@ if (RUN_LEVEL != 3 & file.exists("model3/run_level_3/mod3_V2_res.rds")) {
 } else {
   mod3_V2_res <- bake(
     file = paste0("model3/", rl_dir, "mod3_V2_res.rds"), {
-      
+
       # Create a list to store results
       h3_V2_res <- list()
-      
+
       # Get "noVacc" scenario parameters
       h3_V2_par <- get_model3_vacc_scenario_params(scenario = "3dep")
       coef(h3Spat)[names(h3_V2_par)] <- h3_V2_par
-      
+
       # Using parameters and filtered distribution, project system
       h3_V2_sims <- project_from_filter2(
         h3Spat, PF = h3_bpf, covarGen = project_rain,
         nsims = NSIM, seed = 6897154
       )
-      
+
       # Store nationally aggregated results
       h3_V2_res$mod3_V2_sims <- agg_mod3_sims(h3_V2_sims)
       h3_V2_res$mod3_V2_probs <- get_elimProbs(h3_V2_sims, model = 3)
-      
+
       # Return results
       h3_V2_res
-      
+
     }
   )
 }
@@ -2396,27 +2521,27 @@ if (RUN_LEVEL != 3 & file.exists("model3/run_level_3/mod3_V3_res.rds")) {
 } else {
   mod3_V3_res <- bake(
     file = paste0("model3/", rl_dir, "mod3_V3_res.rds"), {
-      
+
       # Create a list to store results
       h3_V3_res <- list()
-      
+
       # Get "noVacc" scenario parameters
       h3_V3_par <- get_model3_vacc_scenario_params(scenario = "slowNation")
       coef(h3Spat)[names(h3_V3_par)] <- h3_V3_par
-      
+
       # Using parameters and filtered distribution, project system
       h3_V3_sims <- project_from_filter2(
         h3Spat, PF = h3_bpf, covarGen = project_rain,
         nsims = NSIM, seed = 6897154
       )
-      
+
       # Store nationally aggregated results
       h3_V3_res$mod3_V3_sims <- agg_mod3_sims(h3_V3_sims)
       h3_V3_res$mod3_V3_probs <- get_elimProbs(h3_V3_sims, model = 3)
-      
+
       # Return results
       h3_V3_res
-      
+
     }
   )
 }
@@ -2426,27 +2551,27 @@ if (RUN_LEVEL != 3 & file.exists("model3/run_level_3/mod3_V4_res.rds")) {
 } else {
   mod3_V4_res <- bake(
     file = paste0("model3/", rl_dir, "mod3_V4_res.rds"), {
-      
+
       # Create a list to store results
       h3_V4_res <- list()
-      
+
       # Get "noVacc" scenario parameters
       h3_V4_par <- get_model3_vacc_scenario_params(scenario = "fastNation")
       coef(h3Spat)[names(h3_V4_par)] <- h3_V4_par
-      
+
       # Using parameters and filtered distribution, project system
       h3_V4_sims <- project_from_filter2(
         h3Spat, PF = h3_bpf, covarGen = project_rain,
         nsims = NSIM, seed = 6897154
       )
-      
+
       # Store nationally aggregated results
       h3_V4_res$mod3_V4_sims <- agg_mod3_sims(h3_V4_sims)
       h3_V4_res$mod3_V4_probs <- get_elimProbs(h3_V4_sims, model = 3)
-      
+
       # Return results
       h3_V4_res
-      
+
     }
   )
 }
@@ -3030,11 +3155,11 @@ Translations back into the notation of \citet{lee20} are given in Table~S1.
 
 \subsection{Reckoning Scientific Understanding With Fitted Models}\label{sec:science}
 
-The resulting mechanisms in a fitted model can be compared to current scientific knowledge about a system. 
+The resulting mechanisms in a fitted model can be compared to current scientific knowledge about a system.
 Synonymity between model based inference and our current understanding of a system may taken as a confirmation of both model based conclusions and our understanding of the system \jwc{REF???}.
 On the other hand, discrepancies found in these comparisons may have the potential to spark new scientific breakthroughs \jwc{REFS???}.
-The potential for new discoveries based on dynamic modeling outcomes is rooted in a model's ability to effectively approximate the system in question, and is therefore inexorably linked to a models goodness-of-fit. 
-As such, the perception of scientific conclusions made via dynamic modeling should be weighed by the model's goodness-of-fit. 
+The potential for new discoveries based on dynamic modeling outcomes is rooted in a model's ability to effectively approximate the system in question, and is therefore inexorably linked to a models goodness-of-fit.
+As such, the perception of scientific conclusions made via dynamic modeling should be weighed by the model's goodness-of-fit.
 
 In our analysis, we demonstrate how one may compare model mechanisms with current scientific understanding by examining the results of fitting the flexible cubic spline term in Model~1 (Eq.~\myeqref{model1:lambda}--\myeqref{model1:beta});
 the cubic splines permit flexible estimation of seasonality in the force of infection.
@@ -3160,13 +3285,13 @@ cowplot::plot_grid(gg_rain, gg_trans, align = "v", ncol = 1)
 While dynamic models may potentially result in meaningful scientific insights, one must be careful not to assume the results of a single analysis as a de-facto feature of the system.
 It is important instead to recognize and assess the modeling simplifications and assumptions that were used in order to arrive at the conclusions.
 In epidemiological studies, for example, it is unreasonable to expect that our quantitative understanding of individual-level processes will perfectly match model parameters that were fit to population-level case counts \jwc{REF??}.
-This makes the direct interpretation of such parameters difficult. 
+This makes the direct interpretation of such parameters difficult.
 
-Our case study provides an example of this in the parameter estimate for the duration of natural immunity due to cholera infection $\muRS^{-1}$. 
-Under the framework of Model~2, the best estimate for this parameter is $\Sexpr{signif(1/h2_fit$h2_params["sigma"],2)}$, suggesting that individuals have effectively permanent immunity to cholera once infected, and thus the pool of susceptible individuals decreases over time. 
-The interpretation of this result is muddled due to the fact that the data ranged from 2010-2019, and therefore estimates of immunity longer than 10 years---the upper end of previous estimates of natural immunity \citep{king08}---effectively result in the same model dynamics. 
-The depletion of susceptible individuals may also be attributed to confounding mechanisms that are unaccounted for in the model---such as vaccination and other non-pharmaceutical interventions that reduce cholera transmission \citep{trevisin22, rebaudet21}---that were not accounted for in the model. 
-Perhaps the best interpretation of this results, then, is that the model most adequately describes the observed data by having a steady decrease in the number of susceptible individuals; in this case, the fact that the parameter estimate $\muRS$ is inconsistent with the expected result can be taken as evidence of model mispecification. 
+Our case study provides an example of this in the parameter estimate for the duration of natural immunity due to cholera infection $\muRS^{-1}$.
+Under the framework of Model~2, the best estimate for this parameter is $\Sexpr{signif(1/h2_fit$h2_params["sigma"],2)}$, suggesting that individuals have effectively permanent immunity to cholera once infected, and thus the pool of susceptible individuals decreases over time.
+The interpretation of this result is muddled due to the fact that the data ranged from 2010-2019, and therefore estimates of immunity longer than 10 years---the upper end of previous estimates of natural immunity \citep{king08}---effectively result in the same model dynamics.
+The depletion of susceptible individuals may also be attributed to confounding mechanisms that are unaccounted for in the model---such as vaccination and other non-pharmaceutical interventions that reduce cholera transmission \citep{trevisin22, rebaudet21}---that were not accounted for in the model.
+Perhaps the best interpretation of this results, then, is that the model most adequately describes the observed data by having a steady decrease in the number of susceptible individuals; in this case, the fact that the parameter estimate $\muRS$ is inconsistent with the expected result can be taken as evidence of model mispecification.
 
 
 \section{Advising policy via dynamic modeling}\label{sec:advice}
@@ -3219,8 +3344,8 @@ one example was the inability to fit model parameters to the fully-coupled versi
 Promising theoretical and methodological developments \citep{ning21ibpf,ionides22} based on the Block Particle Filter \citep{rebeschini15} may potentially be used to obtain better parameter estimates for Model~3 in future work.
 
 Inference for mechanistic time series models offers opportunities for understanding and controlling complex dynamic systems.
-This case study has investigated issues requiring attention when applying powerful new statistical techniques that can enable statistically efficient inference for a general class of partially observed Markov process models. 
-Care must be taken to ensure that the computationally intensive numerical calculations are carried out adequately. 
+This case study has investigated issues requiring attention when applying powerful new statistical techniques that can enable statistically efficient inference for a general class of partially observed Markov process models.
+Care must be taken to ensure that the computationally intensive numerical calculations are carried out adequately.
 Once that is accomplished, care is required to assess what causal conclusions can properly be inferred given the possibility of alternative explanations consistent with the data.
 Studies that combine model development with thoughtful data analysis, supported by a high standard of reproducibility, build knowledge about the system under investigation.
 Cautionary warnings about the difficulties inherent in understanding complex systems \citep{saltelli20,ioannidis20} should motivate us to follow best practices in data analysis, rather than avoiding the challenge.
