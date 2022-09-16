@@ -97,6 +97,7 @@
 
 \DeclareSymbolFont{matha}{OML}{txmi}{m}{it}% txfonts
 \DeclareMathSymbol{\varv}{\mathord}{matha}{118}
+\DeclareMathOperator*{\argmax}{arg\,max}
 \newcommand\myeqref[1]{(\ref{#1})}
 \newcommand{\blind}{1}
 
@@ -276,34 +277,6 @@ true_agg_cases <- dep_plot_df %>%
       cases_Nord_Est + cases_Ouest + cases_Sud +
       cases_Sud_Est + cases_Nord_Ouest
   )
-
-
-# TODO: Remove these functions and replace with lubridate functions (also in the package).
-dateToYears <- function(date, origin = as.Date("2014-01-01"), yr_offset = 2014) {
-  # This function converts a date to a decimal representation
-  #
-  # ex: "1976-03-01" -> 1976.163
-
-  julian(date, origin = origin) / 365.25 + yr_offset
-}
-
-yearsToDate <- function(year_frac, origin = as.Date("2014-01-01"), yr_offset = 2014.0) {
-  # This function is the inverse function of dateToYears; it takes
-  # a decimal representation of a date and converts it into a Date.
-  #
-  # ex: 1976.163 -> "1976-03-01"
-
-  as.Date((year_frac - yr_offset) * 365.25, origin = origin)
-}
-
-yearsToDateTime <- function(year_frac, origin = as.Date("2014-01-01"), yr_offset = 2014.0) {
-  # Same as the function above, but a DateTime object rather than a Date
-  # object.
-  #
-  # ex: 1976.163 -> "1976-03-01"
-  as.POSIXct((year_frac - yr_offset) * 365.25 * 3600 * 24, origin = origin)
-}
-
 @
 
 <<ReplicateModel1, echo=FALSE, message=FALSE, include=FALSE>>=
@@ -1148,13 +1121,13 @@ The force of infection is
 As with Model~1, $d\Gamma_u(t)/dt$ is multiplicative Gamma-distributed white noise in \myeqref{eq:model3:SI} and \myeqref{eq:model3:SA}.
 In \eqref{eq:model3:water}, $J_u(t)$ is a dimensionless measurement of precipitation that has been standardized by dividing the observed rainfall at time $t$ by the maximum recorded rainfall in department $u$ during the epidemic, and $D_u$ is the average population density.
 Demographic stochasticity is accounted for by modeling non-cholera related death rate $\muDeath$ in each compartment, along with an additional death rate $\choleraDeath$ in \myeqref{eq:model3:IS} to account for cholera induced deaths among infected individuals.
-We note that all deaths are balanced by births into the susceptible compartment in \myeqref{eq:model3:AS} and \myeqref{eq:model3:RS}, thereby maintaining constant population in each department.
+All deaths are balanced by births into the susceptible compartment in \myeqref{eq:model3:AS} and \myeqref{eq:model3:RS}, thereby maintaining constant population in each department.
 
 \section{Statistical Analysis}\label{sec:methods}
 
-We consider model fitting (Sec.~\ref{model_fitting}) followed by diagnostic investigations (Sec.~\ref{model_diagnostics}) and forecasting (Sec.~\ref{sec:filter}).
+We consider model fitting (Sec.~\ref{sec:model_fitting}) followed by diagnostic investigations (Sec.~\ref{sec:model_diagnostics}) and forecasting (Sec.~\ref{sec:filter}).
 
-<<FitModel1, echo=FALSE, message=FALSE>>=
+<<FitModel1, echo=FALSE, message=FALSE, include=FALSE>>=
 set.seed(636813)
 
 NP_H1        <- switch(RUN_LEVEL, 100, 1000,   2000)
@@ -1254,7 +1227,7 @@ stew(file = "models.rda", {
 @
 
 
-\subsection{Model Fitting}\label{model_fitting}
+\subsection{Model Fitting}\label{sec:model_fitting}
 
 Proposed mechanistic structures form a family of statistical models indexed by a parameter vector $\paramVec$.
 Different values of $\paramVec$ can result in qualitative differences in the predicted behavior of the system.
@@ -1421,7 +1394,7 @@ h2_epi_traj$Ctotal <- rowSums(h2_epi_traj[, paste0("C", 1:10)]) * h2_fit$h2_para
 h2_traj <- h2_epi_traj %>%
   select(year, Ctotal) %>%
   mutate(
-    date = yearsToDate(year)
+    date = as.Date(lubridate::round_date(lubridate::date_decimal(year), unit = 'day'))
   )
 @
 
@@ -1432,7 +1405,7 @@ In this model, both the latent and observable processes can be factored into dep
 % We denote the latent and measurement processes for Model~3 as $\bm{X}^{(3)}(t_{0:N}) = X^{(3)}_{1:U, 0:N}$, and $\bm{Y}^{(3)}(t_{1:N}) = Y_{1:U, 1:N}$ \eic{IS THIS NEEDED HERE?}.
 The decision to model the system via metapopulation models versus a model aggregated to a larger spatial scale is one of great scientific interest.
 Evidence for the former approach has been provided in previous studies \citep{king15}, including the specific case of heterogeneity between Haitian departments in cholera transmission \citep{collins14}.
-Note that this evidence alone does not automatically discredit conclusions drawn via nationally aggregated models, as there are also good reasons to prefer a simple model over a complex one \citep{saltelli20,green15}.
+Note that this evidence alone does not automatically discredit conclusions drawn via nationally aggregated models, as there are also reasons to prefer a simple model over a complex one \citep{saltelli20,green15}.
 
 Fitting scientifically flexible metapopulation models is a challenging statistical problem.
 In particular, parameter estimation techniques based on the particle filter become computationally intractable as the number of spatial units increase.
@@ -1451,13 +1424,15 @@ This approximation leads to department-specific models that are conditionally in
 Here, we refer to a collection of POMP models that are independent across units as a PanelPOMP.
 
 In the case of a PanelPOMP, an extension of the IF2 algorithm, known as Panel Iterated Filtering (PIF) \citep{breto20}, can be used to obtain the MLE, which solves the curse of dimensionality for this class of models.
-A major advantage of this algorithm over fitting each unit-specific model separately is that PIF can be used to fit both unit-specific parameters and shared parameters; in this way, the calibration of shared parameters involves all of the available data instead of just an arbitrarily chosen subset.
+A major advantage of this algorithm is that PIF can be used to fit both unit-specific parameters and shared parameters; in this way, the calibration of shared parameters involves all of the available data instead of just an arbitrarily chosen subset.
 
-We then fit the spatially decoupled version of Model~3 using a slight modification of the PIF algorithm, which we call the Block Panel Iterated Filter (BPIF).
-The BPIF algorithm is implemented in the \code{panelPomp} package \citep{breto20panelPomp} in the R programming language, and can be used by adding the argument \code{block = TRUE} in the \code{mif2} function.
+We fit the PanelPOMP version of Model~3 using a slight modification of the PIF algorithm, which we call the Block Panel Iterated Filter (BPIF).
+Let $l_{\text{P}}(y_{1:N}^*; \paramVec)$ denote the log-likelihood function of the PanelPOMP version of Model~3.
+The output of the BPIF algorithm is the MLE $\tilde{\paramVec} = \argmax_{\paramVec} l_{\text{P}}(y_{1:N}^*; \paramVec)$.
+The BPIF algorithm is implemented in the \code{panelPomp} package \citep{breto20panelPomp} as the argument \code{block = TRUE} in the \code{mif2} function.
 Pseudo-code for this algorithm is provided in Algorithm~S1 in the supplementary material.
-While the reported parameters were obtained using the decoupled representation of Model~3, simulations for the various vaccination campaigns were obtained using fully coupled version of the model.
-% Simulations from the fitted version of the PanelPOMP model are shown in Fig.~\ref{h3panelsims}.
+
+% While the reported parameters were obtained using the decoupled representation of Model~3, simulations for the various vaccination campaigns were obtained using fully coupled version of the model, implemented using the \code{spatPomp} package. 
 
 <<Model 3 PanelSims,echo=FALSE>>=
 h3_panel_sims <- switch(RUN_LEVEL, 20, 100, 500)
@@ -1519,7 +1494,12 @@ h3_panel_quantiles <- h3_panel_sims %>%
   mutate(
     dep = gsub("-", "_", dep)
   ) %>%
-  filter(date >= yearsToDate(h3@unit.objects$Artibonite@t0))
+  filter(date >= as.Date(
+    lubridate::round_date(
+      lubridate::date_decimal(h3@unit.objects$Artibonite@t0), unit = 'day'
+    )
+  )
+  )
 
 plot_order <- c(
   'Artibonite',
@@ -1562,13 +1542,12 @@ rm(h3_panel_quantiles, h3_panel_sims)
 gc()
 @
 
-
-Fitting Model~3 as a PanelPOMP simplifies the problem of parameter estimation, but it also introduces additional technicalities that must be addressed.
+Fitting Model~3 in this fashion simplifies the problem of parameter estimation, but it also introduces additional technicalities that must be addressed.
 One concern is that of obtaining model forecasts, which was the primary goal of \citet{lee20}.
 % "primary output" -> "primary goal", based on Anna's suggestion.
 The simplified PanelPOMP version of Model~3 relies on the observed cholera cases as a covariate, which are unavailable for use in forecasts.
-To address this, we use the MLE obtained for the PanelPOMP approximation of Model~3 as an estimate for the parameters in fully coupled version of the model, which was implemented using the \code{spatPomp} package.
-Simulations from the SpatPOMP version of the model, using the parameters that were fit with the PanelPOMP version of the model, are displayed in Fig.~\ref{h3spatsims}.
+To address this, we use the MLE obtained for the PanelPOMP approximation of Model~3 as an estimate for the parameters in fully coupled version of the model, which was implemented using the \code{spatPomp} package, similar to what was done in \cite{lee20}. 
+Simulations from the fully coupled version of the model using the estimated parameter vector $\tilde{\paramVec}$, are displayed in Fig.~\ref{h3spatsims}.
 
 <<Model 3 SpatPOMP sims, echo=FALSE>>=
 # load('output/FinalPanelAsSpatPomp_PF.rda')
@@ -1600,7 +1579,7 @@ if (RUN_LEVEL != 3 & file.exists("model3/run_level_3/SpatPompSims.rds")) {
         mutate(
           date = lubridate::date_decimal(time)
         ) %>%
-        filter(date >= yearsToDate(h3Spat@t0)) %>%
+        filter(date >= as.Date(lubridate::round_date(lubridate::date_decimal(h3Spat@t0), unit = 'day'))) %>%
         mutate(date = as.Date(lubridate::round_date(date, unit = 'day')))
     },
     timing = FALSE
@@ -1625,7 +1604,7 @@ ggplot() +
   scale_y_log10(labels = scales::trans_format("log10", scales::math_format(10^.x)))
 @
 \caption{\label{h3spatsims}
-Simulations from initial conditions using SpatPOMP version of Model~3.
+Simulations from initial conditions using the spatially coupled version of Model~3.
 The black curve represents true case count, the blue line the median of 500 simulations from the model, and the grey ribbons representing $95\%$ confidence interval.
 }
 \end{figure}
@@ -1635,23 +1614,28 @@ rm(h3Spat_quants, h3_spat_nsim)
 gc()
 @
 
-While simulations from the SpatPOMP version of Model~3 resemble the observed data, we note in Table~\ref{tab:likes} that the SpatPOMP version of Model~3 has a lower log-likelihood than the PanelPOMP version using the same model parameters.
-A natural question to ask is if the MLE obtained for the PanelPOMP version of Model~3---obtained using the approximation in Eq.~\myeqref{eq:model3:approx}---could result in a drastically different set of parameters than those that would be obtained by estimating the MLE in the fully coupled model.
-Unfortunately, the answer to this question would require the ability to accurately and reliably estimate the MLE of the fully coupled model, which is beyond the scope of this article.
-% this question is unsatisfactorily left unanswered, because the answer would require knowledge of the the MLE without the simplification, which is an open statistical question and beyond the scope of this article.
-% While this approach may provide a reasonable estimate of the model parameters, it is unknown by how much this estimate may be improved.
-This highlights the need for advancements in statistical methodology that permit inference on models with coupled metapopulation dynamics.
+% While simulations from the SpatPOMP version of Model~3 resemble the observed data, we note in Table~\ref{tab:likes} that the SpatPOMP version of Model~3 has a lower log-likelihood than the PanelPOMP version using the same model parameters.
+Let $l_{\text{C}}(y_{1:N}^*; \paramVec)$ denote the log-likelihood of the fully coupled model, and let $\hat{\paramVec} = \argmax_{\paramVec} l_{\text{C}}(y_{1:N}^*; \paramVec)$.
+If the goal of parameter estimation is to maximize the likelihood of the fully coupled model, the approach of estimating parameters using a decoupled model is clearly sub optimal, as $l_{\text{C}}(y_{1:N}^*; \hat{\paramVec}) \geq l_{\text{C}}(y_{1:N}^*; \tilde{\paramVec})$.
+A natural question that arises is if the difference between $\hat{\paramVec}$ and $\tilde{\paramVec}$ is scientifically and statistically meaningful.
+The answer to this question requires the ability to reliably estimate $\hat{\paramVec}$, which is model specific and beyond the scope of this article.
 
-% \subsection{Comparing mechanistic models with associative benchmarks} %AAAAAAAAAAAAAAA
-\subsection{Model Diagnostics} \label{model_diagnostics}
+In this case study, a brief analysis of the fitted parameters $\tilde{\paramVec}$ provides some interesting insight. 
+Consider the unexpectedly large exponent on rainfall: $r = \Sexpr{signif(p3s["r"],3)}$ (Eq.~\ref{eq:model3:water}).
+Because the value of rainfall $J(t) \in (0, 1)$, the large coefficient results in $J(t)^r \approx 0$. 
+This result may initially be surprising given the importance of rainfall as a seasonal diver of cholera infections in Haiti (see Sec.~\ref{sec:science}).
+One plausible explanation of this result is that the fitting procedure---used to obtain parameter values in the independent department model given the reported cases in other departments---has learned an over-dependence on the reported cholera cases in other departments, and thus the seasonality of cholera incidence in department $u$ depends on the highly correlated covariate of the reported cholera cases in departments $1:U\setminus \{u\}$.
+Whatever the case may be, this fitting procedure results in model likelihoods unable to improve upon a log-linear benchmark (see Sec.~\ref{sec:model_diagnostics} and Tab.~\ref{tab:likes}), and highlights the need for advancements in statistical methodology that permit inference on models with coupled metapopulation dynamics.
+
+\subsection{Model Diagnostics} \label{sec:model_diagnostics}
 
 Parameter calibration (whether Bayesian or frequentist) aims to find the best description of the observed data under the assumptions of the model.
 Obtaining the best fitting set of parameters for a given model does not, however, guarantee that the model provides an accurate representation of the system in question.
 Model misspecification, which may be thought of as the omission of a mechanism in the model that is an important feature of the dynamic system, is inevitable at all levels of model complexity.
 To make progress, while accepting proper limitations, one must bear in mind the much-quoted observation of \citet{box79} that ``all models are wrong but some are useful.''
-\eic{I WAS WONDERING WHETHER TO SAY SOMETHING LIKE, This is not just good practical advice for applied statistics, but matches broader appreciation of the limitations of all scientific knowledge (REF). DO YOU THINK THIS IS USEFUL, OR A DISTRACTION?}
-In this section, we discuss some tools and suggestions for diagnosing mechanistic models with the goal of making the subjective assessment of model ``usefulness" more objective by relying on the quantitative and statistical ability of the model to match the observed data, which we call the model's goodness-of-fit
-\eic{GOODNESS-OF-FIT SEEMED INITIALLY TO ME A MEASURE OF "RIGHT VS WRONG" RATHER THAN "USEFUL VS USELESS". I THINK NOW I SEE YOUR POINT: GOODNESS OF FIT CAN GIVE US SOME INDICATION OF HOW WRONG A MODEL IS, WITH THE GUIDING PRINCIPLE THAT A MODEL WHICH IS TOO FAR WRONG IS PROBABLY NOT RELIABLE FOR USEFUL PURPOSES. MAYBE WE HAVE TO EXPLAIN THIS TO THE READER?}
+This is not just practical advice for applied statistics, but matches broader appreciation of the limitations of all scientific knowledge \eic{REF???}.
+In this section, we provide some tools and suggestions for diagnosing mechanistic models with the goal of making the subjective assessment of model ``usefulness" more objective.
+To do this, we will rely on the quantitative and statistical ability of the model to match the observed data, which we call the model's {\it goodness-of-fit}, with the guiding principle that a model which cannot adequately describe observed data may not be reliable for useful purposes. 
 Goodness-of-fit may provide evidence supporting the causal interpretation of one model versus another, but cannot by itself rule out the possibility of alternative explanations.
 
 One common approach to assess a mechanistic model's goodness-of-fit is to compare simulations from the fitted model to the observed data.
@@ -1673,7 +1657,7 @@ Consequently, we should not require a candidate mechanistic model to beat all be
 However, a mechanistic model which falls far short against benchmarks is evidently failing to explain some substantial aspect of the data.
 A convenient measure of fit should have interpretable differences that help to operationalize the meaning of far short.
 Ideally, the measure should also have favorable theoretical properties.
-Consequently, we focus on log-likelihood as a measure of goodness of fit, and we adjust for the degrees of freedom of the models to be compared by using the Akaike information criterion (AIC) \eic{REF}.
+Consequently, we focus on log-likelihood as a measure of goodness of fit, and we adjust for the degrees of freedom of the models to be compared by using the Akaike information criterion (AIC) \citep{aic74}.
 
 In some cases, a possible benchmark model could be a generally accepted mechanistic model, but often no such model is available.
 Because of this, we use a log-linear Gaussian ARMA model as an associative benchmark, as recommended by \citet{he10}.
@@ -1755,11 +1739,11 @@ if (RUN_LEVEL != 3 & file.exists("model3/run_level_3/SpatPomp_res.rds")) {
       ### Get likelihood for subset of the data
       
       # Find appropriate sub-set
-      in_subset_cols <- h3_bpf[[1]]@times >= as.numeric(dateToYears(as.Date("2014-03-01")))
+      in_subset_cols <- h3_bpf[[1]]@times >= as.numeric(lubridate::decimal_date(as.Date("2014-03-01")))
       in_subset_rows <- h3_bpf[[1]]@unit_names != 'Ouest'
       
       mod3_coupled_subset_evals <- c()
-      for (i in 1:length(pf)) {
+      for (i in 1:length(h3_bpf)) {
         mod3_coupled_subset_evals <- c(
           mod3_coupled_subset_evals,
           sum(h3_bpf[[i]]@block.cond.loglik[in_subset_rows, in_subset_cols])
@@ -1919,7 +1903,7 @@ lee3_sub <- haiti3_lee_et_al()
 # that are not part of this subset as NA. This will allow us to estimate
 # the likelihood for only the values that were considered during the
 # parameter estimation phase.
-set_as_na <- lee3_sub@times < dateToYears(as.Date('2017-06-10'))
+set_as_na <- lee3_sub@times < lubridate::decimal_date(as.Date('2017-06-10'))
 temp_ouest_cases <- lee3_sub@data['casesOuest', ]
 temp_ouest_cases[set_as_na] <- NA_real_
 lee3_sub@data['casesOuest', ] <- temp_ouest_cases
@@ -2024,8 +2008,8 @@ Number of &
 \hline
 \end{tabular}
 \caption{\label{tab:likes}Log-likelihood values for each models compared to their ARMA benchmarks.
-Values in parenthesis are corresponding values using \citet{lee20} parameter estimates.  $\textsuperscript{1}$The reported likelihood is an upper bound of the likelihood of the \citet{lee20} model as it is the largest likelihood obtained using their parameter calibration regime. $\textsuperscript{2}$\cite{lee20} fit Model~3 to only a subset of the data (March 2014 onward) and did not include data from Ouest in 2015-2016.
-On this subset, the \cite{lee20} fit has a likelihood of $\Sexpr{myround(max(lee3_results$sub_ll_evals), 1)}$.
+Values in parenthesis are corresponding values using \citet{lee20} parameter estimates.  $\textsuperscript{1}$The reported likelihood is an upper bound of the likelihood of the \citet{lee20} model as it is the largest likelihood obtained using their parameter calibration regime. $\textsuperscript{2}$\cite{lee20} fit Model~3 to a subset of the data (March 2014 onward, excluding data from Ouest in 2015-2016).
+On this subset, their model has a likelihood of $\Sexpr{myround(max(lee3_results$sub_ll_evals), 1)}$.
 On this same subset, our model has a likelihood of $\Sexpr{myround(mod3_spatPomp_res$subset_ll, 1)}$.
 }
 \end{table}
@@ -2043,28 +2027,17 @@ Forecasting models are built using available scientific understanding, but forec
 In order to provide trustworthy information, however, the reliability of the forecast should be undersood.
 In particular, researchers should account for various forms of uncertainty present in model forecasts, and  calibrate the proposed model to observed data.
 
-
-% \eic{I THINK WE WILL HAVE TO EXPLAIN THIS CAREFULLY IF THE POINT IS TO APPEAR NONTRIVIAL. IT IS WORTH NOTING THAT LEE ET AL DID NOT PROPERLY FORECAST FROM THE BEST ESTIMATE OF THE CURRENT STATE. HOWEVER, IT WILL BE OBVIOUS TO MOST SATISTICAL READERS THAT THIS IS NOT THE BEST THING TO DO. IT MAY NOT BE SO OBVIOUS THAT THE DIFFERENCE IS IMPORTANT IF AND ONLY IF A DETERMINISTIC MODEL IS INADEQUATE.}
-
-% As an example, we note that simulations from a well-fit mechanistic model may closely resemble the observed data $y_{1:N}^*$.
-% In such comparisons, these simulations are random draws from the complete estimated joint distribution $f_{\bm{X}^{(\modelCounter)}_{0:N}, \bm{Y}^{(\modelCounter)}_{1:N}}\left(x_{0:N}, y_{1:N}\mid \hat{\paramVec}\right)$, where $\modelCounter$ indexes the model used for simulations.
-% It can therefore be tempting to use simulations from this model up to time $N+s$, $f_{\bm{X}^{(\modelCounter)}_{0:N+s}, \bm{Y}^{(\modelCounter)}_{1:N+s}}\left(x_{0:N+s}, y_{1:N+s}\mid \hat{\paramVec}\right)$, with $s\geq 0$ to project the dynamic system up to a future time $N+s$, as it has been done in previous studies \citep{lee20,???}.
-% This approach, however, does not take advantage of the information about the state of the system that is contained in the observed data.
-% Note that each of the models in question (and, more generally, all models that are described as POMPs) are Markovian, that is, the history of the process $\{\bm{X}^{(\modelCounter)}_s, s\leq t\}$ for model $\modelCounter$ is uninformative about the future of the process $\{\bm{X}^{(\modelCounter)}_s, s\geq t\}$, given the current state $\bm{X}^{(\modelCounter)}_t$.
-% In other words, observing the data $\bm{Y}^{(\modelCounter)}_N = y_N^*$ at time $N$ provides more information about the future state of the system than the initial conditions.
-% In this case, draws from the conditional density $f_{\bm{X}^{(\modelCounter)}_{N:s}, \bm{Y}^{\modelCounter}_{N:s}}\big(x_{N:s}, y_{N:s}\mid \hat{\paramVec}, \bm{X}^{(\modelCounter)}_{N} = \bm{x}^{(\modelCounter)}_N\big)$ should be preferred as forecasts, as these simulations account for the most recent known state of the system.
 The most recently available information about a dynamic system should be used to obtain reliable forecasts.
 Using state space model $m$, this means that in order to obtain a forecast up to time $N+s$, where $s\geq 0$ and $N$ is the index for the last available data, we should simulate from the conditional density $f_{\bm{X}^{(\modelCounter)}_{N:s}, \bm{Y}^{\modelCounter}_{N:s}}\big(x_{N:s}, y_{N:s}\mid \hat{\paramVec}, \bm{X}^{(\modelCounter)}_{N} = \bm{x}^{(\modelCounter)}_N\big)$.
-We note, however, that $\bm{X}^{(\modelCounter)}_N$ is unobservable and therefore draws from the desired conditional density are unobtainable.
+The latent state $\bm{X}^{(\modelCounter)}_N$ is by definition unobservable, however, and therefore draws from the desired conditional density are unobtainable.
 Informed estimates of $\bm{X}^{(\modelCounter)}_N$ given the observed data $\bm{Y}^{(\modelCounter)}_{1:N} = y_{1:N}^*$ can easily be obtained using the filtering distribution.
 Let $\hat{\bm{X}}^{(\modelCounter), i}_N, \, i \in {1, 2, \ldots, J}$ be $\iid$ draws from the filtering distribution at time $N$, with density $\hat{\bm{X}}^{(\modelCounter), i}_N \sim f_{\bm{X}^{(\modelCounter)}_N|\bm{Y}^{(\modelCounter)}_{1:N}}(x_N \mid \hat{\paramVec}, y_{1:N}^*)$.
 A single model forecast can then be obtained by simulating from the model $f_{\bm{X}^{(\modelCounter)}_{N:s}, \bm{Y}^{(\modelCounter)}_{N:s}}\big(x_{N:s}, y_{N:s}\mid \hat{\paramVec}, \bm{X}^{(\modelCounter)}_{N} = \hat{\bm{X}}^{(\modelCounter), i}_N\big)$.
 Obtaining forecasts in this fashion allows us to obtain results that are consistent with the model assumptions and the observed data.
-% Intuitively, simulating the model starting at the filtering distribution of the most recently available time point is a more appropriate way to project a stochastic dynamic system into the future, as it is not expected that each simulation from initial conditions will result in a latent state at time $N$ consistent with the model and the observation $\bm{Y}^{(\modelCounter)}_N = y_N^*$.
 In this particular case study, projecting the future state of the cholera epidemic in Haiti starting from the draws from the filtering distribution allows the proposed models to benefit from the fact that very few cholera cases had been observed between 2018 and 2019, and that cases appear to be decreasing (i.e., the number of susceptible individuals may be small).
 This alone partially explains the unrealistic forecasts of \cite{lee20}, which were obtained by simulating the model from initial conditions;
 Table~S7 of their supplement material shows that of their simulations that were consistent with observing zero cases in 2019, all forecasts resulted in the elimination of cholera.
-\eic{THE QUESTION OF WHETHER TO USE A DETERMINISTIC MODEL REMAINS OF CURRENT INTEREST...}
+% \eic{THE QUESTION OF WHETHER TO USE A DETERMINISTIC MODEL REMAINS OF CURRENT INTEREST...}
 
 Another consideration to make when obtaining model forecasts is that of parameter uncertainty.
 It has been noted that the uncertainty in just a single parameter can lead to drastically different projections \citep{saltelli20}.
@@ -2077,141 +2050,11 @@ Because the focus of this study is on model fitting and evaluation, we do not pr
 Instead, we use the projections from point estimates to highlight a major deficiency of deterministic models, which is that the only variability in model projections is a result of parameter uncertainty, which leads to over-confidence in the projections.
 This observation is consistent with those made in \cite{king15}, and suggests that stochastic models should be preferred over deterministic models.
 
-We note---the credit of deterministic models---that of the four fitted models in \cite{lee20}, Model~2 provides the most apparently accurate forecasts.
-This perhaps demonstrates that while deterministic models describe the systems in a less realistic and useful way, the relative ease in fitting these models potentially results in fewer modeling errors.
+To the credit of deterministic models, of the four fitted models in \cite{lee20}, Model~2 provides the most apparently accurate forecasts.
+This perhaps demonstrates that while deterministic models describe the systems in a less realistic way, the relative ease in fitting these models potentially results in fewer modeling errors.
 As the data analysis becomes more refined, however, the deficiencies of deterministic models become increasingly apparent.
 
-\subsection{Comparison of Model Fit to Oustide Scientific Evidence}\label{sec:science}
-
-In a similar fashion, one can take advantage of certain mechanistic features contained in a particular model in order to make inference on a system.
-Examples of this are as diverse as estimating the effective reproductive number ($R_0$) of an infectious disease \citep{he10} or investigating interactions between pedestrians and autonomous vehicles \citep{domeyer22}.
-In our analysis, we demonstrate this ability by examining the results of fitting the flexible cubic spline term in Model~1 (Eq.~\myeqref{model1:lambda}--\myeqref{model1:beta}), which allows for a flexible estimation of seasonality in the force of infection.
-After fitting the model, we explore potential patterns in the seasonal transmission rate by plotting the average value of $\transmission$ in a typical year.
-Fig.~\ref{fig:h1SeasRain} shows that the estimated seasonal transmission rate $\transmission$ mimics the rainfall dynamics in Haiti, despite Model~1 not having access to rainfall data.
-This result provides evidence that rainfall plays an important role in cholera transmission in Haiti, which is consistent with previous studies \citep{eisenberg13,rinaldo12}.
-We also note the increase in the transmission rate during the Fall, which was also noticed at an earlier stage of the epidemic \citep{rinaldo12}.
-
-<<Get Model 1 Seasonality>>=
-plot_model_fun <- function(mod) {
-  params <- coef(mod)
-
-  beta1 <- params['beta1']
-  beta2 <- params['beta2']
-  beta3 <- params['beta3']
-  beta4 <- params['beta4']
-  beta5 <- params['beta5']
-  beta6 <- params['beta6']
-  betat <- params['betat']
-
-  get_beta <- function(time) {
-
-    covar <- t(mod@covar@table)
-    covar_df <- as.data.frame(covar)
-    covar_df$times <- mod@covar@times
-
-    betas <- matrix(c(beta1, beta2, beta3, beta4, beta5, beta6), nrow = 1)
-    si <- matrix(unlist(covar_df[time, -7]), ncol = 1)
-    if (time <= 430) {
-      return(as.numeric(exp(betas %*% si + betat * ((time - 215) / (430-215)))))
-    } else {
-      return(as.numeric(exp(betas %*% si + betat)))
-    }
-  }
-
-  return(get_beta)
-}
-
-get_beta1 <- plot_model_fun(h1)
-
-h1_seas_df <- data.frame(
-  'week' = 431:800,
-  'date' = lubridate::ymd("2010-10-16") + lubridate::weeks(431:800),
-  'trans' = purrr::map_dbl(431:800, get_beta1)
-) %>%
-  mutate(year = lubridate::year(date)) %>%
-  filter(year == 2020) %>%
-  mutate(trans_std = (trans - min(trans)) / (max(trans) - min(trans)))
-
-std_rain <- function(x) {
-  # This function simply standardizes the rain for us.
-  x / max(x)
-}
-
-df_rain <- haitiRainfall %>%
-  dplyr::summarize(
-    date = date, dplyr::across(Artibonite:`Sud-Est`, std_rain)
-  ) %>%
-  pivot_longer(
-    data = .,
-    cols = -date,
-    names_to = 'dep',
-    values_to = 'rainfall'
-  ) %>%
-  mutate(
-    year = lubridate::year(date),
-    week = lubridate::week(date)
-  ) %>%
-  group_by(year, week) %>%
-  summarize(national_weekly_rain = sum(rainfall)) %>%
-  ungroup() %>% # Not needed, but good practice
-  mutate(
-    date_week_start = lubridate::ymd(paste0(2014, "-01-01")) + lubridate::weeks(week - 1),
-    week_date = as.Date(date_week_start, format = "%m-%d"),
-    std_national_rain = (national_weekly_rain - min(national_weekly_rain, na.rm = TRUE)) / (max(national_weekly_rain, na.rm = TRUE) - min(national_weekly_rain, na.rm = TRUE))
-  )
-
-mean_rain <- df_rain %>%
-  group_by(week_date) %>%
-  summarize(mean_rain = mean(std_national_rain)) %>%
-  ungroup() %>%
-  mutate(mean_rain = (mean_rain - min(mean_rain)) / ((max(mean_rain) - min(mean_rain))))
-
-gg_rain <- df_rain %>%
-  filter(week != 1, week != max(week)) %>%
-  ggplot(aes(x = week_date, y = std_national_rain, group = year, col = year)) +
-  geom_line() +
-  theme_bw() +
-  guides(color = 'none') +
-  ylab('Standardized Weekly\nNational Rain') +
-  theme(axis.title.x = element_blank(),
-        axis.ticks.x = element_blank(),
-        axis.text.x = element_blank(),
-        axis.text.y = element_text(size = 7.5),
-        axis.title.y = element_text(size = 9))
-
-gg_trans <- ggplot() +
-  geom_line(data = h1_seas_df, aes(x = date, y = trans_std), linetype = 'dashed') +
-  geom_line(
-    data = mean_rain,
-    aes(x = week_date + lubridate::years(6), y = mean_rain),
-    col = '#2166ac'
-  ) +
-  scale_x_date(date_labels = "%b", date_breaks = '1 month') +
-  ylab('Standardized Seasonal\nContact Rate') +
-  theme(axis.title.x = element_blank(),
-        axis.text = element_text(size = 7.5),
-        axis.title.y = element_text(size = 9))
-
-@
-
-\begin{figure}[ht]
-\centering
-<<Model1_Seasonality_Figure, fig.height=2.9, fig.width=5, fig.align='center'>>=
-cowplot::plot_grid(gg_rain, gg_trans, align = "v", ncol = 1)
-@
-\caption{\label{fig:h1SeasRain}
-(Top) weekly rainfall in Haiti, lighter colors representing more recent years.
-(Bottom) estimated seasonality in the transmission rate (dashed line) plotted alongside mean rainfall (solid line).
-% Observed spikes in rainfall correspond to peaks in the seasonal transmission $\transmission$ in Model~1; similarly, lower values of $\transmission$ correspond to the dry periods.
-}
-\end{figure}
-
-While such inference is useful, one must be careful not to assume the results of a single analysis as a de facto feature of the system.
-It is important instead to recognize and assess the modeling simplifications and assumptions that were used in order to arrive at the conclusions.
-
-\subsection{Predicting the Effect of Interventions}\label{sec:interventions}
-
-An additional benefit of mechanistic modeling is ability to simulate various interventions on a system; this feature is useful to inform policy and was the primary goal of \citet{lee20}.
+Forecasting can be used to simulate the simulate various interventions on a system; this feature is useful to inform policy and was the primary goal of \citet{lee20}.
 Outcomes of their study include estimates for the probability of cholera elimination and cumulative number of cholera infections under several possible vaccination scenarios.
 Mimicking their efforts, we define cholera elimination as having less than one infection of cholera over at least 52 consecutive weeks in the 10-year projection period, and provide forecasts under the following vaccination scenarios:
 
@@ -2915,7 +2758,7 @@ mod3_probElims <- rbind(
 
 mod1_probElims$mod <- "Model 1"
 mod3_probElims$mod <- "Model 3"
-mod3_probElims$time <- yearsToDate(mod3_probElims$time)
+mod3_probElims$time <- as.Date(lubridate::round_date(lubridate::date_decimal(mod3_probElims$time), unit = 'day'))
 
 all_prob_elims <- dplyr::bind_rows(mod1_probElims, mod3_probElims)
 @
@@ -3184,6 +3027,147 @@ Parameters in blue were fixed based on scientific reasoning and not fitted to th
 Translations back into the notation of \citet{lee20} are given in Table~S1.
 }
 \end{table}
+
+\subsection{Reckoning Scientific Understanding With Fitted Models}\label{sec:science}
+
+The resulting mechanisms in a fitted model can be compared to current scientific knowledge about a system. 
+Synonymity between model based inference and our current understanding of a system may taken as a confirmation of both model based conclusions and our understanding of the system \jwc{REF???}.
+On the other hand, discrepancies found in these comparisons may have the potential to spark new scientific breakthroughs \jwc{REFS???}.
+The potential for new discoveries based on dynamic modeling outcomes is rooted in a model's ability to effectively approximate the system in question, and is therefore inexorably linked to a models goodness-of-fit. 
+As such, the perception of scientific conclusions made via dynamic modeling should be weighed by the model's goodness-of-fit. 
+
+In our analysis, we demonstrate how one may compare model mechanisms with current scientific understanding by examining the results of fitting the flexible cubic spline term in Model~1 (Eq.~\myeqref{model1:lambda}--\myeqref{model1:beta});
+the cubic splines permit flexible estimation of seasonality in the force of infection.
+After fitting the model, we explore potential patterns in the seasonal transmission rate by plotting the average value of $\transmission$ in a typical year.
+Fig.~\ref{fig:h1SeasRain} shows that the estimated seasonal transmission rate $\transmission$ mimics the rainfall dynamics in Haiti, despite Model~1 not having access to rainfall data.
+This result provides evidence that rainfall played an important role in cholera transmission in Haiti, consistent with previous studies \citep{lemaitre19,eisenberg13};
+the estimated seasonality also features an increased transmission rate during the Fall, which was noticed at an earlier stage of the epidemic \citep{rinaldo12}.
+
+<<Get Model 1 Seasonality>>=
+plot_model_fun <- function(mod) {
+  params <- coef(mod)
+
+  beta1 <- params['beta1']
+  beta2 <- params['beta2']
+  beta3 <- params['beta3']
+  beta4 <- params['beta4']
+  beta5 <- params['beta5']
+  beta6 <- params['beta6']
+  betat <- params['betat']
+
+  get_beta <- function(time) {
+
+    covar <- t(mod@covar@table)
+    covar_df <- as.data.frame(covar)
+    covar_df$times <- mod@covar@times
+
+    betas <- matrix(c(beta1, beta2, beta3, beta4, beta5, beta6), nrow = 1)
+    si <- matrix(unlist(covar_df[time, -7]), ncol = 1)
+    if (time <= 430) {
+      return(as.numeric(exp(betas %*% si + betat * ((time - 215) / (430-215)))))
+    } else {
+      return(as.numeric(exp(betas %*% si + betat)))
+    }
+  }
+
+  return(get_beta)
+}
+
+get_beta1 <- plot_model_fun(h1)
+
+h1_seas_df <- data.frame(
+  'week' = 431:800,
+  'date' = lubridate::ymd("2010-10-16") + lubridate::weeks(431:800),
+  'trans' = purrr::map_dbl(431:800, get_beta1)
+) %>%
+  mutate(year = lubridate::year(date)) %>%
+  filter(year == 2020) %>%
+  mutate(trans_std = (trans - min(trans)) / (max(trans) - min(trans)))
+
+std_rain <- function(x) {
+  # This function simply standardizes the rain for us.
+  x / max(x)
+}
+
+df_rain <- haitiRainfall %>%
+  dplyr::summarize(
+    date = date, dplyr::across(Artibonite:`Sud-Est`, std_rain)
+  ) %>%
+  pivot_longer(
+    data = .,
+    cols = -date,
+    names_to = 'dep',
+    values_to = 'rainfall'
+  ) %>%
+  mutate(
+    year = lubridate::year(date),
+    week = lubridate::week(date)
+  ) %>%
+  group_by(year, week) %>%
+  summarize(national_weekly_rain = sum(rainfall)) %>%
+  ungroup() %>% # Not needed, but good practice
+  mutate(
+    date_week_start = lubridate::ymd(paste0(2014, "-01-01")) + lubridate::weeks(week - 1),
+    week_date = as.Date(date_week_start, format = "%m-%d"),
+    std_national_rain = (national_weekly_rain - min(national_weekly_rain, na.rm = TRUE)) / (max(national_weekly_rain, na.rm = TRUE) - min(national_weekly_rain, na.rm = TRUE))
+  )
+
+mean_rain <- df_rain %>%
+  group_by(week_date) %>%
+  summarize(mean_rain = mean(std_national_rain)) %>%
+  ungroup() %>%
+  mutate(mean_rain = (mean_rain - min(mean_rain)) / ((max(mean_rain) - min(mean_rain))))
+
+gg_rain <- df_rain %>%
+  filter(week != 1, week != max(week)) %>%
+  ggplot(aes(x = week_date, y = std_national_rain, group = year, col = year)) +
+  geom_line() +
+  theme_bw() +
+  guides(color = 'none') +
+  ylab('Standardized Weekly\nNational Rain') +
+  theme(axis.title.x = element_blank(),
+        axis.ticks.x = element_blank(),
+        axis.text.x = element_blank(),
+        axis.text.y = element_text(size = 7.5),
+        axis.title.y = element_text(size = 9))
+
+gg_trans <- ggplot() +
+  geom_line(data = h1_seas_df, aes(x = date, y = trans_std), linetype = 'dashed') +
+  geom_line(
+    data = mean_rain,
+    aes(x = week_date + lubridate::years(6), y = mean_rain),
+    col = '#2166ac'
+  ) +
+  scale_x_date(date_labels = "%b", date_breaks = '1 month') +
+  ylab('Standardized Seasonal\nContact Rate') +
+  theme(axis.title.x = element_blank(),
+        axis.text = element_text(size = 7.5),
+        axis.title.y = element_text(size = 9))
+
+@
+
+\begin{figure}[ht]
+\centering
+<<Model1_Seasonality_Figure, fig.height=2.9, fig.width=5, fig.align='center'>>=
+cowplot::plot_grid(gg_rain, gg_trans, align = "v", ncol = 1)
+@
+\caption{\label{fig:h1SeasRain}
+(Top) weekly rainfall in Haiti, lighter colors representing more recent years.
+(Bottom) estimated seasonality in the transmission rate (dashed line) plotted alongside mean rainfall (solid line).
+}
+\end{figure}
+
+While dynamic models may potentially result in meaningful scientific insights, one must be careful not to assume the results of a single analysis as a de-facto feature of the system.
+It is important instead to recognize and assess the modeling simplifications and assumptions that were used in order to arrive at the conclusions.
+In epidemiological studies, for example, it is unreasonable to expect that our quantitative understanding of individual-level processes will perfectly match model parameters that were fit to population-level case counts \jwc{REF??}.
+This makes the direct interpretation of such parameters difficult. 
+
+Our case study provides an example of this in the parameter estimate for the duration of natural immunity due to cholera infection $\muRS^{-1}$. 
+Under the framework of Model~2, the best estimate for this parameter is $\Sexpr{signif(1/h2_fit$h2_params["sigma"],2)}$, suggesting that individuals have effectively permanent immunity to cholera once infected, and thus the pool of susceptible individuals decreases over time. 
+The interpretation of this result is muddled due to the fact that the data ranged from 2010-2019, and therefore estimates of immunity longer than 10 years---the upper end of previous estimates of natural immunity \citep{king08}---effectively result in the same model dynamics. 
+The depletion of susceptible individuals may also be attributed to confounding mechanisms that are unaccounted for in the model---such as vaccination and other non-pharmaceutical interventions that reduce cholera transmission \citep{trevisin22, rebaudet21}---that were not accounted for in the model. 
+Perhaps the best interpretation of this results, then, is that the model most adequately describes the observed data by having a steady decrease in the number of susceptible individuals; in this case, the fact that the parameter estimate $\muRS$ is inconsistent with the expected result can be taken as evidence of model mispecification. 
+
 
 \section{Advising policy via dynamic modeling}\label{sec:advice}
 
