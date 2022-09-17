@@ -596,11 +596,18 @@ foreach(
   .combine = rbind
 ) %dopar% {
   guess <- coef(lee1_epi_mif)
-  sims <- simulate(h1_epi, nsim = N_LEE_SIMS, format = 'data.frame',
-                   params = guess)  # 20 sims for each set of parameters
+  sims <- simulate(
+    h1_epi,
+    nsim = N_LEE_SIMS,
+    format = 'data.frame',
+    params = guess
+  )  %>%
+    dplyr::filter(week == max(week)) %>%
+    dplyr::select(-.id, -week)
+
   sims$param_set <- i
   sims
-} -> all_sims
+} -> start_states
 
 #-------------------------- Step 3 ----------------------
 
@@ -618,7 +625,6 @@ foreach(
 #-------------------------- Step 4 ----------------------
 
 h1_end <- haiti1(period = "endemic")
-start_states <- all_sims %>% filter(week == max(week))
 
 end_rw <- rw.sd(
   beta1 = 0.05,
@@ -658,7 +664,7 @@ if (RUN_LEVEL != 3 & file.exists("model1/run_level_3/lee1_end_fit.rds")) {
 
         start_states %>%
           filter(param_set == i) %>%
-          select(-.id, -week, -param_set) %>%
+          select(-param_set) %>%
           sapply(., median, na.rm = TRUE) -> rinit_parms
 
         # Set the inital state
@@ -785,7 +791,7 @@ gc()
 mod1_lee_ll <- max(lee_end_ll$pfLL, na.rm = TRUE) + max(lee_epi_ll$pfLL, na.rm = TRUE)
 
 rm(
-  lee_end_ll, lee_epi_ll, h1_end, h1_epi, all_sims, end_start,
+  lee_end_ll, lee_epi_ll, h1_end, h1_epi, end_start,
   N_LEE_SIMS, N_PARAMS, NMIF, NP_EVAL, NP_MIF, NREPS_EVAL
 )
 gc()
