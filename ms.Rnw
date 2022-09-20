@@ -1763,7 +1763,7 @@ Parameter calibration (whether Bayesian or frequentist) aims to find the best de
 Obtaining the best fitting set of parameters for a given model does not, however, guarantee that the model provides an accurate representation of the system in question.
 Model misspecification, which may be thought of as the omission of a mechanism in the model that is an important feature of the dynamic system, is inevitable at all levels of model complexity.
 To make progress, while accepting proper limitations, one must bear in mind the much-quoted observation of \citet{box79} that ``all models are wrong but some are useful.''
-This is not just practical advice for applied statistics, but matches broader appreciation of the limitations of all scientific knowledge \eic{REF???}.
+Beyond being good practical advice for applied statistics, this assertion is relevant for the philosophical justification of statistical inference as severe testing \citep[][Sec.~4.8]{mayo18}.
 In this section, we provide some tools and suggestions for diagnosing mechanistic models with the goal of making the subjective assessment of model ``usefulness" more objective.
 To do this, we will rely on the quantitative and statistical ability of the model to match the observed data, which we call the model's {\it goodness-of-fit}, with the guiding principle that a model which cannot adequately describe observed data may not be reliable for useful purposes.
 Goodness-of-fit may provide evidence supporting the causal interpretation of one model versus another, but cannot by itself rule out the possibility of alternative explanations.
