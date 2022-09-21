@@ -1504,7 +1504,7 @@ This issue is particularly troublesome for this case study: the inability to acc
 To combat this issue, we fit the model to log-transformed case counts, where the difference between periods of high and low infectiousness is less drastic.
 Other solutions include changing the measurement model to include overdispersion, as was done in Models~1 and~3.
 Here we chose to fit the model to transformed case counts rather than adding overdispersion to the measurement model with the goal of making the fewest changes to the model in \cite{lee20} as possible.
-In practice, however, the inclusion of overdispersion in the measurement process may be preferred \jwc{REFS???}.
+In practice, however, the inclusion of overdispersion in the measurement process may be preferred.
 
 We implemented this model using the \code{spatPomp} \code{R} package \citep{asfaw21github}.
 The model was then fit using the subplex algorithm, implemented in the  \code{subplex} package \citep{king2020Subplex}.
@@ -2142,7 +2142,7 @@ On this same subset, our model has a likelihood of $\Sexpr{myround(mod3_spatPomp
 Similar to comparing log-likelihoods across models, an additional powerful diagnosis tool is the comparison of conditional log-likelihoods.
 Conditional likelihoods, defined as the density $f_{Y_k | Y_1, \ldots, Y_{k - 1}}\big(Y_k = y_k^* | y_{1:k-1}^*\big)$, provide a basic description of how well the proposed model can describe each data point, given the previous observations.
 Comparing these results across models---including benchmark models---can help researchers identify potential model deficiencies, or errors in the observed data.
-Additional tools for assessing the goodness-of-fit of a model include plotting the effective sample size of each observation \jwc{REF???} and comparing any statistic of the observed data to simulations from the model, which is sometimes referred to as diagnostic probes (for example, the autocorrelation function (ACF), as was done in \cite{king15}).
+Additional tools for assessing the goodness-of-fit of a model include plotting the effective sample size of each observation, and comparing any statistic of the observed data to simulations from the model---which is sometimes referred to as diagnostic probes.
 
 \subsection{Forecasts}\label{sec:filter}
 
@@ -2167,7 +2167,7 @@ Table~S7 of their supplement material shows that of their simulations that were 
 It has been noted that the uncertainty in just a single parameter can lead to drastically different forecasts \citep{saltelli20};
 parameter uncertainty should therefore be considered when obtaining model forecasts to influence policy. 
 If a Bayesian technique is used for parameter estimation, the most natural way to account for parameter uncertainty is to obtain multiple simulations from the model where each simulation is obtained using parameters $\paramVec$ drawn from the posterior distribution $\paramVec \sim f_{\Theta}\big(\paramVec | \bm{Y}^{(\modelCounter)}_{1:N} = y_{1:N}^*\big)$.
-In the frequentest case, one approach is a quasi-empirical Bayes: endow to set $\Theta_K = \{\theta_1, \theta_2, \ldots, \theta_K\}$ with a discrete uniform distribution, such that $P\big(\paramVec = \theta_k\big) = \frac{1}{K}$ for all values $k \in \seq{1}{K}$.
+In the frequentist case, one approach is a quasi-empirical Bayes: endow to set $\Theta_K = \{\theta_1, \theta_2, \ldots, \theta_K\}$ with a discrete uniform distribution, such that $P\big(\paramVec = \theta_k\big) = \frac{1}{K}$ for all values $k \in \seq{1}{K}$.
 In this case, the posterior distribution of $\paramVec | \bm{Y}^{(\modelCounter)}_{1:N}$ can be expressed as: 
 $P\big(\paramVec = \theta_k | \bm{Y}^{(\modelCounter)}_{1:N} = y_{1:N}^*\big) = \frac{l(y_{1:N}^*; \theta_k)}{\sum_{j = 1}^K l(y_{1:N}^*; \theta_j)}$; to complete the formulation, we then choose the set $\Theta_K$ such that each $\theta_k \in \Theta_K$ is a single output of the MIF2 algorithm, which has been shown to be within a neighborhood of the MLE \cite{ionides15}. 
 This approach has been taken in previous studies \citep{king15}, and the result is simply weighing parameter sets based on their corresponding likelihoods: parameters with higher likelihoods should be used more frequently in model forecasts. 
@@ -3283,16 +3283,15 @@ cowplot::plot_grid(gg_rain, gg_trans, align = "v", ncol = 1)
 
 While dynamic models may potentially result in meaningful scientific insights, one must be careful not to assume the results of a single analysis as a de-facto feature of the system.
 It is important instead to recognize and assess the modeling simplifications and assumptions that were used in order to arrive at the conclusions.
-In epidemiological studies, for example, it is unreasonable to expect that our quantitative understanding of individual-level processes will perfectly match model parameters that were fit to population-level case counts \jwc{REF??}.
-This makes the direct interpretation of such parameters difficult.
+In epidemiological studies, for example, it is unreasonable to expect that our quantitative understanding of individual-level processes will perfectly match model parameters that were fit to population-level case counts \jwc{REF??},
+making direct interpretation estimated parameters difficult.
 
 Our case study provides an example of this in the parameter estimate for the duration of natural immunity due to cholera infection $\muRS^{-1}$.
 Under the framework of Model~2, the best estimate for this parameter is $\Sexpr{signif(1/h2_fit$h2_params["sigma"],2)}$, suggesting that individuals have effectively permanent immunity to cholera once infected, and thus the pool of susceptible individuals decreases over time.
 The interpretation of this result is muddled due to the fact that the data ranged from 2010-2019, and therefore estimates of immunity longer than 10 years---the upper end of previous estimates of natural immunity \citep{king08}---effectively result in the same model dynamics.
 The depletion of susceptible individuals may also be attributed to confounding mechanisms that are unaccounted for in the model---such as vaccination and other non-pharmaceutical interventions that reduce cholera transmission \citep{trevisin22, rebaudet21}---that were not accounted for in the model.
-Perhaps the best interpretation of this results, then, is that the model most adequately describes the observed data by having a steady decrease in the number of susceptible individuals.
-In this case, the fact that the parameter estimate $\muRS$ is inconsistent with the expected result can be taken as evidence of model mispecification.
-
+Perhaps the best interpretation of the estimated parameter, then, is that under model assumptions, the model most adequately describes the observed data by having a steady decrease in the number of susceptible individuals.
+The poor model fit compared to a log-linear benchmark (see Table~\ref{tab:likes}), and the large inconsistenty between model parameters and our understanding of the system, may be taken as evidence of model mispecificaiton. 
 
 \section{Robustness of model based conclusions}\label{sec:advice}
 
