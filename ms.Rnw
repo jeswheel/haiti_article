@@ -864,9 +864,9 @@ Diagnosis of model misspecification and development of alternative models can le
 
 \section{Introduction}
 
-Quantitative models for dynamic systems offer potential for designing effective control measures.
 Regulation of biological populations is a fundamental topic in epidemiology, ecology, fisheries and agriculture.
-Quantitative models for these population dynamics may be nonlinear and stochastic, with the resulting complexities compounded by incomplete understanding of the underlying biological mechanisms and by partial observability of the system variables.
+Population dynamics may be nonlinear and stochastic, with the resulting complexities compounded by incomplete understanding of the underlying biological mechanisms and by partial observability of the system variables.
+Quantitative models for these dynamic systems offer potential for designing effective control measures.
 Developing and testing such models, and assessing their fitness for guiding policy, is a challenging statistical task.
 Questions of interest include: What indications should we look for in the data to assess whether the model-based inferences are trustworthy?
 What diagnostic tests and model variations can and should be considered in the course of the data analysis?
@@ -889,15 +889,22 @@ Beyond this, the groups made autonomous decisions on what to include and exclude
 Despite this autonomy, and largely adhering to existing guidelines on creating models to inform policy \citep{behrend20,saltelli20}, the consensus across the four models was that an extensive nationwide vaccination campaign would be necessary to eliminate cholera from Haiti.
 This conclusion is inconsistent with the fact that there have been no confirmed cases since February, 2019 \citep{trevisin22}, despite the lack of a concentrated vaccination effort.
 
-The failure of \cite{lee20} to correctly predict the elimination of cholera has been debated \citep{francois20,rebaudetComment20,henrys20,leeReply20}.
-\citet{rebaudetComment20} suggested that the models proposed by \citet{lee20} were too unrealistic.
+The discrepancy between the model based conclusions of \cite{lee20} and the subsequent elimination of cholera cholera has been debated \citep{francois20,rebaudetComment20,henrys20,leeReply20}.
+Suggested origins of this discrepancy include the use of unrealistic models \citep{rebaudetComment20} and having unrealistic criteria for cholera elimination \citep{henrys20}.
 We find a more nuanced conclusion: attention to methodological details in model fitting, diagnosis and forecasting can improve each of the proposed model's ability to quantitatively describe observed data.
 These improvements results in forecasts that are more consistent with the observed outcome, without requiring major changes to the model structures.
 Based on this retrospective analysis, we offer suggestions on fitting mechanistic models to dynamic systems for future studies.
 
+While this work is focused on the models proposed in \cite{lee20}, we believe that our suggestions are relevant to a larger class of problems. 
+In order to determine the extent to which this work generalizes, we preformed a literature review by searching PubMed with keywords: Haiti, cholera, and model.
+The search resulted in 66 papers, of which 32 proposed or used dynamic models to describe the cholera epidemic in Haiti.
+This literature review confirmed that close attention to details in fitting, diagnosing, and forecasting is of great importance when modeling cholera in Haiti.
+% Although the literature review focused on cholera and Haiti, 
+The wide relevance of our findings in these papers---supplemented with studies of other epidemiological and dynamic systems---suggests that this work may also be relevant to a much broader class of problems. 
+
 We proceed by introducing Models~1--3 in Sec.~\ref{sec:models};
 in Sec.~\ref{sec:methods}, we present a methodological approach to examining and refining these models, and then use improved model fits to project cholera incidence in Haiti under various vaccination scenarios.
-We then conclude with recommendations on the use of mechanistic models to inform policy decisions in Sec.~\ref{sec:advice}.
+This is followed by a consideration of the robustness of model based policy recommendations in Sec.~\ref{sec:advice}, and a discussion in Sec.~\ref{sec:discussion}.
 
 \begin{figure}[ht]
 <<Plot_Reported_Cases, echo=FALSE, fig.height=3.5>>=
@@ -1391,23 +1398,10 @@ To our knowledge, the only plug-and-play frequentist methods that can maximize t
 These perturbations are carried out iteratively over multiple filtering operations, using the collection of parameters from the previous filtering pass as the parameter initialization for the next iteration, and decreasing the random walk variance at each step.
 
 The ability to maximize the likelihood allows for likelihood-based inference, like performing statistical tests for potential improvements to the model.
-% TODO: We should address somewhere why we included the process noise in Model 1. Anna suggested this below:
-% We first demonstrate this capability by proposing the inclusion of additional stochasticity in the latent process through the force of infection, similar to that in Model~3. Eq.~\myeqref{model1:lambda} becomes
-% \begin{equation}
-% \label{model1:lambda_wn}
-% \lambda(t) = \Big(\sum_{k=0}^{K}  I_{k}(t) + \asymptomRelativeInfect \sum_{k=0}^{K} A_{k}(t) \Big)^\nu d\Gamma_u(t)/dt \transmission(t)/N
-% \end{equation}
-% where $d\Gamma_u(t)/dt$ is multiplicative Gamma-distributed white noise.
-%
 % Part of the appeal of mechanistic models lies in their ability to illustrate a dynamical system.
 % Inherent is dynamical systems is randomness, and, in the context of epidemiology, this randomness is a crucial component to the system itself.
 % Useful and statistically sound incidence forecasting and prediction of vaccine efficacy are not only dependent upon a reasonable reflection of the natural system in the model; it is necessary for the model to also reflect the quantitative characteristics of the processes in question.
 % This need, itself, is dependent upon inclusion of sufficient stochasticity in the model \citep{breto09}.
-% For now, we motivate this decision by its presence in Model~3 and leave the more rigorous assessment of this adjustment to the supplement.
-% The above can no doubt be improved.
-% \arc{I think that evaluating the inclusion of both the noise and the trend parameter in the main text may distract from the main point of this manuscript, which is why I mentioned putting it in the supplement.}
-% \eic{The dynamic noise issue is important, but is well described elsewhere so can perhaps be handled mostly by references. Maybe we don't need to do more than mention that Lee et al constrained the noise parameter to be zero, but we found considerable advantage from including the parameter (XXX log units of likelihood) consistent with previous investigations (refs).}
-% Transition phrase here?
 We demonstrate this capability by proposing a linear trend $\transmissionTrend$ in transmission in Eq.~\myeqref{model1:beta}:
 \begin{equation}
 \label{model1:betat}
@@ -1798,7 +1792,7 @@ It should be universal practice to present measures of goodness of fit for publi
 This alone would assist authors and readers to confront any major statistical limitations of the proposed mechanistic models.
 In addition, the published goodness of fit provides a concrete measure for subsequent research to identify and remedy limitations in the analysis, or to update the investigation based on new data or new scientific understanding.
 When combined with online availability of data and code, objective measures of fit provide a powerful tool to accelerate scientific progress, following the paradigm of the {\it common task framework} \citep[][Sec.~6]{donoho17}.
-In our literature review of the Haiti cholera epidemic \eic{CHECK THIS. HOW/WHERE SHOULD WE DESCRIBE THIS?} no quantitative measures of goodness of fit, and no benchmark models, were considered in any of the ?? papers which calibrated a mechanistic model to data in order to obtain scientific conclusions.
+In our literature review of the Haiti cholera epidemic \eic{CHECK THIS} no quantitative measures of goodness of fit, and no benchmark models, were considered in any of the 24 papers which calibrated a mechanistic model to data in order to obtain scientific conclusions.
 
 The use of benchmarks may also be beneficial when developing models with varying spatial scale, where a direct comparison between models likelihoods is meaningless.
 In such a case, a benchmark model could be fit to each spatial resolution being considered, and each model compared to their respective benchmark.
@@ -2170,17 +2164,16 @@ This alone partially explains the unrealistic forecasts of \cite{lee20}, which w
 Table~S7 of their supplement material shows that of their simulations that were consistent with observing zero cases in 2019, all forecasts resulted in the elimination of cholera.
 % \eic{THE QUESTION OF WHETHER TO USE A DETERMINISTIC MODEL REMAINS OF CURRENT INTEREST...}
 
-Another consideration to make when obtaining model forecasts is that of parameter uncertainty.
-It has been noted that the uncertainty in just a single parameter can lead to drastically different projections \citep{saltelli20}.
-One possible approach to account for parameter uncertainty in model forecasts is by obtaining confidence intervals for each parameter, sampling parameters from the confidence intervals, simulating the model with the resulting parameter set, and then weighing the resulting model projections based on the likelihood of the given set of parameters, as was done in \citet{king15}.
-\eic{THE ``OBVIOUS'' THING TO DO HERE IS A BAYESIAN APPROACH. IN SOME SENSE, KING15 IS EMPIRICAL BAYES. IT MAY TAKE CARE TO DISCUSS THIS WITHOUT OPENING UP A CAN OF WORMS - I CAN HAVE A GO AT MAKING SUGGESTIONS, NEXT TIME I'M WORKING ON THE MS.}
-
-Note that in order to obtain projections that are consistent with the observed data, one must first be able to sample from the filtering distribution given each set of parameters.
-This approach can be done for both deterministic and stochastic models, but requires a large number of computations, especially as the number of observations and model parameters increase.
-Because the focus of this study is on model fitting and evaluation, we do not provide model projections accounting for parameter uncertainty.
-Instead, we use the projections from point estimates to highlight a major deficiency of deterministic models, which is that the only variability in model projections is a result of parameter uncertainty, which leads to over-confidence in the projections.
-This observation is consistent with those made in \cite{king15}, and suggests that stochastic models should be preferred over deterministic models.
-
+It has been noted that the uncertainty in just a single parameter can lead to drastically different forecasts \citep{saltelli20};
+parameter uncertainty should therefore be considered when obtaining model forecasts to influence policy. 
+If a Bayesian technique is used for parameter estimation, the most natural way to account for parameter uncertainty is to obtain multiple simulations from the model where each simulation is obtained using parameters $\paramVec$ drawn from the posterior distribution $\paramVec \sim f_{\Theta}\big(\paramVec | \bm{Y}^{(\modelCounter)}_{1:N} = y_{1:N}^*\big)$.
+In the frequentest case, one approach is a quasi-empirical Bayes: endow to set $\Theta_K = \{\theta_1, \theta_2, \ldots, \theta_K\}$ with a discrete uniform distribution, such that $P\big(\paramVec = \theta_k\big) = \frac{1}{K}$ for all values $k \in \seq{1}{K}$.
+In this case, the posterior distribution of $\paramVec | \bm{Y}^{(\modelCounter)}_{1:N}$ can be expressed as: 
+$P\big(\paramVec = \theta_k | \bm{Y}^{(\modelCounter)}_{1:N} = y_{1:N}^*\big) = \frac{l(y_{1:N}^*; \theta_k)}{\sum_{j = 1}^K l(y_{1:N}^*; \theta_j)}$; to complete the formulation, we then choose the set $\Theta_K$ such that each $\theta_k \in \Theta_K$ is a single output of the MIF2 algorithm, which has been shown to be within a neighborhood of the MLE \cite{ionides15}. 
+This approach has been taken in previous studies \citep{king15}, and the result is simply weighing parameter sets based on their corresponding likelihoods: parameters with higher likelihoods should be used more frequently in model forecasts. 
+This can be done for both deterministic and stochastic models, but requires a large number of computations, especially as the number of observations and model parameters increase.
+Because our direct aim is not to provide forecasts for policy recommendation, we do not include parameter uncertainty in our forecasts.
+Instead, we use the projections from point estimates to highlight a major deficiency of deterministic models, which is that the only variability in model projections is a result of parameter uncertainty, which leads to over-confidence in forecasts \cite{king15}.
 To the credit of deterministic models, of the four fitted models in \cite{lee20}, Model~2 provides the most apparently accurate forecasts.
 This perhaps demonstrates that while deterministic models describe the systems in a less realistic way, the relative ease in fitting these models potentially results in fewer modeling errors.
 As the data analysis becomes more refined, however, the deficiencies of deterministic models become increasingly apparent.
@@ -3132,7 +3125,7 @@ $\begin{array}{l}
   & \eqref{eq:model3:SA}
 \\
 Reporting rate
-  & $\reportRate=(\Sexpr{myround(p1["rho_epi"],3)}, \Sexpr{myround(p1["rho_end"],3)})$
+  & $\reportRate=\Sexpr{myround(p1["rho"], 3)}$
   & (S16) % TODO: Make sure manual equations match!
   & {\fixed $\reportRate=\Sexpr{myround(h2_fit$h2_params["Rho"],2)}$}
   & (S17)
@@ -3162,14 +3155,14 @@ Translations back into the notation of \citet{lee20} are given in Table~S1.
 \subsection{Reckoning Scientific Understanding With Fitted Models}\label{sec:science}
 
 The resulting mechanisms in a fitted model can be compared to current scientific knowledge about a system.
-Synonymity between model based inference and our current understanding of a system may taken as a confirmation of both model based conclusions and our understanding of the system \jwc{REF???}.
-On the other hand, discrepancies found in these comparisons may have the potential to spark new scientific breakthroughs \jwc{REFS???}.
-The potential for new discoveries based on dynamic modeling outcomes is rooted in a model's ability to effectively approximate the system in question, and is therefore inexorably linked to a models goodness-of-fit.
-As such, the perception of scientific conclusions made via dynamic modeling should be weighed by the model's goodness-of-fit.
+Agreement between model based inference and our current understanding of a system may taken as a confirmation of both model based conclusions and our understanding of the system.
+On the other hand, discrepancies found in these comparisons may have the potential to spark new scientific knowledge \citep{ganusov16}.
+The potential for new discoveries based on dynamic modeling outcomes, however, is rooted in a model's ability to effectively approximate the system in question, and is therefore inexorably linked to a models goodness-of-fit.
+As such, conclusions based on dynamic models that poorly fit observed data should not be considered as much as those resulting from models that describe observed data well. 
 
 In our analysis, we demonstrate how one may compare model mechanisms with current scientific understanding by examining the results of fitting the flexible cubic spline term in Model~1 (Eq.~\myeqref{model1:lambda}--\myeqref{model1:beta});
 the cubic splines permit flexible estimation of seasonality in the force of infection.
-After fitting the model, we explore potential patterns in the seasonal transmission rate by plotting the average value of $\transmission$ in a typical year.
+After fitting the model parameters, we explore potential patterns in the seasonal transmission rate by plotting the average value of $\transmission$ in a typical year.
 Fig.~\ref{fig:h1SeasRain} shows that the estimated seasonal transmission rate $\transmission$ mimics the rainfall dynamics in Haiti, despite Model~1 not having access to rainfall data.
 This result provides evidence that rainfall played an important role in cholera transmission in Haiti, consistent with previous studies \citep{lemaitre19,eisenberg13};
 the estimated seasonality also features an increased transmission rate during the Fall, which was noticed at an earlier stage of the epidemic \citep{rinaldo12}.
@@ -3297,17 +3290,18 @@ Our case study provides an example of this in the parameter estimate for the dur
 Under the framework of Model~2, the best estimate for this parameter is $\Sexpr{signif(1/h2_fit$h2_params["sigma"],2)}$, suggesting that individuals have effectively permanent immunity to cholera once infected, and thus the pool of susceptible individuals decreases over time.
 The interpretation of this result is muddled due to the fact that the data ranged from 2010-2019, and therefore estimates of immunity longer than 10 years---the upper end of previous estimates of natural immunity \citep{king08}---effectively result in the same model dynamics.
 The depletion of susceptible individuals may also be attributed to confounding mechanisms that are unaccounted for in the model---such as vaccination and other non-pharmaceutical interventions that reduce cholera transmission \citep{trevisin22, rebaudet21}---that were not accounted for in the model.
-Perhaps the best interpretation of this results, then, is that the model most adequately describes the observed data by having a steady decrease in the number of susceptible individuals; in this case, the fact that the parameter estimate $\muRS$ is inconsistent with the expected result can be taken as evidence of model mispecification.
+Perhaps the best interpretation of this results, then, is that the model most adequately describes the observed data by having a steady decrease in the number of susceptible individuals.
+In this case, the fact that the parameter estimate $\muRS$ is inconsistent with the expected result can be taken as evidence of model mispecification.
 
 
-\section{Advising policy via dynamic modeling}\label{sec:advice}
+\section{Robustness of model based conclusions}\label{sec:advice}
 
-\eic{I THINK IT IS INTERESTING THAT THE MODEL-SUPPORTED SUGGESTION BY \citep{andrews11} HAS LARGELY PROVED ACCURATE (VACCINATION, NON-PHARMACEUTICAL INTERVENTIONS, AND INFRASTRUCTURE IMPROVEMENTS ALL HAVE A ROLE AND SHOULD BE FOLLOWED SIMULTANEOUSLY)DESPITE LEGITIMATE CONCERNS ABOUT WHETHER THE SCIENTIFIC SUPPORT FOR THE MODEL IS STRONG ENOUGH TO ROBUSTLY GUIDE POLICY \citep{grad12}.
-THE MAIN CLAIM OF ANDREWS11 IS THAT FORECASTS AND POLICY NOT SUPPORTED BY A MODEL SEEM EVEN MORE UN-ROOTED THAN RECOMMENDATIONS BASED ON A WEAKLY SUPPORTED MODEL.
-THE CONCLUSION FROM ALL THIS, WHICH I THINK IS SUPPORTED BY OUR RE-ANALYSIS OF LEE ET AL, IS THAT MECHANISTIC MODELS FITTED TO DATA ARE A STRONG WAY TO ENFORCE CONSISTENT THINKING, BUT WEAKER AS A WAY TO CHECK THAT YOU ARE ACTUALLY RIGHT DUE TO THE LIMITATIONS OF INFERRING CAUSAL MECHANISMS FROM OBSERVATIONAL DATA.
-POLICY-MAKERS SHOULD FOLLOW AN APPROACH WHICH IS SELF-CONSISTENT AND CONSISTENT WITH PREVIOUS EVIDENCE THAT MIGHT WORK (WHICH MODELS CAN HELP WITH) BUT THEY MUST BE AGILE AS NEW EVIDENCE EMERGES.
-MODELS, TOGETHER WITH DATA ANALYSIS, CAN ALSO HELP REVEAL WHEN THE EVIDENCE SUPPORTING A P0LICY IS BREAKING DOWN, FORCING A RE-THINK.
-}
+% \eic{I THINK IT IS INTERESTING THAT THE MODEL-SUPPORTED SUGGESTION BY \citep{andrews11} HAS LARGELY PROVED ACCURATE (VACCINATION, NON-PHARMACEUTICAL INTERVENTIONS, AND INFRASTRUCTURE IMPROVEMENTS ALL HAVE A ROLE AND SHOULD BE FOLLOWED SIMULTANEOUSLY)DESPITE LEGITIMATE CONCERNS ABOUT WHETHER THE SCIENTIFIC SUPPORT FOR THE MODEL IS STRONG ENOUGH TO ROBUSTLY GUIDE POLICY \citep{grad12}.
+% THE MAIN CLAIM OF ANDREWS11 IS THAT FORECASTS AND POLICY NOT SUPPORTED BY A MODEL SEEM EVEN MORE UN-ROOTED THAN RECOMMENDATIONS BASED ON A WEAKLY SUPPORTED MODEL.
+% THE CONCLUSION FROM ALL THIS, WHICH I THINK IS SUPPORTED BY OUR RE-ANALYSIS OF LEE ET AL, IS THAT MECHANISTIC MODELS FITTED TO DATA ARE A STRONG WAY TO ENFORCE CONSISTENT THINKING, BUT WEAKER AS A WAY TO CHECK THAT YOU ARE ACTUALLY RIGHT DUE TO THE LIMITATIONS OF INFERRING CAUSAL MECHANISMS FROM OBSERVATIONAL DATA.
+% POLICY-MAKERS SHOULD FOLLOW AN APPROACH WHICH IS SELF-CONSISTENT AND CONSISTENT WITH PREVIOUS EVIDENCE THAT MIGHT WORK (WHICH MODELS CAN HELP WITH) BUT THEY MUST BE AGILE AS NEW EVIDENCE EMERGES.
+% MODELS, TOGETHER WITH DATA ANALYSIS, CAN ALSO HELP REVEAL WHEN THE EVIDENCE SUPPORTING A P0LICY IS BREAKING DOWN, FORCING A RE-THINK.
+% }
 
 A model which aspires to provide quantitative guidance for assessing interventions should provide a quantitative statistical fit for available data.
 However, strong statistical fit does not guarantee a correct causal structure: it does not even necessarily require the model to assert a causal explanation.
@@ -3333,20 +3327,15 @@ The robust statistical conclusion is that a model which allows for change fits b
 The ongoing global COVID-19 pandemic has provided a clear example on how government policy may be affected by the conclusions of scientific models.
 This article demonstrates that fitting appropriate scientific models remains a challenging statistical task, and therefore great care is needed when fitting scientific models for policy recommendations.
 We provided a few suggestions that may aid the fitting of mechanistic models such as comparing model likelihoods to a benchmark.
-Improved model fits allows for meaningful statistical inference that may provide valuable insight on a dynamic system and may improve the accuracy of model-based projections.
-% TODO: "Improved model fits", or "Improved model fitting", based on Anna's suggestion.
+Improved model fits allows for meaningful statistical inference that may provide valuable insight on a dynamic system and may improve the accuracy of model forecasts.
 Caution is nonetheless needed when making policy based on modeling conclusions, as model misspecification may invalidate conclusions.
-% TODO: Citation above?
 
-Various suggestions been made about why \citet{lee20} failed to accurately predict the eventual eradication of cholera from Haiti, including model misspecification, overly difficult elimination criteria, and a potential conflict of interest \citep{rebaudetComment20,henrys20}.
-Here, we instead argue that careful attention to important statistical details could have correctly resulted in the conclusion of imminent cholera elimination.
+In this article we argue that careful attention to important statistical details could have led the models in \cite{lee20} to correctly predict the imminent cholera elimination.
 We acknowledge the benefit of hindsight: our demonstration of a statistically principled route to obtain better-fitting models with more accurate predictions does not rule out the possibility of discovering other models that fit well yet predict poorly.
-
 We used the same data and models, and even much of the same code, as \citet{lee20}, and yet ended up with drastically different conclusions.
 At a minimum, we have shown that the conclusions are sensitive to details in how the data analysis is carried out, and that attention to statistical fit (including numerical issues such as likelihood maximization) can lead to improved policy guidance.
 
-We acknowledge there are limitations to this study;
-one example was the inability to fit model parameters to the fully-coupled version of Model~3.
+We acknowledge there are limitations to this study, such as the inability to fit model parameters to the fully-coupled version of Model~3.
 Promising theoretical and methodological developments \citep{ning21ibpf,ionides22} based on the Block Particle Filter \citep{rebeschini15} may potentially be used to obtain better parameter estimates for Model~3 in future work.
 
 Inference for mechanistic time series models offers opportunities for understanding and controlling complex dynamic systems.
@@ -3354,7 +3343,7 @@ This case study has investigated issues requiring attention when applying powerf
 Care must be taken to ensure that the computationally intensive numerical calculations are carried out adequately.
 Once that is accomplished, care is required to assess what causal conclusions can properly be inferred given the possibility of alternative explanations consistent with the data.
 Studies that combine model development with thoughtful data analysis, supported by a high standard of reproducibility, build knowledge about the system under investigation.
-Cautionary warnings about the difficulties inherent in understanding complex systems \citep{saltelli20,ioannidis20} should motivate us to follow best practices in data analysis, rather than avoiding the challenge.
+Cautionary warnings about the difficulties inherent in understanding complex systems \citep{saltelli20,ioannidis20,ganusov16} should motivate us to follow best practices in data analysis, rather than avoiding the challenge.
 
 \subsection{Reproducibility and Extendability}
 
