@@ -1742,11 +1742,11 @@ A natural question that arises is if the difference between $\hat{\paramVec}$ an
 The answer to this question requires the ability to reliably estimate $\hat{\paramVec}$, the answer to which is model specific and beyond the scope of this case study.
 
 A brief analysis of the fitted parameters $\tilde{\paramVec}$ provides some interesting insight.
-Consider the unexpectedly large exponent on rainfall: $r = \Sexpr{signif(p3s["r"],3)}$ (Eq.~\ref{eq:model3:water}).
+Consider the large estimated exponent on rainfall: $r = \Sexpr{signif(p3s["r"],3)}$ (Eq.~\ref{eq:model3:water}).
 Because the value of rainfall $J(t) \in (0, 1)$, the large coefficient results in $J(t)^r \approx 0$.
 This result may initially be surprising given the importance of rainfall as a seasonal diver of cholera infections in Haiti (see Sec.~\ref{sec:science}).
 One plausible explanation of this result is that the fitting procedure---used to obtain parameter values in the independent department model given the reported cases in other departments---has learned an over-dependence on the reported cholera cases in other departments, and thus the seasonality of cholera incidence in department $u$ depends on the highly correlated covariate of the reported cholera cases in departments $1:U\setminus \{u\}$.
-Whatever the case may be, this fitting procedure results in model likelihoods unable to improve upon a log-linear benchmark (see Sec.~\ref{sec:model_diagnostics} and Tab.~\ref{tab:likes}), and highlights the need for advancements in statistical methodology that permit inference on models with coupled metapopulation dynamics.
+Whatever the case may be, this fitting procedure results in a model that is unable to replicate the observed number of cases by simulating from initial conditions (see Fig.~\ref{h3spatsims}), and highlights the need for advancements in statistical methodology that permit inference on models with coupled metapopulation dynamics.
 
 \subsection{Model Diagnostics} \label{sec:model_diagnostics}
 
@@ -2656,8 +2656,8 @@ gridExtra::grid.arrange(
 @
 \caption{\label{fig:Mod1Scenarios}
 Simulations of Model~1 under each vaccination scenario.
-Blue line indicates the median of model simulations, and ribbon represents $95\%$ of simulations.
-The various vaccination campaigns made no practical difference in the median scenario, but a drastic difference in the extreme cases.
+Blue line indicates the simulated median of reported cases, and the ribbon represents $95\%$ of simulations.
+% The various vaccination campaigns made no practical difference in the median scenario, but a drastic difference in the extreme cases.
 }
 \end{figure}
 
@@ -2759,8 +2759,8 @@ gridExtra::grid.arrange(
 @
 \caption{\label{fig:Mod3Scenarios}
 Simulations of Model~3 under each vaccination scenario.
-Blue line indicates the median of model simulations, and ribbon represents $95\%$ of simulations.
-The various vaccination campaigns made no practical difference in the median scenario, but a drastic difference in the extreme cases.
+Blue line indicates the simulated median of reported cases, and ribbon represents $95\%$ of simulations.
+% The various vaccination campaigns made no practical difference in the median scenario, but a drastic difference in the extreme cases.
 }
 \end{figure}
 
