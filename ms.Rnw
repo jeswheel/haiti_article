@@ -3283,7 +3283,7 @@ cowplot::plot_grid(gg_rain, gg_trans, align = "v", ncol = 1)
 
 While dynamic models may potentially result in meaningful scientific insights, one must be careful not to assume the results of a single analysis as a de-facto feature of the system.
 It is important instead to recognize and assess the modeling simplifications and assumptions that were used in order to arrive at the conclusions.
-In epidemiological studies, for example, it is unreasonable to expect that our quantitative understanding of individual-level processes will perfectly match model parameters that were fit to population-level case counts \jwc{REF??},
+In epidemiological studies, for example, it is unreasonable to expect that our quantitative understanding of individual-level processes will perfectly match model parameters that were fit to population-level case counts \citep{he10} \jwc{ED: ARE THERE BETTER REFERENCES FOR THIS?},
 making direct interpretation estimated parameters difficult.
 
 Our case study provides an example of this in the parameter estimate for the duration of natural immunity due to cholera infection $\muRS^{-1}$.
