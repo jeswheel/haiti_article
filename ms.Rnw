@@ -1789,12 +1789,11 @@ It should be universal practice to present measures of goodness of fit for publi
 This alone would assist authors and readers to confront any major statistical limitations of the proposed mechanistic models.
 In addition, the published goodness of fit provides a concrete measure for subsequent research to identify and remedy limitations in the analysis, or to update the investigation based on new data or new scientific understanding.
 When combined with online availability of data and code, objective measures of fit provide a powerful tool to accelerate scientific progress, following the paradigm of the {\it common task framework} \citep[][Sec.~6]{donoho17}.
-In our literature review of the Haiti cholera epidemic \eic{CHECK THIS} no quantitative measures of goodness of fit, and no benchmark models, were considered in any of the 24 papers which calibrated a mechanistic model to data in order to obtain scientific conclusions.
+In our literature review of the Haiti cholera epidemic, no benchmark models were considered in any of the 24 papers which calibrated a mechanistic model to data in order to obtain scientific conclusions.
 
 The use of benchmarks may also be beneficial when developing models with varying spatial scale, where a direct comparison between models likelihoods is meaningless.
 In such a case, a benchmark model could be fit to each spatial resolution being considered, and each model compared to their respective benchmark.
-Large advantages (shortcomings) in model likelihood relative to the benchmark for a given spatial scale that are not present in other spatial scales may provide weak evidence for (against) the spatial resolution under consideration.
-While these comparisons don't provide a formal statistical test of the amount of spatial resolution needed for a given model, they can be quite informative.
+Large advantages (shortcomings) in model likelihood relative to the benchmark for a given spatial scale that are not present in other spatial scales may provide weak evidence for (against) the statistical fit of models across a range of spatial resolutions.
 
 <<Table 2 Input, echo=FALSE, eval=TRUE>>=
 NREPS_EVAL <- switch(RUN_LEVEL,   3,   8,    36)
@@ -2139,7 +2138,8 @@ On this same subset, our model has a likelihood of $\Sexpr{myround(mod3_spatPomp
 Similar to comparing log-likelihoods across models, an additional powerful diagnosis tool is the comparison of conditional log-likelihoods.
 Conditional likelihoods, defined as the density $f_{Y_k | Y_1, \ldots, Y_{k - 1}}\big(Y_k = y_k^* | y_{1:k-1}^*\big)$, provide a basic description of how well the proposed model can describe each data point, given the previous observations.
 Comparing these results across models---including benchmark models---can help researchers identify potential model deficiencies, or errors in the observed data.
-Additional tools for assessing the goodness-of-fit of a model include plotting the effective sample size of each observation \citep{liu01}, and comparing any statistic of the observed data to simulations from the model \citep{wood10}---which is sometimes referred to as diagnostic probes \citep{king16}.
+Additional tools for assessing the goodness-of-fit of a model include plotting the effective sample size of each observation \citep{liu01}, and comparing summary statistics of the observed data to simulations from the model \citep{wood10}.
+These summary statistics are sometimes called diagnostic probes \citep{king16}.
 
 \subsection{Forecasts}\label{sec:filter}
 
@@ -2159,7 +2159,6 @@ Obtaining forecasts in this fashion allows us to obtain results that are consist
 In this particular case study, projecting the future state of the cholera epidemic starting from latent states that are draws from the filtering distribution allows the proposed models to benefit from the fact that very few cholera cases had been observed between 2018 and 2019, and that cases appear to be decreasing.
 This alone partially explains the unrealistic forecasts of \cite{lee20}, which were obtained by simulating the model from initial conditions;
 Table~S7 of their supplement material shows that of their simulations that were consistent with observing zero cases in 2019, all forecasts resulted in the elimination of cholera.
-% \eic{THE QUESTION OF WHETHER TO USE A DETERMINISTIC MODEL REMAINS OF CURRENT INTEREST...}
 
 It has been noted that the uncertainty in just a single parameter can lead to drastically different forecasts \citep{saltelli20};
 parameter uncertainty should therefore be considered when obtaining model forecasts to influence policy.
@@ -3277,45 +3276,34 @@ cowplot::plot_grid(gg_rain, gg_trans, align = "v", ncol = 1)
 }
 \end{figure}
 
-While dynamic models may potentially result in meaningful scientific insights, one must be careful not to assume the results of a single analysis as a de-facto feature of the system.
-It is important instead to recognize and assess the modeling simplifications and assumptions that were used in order to arrive at the conclusions.
-In epidemiological studies, for example, it is unreasonable to expect that our quantitative understanding of individual-level processes will perfectly match model parameters that were fit to population-level case counts \citep{he10} \jwc{ED: ARE THERE BETTER REFERENCES FOR THIS?},
-making direct interpretation estimated parameters difficult.
+For any model-based inference, it is important to recognize and assess the modeling simplifications and assumptions that were used in order to arrive at the conclusions.
+In epidemiological studies, for example, quantitative understanding of individual-level processes may not perfectly match model parameters that were fit to population-level case counts, even when the model provides a strong statistical fit \citep{he10}.
+This makes direct interpretation of estimated parameters delicate.
 
 Our case study provides an example of this in the parameter estimate for the duration of natural immunity due to cholera infection $\muRS^{-1}$.
 Under the framework of Model~2, the best estimate for this parameter is $\Sexpr{signif(1/h2_fit$h2_params["sigma"],3)}$, suggesting that individuals have effectively permanent immunity to cholera once infected, and thus the pool of susceptible individuals decreases over time.
-The interpretation of this result is muddled due to the fact that the data ranged from 2010-2019, and therefore estimates of immunity longer than 10 years---the upper end of previous estimates of natural immunity \citep{king08}---effectively result in the same model dynamics.
+To interpret this result, we bear in mind that the data ranged from 2010-2019, and therefore estimates of immunity longer than 10 years---the upper end of previous estimates of natural immunity \citep{king08}---effectively result in the same model dynamics.
 The depletion of susceptible individuals may also be attributed to confounding mechanisms that are unaccounted for in the model---such as vaccination and other non-pharmaceutical interventions that reduce cholera transmission \citep{trevisin22, rebaudet21}---that were not accounted for in the model.
 Perhaps the best interpretation of the estimated parameter, then, is that under model assumptions, the model most adequately describes the observed data by having a steady decrease in the number of susceptible individuals.
-The poor model fit compared to a log-linear benchmark (see Table~\ref{tab:likes}), and the large inconsistenty between model parameters and our understanding of the system, may be taken as evidence of model mispecificaiton.
+The weak statistical fit of Model~2 compared to a log-linear benchmark (see Table~\ref{tab:likes}) cautions us aginst drawing quantitative conclusions from this model.
+A model that has a poor statistical fit may nevertheless provide a useful conceptual framework for thinking about the system under investigation.
+However, a claim that the model has been validated against data should be reserved for situations where the model provides a statistical fit that is competitive against alternative explanations.
 
-\section{Robustness of model based conclusions}\label{sec:advice}\jwc{BETTER NAME FOR THIS?}
-
-% \eic{I THINK IT IS INTERESTING THAT THE MODEL-SUPPORTED SUGGESTION BY \citep{andrews11} HAS LARGELY PROVED ACCURATE (VACCINATION, NON-PHARMACEUTICAL INTERVENTIONS, AND INFRASTRUCTURE IMPROVEMENTS ALL HAVE A ROLE AND SHOULD BE FOLLOWED SIMULTANEOUSLY)DESPITE LEGITIMATE CONCERNS ABOUT WHETHER THE SCIENTIFIC SUPPORT FOR THE MODEL IS STRONG ENOUGH TO ROBUSTLY GUIDE POLICY \citep{grad12}.
-% THE MAIN CLAIM OF ANDREWS11 IS THAT FORECASTS AND POLICY NOT SUPPORTED BY A MODEL SEEM EVEN MORE UN-ROOTED THAN RECOMMENDATIONS BASED ON A WEAKLY SUPPORTED MODEL.
-% THE CONCLUSION FROM ALL THIS, WHICH I THINK IS SUPPORTED BY OUR RE-ANALYSIS OF LEE ET AL, IS THAT MECHANISTIC MODELS FITTED TO DATA ARE A STRONG WAY TO ENFORCE CONSISTENT THINKING, BUT WEAKER AS A WAY TO CHECK THAT YOU ARE ACTUALLY RIGHT DUE TO THE LIMITATIONS OF INFERRING CAUSAL MECHANISMS FROM OBSERVATIONAL DATA.
-% POLICY-MAKERS SHOULD FOLLOW AN APPROACH WHICH IS SELF-CONSISTENT AND CONSISTENT WITH PREVIOUS EVIDENCE THAT MIGHT WORK (WHICH MODELS CAN HELP WITH) BUT THEY MUST BE AGILE AS NEW EVIDENCE EMERGES.
-% MODELS, TOGETHER WITH DATA ANALYSIS, CAN ALSO HELP REVEAL WHEN THE EVIDENCE SUPPORTING A P0LICY IS BREAKING DOWN, FORCING A RE-THINK.
-% }
+\section{Robust interpretation of model based conclusions}\label{sec:advice}
 
 A model which aspires to provide quantitative guidance for assessing interventions should provide a quantitative statistical fit for available data.
 However, strong statistical fit does not guarantee a correct causal structure: it does not even necessarily require the model to assert a causal explanation.
 A causal interpretation is strengthened by corroborative evidence.
-For example, reconstructed latent variables (such as numbers of susceptible and recovered individuals) should make sense in the context of alternative measurements of these variables;
-parameters that have been calibrated to data should make sense in the context of alternative lines of evidence about the phenomena being modeled.
-% \jwc{Perhaps add comment on our final parameter estimates, and remove the following sentences in this paragraph.}
-% A model is necessarily a simplified approximation of a complex process, and so it is unreasonable to expect models (describing and fitted to population-level processes) to perfectly match quantitative understanding of individual-level processes.
-% Such discrepancies could lead to biases when interventions (modeled as effects on individuals) are included in the population-level, unless there are historical occurrences of the intervention which enable the consequence to be calibrated at the population level.
+For example, reconstructed latent variables (such as numbers of susceptible and recovered individuals) should make sense in the context of alternative measurements of these variables \citep{grad12}.
+In addition, parameters that have been calibrated to data should make sense in the context of alternative lines of evidence about the phenomena being modeled, while making allowance for the possibility that the interpretations of parameters may vary when modeling across differing spatial scales.
 
 If a mechanistic model including a feature (such as a representation of a mechanism, or the inclusion of a covariate) fits better than mechanistic models without that feature, and also has competitive fit compared to associative benchmarks, this may be taken as evidence supporting the scientific relevance of the feature.
 As for any analysis of observational data, we must be alert to the possibility of confounding.
 For a covariate, this shows up in a similar way to regression analysis: the covariate under investigation could be a proxy for some other unmodeled or unmeasured covariate.
 For a mechanism, the model feature could in principle explain the data by helping to account for some different unmodeled phenomenon.
-% Assessing potential confounding is part of building an argument for a causal interpretation of a fitted model.
 In the context of our analysis, the estimated trend in transmission rate could be explained by any trending variable (such as hygiene improvements, or changes in population behavior), resulting in confounding from colinear covariates.
 Alternatively, the trend could be attributed to a decreasing reporting rate rather than decreasing transmission rate, resulting in confounded mechanisms.
 The robust statistical conclusion is that a model which allows for change fits better than one which does not---we argue that a decreasing transmission rate is a plausible way to explain this, but the incidence data themselves do not provide enough information to pin down the mechanism.
-
 
 \section{Discussion}\label{sec:discussion}
 
@@ -3343,7 +3331,6 @@ Cautionary warnings about the difficulties inherent in understanding complex sys
 \subsection{Reproducibility and Extendability}
 
 \citet{lee20} published their code and data online, and this reproducibility facilitated our work.
-By design, the models were coded and analyzed independently, leading to differing implementation decisions.
 Robust data analysis requires not only reproducibility but also extendability: if one wishes to try new model variations, or new approaches to fitting the existing models, or plotting the results in a different way, this should be not excessively burdensome.
 Scientific results are only trustworthy so far as they can be critically questioned, and an extendable analysis should facilitate such examination \citep{gentleman07}.
 
@@ -3358,9 +3345,9 @@ The dynamic document, together with the R packages, form a {\it compendium}, def
 %% should be provided in the                %%
 %% Acknowledgements section.                %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%\begin{acks}[Acknowledgments]
-% The authors would like to thank ...
-%\end{acks}
+\begin{acks}[Acknowledgments]
+The authors would like to thank Mercedes Pascual and Betz Halloran for helpful discussions. Laura Matrajt provided additional data for the Model~2 analysis. 
+\end{acks}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Funding information, if any,             %%
 %% should be provided in the                %%
