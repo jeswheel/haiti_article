@@ -368,7 +368,7 @@ sample_rho <- function(beta, n_params = N_PARAMS) {
   slope <- (0.4/(5.1 - 6.75))
   intercpt <- -6.75 * slope
 
-  # Determine whice mode should the value of rho belong to, based on regression
+  # Determine which mode should the value of rho belong to, based on regression
   case_when(
     beta > 6.75 ~ 0,  # Large beta --> group "0"
     # Small beta --> more likely to be group "1", with increasing probability as beta gets smaller
@@ -667,7 +667,7 @@ if (RUN_LEVEL != 3 & file.exists("model1/run_level_3/lee1_end_fit.rds")) {
           select(-param_set) %>%
           sapply(., median, na.rm = TRUE) -> rinit_parms
 
-        # Set the inital state
+        # Set the initial state
         new_rinit <- Csnippet(
           sprintf(
             "
@@ -941,7 +941,7 @@ Models that focus on learning relationships between variables in a dataset are c
 The danger in using forecasting techniques which rely on associative models to predict the consequence of interventions is called the Lucas critique in an econometric context.
 \citet{lucas76} pointed out that it is naive to predict the effects of an intervention on a given system based entirely on historical associations.
 To successfully predict the effect of an intervention, a model should therefore both provide a quantitative explanation of existing data and should have a causal interpretation: a manipulation of the system should correspond quantitatively with the corresponding change to the model.
-This motivates the development of mechanistic statistical models, which provides a statistical fit to the available data while also supporting a causal intepretation.
+This motivates the development of mechanistic statistical models, which provides a statistical fit to the available data while also supporting a causal interpretation.
 
 The deliberate limitation of coordination between the groups of \citet{lee20} allows us to treat the models as fairly independently developed expert approaches to understanding cholera transmission.
 However, it led to differences in notation, and in subsets of the data chosen for analysis, that hinder direct comparison.
@@ -1085,7 +1085,7 @@ In \eqref{model2:transport} the spatial coupling is specified by a gravity model
 T_{u\varv} = v_{\mathrm{rate}} \times \frac{\mathrm{Pop}_u \mathrm{Pop}_{\varv}}{D_{u\varv}^2},
 \end{equation}
 where $\mathrm{Pop}_u$ is the mean population for department $u$,
-$D_{u\varv}$ is a distance measure estimating average road distance between rancomly chosen members of each population, and $v_{\mathrm{rate}}= 10^{-12}$ was treated as a fixed constant.
+$D_{u\varv}$ is a distance measure estimating average road distance between randomly chosen members of each population, and $v_{\mathrm{rate}}= 10^{-12}$ was treated as a fixed constant.
 In \eqref{model2:water_transport}, $T^W_{u\varv}$ is a measure of river flow between departments.
 The unit of $W_u(t)$ is cells per ml, with dose response modeled via a saturation constant of $\Wsat$ in \eqref{model2:lambda}.
 
@@ -1653,7 +1653,7 @@ plot_order <- c(
 %
 % \caption{\label{h3panelsims}
 % Simulations from initial conditions using panelPOMP version of Model~3.
-% The black curve represents true case count, the blue curve the median of 500 simulations from the model, and the grey ribbons representing $95\%$ confidence interval.
+% The black curve represents true case count, the blue curve the median of 500 simulations from the model, and the gray ribbons representing $95\%$ confidence interval.
 % }
 % \end{figure}
 
@@ -1726,7 +1726,7 @@ ggplot() +
 @
 \caption{\label{h3spatsims}
 Simulations from initial conditions using the spatially coupled version of Model~3.
-The black curve represents true case count, the blue line the median of 500 simulations from the model, and the grey ribbons representing $95\%$ confidence interval.
+The black curve represents true case count, the blue line the median of 500 simulations from the model, and the gray ribbons representing $95\%$ confidence interval.
 }
 \end{figure}
 
@@ -3285,7 +3285,7 @@ Under the framework of Model~2, the best estimate for this parameter is $\Sexpr{
 To interpret this result, we bear in mind that the data ranged from 2010-2019, and therefore estimates of immunity longer than 10 years---the upper end of previous estimates of natural immunity \citep{king08}---effectively result in the same model dynamics.
 The depletion of susceptible individuals may also be attributed to confounding mechanisms that are unaccounted for in the model---such as vaccination and other non-pharmaceutical interventions that reduce cholera transmission \citep{trevisin22, rebaudet21}---that were not accounted for in the model.
 Perhaps the best interpretation of the estimated parameter, then, is that under model assumptions, the model most adequately describes the observed data by having a steady decrease in the number of susceptible individuals.
-The weak statistical fit of Model~2 compared to a log-linear benchmark (see Table~\ref{tab:likes}) cautions us aginst drawing quantitative conclusions from this model.
+The weak statistical fit of Model~2 compared to a log-linear benchmark (see Table~\ref{tab:likes}) cautions us against drawing quantitative conclusions from this model.
 A model that has a poor statistical fit may nevertheless provide a useful conceptual framework for thinking about the system under investigation.
 However, a claim that the model has been validated against data should be reserved for situations where the model provides a statistical fit that is competitive against alternative explanations.
 
@@ -3301,7 +3301,7 @@ If a mechanistic model including a feature (such as a representation of a mechan
 As for any analysis of observational data, we must be alert to the possibility of confounding.
 For a covariate, this shows up in a similar way to regression analysis: the covariate under investigation could be a proxy for some other unmodeled or unmeasured covariate.
 For a mechanism, the model feature could in principle explain the data by helping to account for some different unmodeled phenomenon.
-In the context of our analysis, the estimated trend in transmission rate could be explained by any trending variable (such as hygiene improvements, or changes in population behavior), resulting in confounding from colinear covariates.
+In the context of our analysis, the estimated trend in transmission rate could be explained by any trending variable (such as hygiene improvements, or changes in population behavior), resulting in confounding from collinear covariates.
 Alternatively, the trend could be attributed to a decreasing reporting rate rather than decreasing transmission rate, resulting in confounded mechanisms.
 The robust statistical conclusion is that a model which allows for change fits better than one which does not---we argue that a decreasing transmission rate is a plausible way to explain this, but the incidence data themselves do not provide enough information to pin down the mechanism.
 
