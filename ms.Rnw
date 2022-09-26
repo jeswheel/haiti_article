@@ -235,6 +235,19 @@ dep_labeller <- as_labeller(
   )
 )
 
+plot_order <- c(
+  'Artibonite',
+  'Sud_Est',
+  'Nippes',
+  'Nord_Est',
+  'Ouest',
+  'Centre',
+  'Nord',
+  'Sud',
+  'Nord_Ouest',
+  'Grande_Anse'
+)
+
 options(
   scipen = 0,
   help_type = "html",
@@ -524,6 +537,8 @@ if (RUN_LEVEL != 3 & file.exists("model1/run_level_3/lee1_epi_fit.rds")) {
   lee1_epi_mif <- bake(
     file = paste0("model1/", rl_dir, "lee1_epi_fit.rds"),
     {
+      lee1_epi_mif_results <- list()
+
       foreach(
         i = 1:nrow(epi_params),
         .packages = c('pomp'),
@@ -538,7 +553,26 @@ if (RUN_LEVEL != 3 & file.exists("model1/run_level_3/lee1_epi_fit.rds")) {
           cooling.fraction.50 = 0.5,  # Cooling set so that we will reach smaller rw.sd at the end than the end of the unit3 search.
           rw.sd = epi_rw
         )
-      }
+      } -> lee1_epi_mif_out
+
+      foreach(i = 1:length(lee1_epi_mif_out), .combine = rbind) %do% {
+        guess <- coef(lee1_epi_mif_out[[i]])
+        sims <- simulate(
+          h1_epi,
+          n = N_LEE_SIMS,
+          format = 'data.frame',
+          params = guess
+        )  %>%
+          dplyr::filter(week == max(week)) %>%
+          dplyr::select(-.id, -week)
+
+          sims$param_set <- i
+          sims
+      } -> start_states
+
+      lee1_epi_mif_results$lee1_epi_mif_params <- t(coef(lee1_epi_mif_out))
+      lee1_epi_mif_results$start_states <- start_states
+      lee1_epi_mif_results
     }
   )
 }
@@ -569,9 +603,9 @@ if (RUN_LEVEL != 3 & file.exists("model1/run_level_3/lee1_epi_evals.rds")) {
         "pfse" = rep(0, length(lee1_epi_mif))
       )
 
-      for (j in 1:nrow(lee_epi_ll)) {
+      for (j in 1:nrow(lee1_epi_mif$lee1_epi_mif_params)) {
         # Get parameters of interest
-        pf_params <- coef(lee1_epi_mif[[j]])
+        pf_params <- lee1_epi_mif$lee1_epi_mif_params[j, ]
 
         # make results reproducible
         registerDoRNG((j * 687383921) %% 7919)
@@ -588,26 +622,6 @@ if (RUN_LEVEL != 3 & file.exists("model1/run_level_3/lee1_epi_evals.rds")) {
     }
   )
 }
-
-# First, we need to simulate the epidemic model using the fitted parameters.
-registerDoRNG(18599687)
-foreach(
-  i = 1:length(lee1_epi_mif),
-  .combine = rbind
-) %dopar% {
-  guess <- coef(lee1_epi_mif)
-  sims <- simulate(
-    h1_epi,
-    nsim = N_LEE_SIMS,
-    format = 'data.frame',
-    params = guess
-  )  %>%
-    dplyr::filter(week == max(week)) %>%
-    dplyr::select(-.id, -week)
-
-  sims$param_set <- i
-  sims
-} -> start_states
 
 #-------------------------- Step 3 ----------------------
 
@@ -641,7 +655,7 @@ end_rw <- rw.sd(
 registerDoParallel(20)
 registerDoRNG(21489587)
 
-end_start <- t(coef(lee1_epi_mif))
+end_start <- lee1_epi_mif$lee1_epi_mif_params
 
 # end_start <- epi_complete %>%
 #   select(-logLik)
@@ -656,13 +670,13 @@ if (RUN_LEVEL != 3 & file.exists("model1/run_level_3/lee1_end_fit.rds")) {
       foreach(
         i = 1:nrow(end_start),
         .packages = c('pomp'),
-        .combine = c
+        .combine = rbind
       ) %dopar% {
 
         output <- list()
         r_params <- end_start[i, ]
 
-        start_states %>%
+        lee1_epi_mif$start_states %>%
           filter(param_set == i) %>%
           select(-param_set) %>%
           sapply(., median, na.rm = TRUE) -> rinit_parms
@@ -704,7 +718,7 @@ if (RUN_LEVEL != 3 & file.exists("model1/run_level_3/lee1_end_fit.rds")) {
         )
 
         coef(h1_end) <- r_params
-        mif2(
+        mf_end <- mif2(
           h1_end,
           Np = NP_MIF,
           Nmif = NMIF,
@@ -712,23 +726,14 @@ if (RUN_LEVEL != 3 & file.exists("model1/run_level_3/lee1_end_fit.rds")) {
           cooling.fraction.50 = 0.05,  # Cooling set so that we will reach smaller rw.sd at the end than the end of the unit3 search.
           rw.sd = end_rw
         )
-        # output[['m2']] <- m2
-        #
-        # coef(h1_end) <- coef(m2)
-        # sims <- simulate(  # Step 5
-        #   h1_end, nsim = N_LEE_SIMS, format = 'data.frame',
-        #   params = coef(m2)
-        # )
-        # sims$param_set <- i
-        #
-        # output[['sims']] <- sims
-        # output
+
+        coef(mf_end)
       }
     }
   )
 }
 
-rm(end_rw, start_states)
+rm(end_rw)
 gc()
 
 if (RUN_LEVEL != 3 & file.exists("model1/run_level_3/lee1_end_evals.rds")) {
@@ -739,14 +744,14 @@ if (RUN_LEVEL != 3 & file.exists("model1/run_level_3/lee1_end_evals.rds")) {
 
       # Create data.frame to save results
       lee_end_ll <- data.frame(
-        "pfLL" = rep(0, length(lee1_end_mif)),
-        "pfse" = rep(0, length(lee1_end_mif))
+        "pfLL" = rep(0, nrow(lee1_end_mif)),
+        "pfse" = rep(0, nrow(lee1_end_mif))
       )
 
       # Perform particle filter to get likelihood estimates
       for (j in 1:nrow(lee_end_ll)) {
         # Get parameters of interest
-        pf_params <- coef(lee1_end_mif[[j]])
+        pf_params <- lee1_end_mif[j, ]
 
         # make results reproducible
         registerDoRNG((j * 687383921) %% 7919)
@@ -796,8 +801,6 @@ rm(
 )
 gc()
 @
-
-
 
 \begin{frontmatter}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -1286,19 +1289,23 @@ if (RUN_LEVEL == 1){
   stop("Run level must be 1, 2 or 3.")
 }
 
-haiti3_fit <- bake(
-  file = paste0("model3/", rl_dir, "haiti3_fit.rds"), {
-    fit_haiti3(
-      search1 = SEARCH1,
-      search2 = SEARCH2,
-      search3 = SEARCH3,
-      search4 = SEARCH4,
-      search5 = SEARCH5,
-      n_searches = N_SEARCHES,
-      ncores = cores
-    )
-  }
-)
+if (RUN_LEVEL != 3 & file.exists("model3/run_level_3/haiti3_fit.rds")) {
+  haiti3_fit <- readRDS("model3/run_level_3/haiti3_fit.rds")
+} else {
+  haiti3_fit <- bake(
+    file = paste0("model3/", rl_dir, "haiti3_fit.rds"), {
+      fit_haiti3(
+        search1 = SEARCH1,
+        search2 = SEARCH2,
+        search3 = SEARCH3,
+        search4 = SEARCH4,
+        search5 = SEARCH5,
+        n_searches = N_SEARCHES,
+        ncores = cores
+      )
+    }
+  )
+}
 
 rm(SEARCH1, SEARCH2, SEARCH3, SEARCH4, SEARCH5, N_SEARCHES)
 gc()
@@ -1306,9 +1313,6 @@ gc()
 
 
 <<Load Model Parameters, echo=FALSE, results='hide'>>=
-# load('model3/output/PanelLocalAll_PF.rda')  # Final model 3 evaluations
-# load('model3/output/PanelLocalAll.rda')  # Final model 3 parameters (MIF search)
-
 
 # haiti3_fit contains ll estimate for many parameter sets, so we want to find
 # the highest value
@@ -1324,7 +1328,7 @@ mod3_ll <- max(
 # Fit model 2. Note that this takes the same amount of time at all run
 # levels.
 h2_fit <- bake(
-  file = paste0("model2/", rl_dir, "model2_fit.rds"), {
+  file = paste0("model2/model2_fit.rds"), {
     fit_haiti2()
   },
   timing = FALSE
@@ -1513,7 +1517,6 @@ A comparison of the trajectory of the fitted model to the data is given in Fig~\
 h2_epi_traj <- trajectory(h2_epi, params = h2_fit$h2_params, format = 'data.frame')
 h2_epi_traj$Ctotal <- rowSums(h2_epi_traj[, paste0("C", 1:10)]) * h2_fit$h2_params['Rho']
 
-
 h2_traj <- h2_epi_traj %>%
   select(year, Ctotal) %>%
   mutate(
@@ -1555,124 +1558,13 @@ Pseudo-code for this algorithm is provided in Algorithm~S1 in the supplementary 
 
 % While the reported parameters were obtained using the decoupled representation of Model~3, simulations for the various vaccination campaigns were obtained using fully coupled version of the model, implemented using the \code{spatPomp} package.
 
-<<Model 3 PanelSims,echo=FALSE>>=
-h3_panel_sims <- switch(RUN_LEVEL, 20, 100, 500)
-
-departements <-
-  c(
-    'Artibonite',
-    'Centre',
-    'Grande_Anse',
-    'Nippes',
-    'Nord',
-    'Nord-Est',
-    'Nord-Ouest',
-    'Ouest',
-    'Sud',
-    'Sud-Est'
-  )
-
-registerDoRNG(5317865)
-
-if (RUN_LEVEL != 3 & file.exists("model3/run_level_3/panelPompSims.rds")) {
-  h3_panel_sims <- readRDS("model3/run_level_3/panelPompSims.rds")
-} else {
-  h3_panel_sims <- bake(
-    file = paste0('model3/', rl_dir, 'panelPompSims.rds'), {
-      foreach(dep = departements, .combine = rbind) %dopar% {
-        SIRB <- unitobjects(h3)[[dep]]
-        shared <- h3@shared
-        specific <- h3@specific[, dep]
-
-        pomp::simulate(
-          SIRB,
-          params = c(shared, specific),
-          nsim = h3_panel_sims,
-          format = 'data.frame'
-        ) -> sims
-
-        sims$dep <- dep
-        sims
-      }
-    }
-  )
-}
-
-h3_panel_quantiles <- h3_panel_sims %>%
-  mutate(
-    date = as.Date(
-      lubridate::round_date(lubridate::date_decimal(time), unit = 'day')
-    )
-  ) %>%
-  group_by(dep, date) %>%
-  summarise(
-    q05 = quantile(cases, 0.025, na.rm = T),
-    mean = mean(cases, na.rm = T),
-    q50 = quantile(cases, 0.5, na.rm = T),
-    q95 = quantile(cases, 0.975, na.rm = T)
-  ) %>%
-  ungroup() %>%
-  mutate(
-    dep = gsub("-", "_", dep)
-  ) %>%
-  filter(date >= as.Date(
-    lubridate::round_date(
-      lubridate::date_decimal(h3@unit.objects$Artibonite@t0), unit = 'day'
-    )
-  )
-  )
-
-plot_order <- c(
-  'Artibonite',
-  'Sud_Est',
-  'Nippes',
-  'Nord_Est',
-  'Ouest',
-  'Centre',
-  'Nord',
-  'Sud',
-  'Nord_Ouest',
-  'Grande_Anse'
-)
-
-@
-
-
-% \begin{figure}[ht]
-% ggplot() +
-%   geom_line(data = h3_panel_quantiles, aes(x = date, y = q50 + 1), col = 'blue') +
-%   geom_line(data = dep_plot_df, aes(x = date, y = cases + 1), col = 'black') +
-%   geom_ribbon(data = h3_panel_quantiles, aes(x = date, ymin = q05 + 1, ymax = q95 + 1),
-%               alpha = 0.4) +
-%   facet_wrap(~factor(dep, levels = plot_order), nrow = 2,
-%              labeller = dep_labeller) +
-%   ylab('Reported cholera cases') +
-%   theme(axis.title.x = element_blank()) +
-%   scale_x_date(date_labels = "'%y", breaks = seq.Date(from = as.Date("2011-01-01"), as.Date("2019-01-01"), by = '2 years')) +
-%   scale_y_log10(labels = scales::trans_format("log10", scales::math_format(10^.x)))
-%
-% \caption{\label{h3panelsims}
-% Simulations from initial conditions using panelPOMP version of Model~3.
-% The black curve represents true case count, the blue curve the median of 500 simulations from the model, and the gray ribbons representing $95\%$ confidence interval.
-% }
-% \end{figure}
-
-
-<<Remove Model3 panelSims, cache=FALSE, include=FALSE, message=FALSE, echo=FALSE>>=
-rm(h3_panel_quantiles, h3_panel_sims)
-gc()
-@
-
 Fitting Model~3 in this fashion simplifies the problem of parameter estimation, but it also introduces additional technicalities that must be addressed.
 One concern is that of obtaining model forecasts, which was the primary goal of \citet{lee20}.
-% "primary output" -> "primary goal", based on Anna's suggestion.
 The simplified PanelPOMP version of Model~3 relies on the observed cholera cases as a covariate, which are unavailable for use in forecasts.
 Similar to what was done in \cite{lee20}, we use the parameter estimates obtained with the independent departmental approximation of Model~3 as an estimate for the parameters in the fully coupled version of the model, which was implemented using the \code{spatPomp} package.
 Simulations from the fully coupled version of the model using the estimated parameter vector $\tilde{\paramVec}$, are displayed in Fig.~\ref{h3spatsims}.
 
 <<Model 3 SpatPOMP sims, echo=FALSE>>=
-# load('output/FinalPanelAsSpatPomp_PF.rda')
-
 h3_spat_nsim <- switch(RUN_LEVEL, 20, 100, 500)
 
 if (RUN_LEVEL != 3 & file.exists("model3/run_level_3/SpatPompSims.rds")) {
@@ -1806,13 +1698,7 @@ epi_ofun <- traj_objfun(
 )
 
 mod2_epi_ll <- -epi_ofun(par = h2_fit$h2_params)
-# mod2_end_ll <- -end_ofun(par = h2_fit$end_params)
-
-
 mod2_ll <- mod2_epi_ll - sum(log(h2_epi@data + 1), na.rm = TRUE)
-
-# Evaluate and sum objective functions to get total model likelihood
-# mod2_ll <- -(epi_ofun(par = h2_fit$epi_params) + end_ofun(par = h2_fit$end_params))
 
 arima_lik2 <- 0
 
@@ -1823,12 +1709,6 @@ mod2_aic <- 2 * mod2_n_params - 2 * mod2_ll
 # model 1 AIC
 mod1_n_params <- 13
 mod1_aic <- 2 * mod1_n_params - 2 * mod1_ll
-
-# Load pre-calculated model 3 likelihood
-# mod3_ll <- ll_mod3 %>%
-#   arrange(-logLik) %>%
-#   slice_head(n = 1) %>%
-#   pull(logLik)
 
 # model 3 AIC
 mod3_n_params <- 29
@@ -2006,9 +1886,7 @@ gc()
 mod1_lee_n_params <- 20
 mod1_lee_aic <- 2 * mod1_lee_n_params - 2 * mod1_lee_ll
 
-# load('model2/output/mod2_leeFit.rda')
 mod2_lee_aic <- 2 * h2_fit$leeFit_n_params - 2 * h2_fit$leeFit_ll
-# mod2_lee_aic <- 2 * mod2_leeFit_num_parms - 2 * mod2_leeFit_ll
 @
 
 <<Lee3 Sub Calculations, echo=FALSE, include=FALSE, message=FALSE>>=
@@ -3346,7 +3224,7 @@ The dynamic document, together with the R packages, form a {\it compendium}, def
 %% Acknowledgements section.                %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{acks}[Acknowledgments]
-The authors would like to thank Mercedes Pascual and Betz Halloran for helpful discussions. Laura Matrajt provided additional data for the Model~2 analysis. 
+The authors would like to thank Mercedes Pascual and Betz Halloran for helpful discussions. Laura Matrajt provided additional data for the Model~2 analysis.
 \end{acks}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Funding information, if any,             %%
