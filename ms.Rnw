@@ -1141,7 +1141,7 @@ All deaths are balanced by births into the susceptible compartment in \myeqref{e
 
 \section{Statistical Analysis}\label{sec:methods}
 
-We consider model fitting (Sec.~\ref{sec:model_fitting}) followed by diagnostic investigations (Sec.~\ref{sec:model_diagnostics}), forecasting (Sec.~\ref{sec:filter}) and interpreting model fit (Sec.~\ref{sec:science}).
+We consider model fitting (Sec.~\ref{sec:model_fitting}) followed by diagnostic investigations (Sec.~\ref{sec:model_diagnostics}), forecasting (Sec.~\ref{sec:filter}) and \eic{PERHAPS external scientific corroboration of model fit RATHER THAN interpreting model fit} (Sec.~\ref{sec:science}).
 
 <<FitModel1, echo=FALSE, message=FALSE, include=FALSE>>=
 set.seed(636813)
@@ -1647,14 +1647,14 @@ Obtaining the best fitting set of parameters for a given model does not, however
 Model misspecification, which may be thought of as the omission of a mechanism in the model that is an important feature of the dynamic system, is inevitable at all levels of model complexity.
 To make progress, while accepting proper limitations, one must bear in mind the much-quoted observation of \citet{box79} that ``all models are wrong but some are useful.''
 Beyond being good practical advice for applied statistics, this assertion is relevant for the philosophical justification of statistical inference as severe testing \citep[][Sec.~4.8]{mayo18}.
-In this section, we provide some tools and suggestions for diagnosing mechanistic models with the goal of making the subjective assessment of model ``usefulness" more objective.
+In this section, we provide some tools and suggestions for diagnosing mechanistic models with the goal of making the subjective assessment of model ``usefulness'' more objective.
 To do this, we will rely on the quantitative and statistical ability of the model to match the observed data, which we call the model's {\it goodness-of-fit}, with the guiding principle that a model which cannot adequately describe observed data may not be reliable for useful purposes.
 Goodness-of-fit may provide evidence supporting the causal interpretation of one model versus another, but cannot by itself rule out the possibility of alternative explanations.
 
 One common approach to assess a mechanistic model's goodness-of-fit is to compare simulations from the fitted model to the observed data.
 Visual inspection may indicate defects in the model, or may  suggest that the observed data are a plausible realization of the fitted model.
 While visual comparisons can be informative, they provide only a weak and informal measure of the goodness-of-fit of a model.
-The study by \citet{lee20} provides an example of this: their models and parameter estimates resulted in simulations that visually resembled the observed data, yet resulted in model likelihoods that were---in some cases---remarkably smaller than likelihoods that can be achieved via the likelihood based optimization techniques that were used (see Table~\ref{tab:likes}).
+The study by \citet{lee20} provides an example of this: their models and parameter estimates resulted in simulations that visually resembled the observed data, yet resulted in model likelihoods that were---in some cases---considerably smaller than likelihoods that can be achieved via the likelihood based optimization techniques that were used (see Table~\ref{tab:likes}).
 Alternative forms of model validation should therefore be used in conjunction with visual comparisons of simulations to observed data.
 
 Another approach is to compare a quantitative measure of the model fit (such as MSE, predictive accuracy, or model likelihood) among all proposed models.
@@ -1674,17 +1674,18 @@ Consequently, we focus on log-likelihood as a measure of goodness of fit, and we
 
 In some cases, a possible benchmark model could be a generally accepted mechanistic model, but often no such model is available.
 Because of this, we use a log-linear Gaussian ARMA model as an associative benchmark, as recommended by \citet{he10}.
-The theory and practice of ARMA models is well developed, but the exponential growth and decay characteristic of biological dynamics suggests applying these linear models on a log scale.
+The theory and practice of ARMA models is well developed, and these linear models are appropriate on a log scale due to the exponential growth and decay characteristic of biological dynamics.
 Likelihoods of Models~1--3 and their respective ARMA benchmark models are provided in Table~\ref{tab:likes}.
 
 It should be universal practice to present measures of goodness of fit for published models, and mechanistic models should be compared against benchmarks.
-This alone would assist authors and readers to confront any major statistical limitations of the proposed mechanistic models.
-In addition, the published goodness of fit provides a concrete measure for subsequent research to identify and remedy limitations in the analysis, or to update the investigation based on new data or new scientific understanding.
-When combined with online availability of data and code, objective measures of fit provide a powerful tool to accelerate scientific progress, following the paradigm of the {\it common task framework} \citep[][Sec.~6]{donoho17}.
 In our literature review of the Haiti cholera epidemic, no benchmark models were considered in any of the 24 papers which calibrated a mechanistic model to data in order to obtain scientific conclusions.
+Including benchmarks would help authors and readers to detect and confront any major statistical limitations of the proposed mechanistic models.
+In addition, the published goodness of fit provides a concrete point of comparison for subsequent scientific investigations.
+When combined with online availability of data and code, objective measures of fit provide a powerful tool to accelerate scientific progress, following the paradigm of the {\it common task framework} \citep[][Sec.~6]{donoho17}.
 
-The use of benchmarks may also be beneficial when developing models with varying spatial scale, where a direct comparison between models likelihoods is meaningless.
-In such a case, a benchmark model could be fit to each spatial resolution being considered, and each model compared to their respective benchmark.
+
+The use of benchmarks may also be beneficial when developing models at differing spatial scales, where a direct comparison between models likelihoods is meaningless.
+In such a case, a benchmark model can be fit to each spatial resolution being considered, and each model compared to their respective benchmark.
 Large advantages (shortcomings) in model likelihood relative to the benchmark for a given spatial scale that are not present in other spatial scales may provide weak evidence for (against) the statistical fit of models across a range of spatial resolutions.
 
 <<Table 2 Input, echo=FALSE, eval=TRUE>>=
@@ -3026,19 +3027,21 @@ Translations back into the notation of \citet{lee20} are given in Table~S1.
 }
 \end{table}
 
-\subsection{Reckoning Scientific Understanding With Fitted Models}\label{sec:science}
+\subsection{Corroborating Fitted Models with Previous Scientific Knowledge}\label{sec:science}
 
 The resulting mechanisms in a fitted model can be compared to current scientific knowledge about a system.
 Agreement between model based inference and our current understanding of a system may taken as a confirmation of both model based conclusions and our scientific understanding.
-On the other hand, discrepancies found in these comparisons may have the potential to spark new scientific knowledge \citep{ganusov16}.
-The potential for new discoveries based on dynamic modeling outcomes, however, is rooted in a model's ability to effectively approximate the system in question, and is therefore inexorably linked to a models goodness-of-fit.
-As such, conclusions based on dynamic models that poorly fit observed data should not be considered as much as those resulting from models that describe observed data well.
+On the other hand, comparisons may generate unexpected results that have the potential to spark new scientific knowledge \citep{ganusov16}.
 
-In our analysis, we demonstrate how one may compare model mechanisms with current scientific understanding by examining the results of fitting the flexible cubic spline term in Model~1 (Eq.~\myeqref{model1:lambda}--\myeqref{model1:beta});
-the cubic splines permit flexible estimation of seasonality in the force of infection.
-After calibrating model parameters to observed data, we explore potential patterns in the seasonal transmission rate by plotting the average value of $\transmission$ in a typical year.
+
+%% The potential for new discoveries based on fitting a dynamic model, however, is rooted in a model's ability to effectively approximate the system in question, and is therefore inexorably linked to a model's goodness-of-fit.
+%% As such, conclusions based on dynamic models that poorly fit observed data should not be considered as much as those resulting from models that describe observed data well. THIS DUPLICATES LATER SENTENCES, SO I THINK IT CAN BE REMOVED HERE.
+
+In the context of our case study, we demonstrate how the fit of Model~1 corroborates other evidence concerning the role of rainfall in cholera epidemics.
+Specifically, we examine the results of fitting the flexible cubic spline term in Model~1 (Eq.~\myeqref{model1:lambda}--\myeqref{model1:beta}).
+The cubic splines permit flexible estimation of seasonality in the force of infection, $\transmission(t)$.
 Fig.~\ref{fig:h1SeasRain} shows that the estimated seasonal transmission rate $\transmission$ mimics the rainfall dynamics in Haiti, despite Model~1 not having access to rainfall data.
-This result provides evidence that rainfall played an important role in cholera transmission in Haiti, consistent with previous studies \citep{lemaitre19,eisenberg13}.
+This is consistent with previous studies finding that rainfall played an important role in cholera transmission in Haiti \citep{lemaitre19,eisenberg13}.
 The estimated seasonality also features an increased transmission rate during the Fall, which was noticed at an earlier stage of the epidemic \citep{rinaldo12}.
 
 <<Get Model 1 Seasonality>>=
