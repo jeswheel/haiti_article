@@ -660,7 +660,6 @@ end_start <- lee1_epi_mif$lee1_epi_mif_params
 # end_start <- epi_complete %>%
 #   select(-logLik)
 
-# TODO: Only save parameter values and "likelihoods".
 if (RUN_LEVEL != 3 & file.exists("model1/run_level_3/lee1_end_fit.rds")) {
   lee1_end_mif <- readRDS("model1/run_level_3/lee1_end_fit.rds")
 } else {
@@ -2075,9 +2074,9 @@ h1_scen_sims <- switch(RUN_LEVEL, 20, 100,  500)
 # below creates a model, samples from the filtering distribution, and then
 # projects the vaccination scenario, under the specified model.
 if (RUN_LEVEL != 3 & file.exists("model1/run_level_3/S0_sims.rds")) {
-  h1_S0_sims <- readRDS("model1/run_level_3/S0_sims.rds")
+  h1_S0_results <- readRDS("model1/run_level_3/S0_sims.rds")
 } else {
-  h1_S0_sims <- bake(
+  h1_S0_results <- bake(
     file = paste0("model1/", rl_dir, "S0_sims.rds"), {
 
       # Create the model
@@ -2090,24 +2089,25 @@ if (RUN_LEVEL != 3 & file.exists("model1/run_level_3/S0_sims.rds")) {
       s0_pf <- pfilter(s0, save.state = TRUE, Np = h1_scen_NP)
 
       # project vacc scenario, with filtering dist, and model.
-      project_from_filter2(mod = s0, PF = s0_pf, nsims = h1_scen_sims)
+      h1_S0_sims <- project_from_filter2(mod = s0, PF = s0_pf, nsims = h1_scen_sims)
+
+      results <- list()
+      results$mod1_V0_sims <- agg_mod1_sims(h1_S0_sims)
+      results$mod1_V0_probs <- get_elimProbs(h1_S0_sims, model = 1)
+
+      results
     },
     timing = FALSE
   )
 }
 
-# Clean-up simulations for analysis/visualization
-mod1_V0_sims <- agg_mod1_sims(h1_S0_sims)
-mod1_V0_probs <- get_elimProbs(h1_S0_sims, model = 1)
-rm(h1_S0_sims)
-
 # Simulate vaccination scenario from filtering distribution. The code
 # below creates a model, samples from the filtering distribution, and then
 # projects the vaccination scenario, under the specified model.
 if (RUN_LEVEL != 3 & file.exists("model1/run_level_3/S2_sims.rds")) {
-  h1_S2_sims <- readRDS("model1/run_level_3/S2_sims.rds")
+  h1_S2_results <- readRDS("model1/run_level_3/S2_sims.rds")
 } else {
-  h1_S2_sims <- bake(
+  h1_S2_results <- bake(
     file = paste0('model1/', rl_dir, 'S2_sims.rds'), {
 
       # Create the model
@@ -2131,24 +2131,25 @@ if (RUN_LEVEL != 3 & file.exists("model1/run_level_3/S2_sims.rds")) {
       s2_pf <- pfilter(s2, save.state = TRUE, Np = h1_scen_NP)
 
       # project vacc scenario, with filtering dist, and model.
-      project_from_filter2(mod = s2, PF = s2_pf, nsims = h1_scen_NP)
+      h1_S2_sims <- project_from_filter2(mod = s2, PF = s2_pf, nsims = h1_scen_NP)
+
+      results <- list()
+      results$mod1_V1_sims <- agg_mod1_sims(h1_S2_sims)
+      results$mod1_V1_probs <- get_elimProbs(h1_S2_sims, model = 1)
+
+      results
     },
     timing = FALSE
   )
 }
 
-# Clean-up simulations for analysis/visualization
-mod1_V1_sims <- agg_mod1_sims(h1_S2_sims)
-mod1_V1_probs <- get_elimProbs(h1_S2_sims, model = 1)
-rm(h1_S2_sims)
-
 # Simulate vaccination scenario from filtering distribution. The code
 # below creates a model, samples from the filtering distribution, and then
 # projects the vaccination scenario, under the specified model.
 if (RUN_LEVEL != 3 & file.exists("model1/run_level_3/S4_sims.rds")) {
-  h1_S4_sims <- readRDS("model1/run_level_3/S4_sims.rds")
+  h1_S4_results <- readRDS("model1/run_level_3/S4_sims.rds")
 } else {
-  h1_S4_sims <- bake(
+  h1_S4_results <- bake(
     file = paste0('model1/', rl_dir, 'S4_sims.rds'), {
 
       # Create the model
@@ -2172,24 +2173,25 @@ if (RUN_LEVEL != 3 & file.exists("model1/run_level_3/S4_sims.rds")) {
       s4_pf <- pfilter(s4, save.state = TRUE, Np = h1_scen_NP)
 
       # project vacc scenario, with filtering dist, and model.
-      project_from_filter2(mod = s4, PF = s4_pf, nsims = h1_scen_NP)
+      h1_S4_sims <- project_from_filter2(mod = s4, PF = s4_pf, nsims = h1_scen_NP)
+
+      results <- list()
+      results$mod1_V2_sims <- agg_mod1_sims(h1_S4_sims)
+      results$mod1_V2_probs <- get_elimProbs(h1_S4_sims, model = 1)
+
+      results
     },
     timing = FALSE
   )
 }
 
-# Clean-up simulations for analysis/visualization
-mod1_V2_sims <- agg_mod1_sims(h1_S4_sims)
-mod1_V2_probs <- get_elimProbs(h1_S4_sims, model = 1)
-rm(h1_S4_sims)
-
 # Simulate vaccination scenario from filtering distribution. The code
 # below creates a model, samples from the filtering distribution, and then
 # projects the vaccination scenario, under the specified model.
 if (RUN_LEVEL != 3 & file.exists("model1/run_level_3/S3_sims.rds")) {
-  h1_S3_sims <- readRDS("model1/run_level_3/S3_sims.rds")
+  h1_S3_results <- readRDS("model1/run_level_3/S3_sims.rds")
 } else {
-  h1_S3_sims <- bake(
+  h1_S3_results <- bake(
     file = paste0('model1/', rl_dir, 'S3_sims.rds'), {
 
       # Create the model
@@ -2213,24 +2215,25 @@ if (RUN_LEVEL != 3 & file.exists("model1/run_level_3/S3_sims.rds")) {
       s3_pf <- pfilter(s3, save.state = TRUE, Np = h1_scen_NP)
 
       # project vacc scenario, with filtering dist, and model.
-      project_from_filter2(mod = s3, PF = s3_pf, nsims = h1_scen_NP)
+      h1_S3_sims <- project_from_filter2(mod = s3, PF = s3_pf, nsims = h1_scen_NP)
+
+      results <- list()
+      results$mod1_V3_sims <- agg_mod1_sims(h1_S3_sims)
+      results$mod1_V3_probs <- get_elimProbs(h1_S3_sims, model = 1)
+
+      results
     },
     timing = FALSE
   )
 }
 
-# Clean-up simulations for analysis/visualization
-mod1_V3_sims <- agg_mod1_sims(h1_S3_sims)
-mod1_V3_probs <- get_elimProbs(h1_S3_sims, model = 1)
-rm(h1_S3_sims)
-
 # Simulate vaccination scenario from filtering distribution. The code
 # below creates a model, samples from the filtering distribution, and then
 # projects the vaccination scenario, under the specified model.
 if (RUN_LEVEL != 3 & file.exists("model1/run_level_3/S1_sims.rds")) {
-  h1_S1_sims <- readRDS("model1/run_level_3/S1_sims.rds")
+  h1_S1_results <- readRDS("model1/run_level_3/S1_sims.rds")
 } else {
-  h1_S1_sims <- bake(
+  h1_S1_results <- bake(
     file = paste0('model1/', rl_dir, 'S1_sims.rds'), {
 
       # Create the model
@@ -2254,34 +2257,31 @@ if (RUN_LEVEL != 3 & file.exists("model1/run_level_3/S1_sims.rds")) {
       s1_pf <- pfilter(s1, save.state = TRUE, Np = h1_scen_NP)
 
       # project vacc scenario, with filtering dist, and model.
-      project_from_filter2(mod = s1, PF = s1_pf, nsims = h1_scen_NP)
+      h1_S1_sims <- project_from_filter2(mod = s1, PF = s1_pf, nsims = h1_scen_NP)
+
+      results <- list()
+      results$mod1_V4_sims <- agg_mod1_sims(h1_S1_sims)
+      results$mod1_V4_probs <- get_elimProbs(h1_S1_sims, model = 1)
+
+      results
     },
     timing = FALSE
   )
 }
-
-# Clean-up simulations for analysis/visualization
-mod1_V4_sims <- agg_mod1_sims(h1_S1_sims)
-mod1_V4_probs <- get_elimProbs(h1_S1_sims, model = 1)
-rm(h1_S1_sims, h1_scen_NP, h1_scen_sims)
-
-gc()
 @
 
 <<Load Model 2 VaccScenarios, message=FALSE, include=FALSE>>=
-# load('model2/output/mod2_vacc_scenarios.rda')
 
 # Run Vaccination scenarios for Model 2. Note that the code runs the same
 # speed for each run-level.
 mod2_VaccScenarios <- bake(
-  file = paste0("model2/", rl_dir, "VaccinationScenarios.rds"), {
+  file = paste0("model2/VaccinationScenarios.rds"), {
     haiti2_vaccScenario(
       h2_params = h2_fit$h2_params
     )
   },
   timing = FALSE
 )
-
 @
 
 <<Load Model 3 Vacc Scenarios, message=FALSE, include=FALSE>>=
