@@ -890,23 +890,22 @@ Advances in OCV technology and vaccine availability, however, raised the possibi
 In the study, certain data were shared between the groups, including demography and vaccination history; vaccine efficacy was also fixed at a shared value between groups.
 Beyond this, the groups made autonomous decisions on what to include and exclude from their models; this autonomy reduced the possible effect that assumptions about the dynamic system may have on the final conclusion of the study.
 Despite this autonomy, and largely adhering to existing guidelines on creating models to inform policy \citep{behrend20,saltelli20}, the consensus across the four models was that an extensive nationwide vaccination campaign would be necessary to eliminate cholera from Haiti.
-This conclusion is inconsistent with the fact that there have been no confirmed cases since February, 2019 \citep{trevisin22}, despite the lack of a concentrated vaccination effort.
+This conclusion is inconsistent with the fact that there have been no confirmed cases since February, 2019 \citep{trevisin22}, despite the lack of a national vaccination program.
 
 The discrepancy between the model based conclusions of \cite{lee20} and the subsequent elimination of cholera cholera has been debated \citep{francois20,rebaudetComment20,henrys20,leeReply20}.
 Suggested origins of this discrepancy include the use of unrealistic models \citep{rebaudetComment20} and having unrealistic criteria for cholera elimination \citep{henrys20}.
 We find a more nuanced conclusion: attention to methodological details in model fitting, diagnosis and forecasting can improve each of the proposed model's ability to quantitatively describe observed data.
-These improvements results in forecasts that are more consistent with the observed outcome, without requiring major changes to the model structures.
+These improvements result in forecasts that are more consistent with the observed outcome, without requiring major changes to the model structures.
 Based on this retrospective analysis, we offer suggestions on fitting mechanistic models to dynamic systems for future studies.
 
-While this work is focused on the models proposed in \cite{lee20}, we believe that our suggestions are relevant to a larger class of problems.
-In order to determine the extent to which this work generalizes, we preformed a literature review by searching PubMed with keywords: Haiti, cholera, and model.
+While this work is focused on the models proposed in \cite{lee20}, our suggestions have broader relevance.
+To investigate the extent to which \citet{lee20} is typical of the substantial body of work on Haiti cholera dynamics, we preformed a literature review by searching PubMed with keywords: Haiti, cholera, model.
 The search resulted in 66 papers, of which 32 used dynamic models to describe the cholera epidemic in Haiti.
-This literature review confirmed that close attention to details in fitting, diagnosing, and forecasting is of great importance when modeling an infectious disease outbreak.
-% Although the literature review focused on cholera and Haiti,
-The wide relevance of our findings in these papers---supplemented with studies of other epidemiological and dynamic systems---suggests that this work may also be relevant to a much broader class of problems.
+The models make various choices on the dichotomies considered by \citet{lee20}; deterministic versus stochastic; compartment model versus agent-based; aggregated versus spatially explicit.
+This is no accident, since \citet{lee20} purposefully designed their study to cover the range of current modeling practice.
 
 We proceed by introducing Models~1--3 in Sec.~\ref{sec:models};
-in Sec.~\ref{sec:methods}, we present a methodological approach to examining and refining these models, and then use improved model fits to project cholera incidence in Haiti under various vaccination scenarios.
+in Sec.~\ref{sec:methods}, we present a systematic approach to examining and refining these models, and then use improved model fits to project cholera incidence in Haiti under various vaccination scenarios.
 This is followed by a consideration of the robustness of model based policy recommendations in Sec.~\ref{sec:advice}, and a discussion in Sec.~\ref{sec:discussion}.
 
 \begin{figure}[ht]
@@ -946,18 +945,20 @@ The danger in using forecasting techniques which rely on associative models to p
 To successfully predict the effect of an intervention, a model should therefore both provide a quantitative explanation of existing data and should have a causal interpretation: a manipulation of the system should correspond quantitatively with the corresponding change to the model.
 This motivates the development of mechanistic statistical models, which provides a statistical fit to the available data while also supporting a causal interpretation.
 
-The deliberate limitation of coordination between the groups of \citet{lee20} allows us to treat the models as fairly independently developed expert approaches to understanding cholera transmission.
+The four mechanistic models of \citet{lee20} were deliberately developed with limited coordination.
+This allows us to treat the models as fairly independently developed expert approaches to understanding cholera transmission.
 However, it led to differences in notation, and in subsets of the data chosen for analysis, that hinder direct comparison.
 Here, we have put all three models into a common notational framework.
 Translations back to the original notation of \citet{lee20} are given in Table~S-1.
 
-Each model describes the cholera dynamics using a latent state vector $\bm{X}^{(\modelCounter)}(t)$ for each continuous time-point $t \in \mathcal{T}$, where $\mathcal{T}$ is the set of all time-points and $\modelCounter \in \{1, 2, 3\}$ indexes the model.
+Each model describes the cholera dynamics using a latent state vector $\bm{X}^{(\modelCounter)}(t)$ for each continuous time-point $t$ and $\modelCounter \in \{1, 2, 3\}$ indexes the model.
+The $N$ observation times are denoted by $t_1,\dots,t_N$ which is also written as $t_{1:N}$.
 The observation at time $t_n$ is modeled by a response vector $\bm{Y}^{(\modelCounter)}_n$.
 The latent state vector $\bm{X}^{(\modelCounter)}(t)$ consists of individuals labeled as susceptible (S), infected (I), asymptomatically infected (A), vaccinated (V), and recovered (R), with various sub-divisions sometimes considered in each model $\modelCounter$.
 Models~2 and~3 have metapopulation structure, meaning that each individual is a member of a spatial unit, denoted by a subscript $u\in \seq{1}{U}$.
 Here, the spatial units are the $U=10$ Haitian administrative d\'{e}partements (henceforth anglicized as departments).
 
-In the following subsections, complete descriptions of Models~1--3 are provided.
+In the following subsections, complete descriptions of Models~1--3 are provided \eic{WE NEED INITIAL VALUES AND A MEASUREMENT MODEL TO COMPLETE THE DESCRIPTION. MAYBE WE JUST SAY WE'RE DESCRIBING THE DYNAMICS HERE, OR MAYBE WE ADD THE MISSING STUFF, WHICH HAS TO BE SOMEWHERE ANYHOW. SOME OF THIS IS DONE IN SEC 3.1.1 FOR MODEL 1, BUT PERHAPS BETTER TO DO IT SYSTEMATICALLY WHEN THE MODEL IS ORIGINALLY DEFINED.}.
 While the model description is scientifically critical, as well as necessary for transparency and reproducibility, the model details are not essential to our methodological discussions of how to diagnose and address model misspecification with the purpose of informing policy.
 A first-time reader may choose to skim through the rest of this section, and return later.
 
@@ -1370,10 +1371,11 @@ stew(file = "models.rda", {
 
 \subsection{Model Fitting}\label{sec:model_fitting}
 
+\eic{PERHAPS THIS PARAGRAPH COULD MOVE TO A LATER SECTION? THE FOLLOWING PARAGRAPH IS MORE WHAT I EXPECTED READING THROUGH WHEN I REACHED THIS POINT IN THE MS. PERHAPS PARTS OF THIS FIRST PARAGRAPH ARE EVEN REDUNDANT, IF THEY ARE COVERED IN THE ORIGINAL DISCUSSION OF THE MODELS.}
 Proposed mechanistic structures form a family of statistical models indexed by a parameter vector $\paramVec$.
 Different values of $\paramVec$ can result in qualitative differences in the predicted behavior of the system.
 The complex nature of biological systems necessitates a search for modeling assumptions that combine insightful simplicity with fidelity to biological reality.
-For example, many models commonly used in epidemiology are motivated by reasoning about a homogeneous mixing population \citep{bansal07} which is simultaneously an avenue for powerful simplification and a source of model misspecification.
+For example, many models commonly used in epidemiology are motivated by reasoning about a homogeneous mixing population which is simultaneously an avenue for powerful simplification and a source of model misspecification \citep{bansal07}.
 Other common considerations include whether the proposed model should be stochastic or deterministic; whether the model should have change points in parameter values or should otherwise make adjustments for changes through time in the dynamic system; and whether the proposed model should include any spatial heterogeneity at a scale permissible by the observed data.
 In addition, elements of $\paramVec$ can either be chosen as constants, based on scientific reasoning and previous knowledge, or calibrated to observed data.
 Suitable methodology for calibrating model parameters may depend on other modeling decisions.
@@ -1386,6 +1388,7 @@ In the following subsections we describe our approach to fitting these mechanist
 
 \subsubsection{Model~1}
 
+\eic{ALL THE MODELS ARE PROBABILISTIC IN SOME SENSE, EVEN THOSE WITH DETERMINISTIC DYNAMICS. HAVING POINTED OUT THAT THEY ARE ALL POMP MODELS ABOVE, MAYBE WE SHOULD DEFINE THE CORRESPONDING NOTATION ABOVE TOO, RATHER THAN SPECIFICALLY FOR MODEL 1}
 One approach to modeling a dynamic system is through probabilistic models.
 With such a model, the existence of a joint density $f_{\bm{X}^{(\modelCounter)}_{\seq{0}{N}}, \bm{Y}^{(\modelCounter)}_{\seq{1}{N}}}$ is supposed, with $\bm{X}^{(\modelCounter)}_{\seq{0}{N}}$ denoting the unobservable Markov process of model $\modelCounter$ at times $\seq{0}{N} = \{0, 1, \ldots, N\}$, and $\bm{Y}^{(\modelCounter)}_{\seq{1}{N}}$ denoting the observable process of the system at times $\seq{1}{N}$.
 Under this framework, the observed data $y_{\seq{1}{N}}^*$---along with some unobserved value $\bm{X}^{(\modelCounter)}_{\seq{0}{N}} = x^*_{\seq{0}{N}}$---are assumed to be a single realization of the model $\big(x^*_{\seq{0}{N}}, y_{\seq{1}{N}}^*\big) \sim f_{\bm{X}^{(\modelCounter)}_{\seq{0}{N}}, \bm{Y}^{(\modelCounter)}_{\seq{1}{N}}}(x_{\seq{0}{N}}, y_{\seq{1}{N}}; \paramVec)$, where $\paramVec$ is a parameter vector that indexes the model.
@@ -1393,23 +1396,21 @@ This modeling framework results in several advantages, including the ability to 
 Furthermore, because each draw from the joint distribution represents a potential outcome of the dynamic system, best/worst case scenarios under the assumptions of the model can be easily obtained via simulation.
 % The added benefits of a stochastic model are coupled with statistical difficulty of fitting the parameter vector $\paramVec$ to observed data.
 
+\eic{MAYBE THE KEY THING HERE IS THAT MODEL 1 IS A ``STANDARD'' POMP MODEL, FOR WHICH MUCH SUCCESSFUL METHODOLOGY IS WIDELY AVAILABLE. THAT IS BASICALLY WHAT WE PROCEED TO SAY.}
 Several algorithms exist, both frequentist and Bayesian, that can be used to obtain estimates of the parameters for this class of models.
 In order to retain the ability to propose models that are scientifically meaningful rather than only those that are simply statistically convenient, we restrict ourselves to parameter estimation techniques that have the plug-and-play property, which is that the fitting procedure only requires the ability to simulate the latent process instead of evaluating transition densities \citep{breto09,he10}.
 Plug-and-play algorithms include Bayesian approaches like ABC and PMCMC \citep{toni09,andrieu10}, but here we use frequentist methods to maximize model likelihoods.
 To our knowledge, the only plug-and-play frequentist methods that can maximize the complete model likelihood are iterated filtering algorithms, which modify the well-known particle filter \citep{arulampalam02} by performing a random walk for each parameter and particle.
 These perturbations are carried out iteratively over multiple filtering operations, using the collection of parameters from the previous filtering pass as the parameter initialization for the next iteration, and decreasing the random walk variance at each step.
 
-The ability to maximize the likelihood allows for likelihood-based inference, like performing statistical tests for potential improvements to the model.
-% Part of the appeal of mechanistic models lies in their ability to illustrate a dynamical system.
-% Inherent is dynamical systems is randomness, and, in the context of epidemiology, this randomness is a crucial component to the system itself.
-% Useful and statistically sound incidence forecasting and prediction of vaccine efficacy are not only dependent upon a reasonable reflection of the natural system in the model; it is necessary for the model to also reflect the quantitative characteristics of the processes in question.
-% This need, itself, is dependent upon inclusion of sufficient stochasticity in the model \citep{breto09}.
+The ability to maximize the likelihood allows for likelihood-based inference, like \eic{I THINK like IS TOO INFORMAL AND PERHAPS ALSO VAGUE; e.g. OR for example WOULD NOT WORK HERE; MAYBE including?} performing statistical tests for potential improvements to the model.
 We demonstrate this capability by proposing a linear trend $\transmissionTrend$ in transmission in Eq.~\myeqref{model1:beta}:
 \begin{equation}
 \label{model1:betat}
 \log\transmission(t) = \sum_{j=1}^6 \transmission_s s_j(t) + \transmissionTrend\bar{t}
 \end{equation}
 Where $\bar{t}$ is the linear mapping $\bar{t}: [0, N] \rightarrow [-1, 1]$ of the time $t$.
+\eic{BEST TO AVOID NOTATION MORE MATHEMATICALLY ABSTRACT THAN NECESSARY - WE WANT THIS TO BE ACCESSIBLE TO PEOPLE WITHOUT MUCH ANALYSIS EXPERIENCE. ALSO, THIS IS NOT QUITE CORRECT; PERHAPS WE MEAN $[t_0,t_N]$}
 The proposal of a linear trend in transmission is a result of observing an apparent decrease in reported cholera infections from 2012-2019 in Fig.~\ref{CholeraData}.
 While several factors may contribute to this decrease, one explanation is that case-area targeted interventions (CATIs), which included education sessions, increased monitoring, household decontamination, soap distribution, and water chlorination in infected areas \citep{rebaudet19CATI}, may have greatly reduced cholera transmission \citep{rebaudet21}.
 
@@ -1442,12 +1443,11 @@ The blue curve is the profile, the blue line indicates the MLE, and the dashed l
 }
 \end{figure}
 
-Model~1 is implemented using the \code{pomp} package \cite{pomp2}, relying heavily on the source code provided by \cite{lee20}, who also used the MIF2 algorithm to estimate $\paramVec$.
-Aside from the introduction of the parameter $\transmissionTrend$ and the multiplicative Gamma-distributed white noise $d\Gamma(t)/dt$ in the process model (Eq.~\ref{model1:lambda}), the only change made that could increase the likelihood of the model was using a substantially increased computational effort to maximize the likelihood.
-While flexible, plug-and-play methods like MIF2 require a large number of computations, and the theoretic ability to maximize the likelihood depends on asymptotics in both the number of particles used and the number of MIF iterations.
+We implemented Model~1 using the \code{pomp} package \cite{pomp2}, relying heavily on the \code{pomp} source code provided by \cite{lee20}.
+Both analyses used the \code{mif2} implementation of the IF2 algorithm to estimate $\paramVec$ by maximum likelihood.
+Aside from the introduction of the parameter $\transmissionTrend$ and the multiplicative Gamma-distributed white noise $d\Gamma(t)/dt$ in the process model (Eq.~\ref{model1:lambda}), the another change we made to increase the likelihood of the fitted model was using a substantially increased computational effort in the numerical maximization.
+\eic{LET'S DISCUSS HOW THIS SENTENCE CAN BE MISREAD AT FIRST PASS (AND ARGUABLY IS AMBIGUOUS EVEN AFTER MORE THOUGHT). I THINK THIS IS COMMONLY THE CASE IN SENTENCES WITH MULITPLE SUBORDINATE CLAUSES} While flexible, plug-and-play methods like IF2 require a large number of computations, and the theoretic ability to maximize the likelihood depends on asymptotics in both the number of particles used and the number of filtering iterations.
 The large difference in likelihoods that were obtain by these two approaches (see Table~\ref{tab:likes}) highlights the importance of carefully determining the necessary computational effort needed to maximize model likelihoods and acting accordingly.
-
-% Simulations from the fitted model compared to the observed data are given in Fig~\ref{fig:mod1fit}.
 
 \begin{figure}[ht]
 \centering
@@ -1492,7 +1492,7 @@ gc()
 
 \subsubsection{Model~2}
 
-Model~2 is a deterministic model, which are degenerate probabilistic models that contain no randomness in the dynamic process or measurement.
+Model~2 is a deterministic model, which are degenerate probabilistic models that contain no randomness in the dynamic process or measurement \eic{HERE, WE USE A MEMBER OF A CLASS AS A SHORT-CUT FOR THE CLASS ITSELF, WHICH READS STRANGELY AND FORMALLY HAS A PLURALITY MIS-MATCH.}.
 By combining a deterministic process model with a simple Gaussian measurement model, Model~2 reduces model fitting to a least squares calculation over parameters in a set of differential equations.
 Deterministic compartment models have a long history in the field of infectious disease epidemiology \citep{kermack1927,brauer2017,varghese21},
 and can be justified by asymptotic considerations in a large-population limit \citep{dadlani2020,ndii17}.
@@ -1506,8 +1506,8 @@ This issue is particularly troublesome for this case study: the inability to acc
 
 To combat this issue, we fit the model to log-transformed case counts, where the difference between periods of high and low infectiousness is less drastic.
 Other solutions include changing the measurement model to include overdispersion, as was done in Models~1 and~3.
+This permits the consideration of demographic stochasticity, which is dominant for small infected populations, togehter with log scale stochasticity (also called multiplicative, or environmental, or extra-demographic) which is dominant at high population counts.
 Here we chose to fit the model to transformed case counts rather than adding overdispersion to the measurement model with the goal of making the fewest changes to the model in \cite{lee20} as possible.
-In practice, however, the inclusion of overdispersion in the measurement process may be preferred.
 
 We implemented this model using the \code{spatPomp} \code{R} package \citep{asfaw21github}.
 The model was then fit using the subplex algorithm, implemented in the  \code{subplex} package \citep{king2020Subplex}.
