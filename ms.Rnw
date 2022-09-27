@@ -1200,33 +1200,20 @@ set.seed(636813)
 
 if (RUN_LEVEL == 1){
 
-  # Global search, All params
-  SEARCH1 <- list(
-    NP = 50, NMIF = 3, NREPS = 3,
-    NREPS_EVAL = 3, NP_EVAL = 100
+  # Global search, All parameters
+  SEARCH1 <- list(NP = 20, NMIF = 3, NREPS = 3, NREPS_EVAL = 3, NP_EVAL = 25)
+
+  # Local search, all parameters
+  SEARCH2 <- list(
+    TOP_N = 1, NP = 20, NMIF = 3, NREPS = 3, NREPS_EVAL = 3, NP_EVAL = 25
   )
 
-  # Local search, unit specific params
-  SEARCH2 <- list(
-    TOP_N = 1, NP = 50, NMIF = 3, NREPS = 3, NREPS_EVAL = 3,
-    NP_EVAL = 100
-  )
+  # Local search, unit specific parameters
+  SEARCH3 <- list(TOP_N = 1, NP = 20, NMIF = 3, NREPS = 3, NREPS_EVAL = 3, NP_EVAL = 25)
 
   # Number of searches
-  N_SEARCHES <- 2L
+  N_SEARCHES <- 3L
 
-  # THESE SEARCHES AREN'T CONDUCTED
-  SEARCH3 <- list(
-    TOP_N = 1, NP = 20, NMIF = 3, NREPS = 3, NREPS_EVAL = 3, NP_EVAL = 25
-  )
-
-  SEARCH4 <- list(
-    TOP_N = 1, NP = 20, NMIF = 3, NREPS = 3, NREPS_EVAL = 3, NP_EVAL = 25
-  )
-
-  SEARCH5 <- list(
-    TOP_N = 1, NP = 20, NMIF = 3, NREPS = 3, NREPS_EVAL = 3, NP_EVAL = 25
-  )
 } else if (RUN_LEVEL == 2) {
 
   # Global search, all parameters
@@ -1234,57 +1221,67 @@ if (RUN_LEVEL == 1){
     NP = 200, NMIF = 10, NREPS = 36, NREPS_EVAL = 36, NP_EVAL = 500
   )
 
-  # Local search, unit specific
+  # Local search, all parameters
   SEARCH2 <- list(
     TOP_N = 2, NP = 200, NMIF = 20, NREPS = 18, NREPS_EVAL = 36, NP_EVAL = 500
   )
 
-  # Local search, shared parameters
+  # Local search, unit specific parameters
   SEARCH3 <- list(
     TOP_N = 2, NP = 200, NMIF = 10, NREPS = 18, NREPS_EVAL = 36, NP_EVAL = 500
   )
 
-  # Local search, unit specific
-  SEARCH4 <- list(
-    TOP_N = 2, NP = 200, NMIF = 10, NREPS = 18, NREPS_EVAL = 36, NP_EVAL = 500
-  )
-
-  # Local search, all parameters
-  SEARCH5 <- list(
-    TOP_N = 2, NP = 200, NMIF =  5, NREPS = 18, NREPS_EVAL = 36, NP_EVAL = 500
-  )
-
   # Number of searches
-  N_SEARCHES <- 5L
+  N_SEARCHES <- 3L
 } else if (RUN_LEVEL == 3) {
 
   # Global search, all parameters
   SEARCH1 <- list(
-    NP = 1500, NMIF = 100, NREPS = 144, NREPS_EVAL = 36, NP_EVAL = 2000
-  )
-
-  # Local search, unit specific parameters
-  SEARCH2 <- list(
-    TOP_N = 4, NP = 2000, NMIF = 100, NREPS = 18, NREPS_EVAL = 36, NP_EVAL = 4000
-  )
-
-  # Local search, shared parameters
-  SEARCH3 <- list(
-    TOP_N = 3, NP = 4000, NMIF = 50, NREPS = 24, NREPS_EVAL = 36, NP_EVAL = 5000
-  )
-
-  # Local search, unit specific parameters
-  SEARCH4 <- list(
-    TOP_N = 3, NP = 4000, NMIF = 50, NREPS = 24, NREPS_EVAL = 36, NP_EVAL = 5000
+    NP = 1500, NMIF = 100, NREPS = 144, NREPS_EVAL = 36, NP_EVAL = 2000,
+    RW_SD = rw.sd(
+      betaB = 0.02,   # Unit Specific
+      foi_add = 0.02, # Unit Specific
+      mu_B = 0.02,
+      thetaI = 0.02,
+      XthetaA = 0.02,
+      lambdaR = 0.02,
+      r = 0.01,
+      std_W = 0.02,
+      epsilon = 0.02,
+      k = 0.02,
+      sigma = 0.02
+    )
   )
 
   # Local search, all parameters
-  SEARCH5 <- list(
-    TOP_N = 3, NP = 4000, NMIF = 25, NREPS = 24, NREPS_EVAL = 36, NP_EVAL = 5000
+  SEARCH2 <- list(
+    TOP_N = 12, NP = 2000, NMIF = 100, NREPS = 6, NREPS_EVAL = 36, NP_EVAL = 3000,
+    RW_SD = rw.sd(
+      betaB = 0.0075,   # Unit Specific
+      foi_add = 0.0075, # Unit Specific
+      mu_B = 0.0075,
+      thetaI = 0.0075,
+      XthetaA = 0.0075,
+      lambdaR = 0.0075,
+      r = 0.005,
+      std_W = 0.0075,
+      epsilon = 0.0075,
+      k = 0.0075,
+      sigma = 0.0075
+    )
+  )
+
+  # Local search, unit specific parameters
+  SEARCH3 <- list(
+    TOP_N = 9, NP = 2000, NMIF = 100, NREPS = 8, NREPS_EVAL = 36, NP_EVAL = 4000,
+    RW_SD = rw.sd(
+      betaB = 0.005,
+      foi_add = 0.005
+    )
   )
 
   # Total number of searches
-  N_SEARCHES <- 5L
+  N_SEARCHES <- 3L
 } else {
   stop("Run level must be 1, 2 or 3.")
 }
@@ -1298,8 +1295,6 @@ if (RUN_LEVEL != 3 & file.exists("model3/run_level_3/haiti3_fit.rds")) {
         search1 = SEARCH1,
         search2 = SEARCH2,
         search3 = SEARCH3,
-        search4 = SEARCH4,
-        search5 = SEARCH5,
         n_searches = N_SEARCHES,
         ncores = cores
       )
@@ -1307,7 +1302,7 @@ if (RUN_LEVEL != 3 & file.exists("model3/run_level_3/haiti3_fit.rds")) {
   )
 }
 
-rm(SEARCH1, SEARCH2, SEARCH3, SEARCH4, SEARCH5, N_SEARCHES)
+rm(SEARCH1, SEARCH2, SEARCH3, N_SEARCHES)
 gc()
 @
 
@@ -2086,9 +2081,11 @@ if (RUN_LEVEL != 3 & file.exists("model1/run_level_3/S0_sims.rds")) {
 
       # Get samples from filtering distribution
       s0_pf <- pfilter(s0, save.state = TRUE, Np = h1_scen_NP)
+      end_states <- saved.states(s0_pf)
+      end_states <- end_states[[length(end_states)]]
 
       # project vacc scenario, with filtering dist, and model.
-      h1_S0_sims <- project_from_filter2(mod = s0, PF = s0_pf, nsims = h1_scen_sims)
+      h1_S0_sims <- project_from_filter(mod = s0, end_states = end_states, nsims = h1_scen_sims)
 
       results <- list()
       results$mod1_V0_sims <- agg_mod1_sims(h1_S0_sims)
@@ -2128,9 +2125,11 @@ if (RUN_LEVEL != 3 & file.exists("model1/run_level_3/S2_sims.rds")) {
 
       # Get samples from filtering distribution for Scenario 2 model:
       s2_pf <- pfilter(s2, save.state = TRUE, Np = h1_scen_NP)
+      end_states <- saved.states(s2_pf)
+      end_states <- end_states[[length(end_states)]]
 
       # project vacc scenario, with filtering dist, and model.
-      h1_S2_sims <- project_from_filter2(mod = s2, PF = s2_pf, nsims = h1_scen_NP)
+      h1_S2_sims <- project_from_filter(mod = s2, end_states = end_states, nsims = h1_scen_NP)
 
       results <- list()
       results$mod1_V1_sims <- agg_mod1_sims(h1_S2_sims)
@@ -2170,9 +2169,11 @@ if (RUN_LEVEL != 3 & file.exists("model1/run_level_3/S4_sims.rds")) {
 
       # Get samples from filtering distribution for Scenario 2 model:
       s4_pf <- pfilter(s4, save.state = TRUE, Np = h1_scen_NP)
+      end_states <- saved.states(s4_pf)
+      end_states <- end_states[[length(end_states)]]
 
       # project vacc scenario, with filtering dist, and model.
-      h1_S4_sims <- project_from_filter2(mod = s4, PF = s4_pf, nsims = h1_scen_NP)
+      h1_S4_sims <- project_from_filter(mod = s4, end_states = end_states, nsims = h1_scen_NP)
 
       results <- list()
       results$mod1_V2_sims <- agg_mod1_sims(h1_S4_sims)
@@ -2212,9 +2213,11 @@ if (RUN_LEVEL != 3 & file.exists("model1/run_level_3/S3_sims.rds")) {
 
       # Get samples from filtering distribution for Scenario 2 model:
       s3_pf <- pfilter(s3, save.state = TRUE, Np = h1_scen_NP)
+      end_states <- saved.states(s3_pf)
+      end_states <- end_states[[length(end_states)]]
 
       # project vacc scenario, with filtering dist, and model.
-      h1_S3_sims <- project_from_filter2(mod = s3, PF = s3_pf, nsims = h1_scen_NP)
+      h1_S3_sims <- project_from_filter(mod = s3, end_states = end_states, nsims = h1_scen_NP)
 
       results <- list()
       results$mod1_V3_sims <- agg_mod1_sims(h1_S3_sims)
@@ -2254,9 +2257,11 @@ if (RUN_LEVEL != 3 & file.exists("model1/run_level_3/S1_sims.rds")) {
 
       # Get samples from filtering distribution for Scenario 2 model:
       s1_pf <- pfilter(s1, save.state = TRUE, Np = h1_scen_NP)
+      end_states <- saved.states(s1_pf)
+      end_states <- end_states[[length(end_states)]]
 
       # project vacc scenario, with filtering dist, and model.
-      h1_S1_sims <- project_from_filter2(mod = s1, PF = s1_pf, nsims = h1_scen_NP)
+      h1_S1_sims <- project_from_filter(mod = s1, end_states = end_states, nsims = h1_scen_NP)
 
       results <- list()
       results$mod1_V4_sims <- agg_mod1_sims(h1_S1_sims)
@@ -2287,13 +2292,15 @@ mod2_VaccScenarios <- bake(
 NP_BPF <- switch(RUN_LEVEL, 50, 200, 1000)
 NSIM   <- switch(RUN_LEVEL, 10,  50,  500)
 
-if (RUN_LEVEL != 3 & file.exists("model3/run_level_3/h3_bpf.rds")) {
-  h3_bpf <- readRDS("model3/run_level_3/h3_bpf.rds")
+if (RUN_LEVEL != 3 & file.exists("model3/run_level_3/h3_bpf_end_states.rds")) {
+  h3_bpf_end_states <- readRDS("model3/run_level_3/h3_bpf_end_states.rds")
 } else {
-  h3_bpf <- bake(
-    file = paste0("model3/", rl_dir, "h3_bpf.rds"),
+  h3_bpf_end_states <- bake(
+    file = paste0("model3/", rl_dir, "h3_bpf_end_states.rds"),
     expr = {
-      bpfilter(h3Spat, Np = NP_BPF, block_size = 1, save_states = TRUE)
+      h3_bpf <- bpfilter(h3Spat, Np = NP_BPF, block_size = 1, save_states = TRUE)
+      ss <- h3_bpf@saved.states
+      ss[[length(ss)]]
     },
     timing = FALSE
   )
@@ -2313,8 +2320,8 @@ if (RUN_LEVEL != 3 & file.exists("model3/run_level_3/mod3_V0_res.rds")) {
       coef(h3Spat)[names(h3_S0_par)] <- h3_S0_par
 
       # Using parameters and filtered distribution, project system
-      h3_V0_sims <- project_from_filter2(
-        h3Spat, PF = h3_bpf, covarGen = project_rain,
+      h3_V0_sims <- project_from_filter(
+        h3Spat, end_states = h3_bpf_end_states, covarGen = project_rain,
         nsims = NSIM, seed = 6897154
       )
 
@@ -2343,8 +2350,8 @@ if (RUN_LEVEL != 3 & file.exists("model3/run_level_3/mod3_V1_res.rds")) {
       coef(h3Spat)[names(h3_V1_par)] <- h3_V1_par
 
       # Using parameters and filtered distribution, project system
-      h3_V1_sims <- project_from_filter2(
-        h3Spat, PF = h3_bpf, covarGen = project_rain,
+      h3_V1_sims <- project_from_filter(
+        h3Spat, end_states = h3_bpf_end_states, covarGen = project_rain,
         nsims = NSIM, seed = 6897154
       )
 
@@ -2373,8 +2380,8 @@ if (RUN_LEVEL != 3 & file.exists("model3/run_level_3/mod3_V2_res.rds")) {
       coef(h3Spat)[names(h3_V2_par)] <- h3_V2_par
 
       # Using parameters and filtered distribution, project system
-      h3_V2_sims <- project_from_filter2(
-        h3Spat, PF = h3_bpf, covarGen = project_rain,
+      h3_V2_sims <- project_from_filter(
+        h3Spat, end_states = h3_bpf_end_states, covarGen = project_rain,
         nsims = NSIM, seed = 6897154
       )
 
@@ -2403,8 +2410,8 @@ if (RUN_LEVEL != 3 & file.exists("model3/run_level_3/mod3_V3_res.rds")) {
       coef(h3Spat)[names(h3_V3_par)] <- h3_V3_par
 
       # Using parameters and filtered distribution, project system
-      h3_V3_sims <- project_from_filter2(
-        h3Spat, PF = h3_bpf, covarGen = project_rain,
+      h3_V3_sims <- project_from_filter(
+        h3Spat, end_states = h3_bpf_end_states, covarGen = project_rain,
         nsims = NSIM, seed = 6897154
       )
 
@@ -2433,8 +2440,8 @@ if (RUN_LEVEL != 3 & file.exists("model3/run_level_3/mod3_V4_res.rds")) {
       coef(h3Spat)[names(h3_V4_par)] <- h3_V4_par
 
       # Using parameters and filtered distribution, project system
-      h3_V4_sims <- project_from_filter2(
-        h3Spat, PF = h3_bpf, covarGen = project_rain,
+      h3_V4_sims <- project_from_filter(
+        h3Spat, end_states = h3_bpf_end_states, covarGen = project_rain,
         nsims = NSIM, seed = 6897154
       )
 
