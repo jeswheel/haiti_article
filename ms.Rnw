@@ -1504,9 +1504,9 @@ The increase in model flexibility, however, results in hidden states that are in
 The inclusion of a model break-point in \cite{lee20} is perhaps due to a challenging feature of fitting a deterministic model via least squares: discrepancies between model trajectories and observed case counts in highly infectious periods of a disease outbreak will result in greater penalty than the discrepancies between model trajectories and observed case counts in times of relatively low infectiousness, resulting in a bias towards accurately describing periods of high infectiousness.
 This issue is particularly troublesome for this case study: the inability to accurately fit times of low infectiousness may result in poor model forecasts, as few cases of cholera were observed the last few years of the epidemic.
 
-To combat this issue, we fit the model to log-transformed case counts, where the difference between periods of high and low infectiousness is less drastic.
+To combat this issue, we fit the model to log-transformed case counts, where the difference between periods of high and low infectiousness is less drastic \eic{, since the log scale stabilizes the variation during periods of high and low infectiousness?? I'M NOT ENTIRELY HAPPY WITH THAT EITHER}.
 Other solutions include changing the measurement model to include overdispersion, as was done in Models~1 and~3.
-This permits the consideration of demographic stochasticity, which is dominant for small infected populations, togehter with log scale stochasticity (also called multiplicative, or environmental, or extra-demographic) which is dominant at high population counts.
+This permits the consideration of demographic stochasticity, which is dominant for small infected populations, together with log scale stochasticity (also called multiplicative, or environmental, or extra-demographic) which is dominant at high population counts.
 Here we chose to fit the model to transformed case counts rather than adding overdispersion to the measurement model with the goal of making the fewest changes to the model in \cite{lee20} as possible.
 
 We implemented this model using the \code{spatPomp} \code{R} package \citep{asfaw21github}.
@@ -1527,38 +1527,39 @@ h2_traj <- h2_epi_traj %>%
 
 \subsubsection{Model~3}
 Both the latent and observable processes in Model~3 can be be factored into department specific processes which interact with each other.
-The decision to model a dynamic system via metapopulation models versus a model aggregated to a larger spatial scale is one of great scientific interest.
+This decision to address metapopulation dynamics via a spatially explicit model, rather than to aggregate over space, is double-edged.
 Evidence for the former approach has been provided in previous studies \citep{king15}, including the specific case of heterogeneity between Haitian departments in cholera transmission \citep{collins14}.
-Note that this evidence alone does not automatically discredit conclusions drawn via nationally aggregated models, as there are also reasons to prefer a simple model over a complex one \citep{saltelli20,green15}.
+A legitimate preference for simplicity \citep{saltelli20,green15} can support a decision to consider nationally aggregated models.
 
 Fitting scientifically flexible metapopulation models is a challenging statistical problem.
 In particular, parameter estimation techniques based on the particle filter become computationally intractable as the number of spatial units increase.
 This is a result of the approximation error of particle filters growing exponentially in the dimension of the model \citep{rebeschini15,park20}.
 
-Parameters that must be fit in Model~3 are shared between each department, the exception to this being the parameters $\beta_{W_u}$, and $\beta_u$, which are unique for each department $u \in \seq{1}{10}$.
-To avoid the parameter estimation issue in high-dimensional models, \citet{lee20} simplified the problem by using the MIF2 algorithm to separately estimate parameters for independent department-level models;
+Parameters that must be fit in Model~3 are shared between each department, the exception to this being the parameters $\beta_{W_u}$, and $\beta_u$, which take department-specific values for each $u \in \seq{1}{10}$.
+To avoid the parameter estimation issue in high-dimensional models, \citet{lee20} simplified the problem by using the MIF2 \eic{IF2} algorithm to separately estimate parameters for independent department-level models;
 the shared parameters were calibrated using the cholera incidence data from Artibonite, and the department-specific parameters ($\beta_{W_u}$ and $\beta_u$) were fit using the data from their respective department.
 Reducing a spatially coupled model to individual units in this fashion requires special treatment of any interactive mechanisms between spatial units, such as found in Eq.~\myeqref{eq:model3:foi}.
 In particular, when considering a model for department $u$, the values $I_\nu(t)$ and $A_\nu(t)$, are unknown for $u \neq v \in \seq{1}{10}$.
-A first order approximation of Eq.~\myeqref{eq:model3:foi} for each department $v \in \seq{1}{10}$ can be obtained using the weekly number of observed cholera cases in each department:
+A first order \eic{IS THIS BEING USED IN A TECHNICAL SENSE HERE?} approximation of Eq.~\myeqref{eq:model3:foi} for each department $v \in \seq{1}{10}$ can be obtained using the weekly number of observed cholera cases in each department:
 \begin{equation}
   I_v(t) + A_v(t) \approx \frac{365}{7\reportRate}y^*_v(t)\left(\frac{1}{\muDeath + \choleraDeath + \muIR} + \frac{1 - \symptomFrac}{\symptomFrac(\muDeath + \muIR)}\right)\label{eq:model3:approx}
 \end{equation}
 This approximation leads to department-specific models that are conditionally independent given the reported number of cholera infections in the remaining departments.
 Here, we refer to a collection of POMP models that are independent across units as a PanelPOMP.
 
-In the case of a PanelPOMP, an extension of the IF2 algorithm, known as Panel Iterated Filtering (PIF) \citep{breto20}, can be used to obtain the MLE, which solves the curse of dimensionality for this class of models.
+In the case of a PanelPOMP, an extension of the IF2 algorithm, known as Panel Iterated Filtering (PIF) \citep{breto20}, can be used to obtain the MLE, which solves the curse of dimensionality for this class of models \eic{WHICH CONVENTIONALLY REFERS TO THE PRECEDING OBJECT, HERE THE MLE, WHICH IS NOT WHAT WE WANT}.
 A major advantage of this algorithm is that PIF can be used to fit both unit-specific parameters and shared parameters; in this way, the calibration of shared parameters involves all of the available data instead of just an arbitrarily chosen subset.
 
+\eic{READERS MAY BE CONFUSED HERE. IS THIS A NEW METHOD? IT SEEMS TO BE IMPLEMENTED BY BRETO ET AL IN 2020. THIS IS DELICATE.}
 We propose and use a slight modification of the PIF algorithm, which we call the Block Panel Iterated Filter (BPIF), to estimate parameters for a PanelPOMP version of Model~3.
 Let $l_{\text{P}}(y_{1:N}^*; \paramVec)$ denote the log-likelihood function of the PanelPOMP version of Model~3.
 The output of the BPIF algorithm is the MLE $\tilde{\paramVec} = \argmax_{\paramVec} l_{\text{P}}(y_{1:N}^*; \paramVec)$.
-The BPIF algorithm is implemented in the \code{panelPomp} package \citep{breto20panelPomp} as the argument \code{block = TRUE} in the \code{mif2} function.
+The BPIF algorithm is implemented in the \code{panelPomp} package \citep{breto20panelPomp} as the argument \code{block = TRUE} in the \code{mif2} function \eic{THIS LEVEL OF CODING DETAIL IS UNUSUAL IN A CASE STUDY}.
 Pseudo-code for this algorithm is provided in Algorithm~S1 in the supplementary material.
 
 % While the reported parameters were obtained using the decoupled representation of Model~3, simulations for the various vaccination campaigns were obtained using fully coupled version of the model, implemented using the \code{spatPomp} package.
 
-Fitting Model~3 in this fashion simplifies the problem of parameter estimation, but it also introduces additional technicalities that must be addressed.
+Fitting Model~3 in this fashion simplifies the problem of parameter estimation, but it also introduces additional technicalities that must be addressed \eic{THIS MAKES IT SEEM LIKE THE FITTING METHOD CAUSES THE PROBLEM, BUT THE LEE ET AL APPROACH ALSO HAS THIS ISSUE. ARGUABLY, IT IS A PART OF THE MODEL NOT THE METHOD, THOUGH THE TWO ARE RELATED. MODEL 3 IS WRITTEN AS FULLY COUPLED IN SEC 2.3, SO FITTING THE NON-COUPLED VERSION IS ARGUABLY FITTING SOMETHING ELSE ENTIRELY, THOUGH IT CAN ALWAYS BE VIEWED AS AN APPROXIMATION.}
 One concern is that of obtaining model forecasts, which was the primary goal of \citet{lee20}.
 The simplified PanelPOMP version of Model~3 relies on the observed cholera cases as a covariate, which are unavailable for use in forecasts.
 Similar to what was done in \cite{lee20}, we use the parameter estimates obtained with the independent departmental approximation of Model~3 as an estimate for the parameters in the fully coupled version of the model, which was implemented using the \code{spatPomp} package.
@@ -2017,7 +2018,7 @@ Similar to comparing log-likelihoods across models, an additional powerful diagn
 Conditional likelihoods, defined as the density $f_{Y_k | Y_1, \ldots, Y_{k - 1}}\big(Y_k = y_k^* | y_{1:k-1}^*\big)$, provide a basic description of how well the proposed model can describe each data point, given the previous observations.
 Comparing these results across models---including benchmark models---can help researchers identify potential model deficiencies, or errors in the observed data.
 Additional tools for assessing the goodness-of-fit of a model include plotting the effective sample size of each observation \citep{liu01}, and comparing summary statistics of the observed data to simulations from the model \citep{wood10}.
-These summary statistics are sometimes called diagnostic probes \citep{king16}.
+These summary statistics are sometimes called diagnostic probes \citep{king15,king16}.
 
 \subsection{Forecasts}\label{sec:filter}
 
