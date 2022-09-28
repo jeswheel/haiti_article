@@ -953,10 +953,16 @@ However, it led to differences in notation, and in subsets of the data chosen fo
 Here, we have put all three models into a common notational framework.
 Translations back to the original notation of \citet{lee20} are given in Table~S-1.
 
-Each model describes the cholera dynamics using a latent state vector $\bm{X}^{(\modelCounter)}(t)$ for each continuous time-point $t$ and $\modelCounter \in \{1, 2, 3\}$ indexes the model.
-The $N$ observation times are denoted by $t_1,\dots,t_N$ which is also written as $t_{1:N}$.
-The observation at time $t_n$ is modeled by a response vector $\bm{Y}^{(\modelCounter)}_n$.
-The latent state vector $\bm{X}^{(\modelCounter)}(t)$ consists of individuals labeled as susceptible (S), infected (I), asymptomatically infected (A), vaccinated (V), and recovered (R), with various sub-divisions sometimes considered in each model $\modelCounter$.
+Each model describes the cholera dynamics as a partially observed Markov process (POMP) with a latent state vector $\bm{X}^{(\modelCounter)}(t)$ for each continuous time point $t$ and model $\modelCounter \in \{1, 2, 3\}$.
+$N$ observations on the system are collected at time points $t_1,\dots,t_N$, written as $t_{1:N}$.
+The observation at time $t_n$ is modeled by the random vector $\bm{Y}^{(\modelCounter)}_n$.
+While the latent process exists between observation times, the value of the latent state at observations times is of particular interest.
+We therefore write $\bm{X}^{(\modelCounter)}_n = \bm{X}^{(\modelCounter)}(t_n)$ to denote the value of the latent process at the $n$th observation time, and $\bm{X}^{(\modelCounter)}_{1:N}$ is the collection of latent state values for all observed time points.
+The observable random variables $\bm{Y}^{(\modelCounter)}_{1:N}$ are assumed to be conditionally independent given $\bm{X}^{(\modelCounter)}_{0:N}$.
+Together, with the density for the initial value of the latent state $\bm{X}^{(\modelCounter)}_{0} = \bm{X}^{(\modelCounter)}(t_0)$, each model assumes a joint density $f_{\bm{X}^{(\modelCounter)}_{0:N}, \bm{Y}^{(\modelCounter)}_{1:N}}\big(\bm{x}^{(\modelCounter)}_{0:N}, \bm{y}^{(\modelCounter)}_{1:N};\paramVec\big)$, where $\paramVec$ is a parameter vector that indexes the model.
+The observed data $\bm{y}_{1:N}^*$ are modeled as a realization of the observation processes. \jwc{SHOULD WE SAY SOMETHING ABOUT HOW THE JOINT DENSITY IS INSTRACTABLE, OR CAN BE FACTORED USING THE MARKOV PROPERTY?}
+
+For each model $\modelCounter \in \{1, 2, 3\}$, the latent state vector $\bm{X}^{(\modelCounter)}(t)$ consists of individuals labeled as susceptible (S), infected (I), asymptomatically infected (A), vaccinated (V), and recovered (R), with various sub-divisions sometimes considered.
 Models~2 and~3 have metapopulation structure, meaning that each individual is a member of a spatial unit, denoted by a subscript $u\in \seq{1}{U}$.
 Here, the spatial units are the $U=10$ Haitian administrative d\'{e}partements (henceforth anglicized as departments).
 
@@ -1371,16 +1377,8 @@ In the following subsections we describe our approach to fitting these mechanist
 
 \subsubsection{Model~1}
 
-\eic{ALL THE MODELS ARE PROBABILISTIC IN SOME SENSE, EVEN THOSE WITH DETERMINISTIC DYNAMICS. HAVING POINTED OUT THAT THEY ARE ALL POMP MODELS ABOVE, MAYBE WE SHOULD DEFINE THE CORRESPONDING NOTATION ABOVE TOO, RATHER THAN SPECIFICALLY FOR MODEL 1}
-One approach to modeling a dynamic system is through probabilistic models.
-With such a model, the existence of a joint density $f_{\bm{X}^{(\modelCounter)}_{\seq{0}{N}}, \bm{Y}^{(\modelCounter)}_{\seq{1}{N}}}$ is supposed, with $\bm{X}^{(\modelCounter)}_{\seq{0}{N}}$ denoting the unobservable Markov process of model $\modelCounter$ at times $\seq{0}{N} = \{0, 1, \ldots, N\}$, and $\bm{Y}^{(\modelCounter)}_{\seq{1}{N}}$ denoting the observable process of the system at times $\seq{1}{N}$.
-Under this framework, the observed data $y_{\seq{1}{N}}^*$---along with some unobserved value $\bm{X}^{(\modelCounter)}_{\seq{0}{N}} = x^*_{\seq{0}{N}}$---are assumed to be a single realization of the model $\big(x^*_{\seq{0}{N}}, y_{\seq{1}{N}}^*\big) \sim f_{\bm{X}^{(\modelCounter)}_{\seq{0}{N}}, \bm{Y}^{(\modelCounter)}_{\seq{1}{N}}}(x_{\seq{0}{N}}, y_{\seq{1}{N}}; \paramVec)$, where $\paramVec$ is a parameter vector that indexes the model.
-This modeling framework results in several advantages, including the ability to account for variability present in the system.
-Furthermore, because each draw from the joint distribution represents a potential outcome of the dynamic system, best/worst case scenarios under the assumptions of the model can be easily obtained via simulation.
-% The added benefits of a stochastic model are coupled with statistical difficulty of fitting the parameter vector $\paramVec$ to observed data.
-
-\eic{MAYBE THE KEY THING HERE IS THAT MODEL 1 IS A ``STANDARD'' POMP MODEL, FOR WHICH MUCH SUCCESSFUL METHODOLOGY IS WIDELY AVAILABLE. THAT IS BASICALLY WHAT WE PROCEED TO SAY.}
-Several algorithms exist, both frequentist and Bayesian, that can be used to obtain estimates of the parameters for this class of models.
+Model~1 describes cholera dynamics at the nationally aggregated scale so that $\bm{Y}^{(1)}_n \in \R$ for each observation time $n \in 1:N$, and the latent state vector $\bm{X}^{(1)}(t)$ is comprised of national level population counts.
+Several algorithms exist, both frequentist and Bayesian, that can be used to obtain estimates of the parameters for the class of models.
 In order to retain the ability to propose models that are scientifically meaningful rather than only those that are simply statistically convenient, we restrict ourselves to parameter estimation techniques that have the plug-and-play property, which is that the fitting procedure only requires the ability to simulate the latent process instead of evaluating transition densities \citep{breto09,he10}.
 Plug-and-play algorithms include Bayesian approaches like ABC and PMCMC \citep{toni09,andrieu10}, but here we use frequentist methods to maximize model likelihoods.
 To our knowledge, the only plug-and-play frequentist methods that can maximize the complete model likelihood are iterated filtering algorithms, which modify the well-known particle filter \citep{arulampalam02} by performing a random walk for each parameter and particle.
