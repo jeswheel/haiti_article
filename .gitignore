@@ -6,6 +6,8 @@
 *.Rout
 *.toc
 *.Rhistory
+*.blg
+*~
 cache/*
 figure/*
 *concordance.tex
