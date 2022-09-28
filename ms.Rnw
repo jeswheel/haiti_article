@@ -1386,14 +1386,13 @@ Plug-and-play algorithms include Bayesian approaches like ABC and PMCMC \citep{t
 To our knowledge, the only plug-and-play frequentist methods that can maximize the complete model likelihood are iterated filtering algorithms, which modify the well-known particle filter \citep{arulampalam02} by performing a random walk for each parameter and particle.
 These perturbations are carried out iteratively over multiple filtering operations, using the collection of parameters from the previous filtering pass as the parameter initialization for the next iteration, and decreasing the random walk variance at each step.
 
-The ability to maximize the likelihood allows for likelihood-based inference, like \eic{I THINK like IS TOO INFORMAL AND PERHAPS ALSO VAGUE; e.g. OR for example WOULD NOT WORK HERE; MAYBE including?} performing statistical tests for potential improvements to the model.
+The ability to maximize the likelihood allows for likelihood-based inference, such as performing statistical tests for potential model improvements.
 We demonstrate this capability by proposing a linear trend $\transmissionTrend$ in transmission in Eq.~\myeqref{model1:beta}:
 \begin{equation}
 \label{model1:betat}
 \log\transmission(t) = \sum_{j=1}^6 \transmission_s s_j(t) + \transmissionTrend\bar{t}
 \end{equation}
-Where $\bar{t}$ is the linear mapping $\bar{t}: [0, N] \rightarrow [-1, 1]$ of the time $t$.
-\eic{BEST TO AVOID NOTATION MORE MATHEMATICALLY ABSTRACT THAN NECESSARY - WE WANT THIS TO BE ACCESSIBLE TO PEOPLE WITHOUT MUCH ANALYSIS EXPERIENCE. ALSO, THIS IS NOT QUITE CORRECT; PERHAPS WE MEAN $[t_0,t_N]$}
+Where $\bar{t} = \frac{t - (t_N + t_0) / 2}{t_N - (t_N + t_0) / 2}$, so that $\bar{t} \in [-1, 1]$.
 The proposal of a linear trend in transmission is a result of observing an apparent decrease in reported cholera infections from 2012-2019 in Fig.~\ref{CholeraData}.
 While several factors may contribute to this decrease, one explanation is that case-area targeted interventions (CATIs), which included education sessions, increased monitoring, household decontamination, soap distribution, and water chlorination in infected areas \citep{rebaudet19CATI}, may have greatly reduced cholera transmission \citep{rebaudet21}.
 
@@ -1428,8 +1427,8 @@ The blue curve is the profile, the blue line indicates the MLE, and the dashed l
 
 We implemented Model~1 using the \code{pomp} package \cite{pomp2}, relying heavily on the \code{pomp} source code provided by \cite{lee20}.
 Both analyses used the \code{mif2} implementation of the IF2 algorithm to estimate $\paramVec$ by maximum likelihood.
-Aside from the introduction of the parameter $\transmissionTrend$ and the multiplicative Gamma-distributed white noise $d\Gamma(t)/dt$ in the process model (Eq.~\ref{model1:lambda}), the another change we made to increase the likelihood of the fitted model was using a substantially increased computational effort in the numerical maximization.
-\eic{LET'S DISCUSS HOW THIS SENTENCE CAN BE MISREAD AT FIRST PASS (AND ARGUABLY IS AMBIGUOUS EVEN AFTER MORE THOUGHT). I THINK THIS IS COMMONLY THE CASE IN SENTENCES WITH MULITPLE SUBORDINATE CLAUSES} While flexible, plug-and-play methods like IF2 require a large number of computations, and the theoretic ability to maximize the likelihood depends on asymptotics in both the number of particles used and the number of filtering iterations.
+One change we made in the statistical analysis that led to larger model likelihoods was increasing the computational effort in the numerical maximization.
+While IF2 is a powerful method that can be used to fit parameters for a large class of models, the theoretic ability to maximize the likelihood depends on asymptotics in both the number of particles and the number of filtering iterations and therefore requires a large number of computations.
 The large difference in likelihoods that were obtain by these two approaches (see Table~\ref{tab:likes}) highlights the importance of carefully determining the necessary computational effort needed to maximize model likelihoods and acting accordingly.
 
 \begin{figure}[ht]
@@ -1475,8 +1474,8 @@ gc()
 
 \subsubsection{Model~2}
 
-Model~2 is a deterministic model, which are degenerate probabilistic models that contain no randomness in the dynamic process or measurement \eic{HERE, WE USE A MEMBER OF A CLASS AS A SHORT-CUT FOR THE CLASS ITSELF, WHICH READS STRANGELY AND FORMALLY HAS A PLURALITY MIS-MATCH.}.
-By combining a deterministic process model with a simple Gaussian measurement model, Model~2 reduces model fitting to a least squares calculation over parameters in a set of differential equations.
+Model~2 is a system of deterministic differential equations and can therefore be considered a degenerate probabilistic model with no randomness in the dynamic process.
+By combining a deterministic process model with a simple Gaussian measurement model, the parameter estimation problem for a set of differential equations reduces to a least squares calculation.
 Deterministic compartment models have a long history in the field of infectious disease epidemiology \citep{kermack1927,brauer2017,varghese21},
 and can be justified by asymptotic considerations in a large-population limit \citep{dadlani2020,ndii17}.
 
@@ -1519,11 +1518,11 @@ In particular, parameter estimation techniques based on the particle filter beco
 This is a result of the approximation error of particle filters growing exponentially in the dimension of the model \citep{rebeschini15,park20}.
 
 Parameters that must be fit in Model~3 are shared between each department, the exception to this being the parameters $\beta_{W_u}$, and $\beta_u$, which take department-specific values for each $u \in \seq{1}{10}$.
-To avoid the parameter estimation issue in high-dimensional models, \citet{lee20} simplified the problem by using the MIF2 \eic{IF2} algorithm to separately estimate parameters for independent department-level models;
+To avoid the parameter estimation issue in high-dimensional models, \citet{lee20} simplified the problem by using the IF2 algorithm to separately estimate parameters for independent department-level models;
 the shared parameters were calibrated using the cholera incidence data from Artibonite, and the department-specific parameters ($\beta_{W_u}$ and $\beta_u$) were fit using the data from their respective department.
 Reducing a spatially coupled model to individual units in this fashion requires special treatment of any interactive mechanisms between spatial units, such as found in Eq.~\myeqref{eq:model3:foi}.
 In particular, when considering a model for department $u$, the values $I_\nu(t)$ and $A_\nu(t)$, are unknown for $u \neq v \in \seq{1}{10}$.
-A first order \eic{IS THIS BEING USED IN A TECHNICAL SENSE HERE?} approximation of Eq.~\myeqref{eq:model3:foi} for each department $v \in \seq{1}{10}$ can be obtained using the weekly number of observed cholera cases in each department:
+An approximation of Eq.~\myeqref{eq:model3:foi} for each department $v \in \seq{1}{10}$ can be obtained using the weekly number of observed cholera cases in each department:
 \begin{equation}
   I_v(t) + A_v(t) \approx \frac{365}{7\reportRate}y^*_v(t)\left(\frac{1}{\muDeath + \choleraDeath + \muIR} + \frac{1 - \symptomFrac}{\symptomFrac(\muDeath + \muIR)}\right)\label{eq:model3:approx}
 \end{equation}
@@ -2028,7 +2027,7 @@ parameter uncertainty should therefore be considered when obtaining model foreca
 If a Bayesian technique is used for parameter estimation, the most natural way to account for parameter uncertainty is to obtain $J$ simulations from the model where each simulation is obtained using parameters $\Theta_{1:J}$ drawn from the posterior distribution $\Theta_{1:J} \sim f_{\Theta}\big(\paramVec | \bm{Y}^{(\modelCounter)}_{1:N} = y_{1:N}^*\big)$.
 In the frequentist case, one approach is empirical Bayes: endow to set $\Theta_K = \{\theta_1, \theta_2, \ldots, \theta_K\}$ with a discrete uniform distribution, such that $P\big(\Theta_{j} = \theta_k\big) = \frac{1}{K}$ for all values $k \in \seq{1}{K}$.
 In this case, the posterior distribution of $\Theta_{j} | \bm{Y}^{(\modelCounter)}_{1:N}$ can be expressed as:
-$P\big(\Theta_{j} = \theta_k | \bm{Y}^{(\modelCounter)}_{1:N} = y_{1:N}^*\big) = \frac{l(y_{1:N}^*; \theta_k)}{\sum_{l = 1}^K l(y_{1:N}^*; \theta_l)}$. To complete the formulation, we then choose the set $\Theta_K$ such that each $\theta_k \in \Theta_K$ is a single output of the MIF2 algorithm, which has been shown to be within a neighborhood of the MLE \cite{ionides15}.
+$P\big(\Theta_{j} = \theta_k | \bm{Y}^{(\modelCounter)}_{1:N} = y_{1:N}^*\big) = \frac{l(y_{1:N}^*; \theta_k)}{\sum_{l = 1}^K l(y_{1:N}^*; \theta_l)}$. To complete the formulation, we then choose the set $\Theta_K$ such that each $\theta_k \in \Theta_K$ is a single output of the IF2 algorithm, which has been shown to be within a neighborhood of the MLE \cite{ionides15}.
 This approach has been taken in previous studies \citep{king15}, and the result is simply weighing parameter sets based on their corresponding likelihoods: parameters with higher likelihoods should be used more frequently in model forecasts than those that correspond to lower likelihoods.
 This can be done for both deterministic and stochastic models, but requires a large number of computations, especially as the number of observations and model parameters increase.
 Because our direct aim is not to provide forecasts for policy recommendation, we do not include parameter uncertainty in our forecasts.
