@@ -715,33 +715,25 @@ foreach(
   i = 1:length(lee1_epi_mif),
   .combine = rbind
 ) %dopar% {
-  guess <- coef(lee1_epi_mif)
+  guess <- lee1_epi_mif$lee1_epi_mif_params[i, ] 
   sims <- simulate(h1_epi, nsim = N_LEE_SIMS, format = 'data.frame',
                    params = guess)  # 20 sims for each set of parameters
   sims$param_set <- i
-  sims
+  sims %>%
+    dplyr::select(.id, week, cases, param_set)
 } -> all_sims
-
-quants <- all_sims %>%
-  select(.id, week, cases) %>%
-  group_by(week) %>%
-  summarize(
-    q025 = quantile(cases, probs = 0.025, na.rm = TRUE),
-    q50  = quantile(cases, probs = 0.500, na.rm = TRUE),
-    q975 = quantile(cases, probs = 0.975, na.rm = TRUE)
-  ) %>%
-  ungroup() %>%
-  mutate(date = lubridate::ymd("2010-10-16") + lubridate::weeks(week))
 
 @
 
 
 <<PlotEpiDist, echo=FALSE, fig.cap="Compare to Figure S8 of Lee et al. (2020) supplement.", fig.width=7, fig.height=7, fig.align='center'>>=
-epi_results <- as.data.frame(t(coef(lee1_epi_mif)))
-epi_results$logLik <- logLik(lee1_epi_mif)
+lee1_epi_evals <- readRDS(file = paste0("../model1/", RL_dir, "lee1_epi_evals.rds"))
+
+epi_results <- as.data.frame(lee1_epi_mif$lee1_epi_mif_params)
+epi_results$logLik <- lee1_epi_evals$pfLL
 
 GGally::ggpairs(
-  filter(epi_results, logLik > -2200),
+  dplyr::filter(epi_results, logLik > -20000),
   columns = c("rho", "tau", "beta1", "nu", "logLik")
 )
 @
@@ -789,38 +781,74 @@ The resulting bivariate relations between $\rho, \tau, \beta_1$ and $\nu$ are gi
 
 <<FitEnd, echo=FALSE, message=FALSE, include=FALSE>>=
 foreach(
-  i = 1:length(lee1_end_mif),
+  i = 1:nrow(lee1_end_mif),
   .combine = rbind
 ) %dopar% {
-  guess <- coef(lee1_end_mif)
+  r_params <- lee1_end_mif[i, ]
+  
+  lee1_epi_mif$start_states %>%
+    filter(param_set == i) %>%
+    select(-param_set) %>%
+    sapply(., median, na.rm = TRUE) -> rinit_parms
+  
+  # Set the initial state
+  new_rinit <- Csnippet(
+    sprintf(
+      "
+          S = nearbyint(%f);
+          E = nearbyint(%f);
+          I = nearbyint(%f);
+          A = nearbyint(%f);
+          R = nearbyint(%f);
+          incid = nearbyint(%f);
+          foival = %f;
+          Str0 = nearbyint(%f);
+          Sout = nearbyint(%f);
+          Sin = nearbyint(%f);
+          ",
+      rinit_parms['S'],
+      rinit_parms['E'],
+      rinit_parms['I'],
+      rinit_parms['A'],
+      rinit_parms['R'],
+      rinit_parms['incid'],
+      rinit_parms['foival'],
+      rinit_parms['Str0'],
+      rinit_parms['Sout'],
+      rinit_parms['Sin']
+    )
+  )
+  
+  h1_end <- h1_end %>% pomp(
+    rinit = new_rinit,
+    statenames = c(
+      "S", "E", "I", "A", "R", "incid",
+      "foival", "Str0", "Sout", "Sin"
+    )
+  )
+  
+  coef(h1_end) <- r_params
+  
   sims <- simulate(
-    lee1_end_mif[[i]], nsim = N_LEE_SIMS,
+    h1_end, nsim = N_LEE_SIMS,
     format = 'data.frame',
-    params = guess
+    params = r_params
   )
   sims$param_set <- i
-  sims
+  sims %>%
+    dplyr::select(.id, week, cases, param_set)
 } -> end_sims
 
-# quants_end <- end_sims %>%
-#   select(.id, week, cases) %>%
-#   group_by(week) %>%
-#   summarize(
-#     q025 = quantile(cases, probs = 0.025, na.rm = TRUE),
-#     q50  = quantile(cases, probs = 0.500, na.rm = TRUE),
-#     q975 = quantile(cases, probs = 0.975, na.rm = TRUE)
-#   ) %>%
-#   ungroup() %>%
-#   mutate(date = lubridate::ymd("2010-10-16") + lubridate::weeks(week))
 @
 
 <<plotEndParams, fig.width=7, fig.height=7, fig.align='center', fig.cap="Bivariate relationships between variables after fitting endemic period. Compare to S9 of Lee et al. (2020) supplement.", cache=TRUE, echo=FALSE>>=
+lee1_end_evals <- readRDS(file = paste0("../model1/", RL_dir, "lee1_end_evals.rds"))
 
-end_results <- as.data.frame(t(coef(lee1_end_mif)))
-end_results$logLik <- logLik(lee1_end_mif)
+end_results <- as.data.frame(lee1_end_mif)
+end_results$logLik <- lee1_epi_evals$pfLL 
 
 GGally::ggpairs(
-  filter(end_results, logLik > -2200),
+  filter(end_results, logLik > -20000),
   columns = c("rho", "tau", "beta1", "nu", "logLik")
 )
 @
@@ -830,12 +858,26 @@ The results of these simulations are shown in Figure~\ref{fig:plotMod1Sims}.
 While not a perfect replication of the results given in \citet{lee20sup}, the similarities between the model simulations, and the fact that we based our implementation of Model~1 primarily on the source code that was provided, makes us confident that we have been able to obtain a reliable representation of the model described in \citet{lee20}.
 
 <<plotMod1Sims, echo=FALSE, fig.cap="Simulations from various parameter sets. Simulations from parameter sets with likelihood $<$ -2200 are removed. Compare to Figure S7 of \\cite{lee20sup}.", cache=TRUE, fig.width=6.5, fig.height=3.75>>=
-end_complete <- filter(end_results, logLik > -2200)
-bad_end_pars <- which(end_results$logLik < -2200)
+
+epi_complete <- filter(epi_results, logLik > -20000)
+bad_epi_pars <- which(epi_results$logLik < -20000)
+
+quants <- all_sims %>%
+  filter(!param_set %in% bad_epi_pars) %>%
+  group_by(week) %>%
+  summarize(
+    q025 = quantile(cases, probs = 0.025, na.rm = TRUE),
+    q50  = quantile(cases, probs = 0.500, na.rm = TRUE),
+    q975 = quantile(cases, probs = 0.975, na.rm = TRUE)
+  ) %>%
+  ungroup() %>%
+  mutate(date = lubridate::ymd("2010-10-16") + lubridate::weeks(week))
+
+end_complete <- filter(end_results, logLik > -20000)
+bad_end_pars <- which(end_results$logLik < -20000)
 
 quants_end <- end_sims %>%
   filter(!param_set %in% bad_end_pars) %>%
-  select(.id, week, cases) %>%
   group_by(week) %>%
   summarize(
     q025 = quantile(cases, probs = 0.025, na.rm = TRUE),
@@ -993,7 +1035,6 @@ We note that slight differences may be accounted for due to variance in the mode
 <<Model3Replication, echo=FALSE, cache=TRUE>>=
 NSIM <- switch(run_level, 50, 100, 1000)
 
-
 plot_order <- c(
   'Artibonite',
   'Sud_Est',
@@ -1104,156 +1145,6 @@ rm(lee3, lee3_sims, quants, sub_cases)
 gc()
 @
 
-
-% \renewcommand\missing{---}
-%
-% \begin{table}
-% \begin{center}
-% \begin{tabular}{|l|c|c|c|c|}
-% \hline
-% Mechanism & Unified & Old model 1 & Old model 2 & Old model 3
-% \\
-% \hline
-% \hline
-% Recovery rate
-%   & $\muIR$
-%   & $\gamma$
-%   & $\gamma$
-%   & $\gamma$
-% \\
-% Latency
-%   & $\muEI$
-%   & $\sigma$
-%   & $\sigma$
-%   & \missing
-% \\
-% Direct transmission
-%   & $\transmission$
-%   & $\beta_{1:6}$
-%   & $\beta$
-%   & $c^i$
-% \\
-% Rainfall exponent
-%   & \rainfallExponent
-%   & \missing
-%   & \missing
-%   & $r$
-% \\
-% Lost immunity
-%   & $\muRS$
-%   & $\alpha$
-%   & $\alpha$
-%   & $\rho$
-% \\
-%   & $\omega_1$, $\omega_2$
-%   & \missing
-%   & $\omega_1$, $\omega_2$
-%   & \missing
-% \\
-% Vaccine efficacy
-%   & $\vaccineEfficacy_{1:2}$
-%   & \missing
-%   & $\theta_{1:2}$
-%   & \missing
-% \\
-% Birth rate
-%   & $\muBirth$
-%   & $\mu$
-%   &
-%   & $\mu$
-% \\
-% Death rate
-%   & $\muDeath$
-%   & $\delta$
-%   &
-%   & $\mu$
-% \\
-% Symptomatic frac.
-%   & $\symptomFrac$
-%   & $\theta_k(t)=c\theta^*(t-\tau_k)$
-%   & $k$
-%   & $\theta$
-% \\
-% Asympt.~infectivity
-%   & $\asymptomRelativeInfect$
-%   & $(1-\kappa)$
-%   & $\beta_A/\beta$
-%   & 1
-% \\
-% Asympt.~shedding
-%   & $\asymptomRelativeShed$
-%   & \missing
-%   & $\mu_A/\mu$
-%   & $\theta_A/\theta_I$
-% \\
-% Seasonality amplitude
-%   & $\seasAmplitude$
-%   & \missing
-%   & $\alpha_s$
-%   & $a$
-% \\
-% Water to human
-%   & $\Wbeta{}$
-%   & \missing
-%   & $\beta_W$
-%   & $\beta^i$
-% \\
-%   & $\Wsat$
-%   & \missing
-%   & $\mathrm{sat}$
-%   & $1$
-% \\
-% Cholera decay in water
-%   & $\Wremoval$
-%   & \missing
-%   & $\delta$
-%   & $\mu_B$
-% \\
-% Human to water
-%   & $\Wshed$
-%   & \missing
-%   & $\mu$
-%   & $\theta_I$
-% \\
-% Mixing exponent
-%   & $\mixExponent$
-%   & $\nu$
-%   & \missing
-%   & \missing
-% \\
-% Process noise
-%   & $\sigmaProc$
-%   & \missing
-%   & \missing
-%   & $\sigma$
-% \\
-% Reporting rate
-%   & $\reportRate$
-%   & $\rho$
-%   & $\rho$
-%   & $\epsilon$
-% \\
-% Observation overdispersion
-%   & $\obsOverdispersion$
-%   & $\tau$
-%   & \missing
-%   & $k$
-% \\
-% \hline
-% \end{tabular}
-% \end{center}
-% \caption{Translation from the unified notation of this article back into the notations used for Lee et al.~(2020)}
-% \label{tab:translate}
-% \end{table}
-
-
-% \section{Investigation into model 2}
-%
-% As part of our case study into the Haiti paper, model 2 was recreated using the spatPomp package in R. To confirm the validity of our model, we recreated Figure S15 from the supplement. In the original model, the authors reinitialized the state values for the endemic phase starting on March 2014. In particular, the group assumed that 75\% of the population was susceptible to cholera. We believe this choice to be unnatural. Having the state values change in the middle of a simulation has no causal interpretation. Instead, the most logical thing to do when fitting an epidemic and endemic model would be to carry over the state values from the former to the latter. This keeps the integrity of the model intact.
-%
-% In Figure S-2, we created the same endemic model with the only difference being the state values are carried over from the end of the epidemic phase. Here, we see that the model predicts a much different trajectory than in Figure S-1. This suggests that the decision to reinitialize state values in the middle of a simulation, as in the original model, is likely a poor choice since it has no cause and does not reflect the nature of the epidemic. One consideration is the choice of measurement component. In the original model, we use a linear measurement component. To avoid a situation where the trajectory goes to zero, we can implement a logarithmic measurement component. This is a more natural measure since the fit should be relative to the magnitude of the reported data.
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \clearpage
 
 \bibliography{../bib-haiti}
