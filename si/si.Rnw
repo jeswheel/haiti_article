@@ -318,9 +318,6 @@ myround <- function (x, digits = 1) {
 
 \begin{document}
 
-%% Comment/remove this line before generating final copy for submission
-%\instructionspage
-
 \date{\today}
 \title{Supplement to ``{\mytitle}''}
   \author{Jesse Wheeler, Anna Rosengart, Zhuoxun Jiang, \\ Kevin Hao En Tan, Noah Treutle, Edward L. Ionides
@@ -358,8 +355,6 @@ myround <- function (x, digits = 1) {
 
 \newpage
 
-\eic{CHECK: EVERYTHING IN SI SHOULD BE REFERENCED IN THE MAIN TEXT.}
-
 \section{Markov chain and differential equation interpretations of compartment flow rates}
 
 In Sections 2.1, 2.2 and 2.3 of the main article, we define compartment models in terms of their flow rates.
@@ -388,9 +383,8 @@ We proceed to describe the ones we use in this paper: via a system of ordinary d
 A basic deterministic specification is
 \begin{equation}
 \label{eq:ode1}
-dN_{ij}/dt = \mu_{ij}\big(t,X(t) \big) X_i(t), \medskip i\in \seq{1}{c}, \medskip j\in \seq{1}{c} \cup\{\bullet\}, \medskip i\neq j,
+dN_{ij}/dt = \mu_{ij}\big(t,X(t) \big) X_i(t), \hspace{3mm} i\in \seq{1}{c}, \hspace{3mm} j\in \seq{1}{c} \cup\{\bullet\}, \hspace{3mm} i\neq j,
 \end{equation}
-\eic{medskip IS VERTICAL SPACE. I USUALLY USE hspace}
 where $\mu_{ij}\big(t,X(t)\big)$ is called a per-capita rate or a unit rate.
 Flows into the system require special treatment since $X_i(t)$ in \myeqref{eq:ode1} is not defined for $i=\bullet$.
 Instead, we specify
@@ -428,8 +422,7 @@ Together with the initial conditions $X(0)$, equations \myeqref{eq:smcs1}--\myeq
 Each flow is a simple counting process, meaning a non-decreasing integer-valued process that only has jumps of size one.
 We therefore call the Markov chain a simple Markov counting system (SMCS).
 The infinitesimal mean of every flow is equal to its infinitesimal variance \citep{breto11} and so an SMCS is called equidispersed.
-\eic{HERE AND ELSEWHERE, in Lee et al SHOULD BE by Lee et al. CONVENTIONALLY, THE TEXT CITATION REFERS TO THE PEOPLE RATHER THAN THE ARTICLE.}
-We note that the special case of Model~1 used in \cite{lee20} (with $\sigmaProc = 0$) is an SMCS.
+We note that the special case of Model~1 used by \cite{lee20} (with $\sigmaProc = 0$) is an SMCS.
 To permit more general mean-variance relationships for a Markov counting system, we must permit jumps of size greater than one.
 The utility of overdispersed models, where the infinitesimal variance of the flow exceeds the infinitesimal mean, has become widely recognized \citep{stocks20,he10}.
 
@@ -537,15 +530,9 @@ In this model, the advantage afforded by vaccination is an increased probability
 Therefore, under the assumptions of this model, all reported cases are assumed to be a fraction of individuals that transition from the exposed to the infected compartment, as noted in Eq.~\myeqref{model1:meas}.
 \begin{equation}
   \label{model1:meas}
-  y_{t} \mid \Delta N_{E_{\vaccCounter}I_{\vaccCounter}}(t) = z(t) \sim \text{NB}\left(\reportRate z_(t), \obsOverdispersion \right)
+  Y_{n} \mid \Delta N_{E_{\vaccCounter}I_{\vaccCounter}}(n) = z(n) \sim \text{NB}\left(\reportRate z(n), \obsOverdispersion \right),
 \end{equation}
-
-Where $y_t$ is the reported cholera cases at time $t \in 1:N$ and $\Delta N_{E_{\vaccCounter}I_{\vaccCounter}}(t)$ is the number of individuals who moved from compartment $E_\vaccCounter$ to $I_\vaccCounter$ since observation $t-1 \in 0:N-1$.
-\eic{HERE AND ELSEHWERE: PUNCTUATION. NO NEED FOR A NEW PARAGRAPH HERE AFTER THE DISPLAY EQUATION. ALSO, PROBABLY THERE SHOULD BE A COMMA AT THE END OF THE EQUATION AND Where THEN IS NOT CAPITALIZED}
-
-\eic{AS A PEDANTIC POINT WHICH IS NOT UNIVERSALLY IMPLEMENTED BUT I HAPPEN TO THINK IS WORTHWHILE: THE NOTATION IN S16 USUALLY CORRESPONDS TO A DISTRIBUTION, BUT $y_n$ (WHICH I SUPPOSE HERE IS WRITTEN $y_t$) IS DATA, AND THEREFORE A NUMBER NOT A RANDOM VARIABLE. WE MODEL IT BY A RANDOM VARIABLE $Y_n$. THE DISTINCTION MAY NOT BE CONFUSING FOR MANY, BUT WHEN WE ARE ENCOURAGING OURSELVES AND OTHERS TO THINK ABOUT THE DIFFERENCES BETWEEN DATA AND MODELS FOR DATA, IT IS COUNTER-PRODUCTIVE TO HAVE NOTATION WHICH SUPPRESSES THIS DIFFERENCE.}
-
-\eic{DUE TO DIFFERENT PARAMETERIZATIONS OF NB (AS WELL AS TO CLARIFY THE MODEL) I THINK IT IS GOOD PRACTICE TO GIVE THE MOMENTS, E.G., ``, and $\text{NB}\left(\reportRate z, \obsOverdispersion \right)$ is the negative binomial distribution with mean $\reportRate z$ and variance $\reportRate z+ \psi^2\reportRate^2 z^2)$'' IF THIS IS CORRECT.}
+where $Y_n$ is the reported cholera cases at time $n \in 1:N$ and $\Delta N_{E_{\vaccCounter}I_{\vaccCounter}}(n)$ is the number of individuals who moved from compartment $E_\vaccCounter$ to $I_\vaccCounter$ since observation $n-1 \in 0:N-1$, and $\text{NB}\left(\reportRate z, \obsOverdispersion \right)$ is the negative binomial distribution with mean $\reportRate z$ and variance $\reportRate z+ \psi^2\reportRate^2 z^2)$. \jwc{CHECK THIS}.
 
 \subsection{Model~2}
 
@@ -555,11 +542,11 @@ a Gaussian measurement model (Eq.~\myeqref{model2:meas}) on the log-transformed 
 
 \begin{equation}
   \label{model2:meas}
-  \log\big(y_{u, t} + 1\big) \mid \bm{X}^{(2)}(t) = \bm{x}^{(2)}(t) \sim \text{N}\left(\log \big(\reportRate \sum_{\vaccCounter} I_{u, \vaccCounter}(t) + 1\big), \obsOverdispersion^2 \right)
+  \log\big(Y_{u, n} + 1\big) \mid \bm{X}^{(2)}(n) = \bm{x}^{(2)}(n) \sim \text{N}\left(\log \big(\reportRate \sum_{\vaccCounter} I_{u, \vaccCounter}(n) + 1\big), \obsOverdispersion^2 \right)
 \end{equation}
 
-Where $\sum_{\vaccCounter} I_{u, \vaccCounter}(t)$ is the total number of individuals who are infected at time $t$ in unit $u \in 1:U$, for all vaccination campaigns $\vaccCounter$.
-We note that fitting a model with this loss function is equivalent to fitting using least squares, with $\log(y_{u, t} + 1)$ as the response variable.
+Where $\sum_{\vaccCounter} I_{u, \vaccCounter}(n)$ is the total number of individuals who are infected at time $n$ in unit $u \in 1:U$, for all vaccination campaigns $\vaccCounter$.
+We note that fitting a model with this loss function is equivalent to fitting using least squares, with $\log(y_{u, n} + 1)$ as the response variable.
 
 \subsection{Model~3}
 
@@ -567,10 +554,10 @@ In this model, reported cholera cases are assumed to stem from individuals who d
 Therefore reported cases are assumed to come from an over-dispersed negative binomial model, given the increase in infected individuals:
 \begin{equation}
   \label{model3:meas}
-  y_{u, t} \mid \Delta N_{S_{u \vaccCounter}I_{u \vaccCounter}}(t) = z_{u}(t) \sim \text{NB}\left(\reportRate z_{u}(t), \obsOverdispersion \right)
+  Y_{u, n} \mid \Delta N_{S_{u \vaccCounter}I_{u \vaccCounter}}(t) = z_{u}(n) \sim \text{NB}\left(\reportRate z_{u}(n), \obsOverdispersion \right)
 \end{equation}
 
-Where $\Delta N_{S_{u \vaccCounter}I_{u \vaccCounter}}(t)$ is the number of individuals who moved from compartment $S_{u \vaccCounter}$ to $I_{u \vaccCounter}$ since observation $t-1 \in 0:N-1$.
+Where $\Delta N_{S_{u \vaccCounter}I_{u \vaccCounter}}(n)$ is the number of individuals who moved from compartment $S_{u \vaccCounter}$ to $I_{u \vaccCounter}$ since observation $n-1 \in 0:N-1$.
 
 This measurement model is a minor change from that used in \cite{lee20}, which allowed for a change in the reporting rate on January 1st, 2018.
 The fitted values of the reporting rate---before and after January 2018---were $0.97$ and $0.097$, respectively.
@@ -597,8 +584,8 @@ As a solution to this issue, we propose the block panel iterated filter (BPIF), 
 In this algorithm, shared $\phi$ and unit-specific parameters $\psi_{u}$ are handled differently when updating the parameter vector $\theta = (\phi, \psi_{1:U})$.
 The BPIF updates $\theta$ by updating the shared vector $\phi$ in the same way that is done with PIF, but index resampling for unit-specific parameters $\psi_{1:U}$ only occurs when data from the corresponding
 unit are being considered.
-In the case where there are many units, we believe that this modification will lead to less particle depletion.
-\eic{USUALLY BEST TO AVOID believe IN SCIENTIFIC WRITING. CAN WE SAY SOMETHING SOLID ABOUT WHAT WE HAVE FOUND. EVEN, I THINK THE FOLLOWING IS TRUE: We have found that this modification leads to improved likelihood maximization performance, especially as the number of units increases.}
+% In the case where there are many units, we believe that this modification will lead to less particle depletion.
+We have found that this modification leads to improved likelihood maximization performance, especially as the number of units increases.
 No theoretical properties of this algorithm have yet been derived, but the approach has similarities to the block particle filter of \citet{rebeschini15} and its extension to parameter estimation \citep{ionides22,ning21ibpf}.
 
 \begin{algorithm}[ht]

@@ -27,3 +27,4 @@ si/output/*
 !model3/run_level_3/haiti3_fit.rds
 !model3/run_level_3/lee3_results.rds
 !model3/run_level_3/SpatPomp_res.rds
+si/si.tex

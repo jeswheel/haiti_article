@@ -960,7 +960,7 @@ While the latent process exists between observation times, the value of the late
 We therefore write $\bm{X}^{(\modelCounter)}_n = \bm{X}^{(\modelCounter)}(t_n)$ to denote the value of the latent process at the $n$th observation time, and $\bm{X}^{(\modelCounter)}_{1:N}$ is the collection of latent state values for all observed time points.
 The observable random variables $\bm{Y}^{(\modelCounter)}_{1:N}$ are assumed to be conditionally independent given $\bm{X}^{(\modelCounter)}_{0:N}$.
 Together, with the density for the initial value of the latent state $\bm{X}^{(\modelCounter)}_{0} = \bm{X}^{(\modelCounter)}(t_0)$, each model assumes a joint density $f_{\bm{X}^{(\modelCounter)}_{0:N}, \bm{Y}^{(\modelCounter)}_{1:N}}\big(\bm{x}^{(\modelCounter)}_{0:N}, \bm{y}^{(\modelCounter)}_{1:N};\paramVec\big)$, where $\paramVec$ is a parameter vector that indexes the model.
-The observed data $\bm{y}_{1:N}^*$ are modeled as a realization of the observation processes. \jwc{SHOULD WE SAY SOMETHING ABOUT HOW THE JOINT DENSITY IS INSTRACTABLE, OR CAN BE FACTORED USING THE MARKOV PROPERTY?}
+The observed data $\bm{y}_{1:N}^*$, along with the unobserved true value of the latent state, are modeled as a realization of this joint distribution.
 
 For each model $\modelCounter \in \{1, 2, 3\}$, the latent state vector $\bm{X}^{(\modelCounter)}(t)$ consists of individuals labeled as susceptible (S), infected (I), asymptomatically infected (A), vaccinated (V), and recovered (R), with various sub-divisions sometimes considered.
 Models~2 and~3 have metapopulation structure, meaning that each individual is a member of a spatial unit, denoted by a subscript $u\in \seq{1}{U}$.
@@ -1150,7 +1150,7 @@ All deaths are balanced by births into the susceptible compartment in \myeqref{e
 
 \section{Statistical Analysis}\label{sec:methods}
 
-We consider model fitting (Sec.~\ref{sec:model_fitting}) followed by diagnostic investigations (Sec.~\ref{sec:model_diagnostics}), forecasting (Sec.~\ref{sec:filter}) and \eic{PERHAPS external scientific corroboration of model fit RATHER THAN interpreting model fit} (Sec.~\ref{sec:science}).
+We consider model fitting (Sec.~\ref{sec:model_fitting}) followed by diagnostic investigations (Sec.~\ref{sec:model_diagnostics}), forecasting (Sec.~\ref{sec:filter}) and external scientific corroboration of model fit (Sec.~\ref{sec:science}).
 
 <<FitModel1, echo=FALSE, message=FALSE, include=FALSE>>=
 set.seed(636813)
@@ -1360,20 +1360,21 @@ stew(file = "models.rda", {
 
 \subsection{Model Fitting}\label{sec:model_fitting}
 
-\eic{PERHAPS THIS PARAGRAPH COULD MOVE TO A LATER SECTION? THE FOLLOWING PARAGRAPH IS MORE WHAT I EXPECTED READING THROUGH WHEN I REACHED THIS POINT IN THE MS. PERHAPS PARTS OF THIS FIRST PARAGRAPH ARE EVEN REDUNDANT, IF THEY ARE COVERED IN THE ORIGINAL DISCUSSION OF THE MODELS.}
-Proposed mechanistic structures form a family of statistical models indexed by a parameter vector $\paramVec$.
-Different values of $\paramVec$ can result in qualitative differences in the predicted behavior of the system.
-The complex nature of biological systems necessitates a search for modeling assumptions that combine insightful simplicity with fidelity to biological reality.
-For example, many models commonly used in epidemiology are motivated by reasoning about a homogeneous mixing population which is simultaneously an avenue for powerful simplification and a source of model misspecification \citep{bansal07}.
-Other common considerations include whether the proposed model should be stochastic or deterministic; whether the model should have change points in parameter values or should otherwise make adjustments for changes through time in the dynamic system; and whether the proposed model should include any spatial heterogeneity at a scale permissible by the observed data.
-In addition, elements of $\paramVec$ can either be chosen as constants, based on scientific reasoning and previous knowledge, or calibrated to observed data.
-Suitable methodology for calibrating model parameters may depend on other modeling decisions.
+% \eic{PERHAPS THIS PARAGRAPH COULD MOVE TO A LATER SECTION?}
+% The complex nature of biological systems necessitates a search for modeling assumptions that combine insightful simplicity with fidelity to biological reality.
+% For example, many models commonly used in epidemiology are motivated by reasoning about a homogeneous mixing population which is simultaneously an avenue for powerful simplification and a source of model misspecification \citep{bansal07}.
+% Other common considerations include whether the proposed model should be stochastic or deterministic; whether the model should have change points in parameter values or should otherwise make adjustments for changes through time in the dynamic system; and whether the proposed model should include any spatial heterogeneity at a scale permissible by the observed data.
 % While this section is focused on the elements of $\paramVec$ that are calibrated to data, we note that the decision of which elements to fix and which to estimate has consequences for model interpretability, as discussed in Sec.~\ref{sec:science}.
-
-Each of the three models considered in this study describes cholera dynamics via unobservable states that evolve dynamically with time.
-Despite their similarities, these models represent a diverse selection of possible modeling assumptions: namely, the use of stochastic (Models~1 and 2) or deterministic (Model~2) equations; spatially-heterogeneous meta-population (Models~2 and 3) or spatially-aggregated (Model~1) structure; and the use of covariates (Model~3) versus mathematical equations (Models~1 and 2) to describe a seasonal mechanism.
-All these structures can be described in the framework of partially observed Markov process (POMP) models, with the understanding that the deterministic Model~2 is a degenerate case of a stochastic model.
-In the following subsections we describe our approach to fitting these mechanistic models.
+Each of the three models considered in this study describes cholera dynamics as partially observed Markov processes (POMP), with the understanding that the deterministic Model~2 is a degenerate case of a stochastic model.
+% Despite their similarities, these models represent a diverse selection of possible modeling assumptions: namely, the use of stochastic (Models~1 and 2) or deterministic (Model~2) equations; spatially-heterogeneous meta-population (Models~2 and 3) or spatially-aggregated (Model~1) structure; and the use of covariates (Model~3) versus mathematical equations (Models~1 and 2) to describe a seasonal mechanism.
+As such, each proposed mechanistic structure forms a family of statistical models indexed by a parameter vector $\paramVec$.
+Different values of $\paramVec$ can result in qualitative differences in the predicted behavior of the system.
+Therefore, the choice of $\paramVec$ used to make inference about the system can greatly affect model based conclusions.
+Specific elements of $\paramVec$ can be chosen as constants based on scientific understanding of the system, but parameters can also be calibrated to data in a way that maximizes some measure of congruency between the observed data and the assumed mechanistic structure. 
+Mechanistic models are used as a way of approximating real-world mechanisms present in a dynamic system.
+While calibrating model parameters does not directly achieve this goal---as model assumptions may be incorrect, and do not change as the model is calibrated to data---the congruency between the model and observed data works as a proxy for the congruency between the model and the true underlying dynamic system, since the observed data are a result of the system. 
+% All these structures can be described in the framework of partially observed Markov process (POMP) models, with the understanding that the deterministic Model~2 is a degenerate case of a stochastic model.
+In the following subsections we describe our approach to fitting the three proposed mechanistic models by calibrating $\paramVec$ to observed cholera incidence data. 
 
 \subsubsection{Model~1}
 
@@ -1472,19 +1473,18 @@ gc()
 
 \subsubsection{Model~2}
 
-Model~2 is a system of deterministic differential equations and can therefore be considered a degenerate probabilistic model with no randomness in the dynamic process.
-By combining a deterministic process model with a simple Gaussian measurement model, the parameter estimation problem for a set of differential equations reduces to a least squares calculation.
-Deterministic compartment models have a long history in the field of infectious disease epidemiology \citep{kermack1927,brauer2017,varghese21},
+As previously stated, Model~2 is a deterministic compartmental model defined by a set of coupled differential equations.
+The use of deterministic compartment models have a long history in the field of infectious disease epidemiology \citep{kermack1927,brauer2017,varghese21},
 and can be justified by asymptotic considerations in a large-population limit \citep{dadlani2020,ndii17}.
-
+Because the process model of Model~2 is deterministic, the parameter estimation problem for Model~2 reduces to a least squares calculation when combined with a Gaussian measurement model (see supplement material for details).
 \cite{lee20} fit two versions of model~2 based on a presupposed change in cholera transmission from a epidemic phase to endemic phase that occurred in March, 2014.
 The inclusion of a change-point in model states and parameters increases the flexibility of the model and hence the ability to fit the observed data.
 The increase in model flexibility, however, results in hidden states that are inconsistent between model phases.
 % A naive solution to this would be to estimate only model parameters in separate phases and not the hidden states, but this may also result in hidden states in one phase of the model that are inconsistent with the other phase of the outbreak, since only the data from one phase is used to fit model parameters.
 The inclusion of a model break-point in \cite{lee20} is perhaps due to a challenging feature of fitting a deterministic model via least squares: discrepancies between model trajectories and observed case counts in highly infectious periods of a disease outbreak will result in greater penalty than the discrepancies between model trajectories and observed case counts in times of relatively low infectiousness, resulting in a bias towards accurately describing periods of high infectiousness.
-This issue is particularly troublesome for this case study: the inability to accurately fit times of low infectiousness may result in poor model forecasts, as few cases of cholera were observed the last few years of the epidemic.
+This issue is particularly troublesome for modeling cholera dynamics in Haiti: the inability to accurately fit times of low infectiousness may result in poor model forecasts, as few cases of cholera were observed the last few years of the epidemic.
 
-To combat this issue, we fit the model to log-transformed case counts, where the difference between periods of high and low infectiousness is less drastic \eic{, since the log scale stabilizes the variation during periods of high and low infectiousness?? I'M NOT ENTIRELY HAPPY WITH THAT EITHER}.
+To combat this issue, we fit the model to log-transformed case counts, where the difference between periods of high and low infectiousness is less drastic, since the log scale stabilizes the variation during periods of high and low infectiousness.
 Other solutions include changing the measurement model to include overdispersion, as was done in Models~1 and~3.
 This permits the consideration of demographic stochasticity, which is dominant for small infected populations, together with log scale stochasticity (also called multiplicative, or environmental, or extra-demographic) which is dominant at high population counts.
 Here we chose to fit the model to transformed case counts rather than adding overdispersion to the measurement model with the goal of making the fewest changes to the model in \cite{lee20} as possible.
@@ -2020,19 +2020,31 @@ In this particular case study, projecting the future state of the cholera epidem
 This alone partially explains the unrealistic forecasts of \cite{lee20}, which were obtained by simulating the model from initial conditions;
 Table~S7 of their supplement material shows that of their simulations that were consistent with observing zero cases in 2019, all forecasts resulted in the elimination of cholera.
 
+% It has been noted that the uncertainty in just a single parameter can lead to drastically different forecasts \citep{saltelli20};
+% parameter uncertainty should therefore be considered when obtaining model forecasts to influence policy.
+% If a Bayesian technique is used for parameter estimation, the most natural way to account for parameter uncertainty is to obtain $J$ simulations from the model where each simulation is obtained using parameters $\Theta_{1:J}$ drawn from the posterior distribution $\Theta_{1:J} \sim f_{\Theta}\big(\paramVec | \bm{Y}^{(\modelCounter)}_{1:N} = y_{1:N}^*\big)$.
+% In the frequentist case, one approach is empirical Bayes: endow to set $\Theta_K = \{\theta_1, \theta_2, \ldots, \theta_K\}$ with a discrete uniform distribution, such that $P\big(\Theta_{j} = \theta_k\big) = \frac{1}{K}$ for all values $k \in \seq{1}{K}$.
+% In this case, the posterior distribution of $\Theta_{j} | \bm{Y}^{(\modelCounter)}_{1:N}$ can be expressed as:
+% $P\big(\Theta_{j} = \theta_k | \bm{Y}^{(\modelCounter)}_{1:N} = y_{1:N}^*\big) = \frac{l(y_{1:N}^*; \theta_k)}{\sum_{l = 1}^K l(y_{1:N}^*; \theta_l)}$. To complete the formulation, we then choose the set $\Theta_K$ such that each $\theta_k \in \Theta_K$ is a single output of the IF2 algorithm, which has been shown to be within a neighborhood of the MLE \cite{ionides15}.
+% This approach has been taken in previous studies \citep{king15}, and the result is simply weighing parameter sets based on their corresponding likelihoods: parameters with higher likelihoods should be used more frequently in model forecasts than those that correspond to lower likelihoods.
+% This can be done for both deterministic and stochastic models, but requires a large number of computations, especially as the number of observations and model parameters increase.
+% Because our direct aim is not to provide forecasts for policy recommendation, we do not include parameter uncertainty in our forecasts.
+% Instead, we use the projections from point estimates to highlight a major deficiency of deterministic models, which is that the only variability in model projections is a result of parameter uncertainty, which leads to over-confidence in forecasts \cite{king15}.
+% To the credit of deterministic models, of the four fitted models in \cite{lee20}, Model~2 provides the most apparently accurate forecasts.
+% This perhaps demonstrates that while deterministic models describe the systems in a less realistic way, the relative ease in fitting these models potentially results in fewer modeling errors.
+% As the data analysis becomes more refined, however, the deficiencies of deterministic models become increasingly apparent.
+
 It has been noted that the uncertainty in just a single parameter can lead to drastically different forecasts \citep{saltelli20};
 parameter uncertainty should therefore be considered when obtaining model forecasts to influence policy.
-If a Bayesian technique is used for parameter estimation, the most natural way to account for parameter uncertainty is to obtain $J$ simulations from the model where each simulation is obtained using parameters $\Theta_{1:J}$ drawn from the posterior distribution $\Theta_{1:J} \sim f_{\Theta}\big(\paramVec | \bm{Y}^{(\modelCounter)}_{1:N} = y_{1:N}^*\big)$.
-In the frequentist case, one approach is empirical Bayes: endow to set $\Theta_K = \{\theta_1, \theta_2, \ldots, \theta_K\}$ with a discrete uniform distribution, such that $P\big(\Theta_{j} = \theta_k\big) = \frac{1}{K}$ for all values $k \in \seq{1}{K}$.
-In this case, the posterior distribution of $\Theta_{j} | \bm{Y}^{(\modelCounter)}_{1:N}$ can be expressed as:
-$P\big(\Theta_{j} = \theta_k | \bm{Y}^{(\modelCounter)}_{1:N} = y_{1:N}^*\big) = \frac{l(y_{1:N}^*; \theta_k)}{\sum_{l = 1}^K l(y_{1:N}^*; \theta_l)}$. To complete the formulation, we then choose the set $\Theta_K$ such that each $\theta_k \in \Theta_K$ is a single output of the IF2 algorithm, which has been shown to be within a neighborhood of the MLE \cite{ionides15}.
-This approach has been taken in previous studies \citep{king15}, and the result is simply weighing parameter sets based on their corresponding likelihoods: parameters with higher likelihoods should be used more frequently in model forecasts than those that correspond to lower likelihoods.
-This can be done for both deterministic and stochastic models, but requires a large number of computations, especially as the number of observations and model parameters increase.
+If a Bayesian technique is used for parameter estimation, the most natural way to account for parameter uncertainty is to obtain simulations from the model where each simulation is obtained using parameters drawn from the posterior distribution.
+In the frequentist case, one approach is empirical Bayes, as was done in \cite{king15} (see supplement for details).
+Both of these approaches share the similarity that parameters with higher likelihoods should be used more frequently in model forecasts than those that correspond to lower likelihoods.
+
 Because our direct aim is not to provide forecasts for policy recommendation, we do not include parameter uncertainty in our forecasts.
 Instead, we use the projections from point estimates to highlight a major deficiency of deterministic models, which is that the only variability in model projections is a result of parameter uncertainty, which leads to over-confidence in forecasts \cite{king15}.
 To the credit of deterministic models, of the four fitted models in \cite{lee20}, Model~2 provides the most apparently accurate forecasts.
 This perhaps demonstrates that while deterministic models describe the systems in a less realistic way, the relative ease in fitting these models potentially results in fewer modeling errors.
-As the data analysis becomes more refined, however, the deficiencies of deterministic models become increasingly apparent.
+As the data analysis becomes more refined, however, the deficiencies of deterministic models become increasingly apparent. \jwc{CHANGE THIS BASED ON DISCUSSION WITH ED.}
 
 Forecasting can be used to simulate various interventions on a system; this feature is useful to inform policy and was the primary goal of \citet{lee20}.
 Outcomes of their study include estimates for the probability of cholera elimination and cumulative number of cholera infections under several possible vaccination scenarios.
@@ -3179,7 +3191,7 @@ This \code{R} package is contained in a public GitHub repository: jeswheel/haiti
 \end{supplement}
 
 \begin{supplement}
-\stitle{\code{jesseuwheeler/haiti}}
+\stitle{\code{jeswheel/haiti\_article}}
 \sdescription{
 This GitHub repository contains the \code{.Rnw} files that were used to create this document and the supplement material.
 }
