@@ -1210,102 +1210,215 @@ gc()
 
 @
 
-
 <<FitModel3, echo=FALSE, include=FALSE, message=FALSE>>=
-set.seed(636813)
+set.seed(1859687)
 
+# Create vectors for the unit and shared parameters
+unit_specific_names <- c("betaB", "foi_add", "Binit")
+shared_param_names <- c(
+  "mu_B", "XthetaA", "thetaI", "lambdaR", "r", "std_W",
+  "epsilon", "k", "sigma"
+)
+est_param_names <- c(
+  unit_specific_names, shared_param_names
+)
+
+# Add unit numbers to each parameter
+est_param_names_expanded <- paste0(rep(est_param_names, each = 10), 1:10)
+
+setrw1 <- function(x) {
+  if (grepl('^r[[:digit:]]+$', x)) {
+    return(0.01 / 2)
+  } else if (grepl('^Binit[[:digit:]]+$', x)) {
+    return(expression(ivp(0.02)))
+  } else {
+    return(0.01)
+  }
+}
+
+setrw2 <- function(x) {
+  if (grepl('^r[[:digit:]]+$', x)) {
+    return(0.0025 / 2)
+  } else if (grepl('^Binit[[:digit:]]+$', x)) {
+    return(expression(ivp(0.005)))
+  } else {
+    return(0.0025)
+  }
+}
+
+setrw3 <- function(x) {
+  if (grepl('^r[[:digit:]]+$', x)) {
+    return(0.001 / 2)
+  } else if (grepl('^Binit[[:digit:]]+$', x)) {
+    return(expression(ivp(0.002)))
+  } else {
+    return(0.001)
+  }
+}
+
+# First Search RW
+reg_rw_1.sd <- lapply(est_param_names_expanded, setrw1)
+names(reg_rw_1.sd) <- est_param_names_expanded
+chol_rw_1.sd <- do.call(rw.sd, reg_rw_1.sd)
+
+# Second Search RW
+reg_rw_2.sd <- lapply(est_param_names_expanded, setrw2)
+names(reg_rw_2.sd) <- est_param_names_expanded
+chol_rw_2.sd <- do.call(rw.sd, reg_rw_2.sd)
+
+# Third Search RW
+reg_rw_3.sd <- lapply(est_param_names_expanded, setrw3)
+names(reg_rw_3.sd) <- est_param_names_expanded
+chol_rw_3.sd <- do.call(rw.sd, reg_rw_3.sd)
+
+# Search hyper-parameters for each run-level and search
 if (RUN_LEVEL == 1){
-
-  # Global search, All parameters
-  SEARCH1 <- list(NP = 20, NMIF = 3, NREPS = 3, NREPS_EVAL = 3, NP_EVAL = 25)
-
-  # Local search, all parameters
-  SEARCH2 <- list(
-    TOP_N = 1, NP = 20, NMIF = 3, NREPS = 3, NREPS_EVAL = 3, NP_EVAL = 25
-  )
-
-  # Local search, unit specific parameters
-  SEARCH3 <- list(TOP_N = 1, NP = 20, NMIF = 3, NREPS = 3, NREPS_EVAL = 3, NP_EVAL = 25)
-
-  # Number of searches
-  N_SEARCHES <- 3L
-
-} else if (RUN_LEVEL == 2) {
-
-  # Global search, all parameters
-  SEARCH1 <- list(
-    NP = 200, NMIF = 10, NREPS = 36, NREPS_EVAL = 36, NP_EVAL = 500
-  )
-
-  # Local search, all parameters
-  SEARCH2 <- list(
-    TOP_N = 2, NP = 200, NMIF = 20, NREPS = 18, NREPS_EVAL = 36, NP_EVAL = 500
-  )
-
-  # Local search, unit specific parameters
-  SEARCH3 <- list(
-    TOP_N = 2, NP = 200, NMIF = 10, NREPS = 18, NREPS_EVAL = 36, NP_EVAL = 500
-  )
-
-  # Number of searches
-  N_SEARCHES <- 3L
-} else if (RUN_LEVEL == 3) {
-
-  # Global search, all parameters
-
   SEARCH1 = list(
-    NBPF = 100,
-    NP = 1500,
+    NBPF = 5,
+    NP = 50,
     SPAT_REGRESSION = 0.5,
-    NREPS = 144,
-    NP_EVAL = 2000,
-    NREPS_EVAL = 36
+    NREPS = 6,
+    NP_EVAL = 100,
+    NREPS_EVAL = 6,
+    RW_SD = chol_rw_1.sd,
+    COOLING = 0.5,
+    KEEP_TRACES = TRUE
   )
 
   SEARCH2 = list(
-    TOP_N = 12,
-    NBPF = 100,
-    NP = 2000,
+    TOP_N = 2,
+    NBPF = 5,
+    NP = 50,
     SPAT_REGRESSION = 0.5,
-    NREPS = 6,
-    NP_EVAL = 3000,
-    NREPS_EVAL = 36
+    NREPS = 3,
+    NP_EVAL = 100,
+    NREPS_EVAL = 6,
+    RW_SD = chol_rw_2.sd,
+    COOLING = 0.5,
+    KEEP_TRACES = TRUE
   )
 
   SEARCH3 = list(
-    TOP_N = 9,
-    NBPF = 100,
-    NP = 2500,
+    TOP_N = 2,
+    NBPF = 5,
+    NP = 100,
     SPAT_REGRESSION = 0.5,
-    NREPS = 8,
-    NP_EVAL = 5000,
-    NREPS_EVAL = 36
+    NREPS = 3,
+    NP_EVAL = 100,
+    NREPS_EVAL = 6,
+    RW_SD = chol_rw_3.sd,
+    COOLING = 0.5,
+    KEEP_TRACES = TRUE
   )
 
-  # Total number of searches
+  N_SEARCHES <- 2L
+} else if (RUN_LEVEL == 2) {
+  SEARCH1 = list(
+    NBPF = 50,
+    NP = 1000,
+    SPAT_REGRESSION = 0.5,
+    NREPS = 36,
+    NP_EVAL = 1000,
+    NREPS_EVAL = 36,
+    RW_SD = chol_rw_1.sd,
+    COOLING = 0.36,
+    KEEP_TRACES = TRUE
+  )
+
+  SEARCH2 = list(
+    TOP_N = 6,
+    NBPF = 50,
+    NP = 1000,
+    SPAT_REGRESSION = 0.5,
+    NREPS = 6,
+    NP_EVAL = 1000,
+    NREPS_EVAL = 36,
+    RW_SD = chol_rw_2.sd,
+    COOLING = 0.5,
+    KEEP_TRACES = TRUE
+  )
+
+  SEARCH3 = list(
+    TOP_N = 6,
+    NBPF = 50,
+    NP = 1000,
+    SPAT_REGRESSION = 0.5,
+    NREPS = 6,
+    NP_EVAL = 1000,
+    NREPS_EVAL = 36,
+    RW_SD = chol_rw_3.sd,
+    COOLING = 0.5,
+    KEEP_TRACES = TRUE
+  )
+
   N_SEARCHES <- 3L
-} else {
-  stop("Run level must be 1, 2 or 3.")
+} else if (RUN_LEVEL == 3) {
+
+  SEARCH1 = list(
+    NBPF = 100,
+    NP = 10000,
+    SPAT_REGRESSION = 0.5,
+    NREPS = 72,
+    NP_EVAL = 10000,
+    NREPS_EVAL = 36,
+    RW_SD = chol_rw_1.sd,
+    COOLING = 0.5,
+    KEEP_TRACES = TRUE
+  )
+
+  SEARCH2 = list(
+    TOP_N = 9,
+    NBPF = 100,
+    NP = 10000,
+    SPAT_REGRESSION = 0.5,
+    NREPS = 4,
+    NP_EVAL = 10000,
+    NREPS_EVAL = 36,
+    RW_SD = chol_rw_2.sd,
+    COOLING = 0.5,
+    KEEP_TRACES = TRUE
+  )
+
+  SEARCH3 = list(
+    TOP_N = 6,
+    NBPF = 100,
+    NP = 10000,
+    SPAT_REGRESSION = 0.5,
+    NREPS = 6,
+    NP_EVAL = 10000,
+    NREPS_EVAL = 36,
+    RW_SD = chol_rw_3.sd,
+    COOLING = 0.5,
+    KEEP_TRACES = TRUE
+  )
+
+  N_SEARCHES <- 3L
 }
 
-if (RUN_LEVEL != 3 & file.exists("model3/run_level_3/haiti3_fit.rds")) {
-  haiti3_fit <- readRDS("model3/run_level_3/haiti3_fit.rds")
+if (RUN_LEVEL != 3 & file.exists("model3/run_level_3/haiti3_coupled_fit.rds")) {
+  haiti3_fit <- readRDS("model3/run_level_3/haiti3_coupled_fit.rds")
 } else {
   haiti3_fit <- bake(
-    file = paste0("model3/", rl_dir, "haiti3_fit.rds"), {
-      fit_haiti3(
+    file = paste0("model3/", rl_dir, "haiti3_coupled_fit.rds"), {
+      fit_coupled_haiti3(
+        nsearches = N_SEARCHES,
         search1 = SEARCH1,
         search2 = SEARCH2,
         search3 = SEARCH3,
-        n_searches = N_SEARCHES,
         ncores = cores
       )
     }
   )
 }
 
-rm(SEARCH1, SEARCH2, SEARCH3, N_SEARCHES)
+rm(
+  SEARCH1, SEARCH2, SEARCH3, N_SEARCHES, unit_specific_names, 
+  shared_param_names, est_param_names, est_param_names_expanded, 
+  setrw1, setrw2, setrw3, reg_rw_1.sd, reg_rw_2.sd, reg_rw_3.sd, 
+  chol_rw_1.sd, chol_rw_2.sd, chol_rw_3.sd
+)
 gc()
+
 @
 
 
@@ -1317,10 +1430,6 @@ mod3_ll <- max(
   haiti3_fit[[length(haiti3_fit)]]$logLiks[, 'logLik'],
   na.rm = TRUE
 )
-
-# MIF_mod3 <- local_MIF2_search
-# rm(mif_logLik, local_MIF2_search, tLocal)
-
 
 # Fit model 2. Note that this takes the same amount of time at all run
 # levels.
@@ -1335,32 +1444,42 @@ h2_fit <- bake(
 
 <<table-input,echo=FALSE,eval=T, include=FALSE, message=FALSE>>=
 
-# best_m3 <- ll_mod3 %>%
-#   arrange(-logLik) %>%
-#   slice_head(n = 1) %>%
-#   pull(which)
-
-best_m3 <- haiti3_fit[[length(haiti3_fit)]]$logLiks %>%
-  filter(logLik == max(logLik, na.rm = TRUE)) %>%
-  pull(which)
+best_m3 <- which.max(haiti3_fit[[length(haiti3_fit)]]$logLiks$logLik)
 
 p3 <- haiti3_fit[[length(haiti3_fit)]]$params[best_m3, ]
-gc()
 
+p3_specific <- c("foi_add", "betaB", "Binit")
+p3_shared <- c(
+  "mu_B", "XthetaA", "thetaI", "lambdaR", "r", "std_W",
+  "epsilon", "k", "sigma"
+)
+
+p3u <- matrix(nrow = length(p3_specific), ncol = 10)
+rownames(p3u) <- p3_specific
+p3s <- numeric(length(p3_shared))
+names(p3s) <- p3_shared
+
+for (p in p3_shared) {
+  pat <- paste0("^", p, "[[:digit:]]+$")
+  p3s[p] <-  mean(p3[grepl(pat, names(p3))])
+}
+
+for (p in p3_specific) {
+  pat <- paste0("^", p, "[[:digit:]]+$")
+  p3u[p, ] <- p3[grepl(pat, names(p3))]
+}
+
+rm(p3_specific, p3_shared, p, pat)
 
 stew(file = "models.rda", {
   h1 <- haiti1_joint()
   coef(h1) <- p1
 
   h2_epi <- haiti2(region = 'before', cutoff = 10000, measure = 'log')
-
   coef(h2_epi) <- h2_fit$h2_params
 
-  h3 <- haiti3_panel(start_time = "2010-10-23", B0 = TRUE)
-  coef(h3) <- p3
-  pp3 <- pparams(h3)
-  p3u <- pp3$specific
-  p3s <- pp3$shared
+  h3Spat <- haiti3_spatPomp()
+  coef(h3Spat) <- p3
 })
 @
 
@@ -1580,8 +1699,8 @@ if (RUN_LEVEL != 3 & file.exists("model3/run_level_3/SpatPompSims.rds")) {
 } else {
   h3Spat_quants <- bake(
     file = paste0('model3/', rl_dir, 'SpatPompSims.rds'), {
-      h3Spat <- haiti3_spatPomp()
-      coef(h3Spat) <- haitipkg:::panelParms_toSpatParms3(p3)
+      # h3Spat <- haiti3_spatPomp()
+      # coef(h3Spat) <- haitipkg:::panelParms_toSpatParms3(p3)
 
       h3Spat_sims <- simulate(
         h3Spat, nsim = h3_spat_nsim, format = 'data.frame'
@@ -1723,8 +1842,8 @@ mod1_aic <- 2 * mod1_n_params - 2 * mod1_ll
 mod3_n_params <- 29
 mod3_aic <- 2 * mod3_n_params - 2 * mod3_ll
 
-h3Spat <- haiti3_spatPomp()
-coef(h3Spat) <- haitipkg:::panelParms_toSpatParms3(p3)
+# h3Spat <- haiti3_spatPomp()
+# coef(h3Spat) <- haitipkg:::panelParms_toSpatParms3(p3)
 
 # Calculate likelihood via block-particle filter
 if (RUN_LEVEL != 3 & file.exists("model3/run_level_3/SpatPomp_res.rds")) {
