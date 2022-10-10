@@ -119,6 +119,7 @@ myround <- function (x, digits = 1) {
 \newcommand\obsOverdispersion{\psi}
 \newcommand\phaseParm{\phi}
 \newcommand\transmissionTrend{\zeta}
+\newcommand\Binit{\xi}
 \newcommand\vaccClass{Z}
 \newcommand\vaccCounter{z}
 \newcommand\modelCounter{m}
@@ -515,9 +516,9 @@ We use the reported cases at the start of the pandemic to approximate the number
 The susceptible compartment is initialized so that the sum $S_{u}(0) + I_u(0) + A_u(0) + \sum_k R_{u, k}(0) = \text{population}_u$.
 The bacteria compartment is then initialized using Eq.~\myeqref{eq:model3:b0}:
 \begin{equation}
-  B_u(0) = \big[1 + \seasAmplitude \big(\xi_u)^r \big] D_i \, \Wshed \big[ I_{u}(0)+ \asymptomRelativeShed A_{u}(0) \big]\label{eq:model3:b0},
+  B_u(0) = \big[1 + \seasAmplitude \big(\Binit_u)^r \big] D_i \, \Wshed \big[ I_{u}(0)+ \asymptomRelativeShed A_{u}(0) \big]\label{eq:model3:b0},
 \end{equation}
-where $\xi_u \in (0, 1)$ is an initial value parameter that allows some flexibility in determining the initial state of the bacteria compartment.
+where $\Binit_u \in (0, 1)$ is an initial value parameter that allows some flexibility in determining the initial state of the bacteria compartment.
 
 \section{Measurement Models}
 
@@ -530,23 +531,40 @@ In this model, the advantage afforded by vaccination is an increased probability
 Therefore, under the assumptions of this model, all reported cases are assumed to be a fraction of individuals that transition from the exposed to the infected compartment, as noted in Eq.~\myeqref{model1:meas}.
 \begin{equation}
   \label{model1:meas}
-  Y_{n} \mid \Delta N_{E_{\vaccCounter}I_{\vaccCounter}}(n) = z(n) \sim \text{NB}\left(\reportRate z(n), \obsOverdispersion \right),
+  Y_{n} \mid \Delta N_{EI}(n) = z(n) \sim \text{NB}\left(\reportRate z(n), \obsOverdispersion \right),
 \end{equation}
-where $Y_n$ is the reported cholera cases at time $n \in 1:N$ and $\Delta N_{E_{\vaccCounter}I_{\vaccCounter}}(n)$ is the number of individuals who moved from compartment $E_\vaccCounter$ to $I_\vaccCounter$ since observation $n-1 \in 0:N-1$, and $\text{NB}\left(\reportRate z, \obsOverdispersion \right)$ is the negative binomial distribution with mean $\reportRate z$ and variance $\reportRate z+ \psi^2\reportRate^2 z^2)$. \jwc{CHECK THIS}.
+where $Y_n$ is the reported cholera cases at time $n \in 1:N$ and $\Delta N_{EI}(n)$ is the sum total of individuals across vaccination compartment $\vaccCounter$ who moved from compartment $E_\vaccCounter$ to $I_\vaccCounter$ since observation $n-1 \in 0:N-1$, and $\text{NB}\left(\reportRate z, \obsOverdispersion \right)$ is the negative binomial distribution with mean $\reportRate z$ and variance $\reportRate z+ \psi^2\reportRate^2 z^2)$. \jwc{CHECK THIS}.
 
-\subsection{Model~2}
+\subsection{Model~2}\label{sec:mod2Meas}
 
-As mentioned in the main text, Model~2 was fit using log-transformed observed cases.
+As mentioned in the main text, Model~2 was fit using reported case counts that were transformed using the natural logarithm.
 We fit Model~2 using the subplex algorithm in the \code{subplex} package, using
-a Gaussian measurement model (Eq.~\myeqref{model2:meas}) on the log-transformed cases as the loss function.
-
+a Gaussian measurement model (Eq.~\myeqref{model2:meas}) on the log transformed cases as the loss function.
 \begin{equation}
   \label{model2:meas}
-  \log\big(Y_{u, n} + 1\big) \mid \bm{X}^{(2)}(n) = \bm{x}^{(2)}(n) \sim \text{N}\left(\log \big(\reportRate \sum_{\vaccCounter} I_{u, \vaccCounter}(n) + 1\big), \obsOverdispersion^2 \right)
+  \log\big(Y_{u, n} + 1\big) \mid \Delta N_{EI}(n) = z(n) \sim \text{N}\left(\log \big(\reportRate z(n) + 1\big), \obsOverdispersion^2 \right),
 \end{equation}
+where $\Delta N_{EI}(n)$ is the sum total of individuals across vaccination compartment $\vaccCounter$ and unit $u$ who moved from compartment $E_{u\vaccCounter}$ to $I_{u\vaccCounter}$ since observation $n-1 \in 0:N-1$.
+Therefore, because the natural logarithm of observed case counts (plus one, to avoid taking the logarithm of zero) has a normal distribution, $Y_{u, n} + 1$ is assumed to follow a log-normal distribution with log-mean parameter $\mu = \log\big(\Delta N_{EI}(n) + 1\big)$ and log-variance $\obsOverdispersion^2$.
+We note that fitting a model with this measurement model is equivalent to fitting using least squares, with $\log(Y_{u, n} + 1)$ as the response variable.
 
-Where $\sum_{\vaccCounter} I_{u, \vaccCounter}(n)$ is the total number of individuals who are infected at time $n$ in unit $u \in 1:U$, for all vaccination campaigns $\vaccCounter$.
-We note that fitting a model with this loss function is equivalent to fitting using least squares, with $\log(y_{u, n} + 1)$ as the response variable.
+This measurement model differs from that used by \citet{lee20}, who fit the model in two stages: epidemic and endemic phases.
+Although their text and supplement material do not explicitly describe the measurement model used, inspection of the code provided with their submission suggests a change in measurement model between the epidemic and endemic phases.
+In the file \code{choleraEqsPublic.py}, \citet{lee20} create several functions, where each function represents a set of coupled differential equations that could potentially be used to model cholera incidence data.
+Each function returns a vector (or \code{numpy} array) that represents the change in each state variable for a single time step, including the variable \code{dC}, which tracks the number of new infections and is used to obtain the reported case counts.
+Following their comments and code, it appears that the function \code{choleraEqs10WithoutVaccinationNetwork} was used to describe the dynamics of the epidemic phase, and \code{choleraEqs11WithoutVaccinationNetwork} was used for the endemic stage (see Sec~\ref{sec:mod2rep} for more details).
+Because their models were fit using least squares, the code in these functions suggest that the measurement model for the epidemic phase is
+\begin{equation}
+  \label{model2:meas}
+  Y_{u, n} \mid \Delta N_{EI}(n) = z(n) \sim \text{N}\left(\reportRate z(n), \obsOverdispersion^2 \right),
+\end{equation}
+which is similar to our measurement model, the primary difference being that the measurement model is applied to raw case counts rather than log-transformed case counts.
+The measurement model for the endemic phase modifies the epidemic model by counting both asymptomatically infected (A) and symptomatically infected (I) individuals in the case counts:
+\begin{equation}
+  \label{model2:meas}
+  Y_{u, n} \mid \Delta N_{EI}(n) = z_1(n), \Delta N_{EA}(n) = z_2(n) \sim \text{N}\left(\reportRate (z_1(n) + z_2), \obsOverdispersion^2 \right),
+\end{equation}
+where the notation for $\Delta N_{EA}(n)$ is similar to $\Delta N_{EI}(n)$, described above.
 
 \subsection{Model~3}
 
@@ -707,7 +725,7 @@ foreach(
   i = 1:length(lee1_epi_mif),
   .combine = rbind
 ) %dopar% {
-  guess <- lee1_epi_mif$lee1_epi_mif_params[i, ] 
+  guess <- lee1_epi_mif$lee1_epi_mif_params[i, ]
   sims <- simulate(h1_epi, nsim = N_LEE_SIMS, format = 'data.frame',
                    params = guess)  # 20 sims for each set of parameters
   sims$param_set <- i
@@ -777,12 +795,12 @@ foreach(
   .combine = rbind
 ) %dopar% {
   r_params <- lee1_end_mif[i, ]
-  
+
   lee1_epi_mif$start_states %>%
     filter(param_set == i) %>%
     select(-param_set) %>%
     sapply(., median, na.rm = TRUE) -> rinit_parms
-  
+
   # Set the initial state
   new_rinit <- Csnippet(
     sprintf(
@@ -810,7 +828,7 @@ foreach(
       rinit_parms['Sin']
     )
   )
-  
+
   h1_end <- h1_end %>% pomp(
     rinit = new_rinit,
     statenames = c(
@@ -818,9 +836,9 @@ foreach(
       "foival", "Str0", "Sout", "Sin"
     )
   )
-  
+
   coef(h1_end) <- r_params
-  
+
   sims <- simulate(
     h1_end, nsim = N_LEE_SIMS,
     format = 'data.frame',
@@ -837,7 +855,7 @@ foreach(
 lee1_end_evals <- readRDS(file = paste0("../model1/", RL_dir, "lee1_end_evals.rds"))
 
 end_results <- as.data.frame(lee1_end_mif)
-end_results$logLik <- lee1_epi_evals$pfLL 
+end_results$logLik <- lee1_epi_evals$pfLL
 
 GGally::ggpairs(
   filter(end_results, logLik > -20000),
@@ -896,18 +914,17 @@ ggplot() +
 @
 
 
-\subsection{Model~2 Replication}
+\subsection{Model~2 Replication}\label{sec:mod2rep}
 
 Model~2 was developed by a team that consisted of members from the Fred Hutchinson Cancer Research Center and the University of Florida (hereafter referred to as the Model~2 authors).
-While Model~2 is the only deterministic model we considered in our analysis, it contains perhaps the most complex descriptions of cholera in Haiti: Model~2 accounts for movement between spatial units; human-to-human and environment-to-human cholera infections; and transfer of water between spatial units based on elevations charts and river flows.
+While Model~2 is the only deterministic model we considered in our analysis, it contains perhaps the most complex descriptions of cholera in Haiti: Model~2 accounts for movement between spatial units; human-to-human and environment-to-human cholera infections; and transfer of water between spatial units based on elevation charts and river flows.
 
-The source code that was used to implement Model~2 in \cite{lee20} was written in the \code{Python} programming language, and is publicly available at \url{10.5281/zenodo.3360857} and its accompanying GitHub repository \url{https://github.com/lulelita/HaitiCholeraMultiModelingProject}.
+The source code that the Model~2 authors used to generate their results was written in the \code{Python} programming language, and is publicly available at \url{10.5281/zenodo.3360857} and its accompanying GitHub repository \url{https://github.com/lulelita/HaitiCholeraMultiModelingProject}.
 In order to perform our analysis in a unified framework, we re-implemented this model in the \code{R} programming language using the \code{spatPomp} package \citep{asfaw21github}, which facilitates the creation of meta-population models.
 We note that the travel and water matrices used to implement the complex dynamics in Model~2 \citep{lee20sup} are not available in either the Zenodo archive or the GitHub repository;
 instead, we obtained these matrices via personal correspondence with the Model~2 authors.
-
 Using these matrices, and the point estimates for model parameters listed in \citep{lee20sup}, we created trajectories of the cholera dynamics and compared this to available data.
-These trajectories, shown in Figure~\ref{fig:mod2rep}, are very similar to the trajectories shown in Figure~S15 of \cite{lee20sup}, suggesting that our re-implementation of Model~2 in the \code{haitipkg} is a faithful approximation to the original model used in \cite{lee20}.
+These trajectories, shown in Figure~\ref{fig:mod2rep}, are very similar to the trajectories shown in Figure~S15 of \cite{lee20sup}.
 
 <<Model2Replication, cache=TRUE, echo=FALSE>>=
 h2_epi <- haiti2()
@@ -1008,12 +1025,29 @@ Model 2 trajectories using the \code{haitipkg}. Compare to Figure S15 of \cite{l
 }
 \end{figure}
 
-We do note, however, several discrepancies exit between Figure~\ref{fig:mod2rep} and Figure~S15 of \cite{lee20sup}, such as a delayed second wave in the epidemic period and a larger initial wave during the endemic period.
-While these are only minor discrepancies, because Model~2 is deterministic one may expect to be able to obtain perfect replication in model trajectories.
-We believe these discrepancies are a result of slight difference in model parameters.
-For example, we note that the parameters $\transmission$, $\Wbeta{}$ (See Table~\ref{tab:translate}) had reported values of $9.9 \times 10^{-7}$ and $4.03 \times 10^{-2}$, respectively (Table~S13 of \cite{lee20sup}), but were actually fit to data and therefore likely had values that were far more precise.
+There are minor differences between Figure~\ref{fig:mod2rep} and Figure~S15 of \cite{lee20sup}.
+% such as a delayed second wave in the epidemic period and a larger initial wave during the endemic period.
+While the discrepancy appears minor, the deterministic nature of Model~2 implies that an exact replication of model trajectories should be possible.
+In this case, these discrepancies may be attributed to model implementation and small differences in model parameters.
+Details about the measurement models and how latent states were initialized for the epidemic model were not provided by \citet{lee20sup} and therefore these details must be inferred by looking at the provided source code.
+According to repository comments, the files \code{fitInPieces3paramsCleanMay2019Public.py} and \code{fitInPiecesMuWithFracSusFixedAllInfectionsPublic.py} were used to fit the epidemic and endemic phases of the model respectively, although it is apparent that these exact files were not used to obtain the reported results.
+These files contain errors that making them impossible to run, and therefore these files cannot be the code that generated the reported model fits\footnote{One example of why the code cannot be run that the file loads functions from a non-extant file named \code{choleraEqs.py} in line 13 rather than \code{choleraEqsPublic.py}.}.
+The inability to replicate the results by \citet{lee20} by running the provided source code makes checking whether or not a our numeric implementation faithfully represents their results very difficult.
+% The difficulty of reproducing the result of \citet{lee20} is coupled with a misunderstanding of how these results were originally obtained.
+
+\jwc{PROBABLY DELETE THIS NEXT BIT, BUT IT'S USEFUL TO DOCUMENT IT FOR NOW...}
+One concern that arises when inspecting the files \code{fitInPieces3paramsCleanMay2019Public.py} and \code{fitInPiecesMuWithFracSusFixedAllInfectionsPublic.py} is that the output of these files (which contains the estimated parameters) was not referenced/used in either the file that generates the sensitivity analysis or the file that generates the model simulations; instead, alternative (non-extant) files with similar names are loaded, suggesting parameters that were used to generate the final results were not a direct result of the estimated parameters.
+Furthermore, inspection of the script \code{simulateHaitiFullTimeInPiecesAllVaccinationScenariosSingleParameterVectorAllInfectionsPublic.py}---which is used to obtain simulations for each of the vaccination scenarios---results in a number of concerns.
+First, the script uses parameters from the pickle file \code{leastSquaresDataUpTo2019/fitEpidemicPiece\_resultsMatrix\_18Mar2019.pickle}, which only appears in the repository as a commented out line of code in the file \code{generateSetsOfParametersForSensitivityAnalysisPublic.py}, suggesting that the set of parameters used to simulate each vaccination scenario was not the most recent set of parameters generated by the sensitivity analysis.
+Second, the script appears to use the set of differential equations from the function \code{choleraEqs11WithVaccinationNetwork} for the epidemic phase, even though parameter values for this phase were estimated using \code{choleraEqs10WithVaccinationNetwork}.
+It is possible, however, that we simply are interpreting the code incorrectly and that these concerns are unwarranted.
+Furthermore, because the provided code is non-functional, it is possible that the code that was actually used to obtain the reported results does not include these potential errors.
+This highlights the importance of providing the exact source code that was used to obtain the reported results of any analysis.
+
+Another potential explanation for the discrepancy between our simulations from Model~2 and those of \citet{lee20} is that the parameters that we used are only approximately the same as those used by \citet{lee20sup}. For example, the parameters $\transmission$, $\Wbeta{}$ (See Table~\ref{tab:translate}) had reported values of $9.9 \times 10^{-7}$ and $4.03 \times 10^{-2}$, respectively (Table~S13 of \cite{lee20sup}), but were actually fit to data and therefore likely had values that were far more precise.
 Additionally, our implementation of Model~2 used a time scale of years and many of the parameters were reported on a weekly scale, so small differences may result due to unit conversions.
-The collective effect of these small differences in model parameters likely will result in differences in model trajectories, as seen here.
+The collective effect of these small differences in model parameters likely will result in differences in model trajectories.
+This issue could have been mitigated if the saved files containing estimated model parameters were included as part of the code submission.
 
 \subsection{Model~3 Replication}
 
