@@ -1522,35 +1522,55 @@ Fitting scientifically flexible metapopulation models is a challenging statistic
 In particular, parameter estimation techniques based on the particle filter become computationally intractable as the number of spatial units increase.
 This is a result of the approximation error of particle filters growing exponentially in the dimension of the model \citep{rebeschini15,park20}.
 
-Parameters that must be fit in Model~3 are shared between each department, the exception to this being the parameters $\beta_{W_u}$, and $\beta_u$, which take department-specific values for each $u \in \seq{1}{10}$.
+Model~3 parameters that are calibrated to data are primarily shared between each department, meaning that the estimated parameter value for department $u$ is the same value as the parameter value in department $v$, with $u, v \in \seq{1}{U}$.
+The exception to this being the parameters $\beta_{W_u}$, and $\beta_u$, which take department-specific values for each department $u$.
 To avoid the parameter estimation issue in high-dimensional models, \citet{lee20} simplified the problem by using the IF2 algorithm to separately estimate parameters for independent department-level models;
 the shared parameters were calibrated using the cholera incidence data from Artibonite, and the department-specific parameters ($\beta_{W_u}$ and $\beta_u$) were fit using the data from their respective department.
 Reducing a spatially coupled model to individual units in this fashion requires special treatment of any interactive mechanisms between spatial units, such as found in Eq.~\myeqref{eq:model3:foi}.
-In particular, when considering a model for department $u$, the values $I_\nu(t)$ and $A_\nu(t)$, are unknown for $u \neq v \in \seq{1}{10}$.
-An approximation of Eq.~\myeqref{eq:model3:foi} for each department $v \in \seq{1}{10}$ can be obtained using the weekly number of observed cholera cases in each department:
-\begin{equation}
-  I_v(t) + A_v(t) \approx \frac{365}{7\reportRate}y^*_v(t)\left(\frac{1}{\muDeath + \choleraDeath + \muIR} + \frac{1 - \symptomFrac}{\symptomFrac(\muDeath + \muIR)}\right)\label{eq:model3:approx}
-\end{equation}
-This approximation leads to department-specific models that are conditionally independent given the reported number of cholera infections in the remaining departments.
-Here, we refer to a collection of POMP models that are independent across units as a PanelPOMP.
+In particular, when considering a model for department $u$, the values $I_\nu(t)$ and $A_\nu(t)$, are unknown for $u \neq v$.
+To address this issue, \cite{lee20} conditioned each department level model on reported cholera cases in other departments and approximated the values of $I_\nu(t)$ and $A_\nu(t)$ using the respective reported cases.
 
-In the case of a PanelPOMP, an extension of the IF2 algorithm, known as Panel Iterated Filtering (PIF) \citep{breto20}, can be used to obtain the MLE, which solves the curse of dimensionality for this class of models \eic{WHICH CONVENTIONALLY REFERS TO THE PRECEDING OBJECT, HERE THE MLE, WHICH IS NOT WHAT WE WANT}.
-A major advantage of this algorithm is that PIF can be used to fit both unit-specific parameters and shared parameters; in this way, the calibration of shared parameters involves all of the available data instead of just an arbitrarily chosen subset.
+% Fitting Model~3 in this fashion simplifies the problem of parameter estimation, but it also introduces additional technicalities that must be addressed.
+% One concern is that of obtaining model forecasts, which was the primary goal of \citet{lee20}.
+The simplified, spatially-decoupled version of Model~3 relies on the observed cholera cases for each department to describe cholera dynamics, making it impossible to obtain forecasts for future time points from the fitted model.
+In order to obtain model forecasts, the parameters fit for the conditionally independent department level models were used in the fully coupled version of Model~3.
+This approach of model calibration and forecasting avoids the issue of particle depletion by simplifying the parameter estimation problem, but it may result in some undesirable outcomes.
+One concern is that cholera dynamics in department $u$ are highly related to the dynamics in the remaining departments;
+calibrating model parameters using observed cases in other departments as a model covariate may therefore lead to an over-dependence on observed cholera cases.
+Another concern is that the two versions of the model are not the same, resulting in sub-optimal parameter estimates for the spatially coupled model.
+This is because the likelihood of the coupled model at its maximum likelihood estimate (MLE) is greater than or equal to the likelihood of the coupled model at the MLE of the decoupled model.
+These two concerns may explain the unrealistic forecasts and low-likelihood of the model (see Table~\ref{tab:likes}).
 
-\eic{READERS MAY BE CONFUSED HERE. IS THIS A NEW METHOD? IT SEEMS TO BE IMPLEMENTED BY BRETO ET AL IN 2020. THIS IS DELICATE.}
-We propose and use a slight modification of the PIF algorithm, which we call the Block Panel Iterated Filter (BPIF), to estimate parameters for a PanelPOMP version of Model~3.
-Let $l_{\text{P}}(y_{1:N}^*; \paramVec)$ denote the log-likelihood function of the PanelPOMP version of Model~3.
-The output of the BPIF algorithm is the MLE $\tilde{\paramVec} = \argmax_{\paramVec} l_{\text{P}}(y_{1:N}^*; \paramVec)$.
-The BPIF algorithm is implemented in the \code{panelPomp} package \citep{breto20panelPomp} as the argument \code{block = TRUE} in the \code{mif2} function \eic{THIS LEVEL OF CODING DETAIL IS UNUSUAL IN A CASE STUDY}.
-Pseudo-code for this algorithm is provided in Algorithm~S1 in the supplementary material.
+For our analysis, we calibrate the parameters of the spatially coupled version of Model~3 using the novel iterated block particle filter (IBPF) algorithm of \cite{ionides22}.
+This algorithm extends the work of \cite{ning21ibpf}, who provided theoretic justification for the version of the algorithm that only estimates unit-specific parameters.
+While computationally intensive, the IBPF algorithm enables us to directly estimate the parameters of models describing high-dimensional partially-observed nonlinear dynamic systems via likelihood maximization.
+The ability to directly estimate parameters of Model~3 is responsible for the large increase in model likelihoods reported in Table~\ref{tab:likes}, as no algorithm with similar capabilities existed when \cite{lee20} published their results.
+Simulations from the fitted model are displayed in Fig~.\ref{fig:h3spatsims}.
+
+% An approximation of Eq.~\myeqref{eq:model3:foi} for each department $v \in \seq{1}{10}$ can be obtained using the weekly number of observed cholera cases in each department:
+% \begin{equation}
+%   I_v(t) + A_v(t) \approx \frac{365}{7\reportRate}y^*_v(t)\left(\frac{1}{\muDeath + \choleraDeath + \muIR} + \frac{1 - \symptomFrac}{\symptomFrac(\muDeath + \muIR)}\right)\label{eq:model3:approx}
+% \end{equation}
+% This approximation leads to department-specific models that are conditionally independent given the reported number of cholera infections in the remaining departments.
+% Here, we refer to a collection of POMP models that are independent across units as a PanelPOMP.
+%
+% In the case of a PanelPOMP, an extension of the IF2 algorithm, known as Panel Iterated Filtering (PIF) \citep{breto20}, can be used to obtain the MLE, which solves the curse of dimensionality for this class of models \eic{WHICH CONVENTIONALLY REFERS TO THE PRECEDING OBJECT, HERE THE MLE, WHICH IS NOT WHAT WE WANT}.
+% A major advantage of this algorithm is that PIF can be used to fit both unit-specific parameters and shared parameters; in this way, the calibration of shared parameters involves all of the available data instead of just an arbitrarily chosen subset.
+%
+% \eic{READERS MAY BE CONFUSED HERE. IS THIS A NEW METHOD? IT SEEMS TO BE IMPLEMENTED BY BRETO ET AL IN 2020. THIS IS DELICATE.}
+% We propose and use a slight modification of the PIF algorithm, which we call the Block Panel Iterated Filter (BPIF), to estimate parameters for a PanelPOMP version of Model~3.
+% Let $l_{\text{P}}(y_{1:N}^*; \paramVec)$ denote the log-likelihood function of the PanelPOMP version of Model~3.
+% The output of the BPIF algorithm is the MLE $\tilde{\paramVec} = \argmax_{\paramVec} l_{\text{P}}(y_{1:N}^*; \paramVec)$.
+% The BPIF algorithm is implemented in the \code{panelPomp} package \citep{breto20panelPomp} as the argument \code{block = TRUE} in the \code{mif2} function \eic{THIS LEVEL OF CODING DETAIL IS UNUSUAL IN A CASE STUDY}.
+% Pseudo-code for this algorithm is provided in Algorithm~S1 in the supplementary material.
 
 % While the reported parameters were obtained using the decoupled representation of Model~3, simulations for the various vaccination campaigns were obtained using fully coupled version of the model, implemented using the \code{spatPomp} package.
 
-Fitting Model~3 in this fashion simplifies the problem of parameter estimation, but it also introduces additional technicalities that must be addressed \eic{THIS MAKES IT SEEM LIKE THE FITTING METHOD CAUSES THE PROBLEM, BUT THE LEE ET AL APPROACH ALSO HAS THIS ISSUE. ARGUABLY, IT IS A PART OF THE MODEL NOT THE METHOD, THOUGH THE TWO ARE RELATED. MODEL 3 IS WRITTEN AS FULLY COUPLED IN SEC 2.3, SO FITTING THE NON-COUPLED VERSION IS ARGUABLY FITTING SOMETHING ELSE ENTIRELY, THOUGH IT CAN ALWAYS BE VIEWED AS AN APPROXIMATION.}
-One concern is that of obtaining model forecasts, which was the primary goal of \citet{lee20}.
-The simplified PanelPOMP version of Model~3 relies on the observed cholera cases as a covariate, which are unavailable for use in forecasts.
-Similar to what was done in \cite{lee20}, we use the parameter estimates obtained with the independent departmental approximation of Model~3 as an estimate for the parameters in the fully coupled version of the model, which was implemented using the \code{spatPomp} package.
-Simulations from the fully coupled version of the model using the estimated parameter vector $\tilde{\paramVec}$, are displayed in Fig.~\ref{h3spatsims}.
+% Fitting Model~3 in this fashion simplifies the problem of parameter estimation, but it also introduces additional technicalities that must be addressed.
+% One concern is that of obtaining model forecasts, which was the primary goal of \citet{lee20}.
+% The simplified PanelPOMP version of Model~3 relies on the observed cholera cases as a covariate, which are unavailable for use in forecasts.
+% Similar to what was done in \cite{lee20}, we use the parameter estimates obtained with the independent departmental approximation of Model~3 as an estimate for the parameters in the fully coupled version of the model, which was implemented using the \code{spatPomp} package.
+% Simulations from the fully coupled version of the model using the estimated parameter vector $\tilde{\paramVec}$, are displayed in Fig.~\ref{h3spatsims}.
 
 <<Model 3 SpatPOMP sims, echo=FALSE>>=
 h3_spat_nsim <- switch(RUN_LEVEL, 20, 100, 500)
@@ -1616,17 +1636,17 @@ gc()
 @
 
 % While simulations from the SpatPOMP version of Model~3 resemble the observed data, we note in Table~\ref{tab:likes} that the SpatPOMP version of Model~3 has a lower log-likelihood than the PanelPOMP version using the same model parameters.
-Let $l_{\text{C}}(y_{1:N}^*; \paramVec)$ denote the log-likelihood of the fully coupled model, and let $\hat{\paramVec} = \argmax_{\paramVec} l_{\text{C}}(y_{1:N}^*; \paramVec)$.
-If the goal of parameter estimation is to maximize the likelihood of the fully coupled model, the approach of estimating parameters using a decoupled model is clearly sub optimal, as $l_{\text{C}}(y_{1:N}^*; \hat{\paramVec}) \geq l_{\text{C}}(y_{1:N}^*; \tilde{\paramVec})$.
-A natural question that arises is if the difference between $\hat{\paramVec}$ and $\tilde{\paramVec}$ is scientifically and statistically meaningful.
-The answer to this question requires the ability to reliably estimate $\hat{\paramVec}$, the answer to which is model specific and beyond the scope of this case study.
+% Let $l_{\text{C}}(y_{1:N}^*; \paramVec)$ denote the log-likelihood of the fully coupled model, and let $\hat{\paramVec} = \argmax_{\paramVec} l_{\text{C}}(y_{1:N}^*; \paramVec)$.
+% If the goal of parameter estimation is to maximize the likelihood of the fully coupled model, the approach of estimating parameters using a decoupled model is clearly sub optimal, as $l_{\text{C}}(y_{1:N}^*; \hat{\paramVec}) \geq l_{\text{C}}(y_{1:N}^*; \tilde{\paramVec})$.
+% A natural question that arises is if the difference between $\hat{\paramVec}$ and $\tilde{\paramVec}$ is scientifically and statistically meaningful.
+% The answer to this question requires the ability to reliably estimate $\hat{\paramVec}$, the answer to which is model specific and beyond the scope of this case study.
 
-A brief analysis of the fitted parameters $\tilde{\paramVec}$ provides some interesting insight.
-Consider the large estimated exponent on rainfall: $r = \Sexpr{signif(p3s["r"],3)}$ (Eq.~\ref{eq:model3:water}).
-Because the value of rainfall $J(t) \in (0, 1)$, the large coefficient results in $J(t)^r \approx 0$.
-This result may initially be surprising given the importance of rainfall as a seasonal diver of cholera infections in Haiti (see Sec.~\ref{sec:science}).
-One plausible explanation of this result is that the fitting procedure---used to obtain parameter values in the independent department model given the reported cases in other departments---has learned an over-dependence on the reported cholera cases in other departments, and thus the seasonality of cholera incidence in department $u$ depends on the highly correlated covariate of the reported cholera cases in departments $1:U\setminus \{u\}$.
-Whatever the case may be, this fitting procedure results in a model that is unable to replicate the observed number of cases by simulating from initial conditions (see Fig.~\ref{h3spatsims}), and highlights the need for advancements in statistical methodology that permit inference on models with coupled metapopulation dynamics.
+% A brief analysis of the fitted parameters $\tilde{\paramVec}$ provides some interesting insight.
+% Consider the large estimated exponent on rainfall: $r = \Sexpr{signif(p3s["r"],3)}$ (Eq.~\ref{eq:model3:water}).
+% Because the value of rainfall $J(t) \in (0, 1)$, the large coefficient results in $J(t)^r \approx 0$.
+% This result may initially be surprising given the importance of rainfall as a seasonal diver of cholera infections in Haiti (see Sec.~\ref{sec:science}).
+% One plausible explanation of this result is that the fitting procedure---used to obtain parameter values in the independent department model given the reported cases in other departments---has learned an over-dependence on the reported cholera cases in other departments, and thus the seasonality of cholera incidence in department $u$ depends on the highly correlated covariate of the reported cholera cases in departments $1:U\setminus \{u\}$.
+% Whatever the case may be, this fitting procedure results in a model that is unable to replicate the observed number of cases by simulating from initial conditions (see Fig.~\ref{h3spatsims}), and highlights the need for advancements in statistical methodology that permit inference on models with coupled metapopulation dynamics.
 
 \subsection{Model Diagnostics} \label{sec:model_diagnostics}
 
@@ -2049,9 +2069,9 @@ Both of these approaches share the similarity that parameters with higher likeli
 
 Because our direct aim is not to provide forecasts for policy recommendation, we do not include parameter uncertainty in our forecasts.
 Instead, we use the projections from point estimates to highlight a major deficiency of deterministic models, which is that the only variability in model projections is a result of parameter uncertainty, which leads to over-confidence in forecasts \cite{king15}.
-To the credit of deterministic models, of the four fitted models in \cite{lee20}, Model~2 provides the most apparently accurate forecasts.
-This perhaps demonstrates that while deterministic models describe the systems in a less realistic way, the relative ease in fitting these models potentially results in fewer modeling errors.
-As the data analysis becomes more refined, however, the deficiencies of deterministic models become increasingly apparent. \jwc{CHANGE THIS BASED ON DISCUSSION WITH ED.}
+% To the credit of deterministic models, of the four fitted models in \cite{lee20}, Model~2 provides the most apparently accurate forecasts.
+% This perhaps demonstrates that while deterministic models describe the systems in a less realistic way, the relative ease in fitting these models potentially results in fewer modeling errors.
+% As the data analysis becomes more refined, however, the deficiencies of deterministic models become increasingly apparent. \jwc{CHANGE THIS BASED ON DISCUSSION WITH ED.}
 
 Forecasting can be used to simulate various interventions on a system; this feature is useful to inform policy and was the primary goal of \citet{lee20}.
 Outcomes of their study include estimates for the probability of cholera elimination and cumulative number of cholera infections under several possible vaccination scenarios.
@@ -3130,8 +3150,8 @@ We acknowledge the benefit of hindsight: our demonstration of a statistically pr
 We used the same data and models, and even much of the same code, as \citet{lee20}, and yet ended up with drastically different conclusions.
 At a minimum, we have shown that the conclusions are sensitive to details in how the data analysis is carried out, and that attention to statistical fit (including numerical issues such as likelihood maximization) can lead to improved policy guidance.
 
-We acknowledge there are limitations to this study, such as the inability to fit model parameters to the fully-coupled version of Model~3.
-Promising theoretical and methodological developments \citep{ning21ibpf,ionides22} based on the Block Particle Filter \citep{rebeschini15} may potentially be used to obtain better parameter estimates for Model~3 in future work.
+% We acknowledge there are limitations to this study, such as the inability to fit model parameters to the fully-coupled version of Model~3.
+% Promising theoretical and methodological developments \citep{ning21ibpf,ionides22} based on the Block Particle Filter \citep{rebeschini15} may potentially be used to obtain better parameter estimates for Model~3 in future work.
 
 Inference for mechanistic time series models offers opportunities for understanding and controlling complex dynamic systems.
 This case study has investigated issues requiring attention when applying powerful new statistical techniques that can enable statistically efficient inference for a general class of partially observed Markov process models.
