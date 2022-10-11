@@ -901,7 +901,7 @@ We find a more nuanced conclusion: attention to methodological details in model 
 These improvements result in forecasts that are more consistent with the observed outcome, without requiring major changes to the model structures.
 Based on this retrospective analysis, we offer suggestions on fitting mechanistic models to dynamic systems for future studies.
 
-While this work is focused on the models proposed in \cite{lee20}, our suggestions have broader relevance.
+While this work is focused on the models proposed by \cite{lee20}, our suggestions have broader relevance.
 To investigate the extent to which \citet{lee20} is typical of the substantial body of work on Haiti cholera dynamics, we preformed a literature review by searching PubMed with keywords: Haiti, cholera, model.
 The search resulted in 66 papers, of which 32 used dynamic models to describe the cholera epidemic in Haiti.
 The models make various choices on the dichotomies considered by \citet{lee20}; deterministic versus stochastic; compartment model versus agent-based; aggregated versus spatially explicit.
@@ -980,7 +980,7 @@ Here, $\vaccCounter=0$ corresponds to unvaccinated individuals, and $\vaccCounte
 The force of infection is
 \begin{equation}
 \label{model1:lambda}
-\lambda(t) = \Big(\sum_{\vaccCounter=0}^{\vaccClass}  I_{\vaccCounter}(t) + \asymptomRelativeInfect \sum_{\vaccCounter=0}^{\vaccClass} A_{\vaccCounter}(t) \Big)^\nu \frac{d\Gamma(t)}{dt} \transmission(t)/N
+\lambda(t) = \Big(\sum_{\vaccCounter=0}^{\vaccClass}  I_{\vaccCounter}(t) + \asymptomRelativeInfect \sum_{\vaccCounter=0}^{\vaccClass} A_{\vaccCounter}(t) \Big)^\nu \frac{d\Gamma(t)}{dt} \transmission(t)/N,
 \end{equation}
 where $\transmission(t)$ is a periodic cubic spline representation of seasonality, given in terms of a B-spline basis $\{ s_j(t), j\in \seq{1}{6}\}$ and parameters $\transmission_{1:6}$ as
 \begin{equation}
@@ -994,28 +994,28 @@ Gamma white noise in the transmission rate gives rise to an over-dispersed laten
 Per-capita transition rates are given in Equations~\ref{model1:SE}-\ref{model1:birth}:
 \begin{eqnarray}
 \label{model1:SE}
-\mu_{S_{\vaccCounter}E_{\vaccCounter}} &=& \lambda(t)
+\mu_{S_{\vaccCounter}E_{\vaccCounter}} &=& \lambda(t),
 \\[-3pt]
 \label{model1:EI}
-\mu_{E_{\vaccCounter}I_{\vaccCounter}} &=& \muEI\big(1-\symptomFrac_{\vaccCounter}(t)\big)
+\mu_{E_{\vaccCounter}I_{\vaccCounter}} &=& \muEI\big(1-\symptomFrac_{\vaccCounter}(t)\big),
 \\[-3pt]
 \label{model1:EA}
-\mu_{E_{\vaccCounter}A_{\vaccCounter}} &=& \muEI\, \symptomFrac_{\vaccCounter}(t)
+\mu_{E_{\vaccCounter}A_{\vaccCounter}} &=& \muEI\, \symptomFrac_{\vaccCounter}(t),
 \\[-3pt]
 \label{model1:toR}
-\mu_{I_{\vaccCounter}R_{\vaccCounter}} &=& \mu_{A_{\vaccCounter}R_{\vaccCounter}} = \muIR
+\mu_{I_{\vaccCounter}R_{\vaccCounter}} &=& \mu_{A_{\vaccCounter}R_{\vaccCounter}} = \muIR,
 \\[-3pt]
 \label{model1:RS}
-\mu_{R_{\vaccCounter}S_{\vaccCounter}} &=& \muRS
+\mu_{R_{\vaccCounter}S_{\vaccCounter}} &=& \muRS,
 \\[-3pt]
 \label{model1:vacc}
-\mu_{S_0S_{\vaccCounter}} &=& \mu_{E_0E_{\vaccCounter}} = \mu_{I_0I_{\vaccCounter}} = \mu_{A_0A_{\vaccCounter}} = \mu_{R_0R_{\vaccCounter}} = \eta_{\vaccCounter}(t)
+\mu_{S_0S_{\vaccCounter}} &=& \mu_{E_0E_{\vaccCounter}} = \mu_{I_0I_{\vaccCounter}} = \mu_{A_0A_{\vaccCounter}} = \mu_{R_0R_{\vaccCounter}} = \eta_{\vaccCounter}(t),
 \\[-3pt]
 \label{model1:death}
-\mu_{S_{\vaccCounter}\demography} &=& \mu_{E_{\vaccCounter}\demography} = \mu_{I_{\vaccCounter}\demography} = \mu_{A_{\vaccCounter}\demography}=\mu_{R_{\vaccCounter}\demography} = \delta
+\mu_{S_{\vaccCounter}\demography} &=& \mu_{E_{\vaccCounter}\demography} = \mu_{I_{\vaccCounter}\demography} = \mu_{A_{\vaccCounter}\demography}=\mu_{R_{\vaccCounter}\demography} = \delta,
 \\
 \label{model1:birth}
-\mu_{\demography S_0} &=& \muBirth
+\mu_{\demography S_0} &=& \muBirth,
 \end{eqnarray}
 where $\vaccCounter\in \seq{0}{\vaccClass}$.
 Here, $\mu_{AB}$ is a transition rate from compartment $A$ to $B$.
@@ -1026,7 +1026,7 @@ In Model~1, the advantage afforded to vaccinated individuals is an increased pro
 Conditional on infection status, vaccinated individuals are also less infectious than their non-vaccinated counterparts by a rate of $\asymptomRelativeInfect = 0.05$ in Eq.~\eqref{model1:lambda}.
 In \eqref{model1:EA} and~\eqref{model1:EI} the asymptomatic ratio for non-vaccinated individuals is set $\symptomFrac_0(t)=0$, so that the asymptomatic route is reserved for vaccinated individuals.
 For $\vaccCounter\in\seq{1}{\vaccClass}$, the vaccination cohort $\vaccCounter$ is assigned a time $\tau_{\vaccCounter}$, and we take $\symptomFrac_{\vaccCounter}(t) = c \, \theta^*(t-\tau_{\vaccCounter})$
-where $\theta^*(t)$ is efficacy at time $t$ since vaccination for adults, taken from \citet{lee20}, Table~S4, and $c=\big(1-(1-0.4688)\times 0.11\big)$ is a correction to allow for reduced efficacy in the 11\% of the population aged under 5 years.
+where $\theta^*(t)$ is efficacy at time $t$ since vaccination for adults, taken from \cite{lee20}, Table~S4, and $c=\big(1-(1-0.4688)\times 0.11\big)$ is a correction to allow for reduced efficacy in the 11\% of the population aged under 5 years.
 Single and double vaccine doses were modeled by changing the waning of protection; protection was assumed to be equal between single and double dose until 52 weeks after vaccination, at which point the single dose becomes ineffective.
 The latent state vector $\bm{X}^{(1)}(t)$ is initialized by setting each compartment count for each vaccination scenario $\vaccCounter \neq 0$ as zero, and introducing initial-value parameters $I_{0,0}$ and $E_{0, 0}$ such that $R_{0}(0) = 0$, $I_{0}(0) = \mathrm{Pop} \times I_{0, 0}$, $E_{0}(0) = \mathrm{Pop} \times E_{0, 0}$ and $S_{0}(0) = \mathrm{Pop} \times (1 - I_{0, 0} - E_{0, 0})$, where $\mathrm{Pop}$ is the total population of Haiti.
 Reported cholera cases at time point $n$ ($\bm{Y}^{(1)}_n$) are assumed to come from a negative binomial measurement model, where only a fraction ($\reportRate$) of new weekly cases are reported.
@@ -1051,44 +1051,44 @@ The force of infection depends on both direct transmission and an aquatic reserv
 \label{model2:lambda}
 \lambda_{u}(t) = 0.5\big(1+\seasAmplitude \cos(2\pi t + \phaseParm)\big)
 \frac{\beta_W\, W_u(t)}{ \Wsat  + W_u(t)} +
-\transmission \left\{\sum_{\vaccCounter=0}^4 I_{u\vaccCounter}(t) + \asymptomRelativeInfect \sum_{\vaccCounter=0}^4 A_{u\vaccCounter}(t) \right\}
+\transmission \left\{\sum_{\vaccCounter=0}^4 I_{u\vaccCounter}(t) + \asymptomRelativeInfect \sum_{\vaccCounter=0}^4 A_{u\vaccCounter}(t) \right\}.
 \end{equation}
 The latent state is therefore described by the vector $\bm{X}^{(2)}(t) = \big(S_{u\vaccCounter}(t),\allowbreak E_{u\vaccCounter}(t),\allowbreak I_{u\vaccCounter}(t),\allowbreak A_{u\vaccCounter}(t),\allowbreak R_{u\vaccCounter}(t),\allowbreak R_{u\vaccCounter}^A(t),\allowbreak W_u,\allowbreak u \in \seq{1}{U},\allowbreak \vaccCounter \in \seq{0}{4}\big)$.
 The cosine term in Eq.~\myeqref{model2:lambda} accounts for annual seasonality, with a phase parameter $\phaseParm$.
-The implementation of Model~2 in \cite{lee20} fixes $\phaseParm = 0$.
+The \cite{lee20} implementation of Model~2 fixes $\phaseParm = 0$.
 
 Individuals move from department $u$ to $v$ at rate $T_{uv}$, and aquatic cholera moves at rate $T^W_{uv}$.
 The nonzero transition rates are
 \begin{eqnarray}
 \label{model2:mu_SE}
-\mu_{S_{u\vaccCounter}E_{u\vaccCounter}} &=& \vaccineEfficacy_\vaccCounter \, \lambda
+\mu_{S_{u\vaccCounter}E_{u\vaccCounter}} &=& \vaccineEfficacy_\vaccCounter \, \lambda,
 \\[-3pt]
 \label{model2:mu_EI}
-\mu_{E_{u\vaccCounter}I_{u\vaccCounter}} &=& \symptomFrac\muEI, \quad \mu_{E_{u\vaccCounter}A_{u\vaccCounter}} = (1-\symptomFrac)\muEI
+\mu_{E_{u\vaccCounter}I_{u\vaccCounter}} &=& \symptomFrac\muEI, \quad \mu_{E_{u\vaccCounter}A_{u\vaccCounter}} = (1-\symptomFrac)\muEI,
 \\[-3pt]
 \label{model2:mu_IR}
-\mu_{I_{u\vaccCounter}R_{u\vaccCounter}} &=& \mu_{A_{u\vaccCounter}R^A_{u\vaccCounter}} = \muIR
+\mu_{I_{u\vaccCounter}R_{u\vaccCounter}} &=& \mu_{A_{u\vaccCounter}R^A_{u\vaccCounter}} = \muIR,
 \\[-3pt]
 \label{model2:RS}
-\mu_{R_{u\vaccCounter}S_{u\vaccCounter}} &=& \mu_{R^A_{u\vaccCounter}S_{u\vaccCounter}} = \muRS
+\mu_{R_{u\vaccCounter}S_{u\vaccCounter}} &=& \mu_{R^A_{u\vaccCounter}S_{u\vaccCounter}} = \muRS,
 \\[-3pt]
 \label{model2:transport}
-\mu_{S_{u\vaccCounter}S_{{\varv}\vaccCounter}} &=& \mu_{E_{u\vaccCounter}E_{{\varv}\vaccCounter}} = \mu_{I_{u\vaccCounter} I_{{\varv}\vaccCounter}} = \mu_{A_{u\vaccCounter}A_{{\varv}\vaccCounter}} = \mu_{R_{u\vaccCounter}R_{{\varv}\vaccCounter}} = \mu_{R^A_{u\vaccCounter} R^A_{{\varv}\vaccCounter}} = T_{u\varv}
+\mu_{S_{u\vaccCounter}S_{{\varv}\vaccCounter}} &=& \mu_{E_{u\vaccCounter}E_{{\varv}\vaccCounter}} = \mu_{I_{u\vaccCounter} I_{{\varv}\vaccCounter}} = \mu_{A_{u\vaccCounter}A_{{\varv}\vaccCounter}} = \mu_{R_{u\vaccCounter}R_{{\varv}\vaccCounter}} = \mu_{R^A_{u\vaccCounter} R^A_{{\varv}\vaccCounter}} = T_{u\varv},
 \\[-3pt]
 \label{model2:omega1}
-\mu_{S_{u1}S_{u0}} &=& \mu_{S_{u3}S_{u0}} = \omega_1
+\mu_{S_{u1}S_{u0}} &=& \mu_{S_{u3}S_{u0}} = \omega_1,
 \\[-3pt]
 \label{model2:omega2}
-\mu_{S_{u2}S_{u0}} &=& \mu_{S_{u4}S_{u0}} = \omega_2
+\mu_{S_{u2}S_{u0}} &=& \mu_{S_{u4}S_{u0}} = \omega_2,
 \\[-3pt]
 \label{model2:to_W}
-\mu_{\demography W_u} &=& \Wshed \left\{ \sum_{\vaccCounter=0}^4 I_{u\vaccCounter}(t) + \asymptomRelativeShed \sum_{\vaccCounter=0}^4 A_{u\vaccCounter}(t) \right\}
+\mu_{\demography W_u} &=& \Wshed \left\{ \sum_{\vaccCounter=0}^4 I_{u\vaccCounter}(t) + \asymptomRelativeShed \sum_{\vaccCounter=0}^4 A_{u\vaccCounter}(t) \right\},
 \\[-3pt]
 \label{model2:from_W}
-\mu_{W_u\demography} &=& \Wremoval
+\mu_{W_u\demography} &=& \Wremoval,
 \\[-3pt]
 \label{model2:water_transport}
-\mu_{W_uW_{\varv}} &=& w_r T^W_{u\varv}
+\mu_{W_uW_{\varv}} &=& w_r T^W_{u\varv}.
 \end{eqnarray}
 In \eqref{model2:transport} the spatial coupling is specified by a gravity model,
 \begin{equation}
@@ -1113,38 +1113,39 @@ The latent state is described as $\bm{X}^{(3)}(t) = \big(S_{u\vaccCounter}(t),\a
 Here, $\vaccCounter=0$ corresponds to unvaccinated, $\vaccCounter=2j-1$ corresponds to a single dose on the $j$th vaccination campaign in unit $u$ and $\vaccCounter=2j$ corresponds to receiving two doses on the $j$th vaccination campaign.
 $k\in\seq{1}{3}$ models non-exponential duration in the recovered class before waning of immunity.
 The force of infection is
-\begin{eqnarray}
+\begin{equation}
 \label{eq:model3:foi}
-\lambda_u(t) &=& \Wbeta{_u} \frac{W_u(t)}{1+W_u(t)} + \transmission_u \sum_{{\varv}\neq u}\big(I_{\varv 0}(t)+ \asymptomRelativeInfect A_{\varv 0}(t)\big)
-\\[-3pt]
+\lambda_u(t) = \Wbeta{_u} \frac{W_u(t)}{1+W_u(t)} + \transmission_u \sum_{{\varv}\neq u}\big(I_{\varv 0}(t)+ \asymptomRelativeInfect A_{\varv 0}(t)\big),
+\end{equation}
+and Per-capita transition rates are given in Equations~\ref{eq:model3:SI}--\ref{eq:model3:Decay}.
+\begin{eqnarray}
 \label{eq:model3:SI}
-\mu_{S_{u\vaccCounter}I_{u\vaccCounter}} &=& \symptomFrac \,  \lambda_u \big(1-\eta_{u\vaccCounter}(t)\big) \, d\Gamma/dt
+\mu_{S_{u\vaccCounter}I_{u\vaccCounter}} &=& \symptomFrac \,  \lambda_u \big(1-\eta_{u\vaccCounter}(t)\big) \, d\Gamma/dt,
 \\[-3pt]
 \label{eq:model3:SA}
-\mu_{S_{u\vaccCounter}A_{u\vaccCounter}} &=& (1-\symptomFrac) \,  \lambda_u \big(1-\eta_{u\vaccCounter}(t)\big) \,  d\Gamma/dt
+\mu_{S_{u\vaccCounter}A_{u\vaccCounter}} &=& (1-\symptomFrac) \,  \lambda_u \big(1-\eta_{u\vaccCounter}(t)\big) \,  d\Gamma/dt,
 \\[-3pt]
 \label{eq:model3:IR}
-\mu_{I_{u\vaccCounter}R_{u\vaccCounter 1}} &=& \mu_{A_{u\vaccCounter}R_{u\vaccCounter 1}} = \muIR
+\mu_{I_{u\vaccCounter}R_{u\vaccCounter 1}} &=& \mu_{A_{u\vaccCounter}R_{u\vaccCounter 1}} = \muIR,
 \\[-3pt]
 \label{eq:model3:IS}
-\mu_{I_{u\vaccCounter}S_{u0}} &=& \muDeath + \choleraDeath
+\mu_{I_{u\vaccCounter}S_{u0}} &=& \muDeath + \choleraDeath,
 \\[-3pt]
 \label{eq:model3:AS}
-\mu_{A_{u\vaccCounter}S_{u0}} &=& \muDeath
+\mu_{A_{u\vaccCounter}S_{u0}} &=& \muDeath,
 \\[-3pt]
 \label{eq:model3:RRnext}
-\mu_{R_{u\vaccCounter 1}R_{u\vaccCounter 2}} &=& \mu_{R_{u\vaccCounter 2}R_{u\vaccCounter 3}} = 3\muRS
+\mu_{R_{u\vaccCounter 1}R_{u\vaccCounter 2}} &=& \mu_{R_{u\vaccCounter 2}R_{u\vaccCounter 3}} = 3\muRS,
 \\[-3pt]
 \label{eq:model3:RS}
-\mu_{R_{u\vaccCounter k}S_{u0}} &=& \muDeath + 3\muRS \, \mathbf{1}_{\{k=3\}}
+\mu_{R_{u\vaccCounter k}S_{u0}} &=& \muDeath + 3\muRS \, \mathbf{1}_{\{k=3\}},
 \\[-3pt]
 \label{eq:model3:water}
-\mu_{{\demography}W_u} &=& \big[1 + \seasAmplitude \big(J_u(t))^r \big] \mathrm{Den}_u \, \Wshed \big[ I_{u0}(t)+ \asymptomRelativeShed A_{u0}(t) \big]
+\mu_{{\demography}W_u} &=& \big[1 + \seasAmplitude \big(J_u(t))^r \big] \mathrm{Den}_u \, \Wshed \big[ I_{u0}(t)+ \asymptomRelativeShed A_{u0}(t) \big],
 \\[-3pt]
 \label{eq:model3:Decay}
-\mu_{W_u\demography} &=& \Wremoval
+\mu_{W_u\demography} &=& \Wremoval.
 \end{eqnarray}
-
 As with Model~1, $d\Gamma_u(t)/dt$ is multiplicative Gamma-distributed white noise in \myeqref{eq:model3:SI} and \myeqref{eq:model3:SA}.
 In \eqref{eq:model3:water}, $J_u(t)$ is a dimensionless measurement of precipitation that has been standardized by dividing the observed rainfall at time $t$ by the maximum recorded rainfall in department $u$ during the epidemic, and $\mathrm{Den}_u$ is the population density.
 Demographic stochasticity is accounted for by modeling non-cholera related death rate $\muDeath$ in each compartment, along with an additional death rate $\choleraDeath$ in \myeqref{eq:model3:IS} to account for cholera induced deaths among infected individuals.
@@ -1502,7 +1503,7 @@ While calibrating model parameters does not directly achieve this goal---as mode
 % All these structures can be described in the framework of partially observed Markov process (POMP) models, with the understanding that the deterministic Model~2 is a degenerate case of a stochastic model.
 In the following subsections we describe our approach to fitting the three proposed mechanistic models by calibrating $\paramVec$ to observed cholera incidence data.
 
-\subsubsection{Model~1}
+\subsubsection{Calibrating Model~1 Parameters}\label{sec:fit1}
 
 Model~1 describes cholera dynamics at the nationally aggregated scale so that $\bm{Y}^{(1)}_n \in \R$ for each observation time $n \in 1:N$, and the latent state vector $\bm{X}^{(1)}(t)$ is comprised of national level population counts.
 Several algorithms exist, both frequentist and Bayesian, that can be used to obtain estimates of the parameters for the class of models.
@@ -1515,15 +1516,15 @@ The ability to maximize the likelihood allows for likelihood-based inference, su
 We demonstrate this capability by proposing a linear trend $\transmissionTrend$ in transmission in Eq.~\myeqref{model1:beta}:
 \begin{equation}
 \label{model1:betat}
-\log\transmission(t) = \sum_{j=1}^6 \transmission_s s_j(t) + \transmissionTrend\bar{t}
+\log\transmission(t) = \sum_{j=1}^6 \transmission_s s_j(t) + \transmissionTrend\bar{t},
 \end{equation}
-Where $\bar{t} = \frac{t - (t_N + t_0) / 2}{t_N - (t_N + t_0) / 2}$, so that $\bar{t} \in [-1, 1]$.
+where $\bar{t} = \frac{t - (t_N + t_0) / 2}{t_N - (t_N + t_0) / 2}$, so that $\bar{t} \in [-1, 1]$.
 The proposal of a linear trend in transmission is a result of observing an apparent decrease in reported cholera infections from 2012-2019 in Fig.~\ref{CholeraData}.
 While several factors may contribute to this decrease, one explanation is that case-area targeted interventions (CATIs), which included education sessions, increased monitoring, household decontamination, soap distribution, and water chlorination in infected areas \citep{rebaudet19CATI}, may have greatly reduced cholera transmission \citep{rebaudet21}.
 
 We perform a statistical test to determine whether or not the data indicate the presence of a linear trend in transmissibility.
 To do this, we perform a profile-likelihood search on the parameter $\transmissionTrend$ and obtain a confidence interval via a Monte Carlo Adjusted Profile (MCAP) \citep{ionides17}.
-Model~1 was implemented in \cite{lee20} by fitting two distinct phases: an epidemic phase from October 2010 through March 2015, and an endemic phase from March 2015 onward.
+\cite{lee20} implemented Model~1 by fitting two distinct phases: an epidemic phase from October 2010 through March 2015, and an endemic phase from March 2015 onward.
 We similarly allow the re-estimation of process and measurement overdispersion parameters ($\sigmaProc^2$ and $\obsOverdispersion$), and require that the latent Markov process $X(t)$ carry over from one phase into the next.
 The resulting confidence interval for $\transmissionTrend$ is $(\Sexpr{myround(mcap_results$ci[1], digits = 3)}, \Sexpr{myround(mcap_results$ci[2], digits = 3)})$, with the full results displayed in Fig.~\ref{fig:betat}.
 These results are suggestive that the inclusion of a trend in transmission rate improves the quantitative ability of Model~1 to describe the observed data.
@@ -1597,7 +1598,7 @@ rm(sims, quants)
 gc()
 @
 
-\subsubsection{Model~2}\label{sec:fit2}
+\subsubsection{Calibrating Model~2 Parameters}\label{sec:fit2}
 
 As previously stated, Model~2 is a deterministic compartmental model defined by a set of coupled differential equations.
 The use of deterministic compartment models have a long history in the field of infectious disease epidemiology \citep{kermack1927,brauer2017,varghese21},
@@ -1607,13 +1608,13 @@ Because the process model of Model~2 is deterministic, the parameter estimation 
 The inclusion of a change-point in model states and parameters increases the flexibility of the model and hence the ability to fit the observed data.
 The increase in model flexibility, however, results in hidden states that are inconsistent between model phases.
 % A naive solution to this would be to estimate only model parameters in separate phases and not the hidden states, but this may also result in hidden states in one phase of the model that are inconsistent with the other phase of the outbreak, since only the data from one phase is used to fit model parameters.
-The inclusion of a model break-point in \cite{lee20} is perhaps due to a challenging feature of fitting a deterministic model via least squares: discrepancies between model trajectories and observed case counts in highly infectious periods of a disease outbreak will result in greater penalty than the discrepancies between model trajectories and observed case counts in times of relatively low infectiousness, resulting in a bias towards accurately describing periods of high infectiousness.
+The inclusion of a model break-point by \cite{lee20} is perhaps due to a challenging feature of fitting a deterministic model via least squares: discrepancies between model trajectories and observed case counts in highly infectious periods of a disease outbreak will result in greater penalty than the discrepancies between model trajectories and observed case counts in times of relatively low infectiousness, resulting in a bias towards accurately describing periods of high infectiousness.
 This issue is particularly troublesome for modeling cholera dynamics in Haiti: the inability to accurately fit times of low infectiousness may result in poor model forecasts, as few cases of cholera were observed the last few years of the epidemic.
 
 To combat this issue, we fit the model to log-transformed case counts, where the difference between periods of high and low infectiousness is less drastic, since the log scale stabilizes the variation during periods of high and low infectiousness.
 Other solutions include changing the measurement model to include overdispersion, as was done in Models~1 and~3.
 This permits the consideration of demographic stochasticity, which is dominant for small infected populations, together with log scale stochasticity (also called multiplicative, or environmental, or extra-demographic) which is dominant at high population counts.
-Here we chose to fit the model to transformed case counts rather than adding overdispersion to the measurement model with the goal of making the fewest changes to the model in \cite{lee20} as possible.
+Here we chose to fit the model to transformed case counts rather than adding overdispersion to the measurement model with the goal of making the fewest changes to the model proposed by \cite{lee20} as possible.
 
 We implemented this model using the \code{spatPomp} \code{R} package \citep{asfaw21github}.
 The model was then fit using the subplex algorithm, implemented in the  \code{subplex} package \citep{king2020Subplex}.
@@ -1631,7 +1632,7 @@ h2_traj <- h2_epi_traj %>%
 @
 
 
-\subsubsection{Model~3}
+\subsubsection{Calibrating Model~3 Parameters}\label{sec:fit3}
 Both the latent and observable processes in Model~3 can be be factored into department specific processes which interact with each other.
 The decision to address metapopulation dynamics via a spatially explicit model, rather than to aggregate over space, is double-edged.
 Evidence for the former approach has been provided in previous studies \citep{king15}, including the specific case of heterogeneity between Haitian departments in cholera transmission \citep{collins14}.
@@ -1664,7 +1665,7 @@ For our analysis, we calibrate the parameters of the spatially coupled version o
 This algorithm extends the work of \cite{ning21ibpf}, who provided theoretic justification for the version of the algorithm that only estimates unit-specific parameters.
 While computationally intensive, the IBPF algorithm enables us to directly estimate the parameters of models describing high-dimensional partially-observed nonlinear dynamic systems via likelihood maximization.
 The ability to directly estimate parameters of Model~3 is responsible for the large increase in model likelihoods reported in Table~\ref{tab:likes}, as no algorithm with similar capabilities existed when \cite{lee20} published their results.
-Simulations from the fitted model are displayed in Fig~.\ref{fig:h3spatsims}.
+Simulations from the fitted model are displayed in Fig.~\ref{fig:h3spatsims}.
 
 % An approximation of Eq.~\myeqref{eq:model3:foi} for each department $v \in \seq{1}{10}$ can be obtained using the weekly number of observed cholera cases in each department:
 % \begin{equation}
@@ -1743,7 +1744,7 @@ ggplot() +
   theme(axis.title.x = element_blank()) +
   scale_y_log10(labels = scales::trans_format("log10", scales::math_format(10^.x)))
 @
-\caption{\label{h3spatsims}
+\caption{\label{fig:h3spatsims}
 Simulations from initial conditions using the spatially coupled version of Model~3.
 The black curve represents true case count, the blue line the median of 500 simulations from the model, and the gray ribbons representing $95\%$ confidence interval.
 }
@@ -2183,7 +2184,7 @@ Table~S7 of their supplement material shows that of their simulations that were 
 It has been noted that the uncertainty in just a single parameter can lead to drastically different forecasts \citep{saltelli20};
 parameter uncertainty should therefore be considered when obtaining model forecasts to influence policy.
 If a Bayesian technique is used for parameter estimation, the most natural way to account for parameter uncertainty is to obtain simulations from the model where each simulation is obtained using parameters drawn from the posterior distribution.
-In the frequentist case, one approach is empirical Bayes, as was done in \cite{king15} (see supplement for details).
+In the frequentist case, one approach is empirical Bayes, as was done by \cite{king15} (see supplement for details). % TODO: \jwc{ADD THIS TO SUPPLEMENT!}
 Both of these approaches share the similarity that parameters with higher likelihoods should be used more frequently in model forecasts than those that correspond to lower likelihoods.
 
 Because our direct aim is not to provide forecasts for policy recommendation, we do not include parameter uncertainty in our forecasts.
@@ -2613,7 +2614,7 @@ Still, trajectories obtained by Model~2 are consistent with the simulation resul
 
 In additional to probability of elimination estimates, we provide estimates for the cumulative number of infections under each vaccination scenario from February 2019 -- February 2024.
 Notably, the median number of cumulative cholera infections under the no-vaccination scenario using Models 1 and 3 were $\Sexpr{prettyNum(round(as.numeric(h1_S0_results$mod1_V0_probs$cumInf['q50'])), big.mark = ",")}$ and $\Sexpr{prettyNum(round(as.numeric(mod3_V0_res$mod3_V0_probs$cumInf['q50'])), big.mark = ",")}$, respectively.
-While there is remaining time during this projection period in which new cholera infections can be detected, up to this point our estimates are far more consistent with the observed number of reported cholera cases than the corresponding estimates from \cite{lee20}, which were approximately $400,000$ and $1,000,000$.
+While there is remaining time during this projection period in which new cholera infections can be detected, up to this point our estimates are far more consistent with the observed number of reported cholera cases than the corresponding estimates of \cite{lee20}, which were approximately $400,000$ and $1,000,000$.
 
 <<Create Model 1 VaccScen plots>>=
 gg_m1_V0 <- ggplot() +
@@ -3264,7 +3265,7 @@ We provided a few suggestions that may aid the fitting of mechanistic models suc
 Improved model fits allows for meaningful statistical inference that may provide valuable insight on a dynamic system and may improve the accuracy of model forecasts.
 Caution is nonetheless needed when making policy based on modeling conclusions, as model misspecification may invalidate conclusions.
 
-In this article we argue that careful attention to important statistical details could have led the models in \cite{lee20} to correctly predict the imminent cholera elimination.
+In this article we argue that careful attention to important statistical details could have led the models proposed by \cite{lee20} to correctly predict the imminent cholera elimination.
 We acknowledge the benefit of hindsight: our demonstration of a statistically principled route to obtain better-fitting models with more accurate predictions does not rule out the possibility of discovering other models that fit well yet predict poorly.
 We used the same data and models, and even much of the same code, as \citet{lee20}, and yet ended up with drastically different conclusions.
 At a minimum, we have shown that the conclusions are sensitive to details in how the data analysis is carried out, and that attention to statistical fit (including numerical issues such as likelihood maximization) can lead to improved policy guidance.
@@ -3323,7 +3324,7 @@ This work was supported by National Science Foundation grants DMS-1761603 and DM
 \begin{supplement}
 \stitle{Eliminating cholera in Haiti: Supplement}
 \sdescription{
-This document contains additional details for Models~1--3, as well as a translation table that facilitates comparisons between these models and those described in \cite{lee20}.
+This document contains additional details for Models~1--3, as well as a translation table that facilitates comparisons between these models and those described by \cite{lee20}.
 The supplement also demonstrates our capability to faithfully replicate the results
 of \cite{lee20}.
 }

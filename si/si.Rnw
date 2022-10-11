@@ -6,20 +6,15 @@
 
 <<debug,echo=F>>=
 run_level <- 1
-
-if(run_level=="manual"){
-}
-
 @
 
 \newcommand\secTitleSpace{\hspace{3mm}}
 
 <<packages, include=FALSE, cache=FALSE, echo=FALSE>>=
 library(tidyverse)
-#library(xtable)
 library(pomp)
 library(haitipkg)
-# library(spatPomp)
+library(spatPomp)
 library(doParallel)
 library(doRNG)
 
@@ -229,7 +224,6 @@ myround <- function (x, digits = 1) {
 \newcommand\mydot{{\,\cdot\,}}
 \newcommand\cp[2]{N_{\mathrm{#1}\mathrm{#2}}}
 \newcommand\giventh{{\hspace{0.5mm};\hspace{0.5mm}}}
-%\newcommand\normal{{\mathrm{Normal}}}
 \newcommand\normal{\mathcal{N}}
 \newcommand\argequals{{\,=\,}}
 \newcommand\lags{c}
@@ -242,14 +236,12 @@ myround <- function (x, digits = 1) {
 \newcommand\param{\,;}
 \newcommand\mycolon{{\hspace{0.6mm}:\hspace{0.6mm}}}
 \newcommand\MC[1]{#1^{\,\mbox{\tiny MC}}}
-%\newcommand\EMC{\MC{\E}}
 \newcommand\EMC{{\E}}
 \newcommand\Var{\mathrm{Var}}
 \newcommand\var{\Var}
 \newcommand\Cov{\mathrm{Cov}}
 \newcommand\cov{\Cov}
 \newcommand\iid{\mathrm{iid}}
-%\newcommand\dist{\mathrm{dist}}
 \newcommand\dist{d}
 \newcommand\transpose{\top}
 
@@ -269,16 +261,8 @@ myround <- function (x, digits = 1) {
 \newtheorem{fact}{Fact}
 \newtheorem{assumption}{Assumption}
 \newtheorem{assumptionB}{Assumption}
-% \newtheorem{procedure}{Procedure}
 \renewcommand\theassumption{A\arabic{assumption}}
 \renewcommand\theassumptionB{B\arabic{assumptionB}}
-
-%\usepackage{float}
-%\floatstyle{ruled}
-%\newfloat{textbox}{t}{tbx}
-%\floatname{textbox}{Box}
-%\renewcommand\thetextbox{\arabic{textbox}}
-
 
 %% FOR PSEUDOCODE SETUP
 \newcommand\mystretch{\rule[-2mm]{0mm}{5mm} }
@@ -288,27 +272,15 @@ myround <- function (x, digits = 1) {
 %%%%%%%%%%%%%%%% END OF USER DEFINITIONSS %%%%%%%%%%%%%%%
 
 \bibliographystyle{apalike}
-%% added or modified from pnas-new.cls
 \usepackage{natbib}
 \usepackage{fullpage}
 
 \newcommand\myeqref[1]{(\ref{#1})}
 
-
-%\usepackage{relsize}
-
-%\templatetype{pnassupportinginfo}
-
-% \readytosubmit %% Uncomment this line before submitting, so that the instruction page is removed.
-
-%\author{Author1, Author2 and Author3 (Complete author list)}
-%\correspondingauthor{Corresponding Author Name.\\E-mail: author.two@email.com}
-
 \renewcommand{\contentsname}{Supplementary Content}
 \renewcommand{\refname}{Supplementary References}
 \renewcommand\thefigure{S-\arabic{figure}}
 \renewcommand\thetable{S-\arabic{table}}
-%\renewcommand\thepage{S-\arabic{page}}
 \renewcommand\thesection{S\arabic{section}}
 \renewcommand\theequation{S\arabic{equation}}
 \renewcommand\theprop{S\arabic{prop}}
@@ -345,10 +317,6 @@ myround <- function (x, digits = 1) {
   \bigskip
   \bigskip
 }\fi
-
-%% Adds the main heading for the SI text. Comment out this line if you do not have any supporting information text.
-
-%\SItext
 
 %Draft: \today
 
@@ -523,12 +491,12 @@ where $\Binit_u \in (0, 1)$ is an initial value parameter that allows some flexi
 \section{Measurement Models}
 
 Each POMP requires specification of a measurement model, which is a statistical description of how observations on the system are obtained.
-In general, we used the same measurement models that were reported in \cite{lee20}.
+In general, we used the same measurement models that were reported by \cite{lee20}.
 
 \subsection{Model~1}
 
 In this model, the advantage afforded by vaccination is an increased probability that an infection is asymptomatic.
-Therefore, under the assumptions of this model, all reported cases are assumed to be a fraction of individuals that transition from the exposed to the infected compartment, as noted in Eq.~\myeqref{model1:meas}.
+Therefore, under the assumptions of this model, all reported cases are assumed to be a fraction of individuals that transition from the exposed to the infected compartment, as noted in Eq.~\myeqref{model1:meas}:
 \begin{equation}
   \label{model1:meas}
   Y_{n} \mid \Delta N_{EI}(n) = z(n) \sim \text{NB}\left(\reportRate z(n), \obsOverdispersion \right),
@@ -572,122 +540,79 @@ In this model, reported cholera cases are assumed to stem from individuals who d
 Therefore reported cases are assumed to come from an over-dispersed negative binomial model, given the increase in infected individuals:
 \begin{equation}
   \label{model3:meas}
-  Y_{u, n} \mid \Delta N_{S_{u \vaccCounter}I_{u \vaccCounter}}(t) = z_{u}(n) \sim \text{NB}\left(\reportRate z_{u}(n), \obsOverdispersion \right)
+  Y_{u, n} \mid \Delta N_{S_{u \vaccCounter}I_{u \vaccCounter}}(t) = z_{u}(n) \sim \text{NB}\left(\reportRate z_{u}(n), \obsOverdispersion \right),
 \end{equation}
+where $\Delta N_{S_{u \vaccCounter}I_{u \vaccCounter}}(n)$ is the number of individuals who moved from compartment $S_{u \vaccCounter}$ to $I_{u \vaccCounter}$ since observation $n-1 \in 0:N-1$.
 
-Where $\Delta N_{S_{u \vaccCounter}I_{u \vaccCounter}}(n)$ is the number of individuals who moved from compartment $S_{u \vaccCounter}$ to $I_{u \vaccCounter}$ since observation $n-1 \in 0:N-1$.
-
-This measurement model is a minor change from that used in \cite{lee20}, which allowed for a change in the reporting rate on January 1st, 2018.
+This measurement model is a minor change from that used by \cite{lee20}, which allowed for a change in the reporting rate on January 1st, 2018.
 The fitted values of the reporting rate---before and after January 2018---were $0.97$ and $0.097$, respectively.
-This major change in reporting rate alone could explain why Model~3 in \cite{lee20} failed to predict the eradication of cholera.
+This major change in reporting rate alone could explain why Model~3 of \cite{lee20} failed to predict the eradication of cholera.
 An overnight change from near perfect to almost non-existent reporting forces the model to explain the observed reduction in reported cases as a decrease in the reporting of cases, rather than a decrease in the prevalence of cholera.
 This shift was justified by a "change of the case definition that occurred on January 1st, 2018";
 this claim was not cited, and we could find no evidence that such a drastic change in the reporting rate would be warranted.
 We therefore do not allow a change in reporting rate when fitting Model~3.
 
-\section{Block Panel Iterated Filter}
-
-The panel iterated filter (PIF) algorithm of \citet{breto20} has been used to fit parameters of panelPOMP models in several studies \citep{domeyer22,wale2019,ranjeva17,ranjeva19}.
-Like other iterated filtering algorithms, PIF iteratively combines particle filter calculations with parameter perturbations.
-Theoretical results show that, as the perturbations are reduced over successive iterations, the perturbed parameters converge to the MLE.
-
-In the case of a panelPOMP, the parameter vector $\theta$ may be composed of a set of shared parameters $\phi$, and a set of unit-specific parameters $\psi_{u}$, for units $u \in \seq{1}{U}$.
-Here, we say that a parameter $\psi_{u}$ for $u \in \seq{1}{U}$ is unit-specific if it is not involved in the one-step transition density or the measurement model of any other unit $k \neq u \in \seq{1}{U}$, and shared parameters are those that are not unit-specific.
-The PIF algorithm treats the parameter vector $\theta = (\phi, \psi_{1:U})$ as a complete entity and gives no distinction between shared and unit-specific parameters.
-Even though the random walk standard deviation is set to zero for unit-specific parameters when considering data from other units, this lack of distinction may result in particle depletion for unit-specific parameters as the number of units $U$ grows large.
-This is because it is likely that, when updating the parameters for a given unit, several parameter vector $\theta$ particles will not be resampled due to having low weights.
-When the number of units is large, this will lead to a decreasing number of ancestral particles to sample unit-specific parameters $\psi_k$ as $k$ increases.
-
-As a solution to this issue, we propose the block panel iterated filter (BPIF), described in Algorithm~\ref{alg:bpif}.
-In this algorithm, shared $\phi$ and unit-specific parameters $\psi_{u}$ are handled differently when updating the parameter vector $\theta = (\phi, \psi_{1:U})$.
-The BPIF updates $\theta$ by updating the shared vector $\phi$ in the same way that is done with PIF, but index resampling for unit-specific parameters $\psi_{1:U}$ only occurs when data from the corresponding
-unit are being considered.
-% In the case where there are many units, we believe that this modification will lead to less particle depletion.
-We have found that this modification leads to improved likelihood maximization performance, especially as the number of units increases.
-No theoretical properties of this algorithm have yet been derived, but the approach has similarities to the block particle filter of \citet{rebeschini15} and its extension to parameter estimation \citep{ionides22,ning21ibpf}.
-
-\begin{algorithm}[ht]
-   \caption[BPIF]{\textbf{BPIF}. \\
-    {\bf Inputs}:\\\hspace{\textwidth}
-    Simulator of initial density, $f_{X_{u, 0}}(x_{u, 0}; \theta)$ for $u$ in $\seq{1}{U}$.\\\hspace{\textwidth}
-    Simulator of transition density, $f_{X_{u, n}|X_{u, n-1}}(x_{u, n}|x_{u, n-1}; \theta)$ for $u$ in $\seq{1}{U}$, $n$ in $\seq{1}{N_u}$.\\\hspace{\textwidth}
-    Evaluator of measurement density, $f_{Y_{u, n}|X_{u, n}}(y_{u, n}|x_{u, n} ; \theta)$ for $u$ in $\seq{1}{U}$, $n$ in $\seq{1}{N_u}$.\\\hspace{\textwidth}
-    Data $y_{u, n}^*$,for $u$ in $\seq{1}{U}$, $n$ in $\seq{1}{N_u}$.\\\hspace{\textwidth}
-    Number of iterations, $M$.\\\hspace{\textwidth}
-    Number of particles, $J$.\\\hspace{\textwidth}
-    Starting parameter swarm, $\Theta_j^0 = \big(\Phi_j^0, \Psi_{1:U, j}^0\big)$ for $j \in \seq{1}{J}$, $u \in \seq{1}{U}$.\\\hspace{\textwidth}
-    Simulator of perturbation density, $h_{u, n}(\theta | \phi; \sigma)$ for $u \in \seq{1}{U}$, $n \in 0:N_u$.\\\hspace{\textwidth}
-    Perturbation sequence, $\sigma_m$ for $m \in 1:M$.\\\hspace{\textwidth}
-    {\bf Output:} \\\hspace{\textwidth}
-    Final parameter swarm, $\Theta_{j}^{m} = \big(\Phi_j^m, \Psi_{\seq{1}{U}, j}^m\big)$ for $j \in \seq{1}{J}$, $u \in \seq{1}{U}$.
-    \label{alg:bpif}}
-%\BlankLine
-\For{$m \in 1:M$}{
-  Set $\Phi_{0, j}^m = \Phi_j^{m-1}$ for $j \in \seq{1}{J}$\;
-    \For{$u \in \seq{1}{U}$}{
-      Set $\Phi_{u, 0, j}^{F, m} \sim h_{u, 0}(\phi | \Phi_{0, j}^m; \sigma_m)$ for $j \in \seq{1}{J}$\;
-      Set $\Psi_{u, 0, j}^{F, m} \sim h_{u, 0}(\psi | \Psi_{u, j}^{m - 1}; \sigma_m)$ for $j \in \seq{1}{J}$\;
-      Set $\Theta_{u, 0, j}^{F, m} = \big(\Phi_{u, 0, j}^{F, m}, \Psi_{u, 0, j}^{F, m}\big)$ for $j \in \seq{1}{J}$\;
-      Initialize $X_{u, 0, j}^{F, m} \sim f_{X_{u, 0}}(x_{u, 0}; \Theta_{u, 0, j}^{F, m})$ for $j \in \seq{1}{J}$\;
-        \For{$n \in \seq{1}{N_u}$} {
-          Set $\Theta_{u, n, j}^{P, m} \sim h_{u, n}(\theta|\Theta_{u, n-1, j}^{F, m}, \sigma_m)$ for $j \in \seq{1}{J}$\;
-          $X_{u, n, j}^{P, m} \sim f_{X_{u, n}|X_{u, n-1}}(x_{u, n}|X_{u, n-1, j}^{F, m}; \Theta_{u, n, j}^{P, m})$ for $j \in \seq{1}{J}$\;
-          $w_{u, n, j}^m = f_{Y_{u, n}|X_{u, n}}(y_{u, n}^*|X_{u, n, j}^{P, m})$ for $j \in \seq{1}{J}$\;
-          Draw $k_{\seq{1}{j}}$ with $P(k_j = i) = w_{u, n, i}^m / \sum_{v = 1}^J w_{u, n, v}^m$ for $i, j \in \seq{1}{J}$\;
-          Set $\Theta_{u, n, j}^{F, m} = \Theta_{u, n, k_j}^{P, m} = \big(\Phi_{u, n, k_j}^{P, m}, \Psi_{u, n, k_j}^{P, m}\big)$ and $X_{u, n, j}^{F, m} = X_{u, n, k_j}^{P, m}$ for $j \in \seq{1}{J}$\;
-        }
-      Set $\Theta_{u, j}^m = \big(\Phi_{u, N_u, j}^{F, m}, \Psi_{u, N_u, j}^{F, m}\big)$ for $j \in \seq{1}{J}$\;
-    }
-  Set $\Theta_j^m = \big(\Phi_{U, j}^m, \Psi_{1:U, j}^m\big)$ for $j \in \seq{1}{J}$\;
-}
-\end{algorithm}
-
-\section{Translating to \citet{lee20} notation}
-
-Since the models in \citet{lee20} were developed independently, the choice of notation varies inconsistently between models.
-For our reanalysis, we rename parameters to provide a unified notation facilitating comparison between models.
-Table~\ref{tab:translate} maps this notation back to the original notations, for reference.
-
-\begin{table}
-  \begin{center}
-  \begin{tabular}{|c|c|c|c|c|}\hline
-    \multirow{2}{*}{Parameter} & Our & \multicolumn{3}{c|}{Lee et al. (2020a)} \\\cline{3-5}
-     & Notation & 1 & 2 & 3 \\
-    \hline
-    \hline
-    % Table begins here
-    Reporting Rate & $\reportRate$ & $\rho$ & $\rho$ & $\epsilon_1, \epsilon_2$ \\\hline
-    Mixing Coefficient & $\mixExponent$ & $\nu$ & --- & --- \\\hline
-    Measurement Over-Dispersion & $\obsOverdispersion$ & $\tau$ & --- & $p$ \\\hline
-    Birth Rate & $\muBirth$ & $\mu$ & --- & --- \\\hline
-    Natural Mortality Rate & $\muDeath$ & $\delta$ & --- & $\mu$ \\\hline
-    Cholera Mortality Rate & $\choleraDeath$ & --- & --- & $\alpha$ \\\hline
-    Latent Period & $1/\muEI$ & $1/\sigma$ & $1/\gamma_E$ & --- \\\hline
-    Recovery Rate & $\muIR$ & $\gamma$ & $\gamma$ & $\gamma$ \\\hline
-    Loss of Immunity & $\muRS$ & $\alpha$ & $\sigma$ & $\rho$ \\\hline
-    Symptomatic Ratio & $\symptomFrac$ & $1 - \theta_0$ & $k$ & $\sigma$ \\\hline
-    Asymptomatic Relative Infectiousness & $\asymptomRelativeInfect$ & $\kappa$ & $red_\beta$ & --- \\\hline
-    Human-to-Water Shedding & $\Wshed$ & --- & $\mu$ & $\theta_I$ \\\hline
-    Asymptomatic Relative Shedding & $\asymptomRelativeShed$ & --- & $red_\mu$ & $\theta_A/\theta_I$ \\\hline
-    Seasonal Amplitude & $\seasAmplitude$ & --- & $\alpha_s$ & $\lambda$ \\\hline
-    Transmission & $\transmission$ & $\beta$ & $\beta$ & $c$ \\\hline
-    Water-to-Human & $\Wbeta{}$ & --- & $\beta_W$ & $\beta$ \\\hline
-    Bacteria Mortality & $\Wremoval$ & --- & $\delta$ & $\mu_\beta$ \\\hline
-    Vaccination Efficacy & $\vaccineEfficacy$ & $\theta_{vk}$ & $\theta_1, \theta_2, \theta_{1_5}, \theta_{2_5}$ & $\eta_{1d}, \eta_{2d}$ \\\hline
-    Process Over-dispersion & $\sigmaProc$ & --- & --- & $\sigma_w$\\\hline
-    % Half Saturation Constant & $\Wsat$ & --- & $Sat$ & $K$ \\\hline
-  \end{tabular}
-  \end{center}
-  \caption{
-  \label{tab:translate}Translations between our common notation and notation used in \cite{lee20}
-  }
-\end{table}
+% \section{Block Panel Iterated Filter}
+% 
+% The panel iterated filter (PIF) algorithm of \citet{breto20} has been used to fit parameters of panelPOMP models in several studies \citep{domeyer22,wale2019,ranjeva17,ranjeva19}.
+% Like other iterated filtering algorithms, PIF iteratively combines particle filter calculations with parameter perturbations.
+% Theoretical results show that, as the perturbations are reduced over successive iterations, the perturbed parameters converge to the MLE.
+% 
+% In the case of a panelPOMP, the parameter vector $\theta$ may be composed of a set of shared parameters $\phi$, and a set of unit-specific parameters $\psi_{u}$, for units $u \in \seq{1}{U}$.
+% Here, we say that a parameter $\psi_{u}$ for $u \in \seq{1}{U}$ is unit-specific if it is not involved in the one-step transition density or the measurement model of any other unit $k \neq u \in \seq{1}{U}$, and shared parameters are those that are not unit-specific.
+% The PIF algorithm treats the parameter vector $\theta = (\phi, \psi_{1:U})$ as a complete entity and gives no distinction between shared and unit-specific parameters.
+% Even though the random walk standard deviation is set to zero for unit-specific parameters when considering data from other units, this lack of distinction may result in particle depletion for unit-specific parameters as the number of units $U$ grows large.
+% This is because it is likely that, when updating the parameters for a given unit, several parameter vector $\theta$ particles will not be resampled due to having low weights.
+% When the number of units is large, this will lead to a decreasing number of ancestral particles to sample unit-specific parameters $\psi_k$ as $k$ increases.
+% 
+% As a solution to this issue, we propose the block panel iterated filter (BPIF), described in Algorithm~\ref{alg:bpif}.
+% In this algorithm, shared $\phi$ and unit-specific parameters $\psi_{u}$ are handled differently when updating the parameter vector $\theta = (\phi, \psi_{1:U})$.
+% The BPIF updates $\theta$ by updating the shared vector $\phi$ in the same way that is done with PIF, but index resampling for unit-specific parameters $\psi_{1:U}$ only occurs when data from the corresponding
+% unit are being considered.
+% We have found that this modification leads to improved likelihood maximization performance, especially as the number of units increases.
+% No theoretical properties of this algorithm have yet been derived, but the approach has similarities to the block particle filter of \citet{rebeschini15} and its extension to parameter estimation \citep{ionides22,ning21ibpf}.
+% 
+% \begin{algorithm}[ht]
+%    \caption[BPIF]{\textbf{BPIF}. \\
+%     {\bf Inputs}:\\\hspace{\textwidth}
+%     Simulator of initial density, $f_{X_{u, 0}}(x_{u, 0}; \theta)$ for $u$ in $\seq{1}{U}$.\\\hspace{\textwidth}
+%     Simulator of transition density, $f_{X_{u, n}|X_{u, n-1}}(x_{u, n}|x_{u, n-1}; \theta)$ for $u$ in $\seq{1}{U}$, $n$ in $\seq{1}{N_u}$.\\\hspace{\textwidth}
+%     Evaluator of measurement density, $f_{Y_{u, n}|X_{u, n}}(y_{u, n}|x_{u, n} ; \theta)$ for $u$ in $\seq{1}{U}$, $n$ in $\seq{1}{N_u}$.\\\hspace{\textwidth}
+%     Data $y_{u, n}^*$,for $u$ in $\seq{1}{U}$, $n$ in $\seq{1}{N_u}$.\\\hspace{\textwidth}
+%     Number of iterations, $M$.\\\hspace{\textwidth}
+%     Number of particles, $J$.\\\hspace{\textwidth}
+%     Starting parameter swarm, $\Theta_j^0 = \big(\Phi_j^0, \Psi_{1:U, j}^0\big)$ for $j \in \seq{1}{J}$, $u \in \seq{1}{U}$.\\\hspace{\textwidth}
+%     Simulator of perturbation density, $h_{u, n}(\theta | \phi; \sigma)$ for $u \in \seq{1}{U}$, $n \in 0:N_u$.\\\hspace{\textwidth}
+%     Perturbation sequence, $\sigma_m$ for $m \in 1:M$.\\\hspace{\textwidth}
+%     {\bf Output:} \\\hspace{\textwidth}
+%     Final parameter swarm, $\Theta_{j}^{m} = \big(\Phi_j^m, \Psi_{\seq{1}{U}, j}^m\big)$ for $j \in \seq{1}{J}$, $u \in \seq{1}{U}$.
+%     \label{alg:bpif}}
+% %\BlankLine
+% \For{$m \in 1:M$}{
+%   Set $\Phi_{0, j}^m = \Phi_j^{m-1}$ for $j \in \seq{1}{J}$\;
+%     \For{$u \in \seq{1}{U}$}{
+%       Set $\Phi_{u, 0, j}^{F, m} \sim h_{u, 0}(\phi | \Phi_{0, j}^m; \sigma_m)$ for $j \in \seq{1}{J}$\;
+%       Set $\Psi_{u, 0, j}^{F, m} \sim h_{u, 0}(\psi | \Psi_{u, j}^{m - 1}; \sigma_m)$ for $j \in \seq{1}{J}$\;
+%       Set $\Theta_{u, 0, j}^{F, m} = \big(\Phi_{u, 0, j}^{F, m}, \Psi_{u, 0, j}^{F, m}\big)$ for $j \in \seq{1}{J}$\;
+%       Initialize $X_{u, 0, j}^{F, m} \sim f_{X_{u, 0}}(x_{u, 0}; \Theta_{u, 0, j}^{F, m})$ for $j \in \seq{1}{J}$\;
+%         \For{$n \in \seq{1}{N_u}$} {
+%           Set $\Theta_{u, n, j}^{P, m} \sim h_{u, n}(\theta|\Theta_{u, n-1, j}^{F, m}, \sigma_m)$ for $j \in \seq{1}{J}$\;
+%           $X_{u, n, j}^{P, m} \sim f_{X_{u, n}|X_{u, n-1}}(x_{u, n}|X_{u, n-1, j}^{F, m}; \Theta_{u, n, j}^{P, m})$ for $j \in \seq{1}{J}$\;
+%           $w_{u, n, j}^m = f_{Y_{u, n}|X_{u, n}}(y_{u, n}^*|X_{u, n, j}^{P, m})$ for $j \in \seq{1}{J}$\;
+%           Draw $k_{\seq{1}{j}}$ with $P(k_j = i) = w_{u, n, i}^m / \sum_{v = 1}^J w_{u, n, v}^m$ for $i, j \in \seq{1}{J}$\;
+%           Set $\Theta_{u, n, j}^{F, m} = \Theta_{u, n, k_j}^{P, m} = \big(\Phi_{u, n, k_j}^{P, m}, \Psi_{u, n, k_j}^{P, m}\big)$ and $X_{u, n, j}^{F, m} = X_{u, n, k_j}^{P, m}$ for $j \in \seq{1}{J}$\;
+%         }
+%       Set $\Theta_{u, j}^m = \big(\Phi_{u, N_u, j}^{F, m}, \Psi_{u, N_u, j}^{F, m}\big)$ for $j \in \seq{1}{J}$\;
+%     }
+%   Set $\Theta_j^m = \big(\Phi_{U, j}^m, \Psi_{1:U, j}^m\big)$ for $j \in \seq{1}{J}$\;
+% }
+% \end{algorithm}
 
 \section{Lee et al. (2020) Replication}
 
-In this article we claimed that we were able to obtain better fits to the observed data using the same models that were proposed in \cite{lee20}.
+In this article we claimed that we were able to obtain better fits to the observed data using the same models that were proposed by \cite{lee20}.
 Along with visual comparisons to the data, this claim was supported by comparing likelihoods and AIC values in Table~1.
-Because model likelihoods were not provided in \cite{lee20}, it is necessary to replicate these models in order to obtain likelihood estimates.
+Because model likelihoods were not provided by \cite{lee20}, it is necessary to replicate these models in order to obtain likelihood estimates.
 Here we would like to thank the authors of \cite{lee20}, who provided detailed descriptions of their models, which enabled us to build on their work.
 In the following subsections, we use our \code{R} package \code{haitipkg} to reproduce some of the results of \cite{lee20}.
 This reproduction allows us to estimate the likelihoods of the \cite{lee20} version of Models~1--3, and also provides a demonstration on reproducibility.
@@ -696,12 +621,12 @@ This reproduction allows us to estimate the likelihoods of the \cite{lee20} vers
 
 The model was implemented by a team at Johns Hopkins Bloomberg School of Public Health (hereafter referred to as the Model~1 authors) in the \code{R} programming language using the \code{pomp} package \citep{king16}.
 Original source code is publicly available with DOI: 10.5281/zenodo.3360991.
-Despite having source code available, no point estimates for model parameters were provided in \cite{lee20}.
+Despite having source code available, no point estimates for model parameters were provided by \cite{lee20}.
 According to the supplement materials, this was because model realizations from a single parameter set retained substantial variability, but multiple realizations from a collection of parameter sets resulted in a reasonable visual fit to the data.
 We are also inclined to believe that the use of multiple parameter values was in part intended to account for parameter uncertainty (as mentioned in our main text), an effort by the Model~1 authors that we applaud.
 We note, however, that simulations from each of the parameter sets were treated with equal importance when being used to diagnose the model fit and make inference on the system.
 This practice is problematic given Figures S8 and S9 of the supplement material, which suggest that some parameter sets that were used for inference were several hundred log-likelihood units lower than the best performing sets of parameters.
-When accounting for parameter uncertainty, one should instead weigh resulting model projections based on the likelihood of the set of parameters that were used to obtain the model realizations, as was done in \cite{king15}.
+When accounting for parameter uncertainty, one should instead weigh resulting model projections based on the likelihood of the set of parameters that were used to obtain the model realizations, as was done by \cite{king15}.
 
 Not providing a point estimate for model parameters also has the effect of making model reproduction a more difficult task.
 We therefore rely on the range and median values for each of the final model parameters are provided in Tables S10 and S11 of the supplement, and bivariate relationships between some of the fitted parameters (Figures S8 and S9) in order to replicate their results.
@@ -718,7 +643,7 @@ lee1_epi_mif <- readRDS(file = paste0("../model1/", RL_dir, "lee1_epi_fit.rds"))
 @
 
 <<Simulate Lee Model 1, echo=FALSE, cache=TRUE>>=
-N_LEE_SIMS <- switch(run_level,  10,  20,   20)
+N_LEE_SIMS <- switch(run_level,  10,  15,   20)
 
 registerDoRNG(18599687)
 foreach(
@@ -786,7 +711,7 @@ true_agg_cases <- haitiCholera %>%
 @
 
 Following the model fitting scheme used by the Model~1 authors, we then use these resulting parameters as starting values for the endemic phase, and refit parameters using MIF2.
-To do this, we use the same number of particles and MIF iterations that were used in \citet{lee20}.
+To do this, we use the same number of particles and MIF iterations that were used by \citet{lee20}.
 The resulting bivariate relations between $\rho, \tau, \beta_1$ and $\nu$ are given in Figure~\ref{fig:plotEndParams}.
 
 <<FitEnd, echo=FALSE, message=FALSE, include=FALSE>>=
@@ -865,7 +790,7 @@ GGally::ggpairs(
 
 Now that we have fit the parameters, we can simulate from the models.
 The results of these simulations are shown in Figure~\ref{fig:plotMod1Sims}.
-While not a perfect replication of the results given in \citet{lee20sup}, the similarities between the model simulations, and the fact that we based our implementation of Model~1 primarily on the source code that was provided, makes us confident that we have been able to obtain a reliable representation of the model described in \citet{lee20}.
+While not a perfect replication of the results given by \citet{lee20sup}, the similarities between the model simulations, and the fact that we based our implementation of Model~1 primarily on the source code that was provided, makes us confident that we have been able to obtain a reliable representation of the model described by \citet{lee20}.
 
 <<plotMod1Sims, echo=FALSE, fig.cap="Simulations from various parameter sets. Simulations from parameter sets with likelihood $<$ -2200 are removed. Compare to Figure S7 of \\cite{lee20sup}.", cache=TRUE, fig.width=6.5, fig.height=3.75>>=
 
@@ -923,7 +848,7 @@ The source code that the Model~2 authors used to generate their results was writ
 In order to perform our analysis in a unified framework, we re-implemented this model in the \code{R} programming language using the \code{spatPomp} package \citep{asfaw21github}, which facilitates the creation of meta-population models.
 We note that the travel and water matrices used to implement the complex dynamics in Model~2 \citep{lee20sup} are not available in either the Zenodo archive or the GitHub repository;
 instead, we obtained these matrices via personal correspondence with the Model~2 authors.
-Using these matrices, and the point estimates for model parameters listed in \citep{lee20sup}, we created trajectories of the cholera dynamics and compared this to available data.
+Using these matrices, and the point estimates for model parameters provided by \citep{lee20sup}, we created trajectories of the cholera dynamics and compared this to available data.
 These trajectories, shown in Figure~\ref{fig:mod2rep}, are very similar to the trajectories shown in Figure~S15 of \cite{lee20sup}.
 
 <<Model2Replication, cache=TRUE, echo=FALSE>>=
@@ -1170,6 +1095,47 @@ Compare to Figure S18 of \cite{lee20}.
 rm(lee3, lee3_sims, quants, sub_cases)
 gc()
 @
+
+\section{Translating to \citet{lee20} notation}
+
+Since the models of \citet{lee20} were developed independently, the choice of notation varies inconsistently between models.
+For our reanalysis, we rename parameters to provide a unified notation facilitating comparison between models.
+Table~\ref{tab:translate} maps this notation back to the original notations, for reference.
+
+\begin{table}
+  \begin{center}
+  \begin{tabular}{|c|c|c|c|c|}\hline
+    \multirow{2}{*}{Parameter} & Our & \multicolumn{3}{c|}{Lee et al. (2020a)} \\\cline{3-5}
+     & Notation & 1 & 2 & 3 \\
+    \hline
+    \hline
+    % Table begins here
+    Reporting Rate & $\reportRate$ & $\rho$ & $\rho$ & $\epsilon_1, \epsilon_2$ \\\hline
+    Mixing Coefficient & $\mixExponent$ & $\nu$ & --- & --- \\\hline
+    Measurement Over-Dispersion & $\obsOverdispersion$ & $\tau$ & --- & $p$ \\\hline
+    Birth Rate & $\muBirth$ & $\mu$ & --- & --- \\\hline
+    Natural Mortality Rate & $\muDeath$ & $\delta$ & --- & $\mu$ \\\hline
+    Cholera Mortality Rate & $\choleraDeath$ & --- & --- & $\alpha$ \\\hline
+    Latent Period & $1/\muEI$ & $1/\sigma$ & $1/\gamma_E$ & --- \\\hline
+    Recovery Rate & $\muIR$ & $\gamma$ & $\gamma$ & $\gamma$ \\\hline
+    Loss of Immunity & $\muRS$ & $\alpha$ & $\sigma$ & $\rho$ \\\hline
+    Symptomatic Ratio & $\symptomFrac$ & $1 - \theta_0$ & $k$ & $\sigma$ \\\hline
+    Asymptomatic Relative Infectiousness & $\asymptomRelativeInfect$ & $\kappa$ & $red_\beta$ & --- \\\hline
+    Human-to-Water Shedding & $\Wshed$ & --- & $\mu$ & $\theta_I$ \\\hline
+    Asymptomatic Relative Shedding & $\asymptomRelativeShed$ & --- & $red_\mu$ & $\theta_A/\theta_I$ \\\hline
+    Seasonal Amplitude & $\seasAmplitude$ & --- & $\alpha_s$ & $\lambda$ \\\hline
+    Transmission & $\transmission$ & $\beta$ & $\beta$ & $c$ \\\hline
+    Water-to-Human & $\Wbeta{}$ & --- & $\beta_W$ & $\beta$ \\\hline
+    Bacteria Mortality & $\Wremoval$ & --- & $\delta$ & $\mu_\beta$ \\\hline
+    Vaccination Efficacy & $\vaccineEfficacy$ & $\theta_{vk}$ & $\theta_1, \theta_2, \theta_{1_5}, \theta_{2_5}$ & $\eta_{1d}, \eta_{2d}$ \\\hline
+    Process Over-dispersion & $\sigmaProc$ & --- & --- & $\sigma_w$\\\hline
+    % Half Saturation Constant & $\Wsat$ & --- & $Sat$ & $K$ \\\hline
+  \end{tabular}
+  \end{center}
+  \caption{
+  \label{tab:translate}Translations between our common notation and notation used by \cite{lee20}
+  }
+\end{table}
 
 \clearpage
 
