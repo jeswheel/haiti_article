@@ -16,15 +16,9 @@ figure/*
 *.synctex.gz
 model1/run_level_1/*
 model1/run_level_2/*
-model1/run_level_3/*
 model3/run_level_1/*
 model3/run_level_2/*
-model3/run_level_3/*
 si/cache/*
 si/figure/*
 si/output/*
-!model1/run_level_3/haiti1_fit.rds
-!model3/run_level_3/haiti3_fit.rds
-!model3/run_level_3/lee3_results.rds
-!model3/run_level_3/SpatPomp_res.rds
 si/si.tex

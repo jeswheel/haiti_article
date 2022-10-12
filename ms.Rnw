@@ -1445,7 +1445,7 @@ Each of the three models considered in this study describes cholera dynamics as 
 Each model is indexed by a parameter vector, $\paramVec$, and different values of $\paramVec$ can result in qualitative differences in the predicted behavior of the system.
 Therefore, the choice of $\paramVec$ used to make inference about the system can greatly affect model based conclusions.
 Elements of $\paramVec$ can be fixed at a constant value based on scientific understanding of the system, but parameters can also be calibrated to data by maximizing a measure of congruency between the observed data and the assumed mechanistic structure.
-Calibrating model parameters does not guarantee that the resulting model successfully approximates real-world mechanisms, since model assumptions may be incorrect, and do not change as the model is calibrated to data
+Calibrating model parameters does not guarantee that the resulting model successfully approximates real-world mechanisms, since model assumptions may be incorrect, and do not change as the model is calibrated to data.
 However, the congruency between the model and observed data serves as a proxy for the congruency between the model and the true underlying dynamic system, since the observed data are a result of the system.
 In the following subsections we describe our approach to fitting the three proposed mechanistic models by calibrating $\paramVec$ to observed cholera incidence data.
 
