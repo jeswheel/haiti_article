@@ -501,7 +501,7 @@ Therefore, under the assumptions of this model, all reported cases are assumed t
   \label{model1:meas}
   Y_{n} \mid \Delta N_{EI}(n) = z(n) \sim \text{NB}\left(\reportRate z(n), \obsOverdispersion \right),
 \end{equation}
-where $Y_n$ is the reported cholera cases at time $n \in 1:N$ and $\Delta N_{EI}(n)$ is the sum total of individuals across vaccination compartment $\vaccCounter$ who moved from compartment $E_\vaccCounter$ to $I_\vaccCounter$ since observation $n-1 \in 0:N-1$, and $\text{NB}\left(\reportRate z, \obsOverdispersion \right)$ is the negative binomial distribution with mean $\reportRate z$ and variance $\reportRate z+ \psi^2\reportRate^2 z^2)$. \jwc{CHECK THIS}.
+where $Y_n$ is the reported cholera cases at time $n \in 1:N$ and $\Delta N_{EI}(n)$ is the sum total of individuals across vaccination compartment $\vaccCounter$ who moved from compartment $E_\vaccCounter$ to $I_\vaccCounter$ since observation $n-1 \in 0:N-1$, and $\text{NB}\left(\reportRate z, \obsOverdispersion \right)$ is the negative binomial distribution with mean $\reportRate z$ and variance $\reportRate z \big(1 + \frac{\reportRate z}{\obsOverdispersion}\big)$.
 
 \subsection{Model~2}\label{sec:mod2Meas}
 

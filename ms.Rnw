@@ -1545,7 +1545,7 @@ gc()
 \subsubsection{Calibrating Model~2 Parameters}\label{sec:fit2}
 
 As previously stated, Model~2 is a deterministic compartmental model defined by a set of coupled differential equations.
-The use of deterministic compartment models have a long history in the field of infectious disease epidemiology \citep{kermack1927,brauer2017,varghese21},
+The use of deterministic compartment models have a long history in the field of infectious disease epidemiology \citep{kermack1927,brauer2017,giordano20},
 and can be justified by asymptotic considerations in a large-population limit \citep{dadlani2020,ndii17}.
 Because the process model of Model~2 is deterministic, the parameter estimation problem for Model~2 reduces to a least squares calculation when combined with a Gaussian measurement model (see supplement material for details).
 \cite{lee20} fit two versions of model~2 based on a presupposed change in cholera transmission from a epidemic phase to endemic phase that occurred in March, 2014.
