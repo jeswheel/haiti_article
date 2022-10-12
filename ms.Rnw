@@ -1,17 +1,8 @@
 %% Template for the submission to:
 %%   The Annals of Applied Statistics [AOAS]
-%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% In this template, the places where you   %%
-%% need to fill in your information are     %%
-%% indicated by '???'.                      %%
-%%                                          %%
-%% Please do not use \input{...} to include %%
-%% other tex files. Submit your LaTeX       %%
-%% manuscript as one .tex document.         %%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\documentclass[aoas]{imsart}
+%\documentclass[aoas]{imsart}
+\documentclass[aoas,preprint]{imsart}
 
 %% Packages
 \RequirePackage{amsthm,amsmath,amsfonts,amssymb,graphicx,enumerate,url,xr,lmodern}
@@ -27,40 +18,6 @@
 \usepackage[mathscr]{euscript}
 
 \startlocaldefs
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%                                          %%
-%% Uncomment next line to change            %%
-%% the type of equation numbering           %%
-%%                                          %%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%\numberwithin{equation}{section}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%                                          %%
-%% For Axiom, Claim, Corollary, Hypothesis, %%
-%% Lemma, Theorem, Proposition              %%
-%% use \theoremstyle{plain}                 %%
-%%                                          %%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%\theoremstyle{plain}
-%\newtheorem{???}{???}
-%\newtheorem*{???}{???}
-%\newtheorem{???}{???}[???]
-%\newtheorem{???}[???]{???}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%                                          %%
-%% For Assumption, Definition, Example,     %%
-%% Notation, Property, Remark, Fact         %%
-%% use \theoremstyle{remark}                %%
-%%                                          %%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%\theoremstyle{remark}
-%\newtheorem{???}{???}
-%\newtheorem*{???}{???}
-%\newtheorem{???}{???}[???]
-%\newtheorem{???}[???]{???}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% Please put your definitions here:        %%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%% parameters %%%%%%%%%%%
 \newcommand\Wsat{W_{\mathrm{sat}}}
@@ -256,7 +213,6 @@ options(
   scipen = 0,
   help_type = "html",
   stringsAsFactors = FALSE,
-  # prompt="R> ",
   continue = "+  ",
   width = 70,
   useFancyQuotes = FALSE,
@@ -838,6 +794,12 @@ gc()
 \end{aug}
 
 \begin{abstract}
+\begin{center}
+Working draft, \today
+\end{center}
+
+\vspace{3mm}
+
 Public health decisions must be made about when and how to implement interventions to control an infectious disease epidemic.
 These decisions should be informed by data on the epidemic as well as current understanding about the transmission dynamics.
 Such decisions can be posed as statistical questions about scientifically motivated dynamic models.
@@ -859,14 +821,6 @@ Diagnosis of model misspecification and development of alternative models can le
 \end{keyword}
 
 \end{frontmatter}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% Please use \tableofcontents for articles %%
-%% with 50 pages and more                   %%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%\tableofcontents
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%% Main text entry area:
 
 \section{Introduction}
 
@@ -891,12 +845,12 @@ potential effect of prospective oral cholera vaccine (OCV) programs.
 While OCV is accepted as a safe and effective tool for controlling the spread of cholera, the global stockpile of OCV doses remains limited \citep{pezzoli20}.
 Advances in OCV technology and vaccine availability, however, raised the possibility of planning a national vaccination program \citep{lee20}.
 In the study, certain data were shared between the groups, including demography and vaccination history; vaccine efficacy was also fixed at a shared value between groups.
-Beyond this, the groups made autonomous decisions on what to include and exclude from their models; this autonomy reduced the possible effect that assumptions about the dynamic system may have on the final conclusion of the study.
-Despite this autonomy, and largely adhering to existing guidelines on creating models to inform policy \citep{behrend20,saltelli20}, the consensus across the four models was that an extensive nationwide vaccination campaign would be necessary to eliminate cholera from Haiti.
-This conclusion is inconsistent with the fact that there have been no confirmed cases since February, 2019 \citep{trevisin22}, despite the lack of a national vaccination program.
+Beyond this, the groups made autonomous decisions on what to include and exclude from their models.
+The groups largely adhered to existing guidelines on creating models to inform policy \citep{behrend20,saltelli20} and, despite their autonomy, obtained a consensus that an extensive nationwide vaccination campaign would be necessary to eliminate cholera from Haiti.
+This conclusion is inconsistent with the fact that there have been no confirmed cases since February, 2019 \citep{trevisin22} without the implementation of a national vaccination program.
 
 The discrepancy between the model based conclusions of \cite{lee20} and the subsequent elimination of cholera cholera has been debated \citep{francois20,rebaudetComment20,henrys20,leeReply20}.
-Suggested origins of this discrepancy include the use of unrealistic models \citep{rebaudetComment20} and having unrealistic criteria for cholera elimination \citep{henrys20}.
+Suggested origins of this discrepancy include the use of unrealistic models \citep{rebaudetComment20} and unrealistic criteria for cholera elimination \citep{henrys20}.
 We find a more nuanced conclusion: attention to methodological details in model fitting, diagnosis and forecasting can improve each of the proposed model's ability to quantitatively describe observed data.
 These improvements result in forecasts that are more consistent with the observed outcome, without requiring major changes to the model structures.
 Based on this retrospective analysis, we offer suggestions on fitting mechanistic models to dynamic systems for future studies.
@@ -1487,20 +1441,12 @@ stew(file = "models.rda", {
 
 \subsection{Model Fitting}\label{sec:model_fitting}
 
-% \eic{PERHAPS THIS PARAGRAPH COULD MOVE TO A LATER SECTION?}
-% The complex nature of biological systems necessitates a search for modeling assumptions that combine insightful simplicity with fidelity to biological reality.
-% For example, many models commonly used in epidemiology are motivated by reasoning about a homogeneous mixing population which is simultaneously an avenue for powerful simplification and a source of model misspecification \citep{bansal07}.
-% Other common considerations include whether the proposed model should be stochastic or deterministic; whether the model should have change points in parameter values or should otherwise make adjustments for changes through time in the dynamic system; and whether the proposed model should include any spatial heterogeneity at a scale permissible by the observed data.
-% While this section is focused on the elements of $\paramVec$ that are calibrated to data, we note that the decision of which elements to fix and which to estimate has consequences for model interpretability, as discussed in Sec.~\ref{sec:science}.
-Each of the three models considered in this study describes cholera dynamics as partially observed Markov processes (POMP), with the understanding that the deterministic Model~2 is a degenerate case of a stochastic model.
-% Despite their similarities, these models represent a diverse selection of possible modeling assumptions: namely, the use of stochastic (Models~1 and 2) or deterministic (Model~2) equations; spatially-heterogeneous meta-population (Models~2 and 3) or spatially-aggregated (Model~1) structure; and the use of covariates (Model~3) versus mathematical equations (Models~1 and 2) to describe a seasonal mechanism.
-As such, each proposed mechanistic structure forms a family of statistical models indexed by a parameter vector $\paramVec$.
-Different values of $\paramVec$ can result in qualitative differences in the predicted behavior of the system.
+Each of the three models considered in this study describes cholera dynamics as a partially observed Markov process (POMP), with the understanding that the deterministic Model~2 is a degenerate case of a stochastic model.
+Each model is indexed by a parameter vector, $\paramVec$, and different values of $\paramVec$ can result in qualitative differences in the predicted behavior of the system.
 Therefore, the choice of $\paramVec$ used to make inference about the system can greatly affect model based conclusions.
-Specific elements of $\paramVec$ can be chosen as constants based on scientific understanding of the system, but parameters can also be calibrated to data in a way that maximizes some measure of congruency between the observed data and the assumed mechanistic structure.
-Mechanistic models are used as a way of approximating real-world mechanisms present in a dynamic system.
-While calibrating model parameters does not directly achieve this goal---as model assumptions may be incorrect, and do not change as the model is calibrated to data---the congruency between the model and observed data works as a proxy for the congruency between the model and the true underlying dynamic system, since the observed data are a result of the system.
-% All these structures can be described in the framework of partially observed Markov process (POMP) models, with the understanding that the deterministic Model~2 is a degenerate case of a stochastic model.
+Elements of $\paramVec$ can be fixed at a constant value based on scientific understanding of the system, but parameters can also be calibrated to data by maximizing a measure of congruency between the observed data and the assumed mechanistic structure.
+Calibrating model parameters does not guarantee that the resulting model successfully approximates real-world mechanisms, since model assumptions may be incorrect, and do not change as the model is calibrated to data
+However, the congruency between the model and observed data serves as a proxy for the congruency between the model and the true underlying dynamic system, since the observed data are a result of the system.
 In the following subsections we describe our approach to fitting the three proposed mechanistic models by calibrating $\paramVec$ to observed cholera incidence data.
 
 \subsubsection{Calibrating Model~1 Parameters}\label{sec:fit1}
@@ -1536,10 +1482,8 @@ The reported results for Model~1 in the remainder of this article were obtained 
 ggplot() +
   geom_point(data = h1_prof_res, aes(x = betat, y = logLik)) +
   geom_line(data = mcap_results$fit, aes(x = parameter, y = smoothed), col = 'blue') +
-  # geom_line(data = mcap_results$fit, aes(x = parameter, y = quadratic), col = 'red') +
   geom_vline(xintercept = mcap_results$ci[1], linetype = 'dashed') +
   geom_vline(xintercept = mcap_results$ci[2], linetype = 'dashed') +
-  # geom_vline(xintercept = mcap_results$quadratic_max, col = 'red') +
   geom_vline(xintercept = mcap_results$mle, col = 'blue') +
   labs(x = "Linear Trend in Transmission", y = 'Log Likelihood') +
   theme(axis.text = element_text(size = 8),
@@ -1650,8 +1594,6 @@ Reducing a spatially coupled model to individual units in this fashion requires 
 In particular, when considering a model for department $u$, the values $I_\nu(t)$ and $A_\nu(t)$, are unknown for $u \neq v$.
 To address this issue, \cite{lee20} conditioned each department level model on reported cholera cases in other departments and approximated the values of $I_\nu(t)$ and $A_\nu(t)$ using the respective reported cases.
 
-% Fitting Model~3 in this fashion simplifies the problem of parameter estimation, but it also introduces additional technicalities that must be addressed.
-% One concern is that of obtaining model forecasts, which was the primary goal of \citet{lee20}.
 The simplified, spatially-decoupled version of Model~3 relies on the observed cholera cases for each department to describe cholera dynamics, making it impossible to obtain forecasts for future time points from the fitted model.
 In order to obtain model forecasts, the parameters fit for the conditionally independent department level models were used in the fully coupled version of Model~3.
 This approach of model calibration and forecasting avoids the issue of particle depletion by simplifying the parameter estimation problem, but it may result in some undesirable outcomes.
@@ -1666,31 +1608,6 @@ This algorithm extends the work of \cite{ning21ibpf}, who provided theoretic jus
 While computationally intensive, the IBPF algorithm enables us to directly estimate the parameters of models describing high-dimensional partially-observed nonlinear dynamic systems via likelihood maximization.
 The ability to directly estimate parameters of Model~3 is responsible for the large increase in model likelihoods reported in Table~\ref{tab:likes}, as no algorithm with similar capabilities existed when \cite{lee20} published their results.
 Simulations from the fitted model are displayed in Fig.~\ref{fig:h3spatsims}.
-
-% An approximation of Eq.~\myeqref{eq:model3:foi} for each department $v \in \seq{1}{10}$ can be obtained using the weekly number of observed cholera cases in each department:
-% \begin{equation}
-%   I_v(t) + A_v(t) \approx \frac{365}{7\reportRate}y^*_v(t)\left(\frac{1}{\muDeath + \choleraDeath + \muIR} + \frac{1 - \symptomFrac}{\symptomFrac(\muDeath + \muIR)}\right)\label{eq:model3:approx}
-% \end{equation}
-% This approximation leads to department-specific models that are conditionally independent given the reported number of cholera infections in the remaining departments.
-% Here, we refer to a collection of POMP models that are independent across units as a PanelPOMP.
-%
-% In the case of a PanelPOMP, an extension of the IF2 algorithm, known as Panel Iterated Filtering (PIF) \citep{breto20}, can be used to obtain the MLE, which solves the curse of dimensionality for this class of models \eic{WHICH CONVENTIONALLY REFERS TO THE PRECEDING OBJECT, HERE THE MLE, WHICH IS NOT WHAT WE WANT}.
-% A major advantage of this algorithm is that PIF can be used to fit both unit-specific parameters and shared parameters; in this way, the calibration of shared parameters involves all of the available data instead of just an arbitrarily chosen subset.
-%
-% \eic{READERS MAY BE CONFUSED HERE. IS THIS A NEW METHOD? IT SEEMS TO BE IMPLEMENTED BY BRETO ET AL IN 2020. THIS IS DELICATE.}
-% We propose and use a slight modification of the PIF algorithm, which we call the Block Panel Iterated Filter (BPIF), to estimate parameters for a PanelPOMP version of Model~3.
-% Let $l_{\text{P}}(y_{1:N}^*; \paramVec)$ denote the log-likelihood function of the PanelPOMP version of Model~3.
-% The output of the BPIF algorithm is the MLE $\tilde{\paramVec} = \argmax_{\paramVec} l_{\text{P}}(y_{1:N}^*; \paramVec)$.
-% The BPIF algorithm is implemented in the \code{panelPomp} package \citep{breto20panelPomp} as the argument \code{block = TRUE} in the \code{mif2} function \eic{THIS LEVEL OF CODING DETAIL IS UNUSUAL IN A CASE STUDY}.
-% Pseudo-code for this algorithm is provided in Algorithm~S1 in the supplementary material.
-
-% While the reported parameters were obtained using the decoupled representation of Model~3, simulations for the various vaccination campaigns were obtained using fully coupled version of the model, implemented using the \code{spatPomp} package.
-
-% Fitting Model~3 in this fashion simplifies the problem of parameter estimation, but it also introduces additional technicalities that must be addressed.
-% One concern is that of obtaining model forecasts, which was the primary goal of \citet{lee20}.
-% The simplified PanelPOMP version of Model~3 relies on the observed cholera cases as a covariate, which are unavailable for use in forecasts.
-% Similar to what was done in \cite{lee20}, we use the parameter estimates obtained with the independent departmental approximation of Model~3 as an estimate for the parameters in the fully coupled version of the model, which was implemented using the \code{spatPomp} package.
-% Simulations from the fully coupled version of the model using the estimated parameter vector $\tilde{\paramVec}$, are displayed in Fig.~\ref{h3spatsims}.
 
 <<Model 3 SpatPOMP sims, echo=FALSE>>=
 h3_spat_nsim <- switch(RUN_LEVEL, 20, 100, 500)
@@ -1754,19 +1671,6 @@ The black curve represents true case count, the blue line the median of 500 simu
 rm(h3Spat_quants, h3_spat_nsim)
 gc()
 @
-
-% While simulations from the SpatPOMP version of Model~3 resemble the observed data, we note in Table~\ref{tab:likes} that the SpatPOMP version of Model~3 has a lower log-likelihood than the PanelPOMP version using the same model parameters.
-% Let $l_{\text{C}}(y_{1:N}^*; \paramVec)$ denote the log-likelihood of the fully coupled model, and let $\hat{\paramVec} = \argmax_{\paramVec} l_{\text{C}}(y_{1:N}^*; \paramVec)$.
-% If the goal of parameter estimation is to maximize the likelihood of the fully coupled model, the approach of estimating parameters using a decoupled model is clearly sub optimal, as $l_{\text{C}}(y_{1:N}^*; \hat{\paramVec}) \geq l_{\text{C}}(y_{1:N}^*; \tilde{\paramVec})$.
-% A natural question that arises is if the difference between $\hat{\paramVec}$ and $\tilde{\paramVec}$ is scientifically and statistically meaningful.
-% The answer to this question requires the ability to reliably estimate $\hat{\paramVec}$, the answer to which is model specific and beyond the scope of this case study.
-
-% A brief analysis of the fitted parameters $\tilde{\paramVec}$ provides some interesting insight.
-% Consider the large estimated exponent on rainfall: $r = \Sexpr{signif(p3s["r"],3)}$ (Eq.~\ref{eq:model3:water}).
-% Because the value of rainfall $J(t) \in (0, 1)$, the large coefficient results in $J(t)^r \approx 0$.
-% This result may initially be surprising given the importance of rainfall as a seasonal diver of cholera infections in Haiti (see Sec.~\ref{sec:science}).
-% One plausible explanation of this result is that the fitting procedure---used to obtain parameter values in the independent department model given the reported cases in other departments---has learned an over-dependence on the reported cholera cases in other departments, and thus the seasonality of cholera incidence in department $u$ depends on the highly correlated covariate of the reported cholera cases in departments $1:U\setminus \{u\}$.
-% Whatever the case may be, this fitting procedure results in a model that is unable to replicate the observed number of cases by simulating from initial conditions (see Fig.~\ref{h3spatsims}), and highlights the need for advancements in statistical methodology that permit inference on models with coupled metapopulation dynamics.
 
 \subsection{Model Diagnostics} \label{sec:model_diagnostics}
 
@@ -2167,31 +2071,14 @@ In this particular case study, projecting the future state of the cholera epidem
 This alone partially explains the unrealistic forecasts of \cite{lee20}, which were obtained by simulating the model from initial conditions;
 Table~S7 of their supplement material shows that of their simulations that were consistent with observing zero cases in 2019, all forecasts resulted in the elimination of cholera.
 
-% It has been noted that the uncertainty in just a single parameter can lead to drastically different forecasts \citep{saltelli20};
-% parameter uncertainty should therefore be considered when obtaining model forecasts to influence policy.
-% If a Bayesian technique is used for parameter estimation, the most natural way to account for parameter uncertainty is to obtain $J$ simulations from the model where each simulation is obtained using parameters $\Theta_{1:J}$ drawn from the posterior distribution $\Theta_{1:J} \sim f_{\Theta}\big(\paramVec | \bm{Y}^{(\modelCounter)}_{1:N} = y_{1:N}^*\big)$.
-% In the frequentist case, one approach is empirical Bayes: endow to set $\Theta_K = \{\theta_1, \theta_2, \ldots, \theta_K\}$ with a discrete uniform distribution, such that $P\big(\Theta_{j} = \theta_k\big) = \frac{1}{K}$ for all values $k \in \seq{1}{K}$.
-% In this case, the posterior distribution of $\Theta_{j} | \bm{Y}^{(\modelCounter)}_{1:N}$ can be expressed as:
-% $P\big(\Theta_{j} = \theta_k | \bm{Y}^{(\modelCounter)}_{1:N} = y_{1:N}^*\big) = \frac{l(y_{1:N}^*; \theta_k)}{\sum_{l = 1}^K l(y_{1:N}^*; \theta_l)}$. To complete the formulation, we then choose the set $\Theta_K$ such that each $\theta_k \in \Theta_K$ is a single output of the IF2 algorithm, which has been shown to be within a neighborhood of the MLE \cite{ionides15}.
-% This approach has been taken in previous studies \citep{king15}, and the result is simply weighing parameter sets based on their corresponding likelihoods: parameters with higher likelihoods should be used more frequently in model forecasts than those that correspond to lower likelihoods.
-% This can be done for both deterministic and stochastic models, but requires a large number of computations, especially as the number of observations and model parameters increase.
-% Because our direct aim is not to provide forecasts for policy recommendation, we do not include parameter uncertainty in our forecasts.
-% Instead, we use the projections from point estimates to highlight a major deficiency of deterministic models, which is that the only variability in model projections is a result of parameter uncertainty, which leads to over-confidence in forecasts \cite{king15}.
-% To the credit of deterministic models, of the four fitted models in \cite{lee20}, Model~2 provides the most apparently accurate forecasts.
-% This perhaps demonstrates that while deterministic models describe the systems in a less realistic way, the relative ease in fitting these models potentially results in fewer modeling errors.
-% As the data analysis becomes more refined, however, the deficiencies of deterministic models become increasingly apparent.
-
 It has been noted that the uncertainty in just a single parameter can lead to drastically different forecasts \citep{saltelli20};
 parameter uncertainty should therefore be considered when obtaining model forecasts to influence policy.
 If a Bayesian technique is used for parameter estimation, the most natural way to account for parameter uncertainty is to obtain simulations from the model where each simulation is obtained using parameters drawn from the posterior distribution.
-In the frequentist case, one approach is empirical Bayes, as was done by \cite{king15} (see supplement for details). % TODO: \jwc{ADD THIS TO SUPPLEMENT!}
+In the frequentist case, one approach is empirical Bayes, as was done by \cite{king15} (see supplement for details). 
 Both of these approaches share the similarity that parameters with higher likelihoods should be used more frequently in model forecasts than those that correspond to lower likelihoods.
 
 Because our direct aim is not to provide forecasts for policy recommendation, we do not include parameter uncertainty in our forecasts.
 Instead, we use the projections from point estimates to highlight a major deficiency of deterministic models, which is that the only variability in model projections is a result of parameter uncertainty, which leads to over-confidence in forecasts \cite{king15}.
-% To the credit of deterministic models, of the four fitted models in \cite{lee20}, Model~2 provides the most apparently accurate forecasts.
-% This perhaps demonstrates that while deterministic models describe the systems in a less realistic way, the relative ease in fitting these models potentially results in fewer modeling errors.
-% As the data analysis becomes more refined, however, the deficiencies of deterministic models become increasingly apparent. \jwc{CHANGE THIS BASED ON DISCUSSION WITH ED.}
 
 Forecasting can be used to simulate various interventions on a system; this feature is useful to inform policy and was the primary goal of \citet{lee20}.
 Outcomes of their study include estimates for the probability of cholera elimination and cumulative number of cholera infections under several possible vaccination scenarios.
@@ -3103,10 +2990,6 @@ The resulting mechanisms in a fitted model can be compared to current scientific
 Agreement between model based inference and our current understanding of a system may taken as a confirmation of both model based conclusions and our scientific understanding.
 On the other hand, comparisons may generate unexpected results that have the potential to spark new scientific knowledge \citep{ganusov16}.
 
-
-%% The potential for new discoveries based on fitting a dynamic model, however, is rooted in a model's ability to effectively approximate the system in question, and is therefore inexorably linked to a model's goodness-of-fit.
-%% As such, conclusions based on dynamic models that poorly fit observed data should not be considered as much as those resulting from models that describe observed data well. THIS DUPLICATES LATER SENTENCES, SO I THINK IT CAN BE REMOVED HERE.
-
 In the context of our case study, we demonstrate how the fit of Model~1 corroborates other evidence concerning the role of rainfall in cholera epidemics.
 Specifically, we examine the results of fitting the flexible cubic spline term in Model~1 (Eq.~\myeqref{model1:lambda}--\myeqref{model1:beta}).
 The cubic splines permit flexible estimation of seasonality in the force of infection, $\transmission(t)$.
@@ -3235,7 +3118,7 @@ This makes direct interpretation of estimated parameters delicate.
 Our case study provides an example of this in the parameter estimate for the duration of natural immunity due to cholera infection $\muRS^{-1}$.
 Under the framework of Model~2, the best estimate for this parameter is $\Sexpr{signif(1/h2_fit$h2_params["sigma"],3)}$, suggesting that individuals have effectively permanent immunity to cholera once infected, and thus the pool of susceptible individuals decreases over time.
 To interpret this result, we bear in mind that the data ranged from 2010-2019, and therefore estimates of immunity longer than 10 years---the upper end of previous estimates of natural immunity \citep{king08}---effectively result in the same model dynamics.
-The depletion of susceptible individuals may also be attributed to confounding mechanisms that are unaccounted for in the model---such as vaccination and other non-pharmaceutical interventions that reduce cholera transmission \citep{trevisin22, rebaudet21}---that were not accounted for in the model.
+The depletion of susceptible individuals may also be attributed to confounding mechanisms---such as localized vaccination programs and non-pharmaceutical interventions that reduce cholera transmission \citep{trevisin22, rebaudet21}---that were not accounted for in the model.
 Perhaps the best interpretation of the estimated parameter, then, is that under model assumptions, the model most adequately describes the observed data by having a steady decrease in the number of susceptible individuals.
 The weak statistical fit of Model~2 compared to a log-linear benchmark (see Table~\ref{tab:likes}) cautions us against drawing quantitative conclusions from this model.
 A model that has a poor statistical fit may nevertheless provide a useful conceptual framework for thinking about the system under investigation.
@@ -3259,7 +3142,7 @@ The robust statistical conclusion is that a model which allows for change fits b
 
 \section{Discussion}\label{sec:discussion}
 
-The ongoing global COVID-19 pandemic has provided a clear example on how government policy may be affected by the conclusions of scientific models.
+The ongoing global COVID-19 pandemic has provided a clear example on how government policy may be affected by the conclusions of scientific models \citep{saltelli20}.
 This article demonstrates that fitting appropriate scientific models remains a challenging statistical task, and therefore great care is needed when fitting scientific models for policy recommendations.
 We provided a few suggestions that may aid the fitting of mechanistic models such as comparing model likelihoods to a benchmark.
 Improved model fits allows for meaningful statistical inference that may provide valuable insight on a dynamic system and may improve the accuracy of model forecasts.
@@ -3269,9 +3152,6 @@ In this article we argue that careful attention to important statistical details
 We acknowledge the benefit of hindsight: our demonstration of a statistically principled route to obtain better-fitting models with more accurate predictions does not rule out the possibility of discovering other models that fit well yet predict poorly.
 We used the same data and models, and even much of the same code, as \citet{lee20}, and yet ended up with drastically different conclusions.
 At a minimum, we have shown that the conclusions are sensitive to details in how the data analysis is carried out, and that attention to statistical fit (including numerical issues such as likelihood maximization) can lead to improved policy guidance.
-
-% We acknowledge there are limitations to this study, such as the inability to fit model parameters to the fully-coupled version of Model~3.
-% Promising theoretical and methodological developments \citep{ning21ibpf,ionides22} based on the Block Particle Filter \citep{rebeschini15} may potentially be used to obtain better parameter estimates for Model~3 in future work.
 
 Inference for mechanistic time series models offers opportunities for understanding and controlling complex dynamic systems.
 This case study has investigated issues requiring attention when applying powerful new statistical techniques that can enable statistically efficient inference for a general class of partially observed Markov process models.
@@ -3286,41 +3166,22 @@ Cautionary warnings about the difficulties inherent in understanding complex sys
 Robust data analysis requires not only reproducibility but also extendability: if one wishes to try new model variations, or new approaches to fitting the existing models, or plotting the results in a different way, this should be not excessively burdensome.
 Scientific results are only trustworthy so far as they can be critically questioned, and an extendable analysis should facilitate such examination \citep{gentleman07}.
 
-We provide a strong form of reproducibility, as well as extendability, by developing our analysis in the context of an \code{R} package, \code{haitipkg}.
+We provide a strong form of reproducibility, as well as extendability, by developing our analysis in the context of a software package, \code{haitipkg}, written in the R language \citep{r}.
 Using a software package mechanism supports documentation, standardization and portability that promote extendability.
 In the terminology of \citet{gentleman07}, the source code for this article is a {\it dynamic document} combining code chunks with text.
 In addition to reproducing the article, the code can be extended to examine alternative analysis to that presented.
 The dynamic document, together with the R packages, form a {\it compendium}, defined by \citet{gentleman07} as a distributable and executable unit which combines data, text and auxiliary software (the latter meaning code written to run in a general-purpose, portable programming environment, which in this case is R).
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% Support information, if any,             %%
-%% should be provided in the                %%
-%% Acknowledgements section.                %%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{acks}[Acknowledgments]
 The authors would like to thank Mercedes Pascual and Betz Halloran for helpful discussions. Laura Matrajt provided additional data for the Model~2 analysis.
 \end{acks}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% Funding information, if any,             %%
-%% should be provided in the                %%
-%% funding section.                         %%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 \begin{funding}
 This work was supported by National Science Foundation grants DMS-1761603 and DMS-1646108.
 %
 % The second author was supported in part by ...
 \end{funding}
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% Supplementary Material, including data   %%
-%% sets and code, should be provided in     %%
-%% {supplement} environment with title      %%
-%% and short description. It cannot be      %%
-%% available exclusively as external link.  %%
-%% All Supplementary Material must be       %%
-%% available to the reader on Project       %%
-%% Euclid with the published article.       %%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{supplement}
 \stitle{Eliminating cholera in Haiti: Supplement}
 \sdescription{
@@ -3331,37 +3192,21 @@ of \cite{lee20}.
 \end{supplement}
 
 \begin{supplement}
-\stitle{\code{haitipkg}}
+\stitle{Auxiliary software: \code{haitipkg}}
 \sdescription{
-This \code{R} package is contained in a public GitHub repository: jeswheel/haitipkg. The package contains all of the data and code used to create and fit the models, as well as other useful functions that were used in this article.
+The \code{haitipkg} R package is maintained in a GitHub repository, \code{jeswheel/haitipkg}. The submitted version of this package will be archived on Zenodo.
+The package contains all of the data and code used to create and fit the models, as well as other useful functions that were used in this article.
 }
 \end{supplement}
 
 \begin{supplement}
-\stitle{\code{jeswheel/haiti\_article}}
+\stitle{Dynamic document: \code{haiti\_article}}
 \sdescription{
-This GitHub repository contains the \code{.Rnw} files that were used to create this document and the supplement material.
+The Rnw \citep[R noweb,][]{ramsey94} files generating this article and its supplement are maintained in a GitHub repository, \code{jeswheel/haiti\_article}. The submitted version will be archived on Zenodo.
 }
 \end{supplement}
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%                  The Bibliography                       %%
-%%                                                         %%
-%%  imsart-nameyear.bst  will be used to                   %%
-%%  create a .BBL file for submission.                     %%
-%%                                                         %%
-%%  Note that the displayed Bibliography will not          %%
-%%  necessarily be rendered by Latex exactly as specified  %%
-%%  in the online Instructions for Authors.                %%
-%%                                                         %%
-%%  MR numbers will be added by VTeX.                      %%
-%%                                                         %%
-%%  Use \cite{...} to cite references in text.             %%
-%%                                                         %%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-%% if your bibliography is in bibtex format, uncomment commands:
-\bibliographystyle{imsart-nameyear} % Style BST file
-\bibliography{bib-haiti}       % Bibliography file (usually '*.bib')
+\bibliographystyle{imsart-nameyear} 
+\bibliography{bib-haiti}       
 
 \end{document}
