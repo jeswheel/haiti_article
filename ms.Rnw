@@ -3149,7 +3149,8 @@ At a minimum, we have shown that the conclusions are sensitive to details in how
 
 Inference for mechanistic time series models offers opportunities for understanding and controlling complex dynamic systems.
 This case study has investigated issues requiring attention when applying powerful new statistical techniques that can enable statistically efficient inference for a general class of partially observed Markov process models.
-Care must be taken to ensure that the computationally intensive numerical calculations are carried out adequately.
+Researchers should check that the computationally intensive numerical calculations are carried out adequately.
+Comparison against benchmarks and alternative model specifications should be considered to evaluate the statistical goodness-of-fit.
 Once that is accomplished, care is required to assess what causal conclusions can properly be inferred given the possibility of alternative explanations consistent with the data.
 Studies that combine model development with thoughtful data analysis, supported by a high standard of reproducibility, build knowledge about the system under investigation.
 Cautionary warnings about the difficulties inherent in understanding complex systems \citep{saltelli20,ioannidis20,ganusov16} should motivate us to follow best practices in data analysis, rather than avoiding the challenge.
