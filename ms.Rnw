@@ -100,6 +100,8 @@
 \begin{document}
 
 <<Setup, include=FALSE,echo=FALSE,results='hide'>>=
+
+# Load Required packages
 library(knitr)
 library(pomp)
 library(panelPomp)
@@ -110,16 +112,24 @@ library(doRNG)
 library(haitipkg)
 library(tidyverse)
 
+# Set run level:
+#   1: Used primarily for debugging
+#   2: Used to test various results in a way that provides meaningful results, yet doesn't require an extensive amount of time to run.
+#   3: Used to get final results.
+#
+# Throughout the document, if run_level_3 results exist already exist,
+# then these results are used.
 RUN_LEVEL <- 1
 rl_dir <- paste0("run_level_", RUN_LEVEL, "/")
 
-# run_level_* for model 2 is not needed.
+# Check if run_level_* directories exist; if not, create them.
 for (i in c(1, 3)) {
   if (!dir.exists(paste0("model", i, '/', rl_dir))) {
     dir.create(paste0("model", i, '/', rl_dir), recursive = TRUE)
   }
 }
 
+# Model 2 doesn't need a run_level, since all computations are the same.
 if (!dir.exists('model2')) dir.create("model2/")
 
 opts_knit$set(concordance=TRUE)
@@ -167,16 +177,16 @@ myround <- function(x, digits = 1) {
   tmp
 }
 
+# Setting black and white ggplot2 theme for entire document.
 theme_set(theme_bw() + theme(plot.title = element_text(hjust = 0.5)))
 
-# 40 cores for doob, 8 for ito
-# doob_cores <- 40
-# gl_cores <- 36
-
+# Get the number of cores. The high performance computing cluster that we
+# used has 36 cores.
 cores <-  as.numeric(Sys.getenv('SLURM_NTASKS_PER_NODE', unset=NA))
 if(is.na(cores)) cores <- detectCores()
 registerDoParallel(cores)
 
+# Create a mapping between department names and what should be shown in figures
 dep_labeller <- as_labeller(
   c(
     'Artibonite' = 'Artibonite',
@@ -196,6 +206,7 @@ dep_labeller <- as_labeller(
   )
 )
 
+# Vector used to arrange figures in the same order that was used in Lee et al (2020)
 plot_order <- c(
   'Artibonite',
   'Sud_Est',
@@ -220,6 +231,7 @@ options(
   xtable.comment = FALSE
 )
 
+# Create "long" version of the observed cholera cases, for plotting purposes.
 dep_plot_df <- haitiCholera %>%
   select(-report) %>%
   pivot_longer(
@@ -236,6 +248,8 @@ dep_plot_df <- haitiCholera %>%
     dep = case_when(dep == "Grand_Anse" ~ "Grande_Anse", TRUE ~ dep)
   )
 
+# Calculate total number of nationally aggregated cholera cases, using previous
+# data.
 true_agg_cases <- dep_plot_df %>%
   tidyr::pivot_wider(
     data = .,
@@ -276,164 +290,17 @@ NREPS_EVAL <- switch(RUN_LEVEL,   3,   5,   36)
 #-------------------------- Step 1 ----------------------
 
 set.seed(141837)
-sample_beta_nu <- function(mu_beta = 5.8, mu_nu = 0.96, n_params = N_PARAMS) {
-  # This function is used to sample starting values for beta and nu.
-  #
-  # params:
-  #   mu_beta: Average of the marginal distribution for beta1. Value was fit visually.
-  #   mu_nu: Average of the marginal distribution for nu. Value was fit visually.
-  # returns:
-  #   data.frame of size 300x2, values of beta1 and nu with truncated bivariate
-  #   normal relation.
 
-  # Determine a good value for the marginal standard deviations
-  sd_beta <- (12.1-mu_beta) / qnorm(0.995)
-  sd_nu <- (0.9-mu_nu) / qnorm(0.005)
-
-  # Create covariance matrix for the bivariate-normal distribution
-  cov_mat <- rbind(
-    c(sd_beta^2, -0.7 * sd_beta * sd_nu),
-    c(-0.7 * sd_beta * sd_nu, sd_nu^2)
-  )
-
-  # Sample from the bivariate normal distribution
-  X <- MASS::mvrnorm(n = n_params, mu = c(mu_beta, mu_nu), Sigma = cov_mat)
-  colnames(X) <- c("beta1", "nu")
-
-  # Identify values that fell outside of range, so they can be resampled
-  bad_beta <- which(X[, 'beta1'] > 12.1 | X[, 'beta1'] < 0.04)
-  bad_nu <- which(X[, 'nu'] > 1 | X[, 'nu'] < 0.9)
-  n_resamp <- length(unique(c(bad_beta, bad_nu)))
-
-  # Keep resampling values until all values fall within the range.
-  while (n_resamp > 0) {
-    to_resamp <- unique(c(bad_beta, bad_nu))
-    X[to_resamp, ] <- MASS::mvrnorm(n = n_resamp, mu = c(mu_beta, mu_nu), Sigma = cov_mat)
-
-    bad_beta <- which(X[, 'beta1'] > 12.1 | X[, 'beta1'] < 0.04)
-    bad_nu <- which(X[, 'nu'] > 1 | X[, 'nu'] < 0.9)
-    n_resamp <- length(unique(c(bad_beta, bad_nu)))
-  }
-
-  # Return results as a data.frame
-  as.data.frame(X)
-}
-# Run the function to get values of beta1 and nu
-starting_params <- sample_beta_nu()
-
-sample_rho <- function(beta, n_params = N_PARAMS) {
-  # This function is used to get starting values for the parameter rho, based
-  # on it's strong correlation with beta1 and nu. Here, we first sample beta1
-  # and nu, and then sample rho based on a regression on beta1. Additionally,
-  # it is noted that rho has a bi-modal distribution, with lower values of rho
-  # corresponding with high probability to higher values of beta1.
-  #
-  # params:
-  #   beta: previously sampled values of beta1 that will be used to get values
-  #         of rho.
-  # returns:
-  #   vector of length 300 that have an appropriate relationship with the parameter
-  #   beta1.
-
-  rhos <- rep(0, N_PARAMS)
-
-  # Get slope and intercept for the regression
-  slope <- (0.4/(5.1 - 6.75))
-  intercpt <- -6.75 * slope
-
-  # Determine which mode should the value of rho belong to, based on regression
-  case_when(
-    beta > 6.75 ~ 0,  # Large beta --> group "0"
-    # Small beta --> more likely to be group "1", with increasing probability as beta gets smaller
-    beta <= 6.75 & beta > (0.95 - intercpt) / slope ~ slope * beta + intercpt,
-    TRUE ~ 0.95
-  ) -> probs
-
-  # Sample the groups that rho belongs to
-  rho_group1 <- rbernoulli(N_PARAMS, probs)
-  rho_group2 <- !rho_group1
-
-  # Keep track of how many values are in each group, used later for resampling
-  n_group1 <- sum(rho_group1)
-  n_group2 <- sum(rho_group2)
-
-  # Resample values of rho that are larger than 1
-  group1 <- rnorm(n_group1, mean = 1, sd = 0.05)
-  n_bad1 <- sum(group1 > 1)
-  while(n_bad1 > 0) {
-    group1[group1 > 1] <- rnorm(n_bad1, mean = 1, sd = 0.175)
-    n_bad1 <- sum(group1 > 1)
-  }
-
-  # get standard deviation for regression
-  std_beta1 <- (beta[rho_group2] - mean(beta[rho_group2])) / sd(beta[rho_group2])
-
-  group2 <- 0.25 - 0.025 * std_beta1 - (rlnorm(n_group2, sdlog = 0.2) - 1)
-
-  # Resample values of rho in group2 as needed
-  which_bad2 <- group2 < .13
-  while(sum(which_bad2) > 0) {
-    group2[group2 < 0.13] <- 0.25 - 0.1 * std_beta1[which_bad2] - (rlnorm(sum(which_bad2), sdlog = 0.2) - 1)
-
-    which_bad2 <- group2 < .13
-  }
-
-  rhos[rho_group1] <- group1
-  rhos[rho_group2] <- group2
-
-  # Return the values of rho
-  rhos
-}
-# Sample rho, using already sampled beta1.
-starting_params$rho <- sample_rho(starting_params$beta1)
-
-sample_tau <- function(mu = 4.1, n_params = N_PARAMS) {
-  # Function used to sample tau. Tau is approximately independent of the other
-  # parameters.
-  #
-  # params:
-  #   mu: mean of the truncated normal distribution
-  # returns:
-  #   vector of length 300, sampled values of tau from truncated normal distribution
-
-  # Sample from normal distribution
-  X <- rnorm(n_params, mean = mu, sd = (1.7-mu) / qnorm(0.001))
-
-  # Get how many resamples are needed
-  n_resamp <- sum(X > 5.9 | X < 1.7)
-
-  # Keep resampling until all values fall within desired range
-  while (n_resamp > 0) {
-    X[X > 5.9 | X < 1.7] <- rnorm(n_resamp, mean = mu, sd = (1.7-mu) / qnorm(0.001))
-
-    n_resamp <- sum(X > 5.9 | X < 1.7)
-  }
-
-  # Return values of tau
-  X
-}
-# Use function to sample tau
-starting_params$tau <- sample_tau()
-
-# Here we note that there are additional parameters that were fit, but their
-# relationship between the remaining parameters is not given in Lee et al. (2020).
-# Because of this, we simply sample these parameters using a truncated normal distribution:
-
-POP <- 10911819
-E_0_probs <- dnorm(seq(1, 1752, 1), mean = 400, sd = (1752-400) / qnorm(0.99))
-I_0_probs <- dnorm(seq(1, 2271, 1), mean = 500, sd = (2271-500) / qnorm(0.99))
-starting_params$E_0 <- sample(1:1752, size = N_PARAMS, replace = TRUE, prob = E_0_probs) / POP
-starting_params$I_0 <- sample(1:2271, size = N_PARAMS, replace = TRUE, prob = I_0_probs) / POP
-starting_params$S_0 <- 1 - starting_params$E_0 - starting_params$I_0
-
-rm(sample_beta_nu, sample_rho, sample_tau, POP, I_0_probs, E_0_probs)
-gc()
+# Get starting parameters close to those that are provided
+# in Lee et al (2020)
+starting_params <- get_h1_startVals(N_PARAMS)
 
 #-------------------------- Step 2 ----------------------
 
 # Create epi model for haiti1
 h1_epi <- haiti1()
 
+# Do a small global search for starting parameters for beta2-beta6
 bounds <- tribble(
   ~param, ~lower, ~upper,
   "beta2", 1e-08, 10,
@@ -449,21 +316,23 @@ names(lower) <- bounds$param
 upper <- bounds$upper
 names(upper) <- bounds$param
 
+# Get a sequence of starting values for the betas
 betas <- sobol_design(
   lower = lower,
   upper = upper,
   nseq  = N_PARAMS
 )
 
+# Combine betas with the starting_params data.frame object.
 epi_params <- cbind(starting_params, betas)
 
+# Get the names of all of the remaining coefficients (fixed parameters).
 not_in_start_params <- names(coef(h1_epi))[!names(coef(h1_epi)) %in% colnames(epi_params)]
 
+# Add fixed parameters to the matrix of starting parameters
 for (i in 1:length(not_in_start_params)) {
   epi_params[, not_in_start_params[i]] <- coef(h1_epi)[not_in_start_params[i]]
 }
-
-rm(i)
 
 epi_params$sig_sq <- 0
 
@@ -490,44 +359,57 @@ registerDoRNG(48963587)
 
 # Check if RUN_LEVEL == 3 results exists, if so, use them.
 # Include a flag to check if RUN_LEVEL == 3. If so, we might want to recompute.
-# TODO: Only save parameters and likelihoods, not entire MIF objects.
 if (RUN_LEVEL != 3 & file.exists("model1/run_level_3/lee1_epi_fit.rds")) {
   lee1_epi_mif <- readRDS("model1/run_level_3/lee1_epi_fit.rds")
 } else {
   lee1_epi_mif <- bake(
     file = paste0("model1/", rl_dir, "lee1_epi_fit.rds"),
     {
+      # Create a list to save all of the results.
       lee1_epi_mif_results <- list()
 
+      # Loop through each of the starting parameters
       foreach(
         i = 1:nrow(epi_params),
         .packages = c('pomp'),
         .combine = c
       ) %dopar% {
+
+        # Get the ith set of starting parameters
         r_params <- unlist(epi_params[i, ])
+
+        # Set the coefficients of model 1 to the ith starting values
         coef(h1_epi) <- r_params
+
+        # Perform short IF2 from the starting value
         mif2(
           h1_epi,
           Np = NP_MIF,
           Nmif = NMIF,
-          cooling.fraction.50 = 0.5,  # Cooling set so that we will reach smaller rw.sd at the end than the end of the unit3 search.
+          cooling.fraction.50 = 0.5,
           rw.sd = epi_rw
         )
-      } -> lee1_epi_mif_out
+      } -> lee1_epi_mif_out  # Contains nrow(epi_params) mif2d objects
 
+      # For each output of the MIF2 objects, simulate Model 1 with the IF2
+      # parameters and save the states from the final week of the simulation
       foreach(i = 1:length(lee1_epi_mif_out), .combine = rbind) %do% {
+
+        # Get IF2 parameter set
         guess <- coef(lee1_epi_mif_out[[i]])
+
+        # Simulate with the parameter set
         sims <- simulate(
           h1_epi,
           n = N_LEE_SIMS,
           format = 'data.frame',
           params = guess
         )  %>%
-          dplyr::filter(week == max(week)) %>%
+          dplyr::filter(week == max(week)) %>%  # Just keep final states, to use later.
           dplyr::select(-.id, -week)
 
-          sims$param_set <- i
-          sims
+        sims$param_set <- i
+        sims
       } -> start_states
 
       lee1_epi_mif_results$lee1_epi_mif_params <- t(coef(lee1_epi_mif_out))
@@ -538,7 +420,7 @@ if (RUN_LEVEL != 3 & file.exists("model1/run_level_3/lee1_epi_fit.rds")) {
 }
 
 rm(epi_rw, epi_params, not_in_start_params,
-   lower, upper, betas, bounds, starting_params)
+   lower, upper, betas, bounds, starting_params, i)
 gc()
 
 # epi_complete <- as.data.frame(t(coef(lee1_epi_mif)))
@@ -762,24 +644,12 @@ gc()
 @
 
 \begin{frontmatter}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%                                          %%
-%% Enter the title of your article here     %%
-%%                                          %%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 \title{Informing policy via dynamic models: Eliminating cholera in Haiti}
 \runtitle{Eliminating Cholera in Haiti}
 
 \begin{aug}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% Only one address is permitted per author. %%
-%% Only division, organization and e-mail is %%
-%% included in the address.                  %%
-%% Additional information can be included in %%
-%% the Acknowledgments section if necessary. %%
-%% ORCID can be inserted by command:         %%
-%% \orcid{0000-0000-0000-0000}               %%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 \author[A]{\fnms{Jesse}~\snm{Wheeler}\ead[label=e1]{jeswheel@umich.edu}\orcid{0000-0003-3941-3884}},
 \author[A]{\fnms{AnnaElaine}~\snm{Rosengart}\ead[label=e2]{aelr@umich.edu}}
 \author[A]{\fnms{Zhuoxun}~\snm{Jiang}\ead[label=e3]{zhuoxunj@umich.edu}},
@@ -787,10 +657,9 @@ gc()
 \author[A]{\fnms{Noah}~\snm{Treutle}\ead[label=e5]{ntreutle@umich.edu}}
 \and
 \author[A]{\fnms{Edward}~\snm{Ionides}\ead[label=e6]{ionides@umich.edu}}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% Addresses                                %%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 \address[A]{Statistics Department, University of Michigan\printead[presep={,\ }]{e1,e2,e3,e4,e5,e6}}
+
 \end{aug}
 
 \begin{abstract}
@@ -867,27 +736,24 @@ This is followed by a consideration of the robustness of model based policy reco
 
 \begin{figure}[ht]
 <<Plot_Reported_Cases, echo=FALSE, fig.height=3.5>>=
-plot_df <- haitiCholera %>%
-  select(-report) %>%
-  mutate(date = as.Date(date_saturday)) %>%
-  select(-date_saturday) %>%
-  pivot_longer(
-    data = .,
-    cols = -c(date),
-    names_to = 'Departement',
-    values_to = "Cases",
-  )
 
-ggplot(plot_df, aes(x = date, y = Cases + 1)) +
-  facet_wrap(~Departement, nrow = 2, labeller = dep_labeller) +
+# Plot reported cholera cases, by department. Creates Figure 1.
+ggplot(dep_plot_df, aes(x = date, y = cases + 1)) +
+  facet_wrap(~dep, nrow = 2, labeller = dep_labeller) +
   geom_line() +
-  theme(
-    axis.title.x = element_blank()
-  ) +
+  theme(axis.title.x = element_blank()) +
   ylab('Reported Cases') +
-  scale_y_log10(labels = scales::trans_format("log10", scales::math_format(10^.x))) +
-  scale_x_date(date_labels = "'%y", breaks = seq.Date(from = as.Date("2011-01-01"), as.Date("2019-01-01"), by = '2 years'))
-
+  scale_y_log10(
+    labels = scales::trans_format("log10", scales::math_format(10^.x))
+  ) +
+  scale_x_date(
+    date_labels = "'%y",
+    breaks = seq.Date(
+      from = as.Date("2011-01-01"),
+      to = as.Date("2019-01-01"),
+      by = '2 years'
+    )
+  )
 @
 \caption{\label{CholeraData}
 \small
@@ -1057,7 +923,6 @@ The starting value for each element of the latent state vector $\bm{X}^{(2)}(0)$
 Reported cases are assumed to come from a log-normal distribution, with the log-scale mean equal to the reporting rate $\reportRate$ times the number of newly infected individuals.
 See Sec.~\ref{sec:fit2} and Sec.~S4.2 of the supplement for more details.
 
-
 %%%%%%% 333333333 %%%%%%%%%%
 
 \subsection{Model~3}
@@ -1115,16 +980,22 @@ Reported cholera cases are assumed to come from a negative binomial measurement 
 We consider model fitting (Sec.~\ref{sec:model_fitting}) followed by diagnostic investigations (Sec.~\ref{sec:model_diagnostics}), forecasting (Sec.~\ref{sec:filter}) and external scientific corroboration of model fit (Sec.~\ref{sec:science}).
 
 <<FitModel1, echo=FALSE, message=FALSE, include=FALSE>>=
+
+# This code chunk is used to fit Model 1 using the IF2 algorithm.
 set.seed(636813)
 
-NP_H1        <- switch(RUN_LEVEL, 100, 1000,   2000)
-NMIF_H1      <- switch(RUN_LEVEL,  10,   50,    200)
-NUM_TREND    <- switch(RUN_LEVEL,   5,   10,     90)
-NPROF        <- switch(RUN_LEVEL,   4,    4,     24)
-NP_EVAL      <- switch(RUN_LEVEL, 200, 1000,   5000)
-NREPS_EVAL   <- switch(RUN_LEVEL, cores, 20,  cores)
+# Check RUN_LEVEL, and set hyper-parameters to IF2 and pfilter accordingly.
+#
+#                      RUN_LEVEL =    1,    2,      3
+NP_H1        <- switch(RUN_LEVEL,   100, 1000,   2000)
+NMIF_H1      <- switch(RUN_LEVEL,    10,   50,    200)
+NUM_TREND    <- switch(RUN_LEVEL,     5,   10,     90)
+NPROF        <- switch(RUN_LEVEL,     4,    4,     24)
+NP_EVAL      <- switch(RUN_LEVEL,   200, 1000,   5000)
+NREPS_EVAL   <- switch(RUN_LEVEL, cores,   20,  cores)
 
-
+# Check first if RUN_LEVEL_3 file exists in directory, if not, create the
+# RUN_LEVEL version of the results and save them.
 if (RUN_LEVEL != 3 & file.exists("model1/run_level_3/haiti1_fit.rds")) {
   h1_MIF <- readRDS("model1/run_level_3/haiti1_fit.rds")
 } else {
@@ -1143,6 +1014,9 @@ if (RUN_LEVEL != 3 & file.exists("model1/run_level_3/haiti1_fit.rds")) {
   )
 }
 
+# The result is a data.frame containing many parameter values and their
+# corresponding likelihood evaluation. To perform a likelihood profile,
+# we calculate the maximum likelihood for each value of betat.
 h1_prof_res <- h1_MIF %>%
   group_by(betat) %>%
   summarize(logLik = max(ll))
@@ -1155,17 +1029,35 @@ p1 <- h1_MIF %>%
   select(-ll, -ll.se) %>%
   unlist()
 
+# Save the likelihood of the best parameters, for use later.
 mod1_ll <- h1_MIF %>%
   filter(ll == max(ll)) %>%
   select(ll) %>%
   unlist()
 
+# Just a bit of tidying up: removing parameters that we won't use again.
 rm(NP_H1, NMIF_H1, NUM_TREND, NPROF, NREPS_EVAL, NP_EVAL, h1_MIF)
 gc()
 
 @
 
+<<FitModel2, echo=FALSE, include=FALSE, message=FALSE>>=
+
+# This code chunk fits Model 2. This is a quick caclulation compared to models
+# 1 and 3, so no run_level is used.
+
+h2_fit <- bake(
+  file = paste0("model2/model2_fit.rds"), {
+    fit_haiti2()
+  },
+  timing = FALSE
+)
+@
+
+
 <<FitModel3, echo=FALSE, include=FALSE, message=FALSE>>=
+
+# This code chunk is used to fit Model 3 using the IBPF algorithm.
 set.seed(1859687)
 
 # Create vectors for the unit and shared parameters
@@ -1366,19 +1258,6 @@ if (RUN_LEVEL != 3 & file.exists("model3/run_level_3/haiti3_coupled_fit.rds")) {
   )
 }
 
-rm(
-  SEARCH1, SEARCH2, SEARCH3, N_SEARCHES, unit_specific_names, 
-  shared_param_names, est_param_names, est_param_names_expanded, 
-  setrw1, setrw2, setrw3, reg_rw_1.sd, reg_rw_2.sd, reg_rw_3.sd, 
-  chol_rw_1.sd, chol_rw_2.sd, chol_rw_3.sd
-)
-gc()
-
-@
-
-
-<<Load Model Parameters, echo=FALSE, results='hide'>>=
-
 # haiti3_fit contains ll estimate for many parameter sets, so we want to find
 # the highest value
 mod3_ll <- max(
@@ -1386,21 +1265,24 @@ mod3_ll <- max(
   na.rm = TRUE
 )
 
-# Fit model 2. Note that this takes the same amount of time at all run
-# levels.
-h2_fit <- bake(
-  file = paste0("model2/model2_fit.rds"), {
-    fit_haiti2()
-  },
-  timing = FALSE
+# Just a bit of tidying up: removing parameters that we won't use again.
+rm(
+  SEARCH1, SEARCH2, SEARCH3, N_SEARCHES, unit_specific_names,
+  shared_param_names, est_param_names, est_param_names_expanded,
+  setrw1, setrw2, setrw3, reg_rw_1.sd, reg_rw_2.sd, reg_rw_3.sd,
+  chol_rw_1.sd, chol_rw_2.sd, chol_rw_3.sd
 )
+gc()
 
 @
 
+
 <<table-input,echo=FALSE,eval=T, include=FALSE, message=FALSE>>=
 
+# Find the index for parameters of model 3 that correspond to the MLE.
 best_m3 <- which.max(haiti3_fit[[length(haiti3_fit)]]$logLiks$logLik)
 
+# Save the parameters that correspond to the MLE of Model 3.
 p3 <- haiti3_fit[[length(haiti3_fit)]]$params[best_m3, ]
 
 p3_specific <- c("foi_add", "betaB", "Binit")
@@ -1504,8 +1386,12 @@ The large difference in likelihoods that were obtain by these two approaches (se
 \begin{figure}[ht]
 \centering
 <<Model_1_Sims_Figure, fig.height=2.4, fig.width=4.7, fig.align='center'>>=
+# This code chunk creates the figure containing simulations from Model 1
+
+# Simulate Model 1 from initial conditions.
 sims <- simulate(h1, nsim = 500, format = 'data.frame', seed = 3448931)
 
+# Calculate 0.025 and 0.975 percentiles of simulations, at each time point.
 quants <- sims %>%
   mutate(is_data = .id == 'data') %>%
   filter(!is_data) %>%
@@ -1519,17 +1405,36 @@ quants <- sims %>%
   ungroup() %>%
   mutate(date = lubridate::ymd("2010-10-16") + lubridate::weeks(week))
 
+# Plot the data, median value of the simulation, and estimated quantiles.
 ggplot() +
   geom_line(data = true_agg_cases, aes(x = date, y = ReportedAll + 1)) +
   geom_line(data = quants, aes(x = date, y = q50 + 1), col = 'blue') +
-  geom_ribbon(data = quants, aes(x = date, ymin = q025 + 1, ymax = q975 + 1), alpha = 0.5) +
-  theme(axis.title.x = element_blank(),
-        axis.text = element_text(size = 8),
-        axis.title.y = element_text(size = 10))+
+  geom_ribbon(  # Plot confidence region
+    data = quants,
+    aes(x = date, ymin = q025 + 1, ymax = q975 + 1),
+    alpha = 0.5
+  ) +
+  theme(
+    axis.title.x = element_blank(),
+    axis.text = element_text(size = 8),
+    axis.title.y = element_text(size = 10)
+  )+
   ylab('Reported cholera cases') +
-  geom_vline(xintercept = lubridate::weeks(232) + lubridate::ymd("2010-10-16"), linetype = 'dashed') +
-  scale_y_log10(labels = scales::trans_format("log10", scales::math_format(10^.x))) +
-  scale_x_date(date_labels = "'%y", breaks = seq.Date(from = as.Date("2011-01-01"), as.Date("2019-01-01"), by = '1 year'))
+  geom_vline(  # Show change from epidemic -> endemic models.
+    xintercept = lubridate::weeks(232) + lubridate::ymd("2010-10-16"),
+    linetype = 'dashed'
+  ) +
+  scale_y_log10(  # Plot on the log-scale
+    labels = scales::trans_format("log10", scales::math_format(10^.x))
+  ) +
+  scale_x_date(  # Format the date on x-axis.
+    date_labels = "'%y",
+    breaks = seq.Date(
+      from = as.Date("2011-01-01"),
+      as.Date("2019-01-01"),
+      by = '1 year'
+    )
+  )
 @
 \caption{\label{fig:mod1fit}
 Simulations from Model~1 compared to reported cholera cases.
@@ -1551,7 +1456,6 @@ Because the process model of Model~2 is deterministic, the parameter estimation 
 \cite{lee20} fit two versions of model~2 based on a presupposed change in cholera transmission from a epidemic phase to endemic phase that occurred in March, 2014.
 The inclusion of a change-point in model states and parameters increases the flexibility of the model and hence the ability to fit the observed data.
 The increase in model flexibility, however, results in hidden states that are inconsistent between model phases.
-% A naive solution to this would be to estimate only model parameters in separate phases and not the hidden states, but this may also result in hidden states in one phase of the model that are inconsistent with the other phase of the outbreak, since only the data from one phase is used to fit model parameters.
 The inclusion of a model break-point by \cite{lee20} is perhaps due to a challenging feature of fitting a deterministic model via least squares: discrepancies between model trajectories and observed case counts in highly infectious periods of a disease outbreak will result in greater penalty than the discrepancies between model trajectories and observed case counts in times of relatively low infectiousness, resulting in a bias towards accurately describing periods of high infectiousness.
 This issue is particularly troublesome for modeling cholera dynamics in Haiti: the inability to accurately fit times of low infectiousness may result in poor model forecasts, as few cases of cholera were observed the last few years of the epidemic.
 
@@ -1565,8 +1469,20 @@ The model was then fit using the subplex algorithm, implemented in the  \code{su
 A comparison of the trajectory of the fitted model to the data is given in Fig~\ref{fig:mod2Traj}.
 
 <<Model 2 Trajectory, echo=FALSE>>=
-h2_epi_traj <- trajectory(h2_epi, params = h2_fit$h2_params, format = 'data.frame')
-h2_epi_traj$Ctotal <- rowSums(h2_epi_traj[, paste0("C", 1:10)]) * h2_fit$h2_params['Rho']
+
+# This code chunk calculates the "trajectory" of the differential equations
+# for Model 2.
+
+h2_epi_traj <- trajectory(
+  h2_epi,  # Model
+  params = h2_fit$h2_params,  # estimated parameters
+  format = 'data.frame'
+)
+
+# Display the output as nationally aggregated data, as was done in Lee et al (2020)
+h2_epi_traj$Ctotal <- rowSums(
+  h2_epi_traj[, paste0("C", 1:10)]  # Infections in each department
+) * h2_fit$h2_params['Rho']  # multiply by reporting rate, to compare to reported cases.
 
 h2_traj <- h2_epi_traj %>%
   select(year, Ctotal) %>%
@@ -1610,20 +1526,27 @@ The ability to directly estimate parameters of Model~3 is responsible for the la
 Simulations from the fitted model are displayed in Fig.~\ref{fig:h3spatsims}.
 
 <<Model 3 SpatPOMP sims, echo=FALSE>>=
+
+# Number of simulations from Model 3. Because it's high-dimensional, we include
+# a run level to avoid time/memory issues when editing. Final results shown
+# with RUN_LEVEL = 3.
+
 h3_spat_nsim <- switch(RUN_LEVEL, 20, 100, 500)
 
+# Check if run_level_3 results exit, and use them if they do.
 if (RUN_LEVEL != 3 & file.exists("model3/run_level_3/SpatPompSims.rds")) {
   h3Spat_quants <- readRDS("model3/run_level_3/SpatPompSims.rds")
 } else {
   h3Spat_quants <- bake(
     file = paste0('model3/', rl_dir, 'SpatPompSims.rds'), {
-      # h3Spat <- haiti3_spatPomp()
-      # coef(h3Spat) <- haitipkg:::panelParms_toSpatParms3(p3)
 
+      # Simulate from the fitted version of Model 3
       h3Spat_sims <- simulate(
         h3Spat, nsim = h3_spat_nsim, format = 'data.frame'
       )
 
+      # For each department and time-point, calculate percentiles of the
+      # simulations
       h3Spat_sims %>%
         rename(dep = unitname) %>%
         group_by(dep, time) %>%
@@ -1637,7 +1560,9 @@ if (RUN_LEVEL != 3 & file.exists("model3/run_level_3/SpatPompSims.rds")) {
         mutate(
           date = lubridate::date_decimal(time)
         ) %>%
-        filter(date >= as.Date(lubridate::round_date(lubridate::date_decimal(h3Spat@t0), unit = 'day'))) %>%
+        # filter(
+        #   date >= as.Date(lubridate::round_date(lubridate::date_decimal(h3Spat@t0), unit = 'day'))
+        #   ) %>%
         mutate(date = as.Date(lubridate::round_date(date, unit = 'day')))
     },
     timing = FALSE
@@ -1648,18 +1573,33 @@ if (RUN_LEVEL != 3 & file.exists("model3/run_level_3/SpatPompSims.rds")) {
 
 \begin{figure}[ht]
 <<Model3_SpatPOMP_sims_Figure, fig.height=3>>=
+
+# Plot the reported cases and confidence region for each department.
+
 ggplot() +
   geom_line(data = h3Spat_quants, aes(x = date, y = q50 + 1), col = 'blue') +
   geom_line(data = dep_plot_df, aes(x = date, y = cases + 1), col = 'black') +
-  geom_ribbon(data = h3Spat_quants,
-              aes(x = date, ymin = q05 + 1, ymax = q95 + 1),
-              alpha = 0.4) +
-  facet_wrap(~factor(dep, levels = plot_order), nrow = 2,
-             labeller = dep_labeller) +
+  geom_ribbon(  # plot confidence region.
+    data = h3Spat_quants,
+    aes(x = date, ymin = q05 + 1, ymax = q95 + 1),
+    alpha = 0.4
+  ) +
+  facet_wrap(
+    ~factor(dep, levels = plot_order), nrow = 2, labeller = dep_labeller
+  ) +
   labs(y = 'Log Reported Cholera Cases') +
-  scale_x_date(date_labels = "'%y", breaks = seq.Date(from = as.Date("2011-01-01"), as.Date("2019-01-01"), by = '2 years')) +
+  scale_x_date(  # Format the date on the X-axis.
+    date_labels = "'%y",
+    breaks = seq.Date(
+      from = as.Date("2011-01-01"),
+      to = as.Date("2019-01-01"),
+      by = '2 years'
+    )
+  ) +
   theme(axis.title.x = element_blank()) +
-  scale_y_log10(labels = scales::trans_format("log10", scales::math_format(10^.x)))
+  scale_y_log10(  # Plot on log-scale
+    labels = scales::trans_format("log10", scales::math_format(10^.x))
+  )
 @
 \caption{\label{fig:h3spatsims}
 Simulations from initial conditions using the spatially coupled version of Model~3.
@@ -1715,12 +1655,13 @@ Including benchmarks would help authors and readers to detect and confront any m
 In addition, the published goodness of fit provides a concrete point of comparison for subsequent scientific investigations.
 When combined with online availability of data and code, objective measures of fit provide a powerful tool to accelerate scientific progress, following the paradigm of the {\it common task framework} \citep[][Sec.~6]{donoho17}.
 
-
 The use of benchmarks may also be beneficial when developing models at differing spatial scales, where a direct comparison between models likelihoods is meaningless.
 In such a case, a benchmark model can be fit to each spatial resolution being considered, and each model compared to their respective benchmark.
 Large advantages (shortcomings) in model likelihood relative to the benchmark for a given spatial scale that are not present in other spatial scales may provide weak evidence for (against) the statistical fit of models across a range of spatial resolutions.
 
 <<Table 2 Input, echo=FALSE, eval=TRUE>>=
+
+# TODO: Not needed after fitting Model 3.
 NREPS_EVAL <- switch(RUN_LEVEL,   3,   8,    36)
 NP_EVAL    <- switch(RUN_LEVEL, 100, 500, 10000)
 
@@ -1750,6 +1691,7 @@ mod3_aic <- 2 * mod3_n_params - 2 * mod3_ll
 # h3Spat <- haiti3_spatPomp()
 # coef(h3Spat) <- haitipkg:::panelParms_toSpatParms3(p3)
 
+# TODO: The code below will not be needed once we update the fitting of model 3.
 # Calculate likelihood via block-particle filter
 if (RUN_LEVEL != 3 & file.exists("model3/run_level_3/SpatPomp_res.rds")) {
   mod3_spatPomp_res <- readRDS("model3/run_level_3/SpatPomp_res.rds")
@@ -2071,7 +2013,7 @@ In this case study, projecting the future state of the cholera epidemic starting
 Uncertainty in just a single parameter can lead to drastically different forecasts \citep{saltelli20}.
 Therefore, parameter uncertainty should also be considered when obtaining model forecasts to influence policy.
 If a Bayesian technique is used for parameter estimation, a natural way to account for parameter uncertainty is to obtain simulations from the model where each simulation is obtained using parameters drawn from the estimated posterior distribution.
-For frequentist inference, an empirical Bayes approach leads to similar methodology \citep{king15}; details are provided in the supplement. 
+For frequentist inference, an empirical Bayes approach leads to similar methodology \citep{king15}; details are provided in the supplement.
 Both of these approaches share the similarity that parameters are chosen for the forecast approximately in proportion to their corresponding value of the likelihood function, $f^{(m)}_{\bm{Y}_{1:N}}(\bm{y}_{1:N}^*; \theta)$.
 
 The primary forecasting goal of \citet{lee20} was to investigate the potential consequences of vaccination interventions on a system to inform policy.
@@ -2992,80 +2934,83 @@ This is consistent with previous studies finding that rainfall played an importa
 The estimated seasonality also features an increased transmission rate during the Fall, which was noticed at an earlier stage of the epidemic \citep{rinaldo12}.
 
 <<Get Model 1 Seasonality>>=
-plot_model_fun <- function(mod) {
-  params <- coef(mod)
+# plot_model_fun <- function(mod) {
+#   params <- coef(mod)
+#
+#   beta1 <- params['beta1']
+#   beta2 <- params['beta2']
+#   beta3 <- params['beta3']
+#   beta4 <- params['beta4']
+#   beta5 <- params['beta5']
+#   beta6 <- params['beta6']
+#   betat <- params['betat']
+#
+#   get_beta <- function(time) {
+#
+#     covar <- t(mod@covar@table)
+#     covar_df <- as.data.frame(covar)
+#     covar_df$times <- mod@covar@times
+#
+#     betas <- matrix(c(beta1, beta2, beta3, beta4, beta5, beta6), nrow = 1)
+#     si <- matrix(unlist(covar_df[time, -7]), ncol = 1)
+#     if (time <= 430) {
+#       return(as.numeric(exp(betas %*% si + betat * ((time - 215) / (430-215)))))
+#     } else {
+#       return(as.numeric(exp(betas %*% si + betat)))
+#     }
+#   }
+#
+#   return(get_beta)
+# }
+#
+# get_beta1 <- plot_model_fun(h1)
+#
+# h1_seas_df <- data.frame(
+#   'week' = 431:800,
+#   'date' = lubridate::ymd("2010-10-16") + lubridate::weeks(431:800),
+#   'trans' = purrr::map_dbl(431:800, get_beta1)
+# ) %>%
+#   mutate(year = lubridate::year(date)) %>%
+#   filter(year == 2020) %>%
+#   mutate(trans_std = (trans - min(trans)) / (max(trans) - min(trans)))
 
-  beta1 <- params['beta1']
-  beta2 <- params['beta2']
-  beta3 <- params['beta3']
-  beta4 <- params['beta4']
-  beta5 <- params['beta5']
-  beta6 <- params['beta6']
-  betat <- params['betat']
+h1_seas_df <- get_h1_seasonality(h1)
 
-  get_beta <- function(time) {
-
-    covar <- t(mod@covar@table)
-    covar_df <- as.data.frame(covar)
-    covar_df$times <- mod@covar@times
-
-    betas <- matrix(c(beta1, beta2, beta3, beta4, beta5, beta6), nrow = 1)
-    si <- matrix(unlist(covar_df[time, -7]), ncol = 1)
-    if (time <= 430) {
-      return(as.numeric(exp(betas %*% si + betat * ((time - 215) / (430-215)))))
-    } else {
-      return(as.numeric(exp(betas %*% si + betat)))
-    }
-  }
-
-  return(get_beta)
-}
-
-get_beta1 <- plot_model_fun(h1)
-
-h1_seas_df <- data.frame(
-  'week' = 431:800,
-  'date' = lubridate::ymd("2010-10-16") + lubridate::weeks(431:800),
-  'trans' = purrr::map_dbl(431:800, get_beta1)
-) %>%
-  mutate(year = lubridate::year(date)) %>%
-  filter(year == 2020) %>%
-  mutate(trans_std = (trans - min(trans)) / (max(trans) - min(trans)))
-
-std_rain <- function(x) {
-  # This function simply standardizes the rain for us.
-  x / max(x)
-}
+# std_rain <- function(x) {
+#   # This function simply standardizes the rain for us.
+#   x / max(x)
+# }
 
 df_rain <- haitiRainfall %>%
-  dplyr::summarize(
-    date = date, dplyr::across(Artibonite:`Sud-Est`, std_rain)
-  ) %>%
-  pivot_longer(
+  # dplyr::summarize(
+  #   # Standardize rainfall value using the function above
+  #   date = date, dplyr::across(Artibonite:`Sud-Est`, std_rain)
+  # ) %>%
+  pivot_longer(  # Convert data to "long" format
     data = .,
     cols = -date,
     names_to = 'dep',
     values_to = 'rainfall'
   ) %>%
-  mutate(
-    year = lubridate::year(date),
-    week = lubridate::week(date)
-  ) %>%
+  mutate(year = lubridate::year(date), week = lubridate::week(date)) %>%
   group_by(year, week) %>%
-  summarize(national_weekly_rain = sum(rainfall)) %>%
-  ungroup() %>% # Not needed, but good practice
+  summarize(nwr = sum(rainfall)) %>%
+  ungroup() %>%  # Not needed, but good practice
   mutate(
-    date_week_start = lubridate::ymd(paste0(2014, "-01-01")) + lubridate::weeks(week - 1),
+    date_week_start = lubridate::ymd(paste0(2014, "-01-01")) +
+      lubridate::weeks(week - 1),
     week_date = as.Date(date_week_start, format = "%m-%d"),
-    std_national_rain = (national_weekly_rain - min(national_weekly_rain, na.rm = TRUE)) / (max(national_weekly_rain, na.rm = TRUE) - min(national_weekly_rain, na.rm = TRUE))
+    std_national_rain = (nwr - min(nwr)) / (max(nwr) - min(nwr))
   )
 
+# Calculate the average national weekly rainfall.
 mean_rain <- df_rain %>%
   group_by(week_date) %>%
   summarize(mean_rain = mean(std_national_rain)) %>%
   ungroup() %>%
   mutate(mean_rain = (mean_rain - min(mean_rain)) / ((max(mean_rain) - min(mean_rain))))
 
+# Create a figure showing annual rainfal, scaled from 0-1. This is top figure
 gg_rain <- df_rain %>%
   filter(week != 1, week != max(week)) %>%
   ggplot(aes(x = week_date, y = std_national_rain, group = year, col = year)) +
@@ -3073,12 +3018,16 @@ gg_rain <- df_rain %>%
   theme_bw() +
   guides(color = 'none') +
   ylab('Standardized Weekly\nNational Rain') +
-  theme(axis.title.x = element_blank(),
-        axis.ticks.x = element_blank(),
-        axis.text.x = element_blank(),
-        axis.text.y = element_text(size = 7.5),
-        axis.title.y = element_text(size = 9))
+  theme(  # Remove elements that are un-unsed becuase this is top figure
+    axis.title.x = element_blank(),
+    axis.ticks.x = element_blank(),
+    axis.text.x = element_blank(),
+    axis.text.y = element_text(size = 7.5),
+    axis.title.y = element_text(size = 9)
+  )
 
+# Create plot that shows the seasonality of Model 1, alongside the average
+# weekly national rainfall.
 gg_trans <- ggplot() +
   geom_line(data = h1_seas_df, aes(x = date, y = trans_std), linetype = 'dashed') +
   geom_line(
@@ -3201,7 +3150,7 @@ The Rnw \citep[R noweb,][]{ramsey94} files generating this article and its suppl
 }
 \end{supplement}
 
-\bibliographystyle{imsart-nameyear} 
-\bibliography{bib-haiti}       
+\bibliographystyle{imsart-nameyear}
+\bibliography{bib-haiti}
 
 \end{document}
