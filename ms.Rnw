@@ -891,7 +891,7 @@ ggplot(plot_df, aes(x = date, y = Cases + 1)) +
 @
 \caption{\label{CholeraData}
 \small
-Reported Cholera cases in the outbreak in Haiti from 2010-2019.
+Weekly reported cholera cases in Haiti from October 2010 to January 2019.
 }
 \end{figure}
 
@@ -1455,7 +1455,7 @@ Model~1 describes cholera dynamics at the nationally aggregated scale so that $\
 Several algorithms exist, both frequentist and Bayesian, that can be used to obtain estimates of the parameters for the class of models.
 In order to retain the ability to propose models that are scientifically meaningful rather than only those that are simply statistically convenient, we restrict ourselves to parameter estimation techniques that have the plug-and-play property, which is that the fitting procedure only requires the ability to simulate the latent process instead of evaluating transition densities \citep{breto09,he10}.
 Plug-and-play algorithms include Bayesian approaches like ABC and PMCMC \citep{toni09,andrieu10}, but here we use frequentist methods to maximize model likelihoods.
-To our knowledge, the only plug-and-play frequentist methods that can maximize the complete model likelihood are iterated filtering algorithms, which modify the well-known particle filter \citep{arulampalam02} by performing a random walk for each parameter and particle.
+To our knowledge, the only plug-and-play frequentist methods that can maximize the likelihood for POMP models of this complexity are iterated filtering algorithms, which modify the well-known particle filter \citep{arulampalam02} by performing a random walk for each parameter and particle.
 These perturbations are carried out iteratively over multiple filtering operations, using the collection of parameters from the previous filtering pass as the parameter initialization for the next iteration, and decreasing the random walk variance at each step.
 
 The ability to maximize the likelihood allows for likelihood-based inference, such as performing statistical tests for potential model improvements.
@@ -1555,7 +1555,7 @@ The increase in model flexibility, however, results in hidden states that are in
 The inclusion of a model break-point by \cite{lee20} is perhaps due to a challenging feature of fitting a deterministic model via least squares: discrepancies between model trajectories and observed case counts in highly infectious periods of a disease outbreak will result in greater penalty than the discrepancies between model trajectories and observed case counts in times of relatively low infectiousness, resulting in a bias towards accurately describing periods of high infectiousness.
 This issue is particularly troublesome for modeling cholera dynamics in Haiti: the inability to accurately fit times of low infectiousness may result in poor model forecasts, as few cases of cholera were observed the last few years of the epidemic.
 
-To combat this issue, we fit the model to log-transformed case counts, where the difference between periods of high and low infectiousness is less drastic, since the log scale stabilizes the variation during periods of high and low infectiousness.
+To combat this issue, we fit the model to log-transformed case counts, since the log scale stabilizes the variation during periods of high and low incidence.
 Other solutions include changing the measurement model to include overdispersion, as was done in Models~1 and~3.
 This permits the consideration of demographic stochasticity, which is dominant for small infected populations, together with log scale stochasticity (also called multiplicative, or environmental, or extra-demographic) which is dominant at high population counts.
 Here we chose to fit the model to transformed case counts rather than adding overdispersion to the measurement model with the goal of making the fewest changes to the model proposed by \cite{lee20} as possible.
@@ -1580,7 +1580,7 @@ h2_traj <- h2_epi_traj %>%
 Both the latent and observable processes in Model~3 can be be factored into department specific processes which interact with each other.
 The decision to address metapopulation dynamics via a spatially explicit model, rather than to aggregate over space, is double-edged.
 Evidence for the former approach has been provided in previous studies \citep{king15}, including the specific case of heterogeneity between Haitian departments in cholera transmission \citep{collins14}.
-A legitimate preference for simplicity \citep{saltelli20,green15} can support a decision to consider nationally aggregated models.
+However, a legitimate preference for simplicity \citep{saltelli20,green15} can support a decision to consider nationally aggregated models.
 
 Fitting scientifically flexible metapopulation models is a challenging statistical problem.
 In particular, parameter estimation techniques based on the particle filter become computationally intractable as the number of spatial units increase.
@@ -1588,7 +1588,7 @@ This is a result of the approximation error of particle filters growing exponent
 
 Model~3 parameters that are calibrated to data are primarily shared between each department, meaning that the estimated parameter value for department $u$ is the same value as the parameter value in department $v$, with $u, v \in \seq{1}{U}$.
 The exception to this being the parameters $\beta_{W_u}$, and $\beta_u$, which take department-specific values for each department $u$.
-To avoid the parameter estimation issue in high-dimensional models, \citet{lee20} simplified the problem by using the IF2 algorithm to separately estimate parameters for independent department-level models;
+To avoid the parameter estimation issue in high-dimensional models, \citet{lee20} simplified the problem by using the IF2 algorithm to estimate parameters separately for independent department-level models;
 the shared parameters were calibrated using the cholera incidence data from Artibonite, and the department-specific parameters ($\beta_{W_u}$ and $\beta_u$) were fit using the data from their respective department.
 Reducing a spatially coupled model to individual units in this fashion requires special treatment of any interactive mechanisms between spatial units, such as found in Eq.~\myeqref{eq:model3:foi}.
 In particular, when considering a model for department $u$, the values $I_\nu(t)$ and $A_\nu(t)$, are unknown for $u \neq v$.
@@ -1596,14 +1596,14 @@ To address this issue, \cite{lee20} conditioned each department level model on r
 
 The simplified, spatially-decoupled version of Model~3 relies on the observed cholera cases for each department to describe cholera dynamics, making it impossible to obtain forecasts for future time points from the fitted model.
 In order to obtain model forecasts, the parameters fit for the conditionally independent department level models were used in the fully coupled version of Model~3.
-This approach of model calibration and forecasting avoids the issue of particle depletion by simplifying the parameter estimation problem, but it may result in some undesirable outcomes.
+This approach of model calibration and forecasting avoids the issue of particle depletion by simplifying the parameter estimation problem, but this advantage raises new issues.
 One concern is that cholera dynamics in department $u$ are highly related to the dynamics in the remaining departments;
 calibrating model parameters using observed cases in other departments as a model covariate may therefore lead to an over-dependence on observed cholera cases.
 Another concern is that the two versions of the model are not the same, resulting in sub-optimal parameter estimates for the spatially coupled model.
 This is because the likelihood of the coupled model at its maximum likelihood estimate (MLE) is greater than or equal to the likelihood of the coupled model at the MLE of the decoupled model.
-These two concerns may explain the unrealistic forecasts and low-likelihood of the model (see Table~\ref{tab:likes}).
+These two concerns may explain the unrealistic forecasts and low likelihood of the model (see Table~\ref{tab:likes}).
 
-For our analysis, we calibrate the parameters of the spatially coupled version of Model~3 using the novel iterated block particle filter (IBPF) algorithm of \cite{ionides22}.
+For our analysis, we calibrate the parameters of the spatially coupled version of Model~3 using the iterated block particle filter (IBPF) algorithm of \cite{ionides22}.
 This algorithm extends the work of \cite{ning21ibpf}, who provided theoretic justification for the version of the algorithm that only estimates unit-specific parameters.
 While computationally intensive, the IBPF algorithm enables us to directly estimate the parameters of models describing high-dimensional partially-observed nonlinear dynamic systems via likelihood maximization.
 The ability to directly estimate parameters of Model~3 is responsible for the large increase in model likelihoods reported in Table~\ref{tab:likes}, as no algorithm with similar capabilities existed when \cite{lee20} published their results.
@@ -2054,33 +2054,27 @@ These summary statistics are sometimes called diagnostic probes \citep{king15,ki
 
 \subsection{Forecasts}\label{sec:filter}
 
-The central goal of a forecast is to provide an accurate estimate of the future state of a system based on currently available data.
-When a mechanistic model is used, forecasts may also provide estimates of the future effects of potential interventions.
-Forecasting models are built using available scientific understanding, but forecasting can also be a way of testing new scientific hypotheses in real time \citep{lewis22}.
-In order to provide trustworthy information, however, the reliability of the forecast should be understood.
-In particular, researchers should account for various forms of uncertainty present in model forecasts, and  calibrate the proposed model to observed data.
+Forecasts aim to provide an accurate estimate of the future state of a system based on currently available data, together with an assessment of uncertainty.
+Mechanistic forecasting models, compatible with current scientific understanding, may also provide estimates of the future effects of potential interventions.
+Further, they may enable real-time testing of new scientific hypotheses \citep{lewis22}.
 
-The most recently available information about a dynamic system should be used to obtain reliable forecasts.
-Using state space model $m$, this means that in order to obtain a forecast up to time $N+s$, where $s\geq 0$ and $N$ is the index for the last available data, we should simulate from the conditional density $f_{\bm{X}^{(\modelCounter)}_{N:s}, \bm{Y}^{\modelCounter}_{N:s}}\big(x_{N:s}, y_{N:s}\mid \hat{\paramVec}, \bm{X}^{(\modelCounter)}_{N} = \bm{x}^{(\modelCounter)}_N\big)$, where $\bm{x}^{(\modelCounter)}_N$ is the value of the latent state at time $N$.
-Because the latent state $\bm{X}^{(\modelCounter)}_N$ is unobservable, draws from the desired conditional density are unobtainable.
-Informed estimates of $\bm{X}^{(\modelCounter)}_N$ given the observed data $\bm{Y}^{(\modelCounter)}_{1:N} = y_{1:N}^*$ can easily be obtained using the filtering distribution.
-Let $\hat{\bm{X}}^{(\modelCounter), i}_N, \, i \in {1, 2, \ldots, J}$ be $\iid$ draws from the filtering distribution at time $N$, with density $\hat{\bm{X}}^{(\modelCounter), i}_N \sim f_{\bm{X}^{(\modelCounter)}_N|\bm{Y}^{(\modelCounter)}_{1:N}}(x_N \mid \hat{\paramVec}, y_{1:N}^*)$.
-A single model forecast can then be obtained by simulating from the model $f_{\bm{X}^{(\modelCounter)}_{N:s}, \bm{Y}^{(\modelCounter)}_{N:s}}\big(x_{N:s}, y_{N:s}\mid \hat{\paramVec}, \bm{X}^{(\modelCounter)}_{N} = \hat{\bm{X}}^{(\modelCounter), i}_N\big)$.
-Obtaining forecasts in this fashion allows us to obtain results that are consistent with the model assumptions and the observed data.
-In this particular case study, projecting the future state of the cholera epidemic starting from latent states that are draws from the filtering distribution allows the proposed models to benefit from the fact that very few cholera cases had been observed between 2018 and 2019, and that cases appear to be decreasing.
-This alone partially explains the unrealistic forecasts of \cite{lee20}, which were obtained by simulating the model from initial conditions;
-Table~S7 of their supplement material shows that of their simulations that were consistent with observing zero cases in 2019, all forecasts resulted in the elimination of cholera.
+Recent information about a dynamic system should be more relevant for a forecast than older information.
+This assertion may seem self-evident, but it is not the case for deterministic models, for which the initial conditions together with the parameters are sufficient for forecasting, and so recent data do not have special importance.
+Epidemiological forecasts based on deterministic models are not uncommon in practice, despite their limitations \citep{king15}.
+That may explain why \citet{lee20} chose to obtain forecasts by simulating the calibrated models forward from initial conditions.
+Here, we compare with a forecast projected from the filtered distribution: to obtain a forecast using POMP model $m$ at a collection of times $t_{N+1:N+s}$, where $N$ is the index for the last available data, we simulate forward from a draw from
+$f^{(m)}_{\bm{X}_N|\bm{Y}_{1:N}}(\bm{x}_{N} | \bm{y}^*_{1:N} ; \hat\theta)$
+where $\hat\theta$ is a vector of calibrated parameters.
+The decision not to do this partially explains the unsuccessful forecasts of \cite{lee20}: their Table~S7 shows that the subset of their simulations which were consistent with observing zero cases in 2019 predicted the elimination of cholera.
+In this case study, projecting the future state of the cholera epidemic starting from latent states that are draws from the filtering distribution allows the model-based forecasts to benefit from the fact that very few cholera cases were observed in 2018 and January 2019.
 
-It has been noted that the uncertainty in just a single parameter can lead to drastically different forecasts \citep{saltelli20};
-parameter uncertainty should therefore be considered when obtaining model forecasts to influence policy.
-If a Bayesian technique is used for parameter estimation, the most natural way to account for parameter uncertainty is to obtain simulations from the model where each simulation is obtained using parameters drawn from the posterior distribution.
-In the frequentist case, one approach is empirical Bayes, as was done by \cite{king15} (see supplement for details). 
-Both of these approaches share the similarity that parameters with higher likelihoods should be used more frequently in model forecasts than those that correspond to lower likelihoods.
+Uncertainty in just a single parameter can lead to drastically different forecasts \citep{saltelli20}.
+Therefore, parameter uncertainty should also be considered when obtaining model forecasts to influence policy.
+If a Bayesian technique is used for parameter estimation, a natural way to account for parameter uncertainty is to obtain simulations from the model where each simulation is obtained using parameters drawn from the estimated posterior distribution.
+For frequentist inference, an empirical Bayes approach leads to similar methodology \citep{king15}; details are provided in the supplement. 
+Both of these approaches share the similarity that parameters are chosen for the forecast approximately in proportion to their corresponding value of the likelihood function, $f^{(m)}_{\bm{Y}_{1:N}}(\bm{y}_{1:N}^*; \theta)$.
 
-Because our direct aim is not to provide forecasts for policy recommendation, we do not include parameter uncertainty in our forecasts.
-Instead, we use the projections from point estimates to highlight a major deficiency of deterministic models, which is that the only variability in model projections is a result of parameter uncertainty, which leads to over-confidence in forecasts \cite{king15}.
-
-Forecasting can be used to simulate various interventions on a system; this feature is useful to inform policy and was the primary goal of \citet{lee20}.
+The primary forecasting goal of \citet{lee20} was to investigate the potential consequences of vaccination interventions on a system to inform policy.
 Outcomes of their study include estimates for the probability of cholera elimination and cumulative number of cholera infections under several possible vaccination scenarios.
 Mimicking their efforts, we define cholera elimination as having less than one infection of cholera over at least 52 consecutive weeks, and provide forecasts under the following vaccination scenarios:
 
