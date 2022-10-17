@@ -268,174 +268,49 @@ true_agg_cases <- dep_plot_df %>%
 
 <<CalculateLee1Likelihoods, echo=FALSE, message=FALSE, include=FALSE>>=
 
-# In this code chunk, we attempt to estimate the likelihood of Model 1 that 
-# is described by Lee et al (2020). Because this chunk produces some 
-# computationally intensive calculations that must also be done in the 
-# supplement, we save some additional information in this chunk that is only 
-# used in the supplement (si/si.Rnw) and not in the manuscript. 
+# In this code chunk, we attempt to estimate the likelihood of Model 1 that
+# is described by Lee et al (2020). Because this chunk produces some
+# computationally intensive calculations that must also be done in the
+# supplement, we save some additional information in this chunk that is only
+# used in the supplement (si/si.Rnw) and not in the manuscript.
 
-# Setting algorithmic hyper-parameters based on RUN_LEVEL. 
-# 
+# Setting algorithmic hyper-parameters based on RUN_LEVEL.
+#
 #                    RUN_LEVEL =  1,   2,    3
-N_PARAMS   <- switch(RUN_LEVEL,  10,  20,  300)  # Number of parameters to sample
+N_PARAMS   <- switch(RUN_LEVEL,  10,  20,  nrow(h1LeeStartsEpi))  # Number of parameters to sample
 N_LEE_SIMS <- switch(RUN_LEVEL,  10,  20,   20)  # Number of simulations per parameter
-NMIF       <- switch(RUN_LEVEL,   5,  20,   50)  # Number of MIF iterations
-NP_MIF     <- switch(RUN_LEVEL,  20,  50,  100)  # Number of particles for IF2. This is too few for proper optimization, but matches Lee et al
-NP_EVAL    <- switch(RUN_LEVEL,  50, 200, 2000)  # Number of particles used to evaluate the likelihood 
-NREPS_EVAL <- switch(RUN_LEVEL,   3,   5,   36)  # Number of replicates of likelihood evaluation. 
+NP_EVAL    <- switch(RUN_LEVEL,  50, 200, 2000)  # Number of particles used to evaluate the likelihood
+NREPS_EVAL <- switch(RUN_LEVEL,   3,   5,   36)  # Number of replicates of likelihood evaluation.
+
+h1_epi <- haiti1()
 
 set.seed(141837)
 
-# Get starting parameters close to those that are provided
-# in Lee et al (2020)
-starting_params <- get_h1_startVals(N_PARAMS)
-
-# Create epi model for haiti1
-h1_epi <- haiti1()
-
-# Do a small global search for starting parameters for beta2-beta6
-bounds <- tribble(
-  ~param, ~lower, ~upper,
-  "beta2", 1e-08, 10,
-  "beta3", 1e-08, 10,
-  "beta4", 1e-08, 10,
-  "beta5", 1e-08, 10,
-  "beta6", 1e-08, 10
-)
-
-lower <- bounds$lower
-names(lower) <- bounds$param
-
-upper <- bounds$upper
-names(upper) <- bounds$param
-
-# Get a sequence of starting values for the betas
-betas <- sobol_design(
-  lower = lower,
-  upper = upper,
-  nseq  = N_PARAMS
-)
-
-# Combine betas with the starting_params data.frame object.
-epi_params <- cbind(starting_params, betas)
-
-# Get the names of all of the remaining coefficients (fixed parameters).
-not_in_start_params <- names(coef(h1_epi))[!names(coef(h1_epi)) %in% colnames(epi_params)]
-
-# Add fixed parameters to the matrix of starting parameters
-for (i in 1:length(not_in_start_params)) {
-  epi_params[, not_in_start_params[i]] <- coef(h1_epi)[not_in_start_params[i]]
-}
-
-# The process model of Lee et al (2020) didn't include over-dispersion
-epi_params$sig_sq <- 0
-
-# re-ordering starting parameters to match model order
-epi_params <- epi_params[, names(coef(h1_epi))]
-
-# Setting the random walk standard deviation. 
-epi_rw <- rw.sd(
-  # Parameters close to desired values
-  beta1 = 0.001,
-  tau   = 0.001,
-  nu    = 0.001,
-  rho   = 0.001,
-  # Parameters not close to desired values
-  beta2 = 0.02,
-  beta3 = 0.02,
-  beta4 = 0.02,
-  beta5 = 0.02,
-  beta6 = 0.02,
-  E_0   = ivp(0.1),
-  I_0   = ivp(0.1)
-)
-
-registerDoRNG(48963587)
-
-# Check if RUN_LEVEL == 3 results exists, if so, use them.
-# Include a flag to check if RUN_LEVEL == 3. If so, we might want to recompute.
-if (RUN_LEVEL != 3 & file.exists("model1/run_level_3/lee1_epi_fit.rds")) {
-  lee1_epi_mif <- readRDS("model1/run_level_3/lee1_epi_fit.rds")
-} else {
-  lee1_epi_mif <- bake(
-    file = paste0("model1/", rl_dir, "lee1_epi_fit.rds"),
-    {
-      # Create a list to save all of the results.
-      lee1_epi_mif_results <- list()
-
-      # Loop through each of the starting parameters
-      foreach(
-        i = 1:nrow(epi_params),
-        .packages = c('pomp'),
-        .combine = c
-      ) %dopar% {
-
-        # Get the ith set of starting parameters
-        r_params <- unlist(epi_params[i, ])
-
-        # Set the coefficients of model 1 to the ith starting values
-        coef(h1_epi) <- r_params
-
-        # Perform short IF2 from the starting value
-        mif2(
-          h1_epi,
-          Np = NP_MIF,
-          Nmif = NMIF,
-          cooling.fraction.50 = 0.5,
-          rw.sd = epi_rw
-        )
-      } -> lee1_epi_mif_out  # Contains nrow(epi_params) mif2d objects
-
-      # For each output of the MIF2 objects, simulate Model 1 with the IF2
-      # parameters and save the states from the final week of the simulation
-      foreach(i = 1:length(lee1_epi_mif_out), .combine = rbind) %do% {
-
-        # Get IF2 parameter set
-        guess <- coef(lee1_epi_mif_out[[i]])
-
-        # Simulate with the parameter set
-        sims <- simulate(
-          h1_epi,
-          n = N_LEE_SIMS,
-          format = 'data.frame',
-          params = guess
-        )  %>%
-          dplyr::filter(week == max(week)) %>%  # Just keep final states, to use later.
-          dplyr::select(-.id, -week)
-
-        sims$param_set <- i
-        sims
-      } -> start_states
-
-      lee1_epi_mif_results$lee1_epi_mif_params <- t(coef(lee1_epi_mif_out))
-      lee1_epi_mif_results$start_states <- start_states
-      lee1_epi_mif_results
-    }
-  )
-}
-
-# Some clean-up of unused variables, to avoid "Environment clutter".
-rm(epi_rw, epi_params, not_in_start_params,
-   lower, upper, betas, bounds, starting_params, i)
-gc()
-
-# Check if the run_level_3 results exist. If they do, load these results. 
-# If not, compute the run_level_<RUN_LEVEL> results and save them. 
+# Check if the run_level_3 results exist. If they do, load these results.
+# If not, compute the run_level_<RUN_LEVEL> results and save them.
 if (RUN_LEVEL != 3 & file.exists("model1/run_level_3/lee1_epi_evals.rds")) {
   lee_epi_ll <- readRDS("model1/run_level_3/lee1_epi_evals.rds")
 } else {
   lee_epi_ll <- bake(
     file = paste0("model1/", rl_dir, "lee1_epi_evals.rds"), {
 
+      which_params <- sample(
+        1:nrow(h1LeeStartsEpi),
+        size = N_PARAMS,
+        replace = FALSE
+      )
+      epi_params <- h1LeeStartsEpi[which_params, ]
+
       # Create data.frame to save results
       lee_epi_ll <- data.frame(
-        "pfLL" = rep(0, length(lee1_epi_mif)),
-        "pfse" = rep(0, length(lee1_epi_mif))
+        "pfLL" = NA_real_,
+        "pfse" = NA_real_,
+        "parid" = epi_params$parid
       )
 
-      for (j in 1:nrow(lee1_epi_mif$lee1_epi_mif_params)) {
+      for (j in 1:nrow(lee_epi_ll)) {
         # Get parameters of interest
-        pf_params <- lee1_epi_mif$lee1_epi_mif_params[j, ]
+        pf_params <- epi_params[j, -1][names(coef(h1_epi))]
 
         # make results reproducible
         registerDoRNG((j * 687383921) %% 7919)
@@ -456,131 +331,25 @@ if (RUN_LEVEL != 3 & file.exists("model1/run_level_3/lee1_epi_evals.rds")) {
 # Create the endemic version of the model
 h1_end <- haiti1(period = "endemic")
 
-# Our parameter values are now very similar to those used by Lee et al (2020). 
-# We therefore use the same rw.sd that was used in their source code. 
-end_rw <- rw.sd(
-  beta1 = 0.05,
-  tau   = 0.005,
-  nu    = 0.04,
-  rho   = 0.01,
-  beta2 = 0.05,
-  beta3 = 0.05,
-  beta4 = 0.05,
-  beta5 = 0.05,
-  beta6 = 0.05
-)
-
-registerDoRNG(21489587)  # For reproducible computing
-
-# Store the parameter values from the end of the IF2 search for the epidemic 
-# model as the start values for the IF2 search for the endemic model, as was 
-# described by Lee et al (2020)
-end_start <- lee1_epi_mif$lee1_epi_mif_params
-
-# Check if the run_level_3 results exist. If they do, load these results. 
-# If not, compute the run_level_<RUN_LEVEL> results and save them. 
-if (RUN_LEVEL != 3 & file.exists("model1/run_level_3/lee1_end_fit.rds")) {
-  lee1_end_mif <- readRDS("model1/run_level_3/lee1_end_fit.rds")
-} else {
-  lee1_end_mif <- bake(
-    file = paste0("model1/", rl_dir, "lee1_end_fit.rds"),
-    {
-      foreach(  # Parallel execution of the IF2 algorith. 
-        i = 1:nrow(end_start),
-        .packages = c('pomp'),
-        .combine = rbind
-      ) %dopar% {
-
-        # Get the ith set of starting parameters for the endemic model. These 
-        # correspond to the parameters resulting from the ith execution of the 
-        # IF2 algorithm on the epidemic model
-        r_params <- end_start[i, ]
-
-        # Calculate the starting states for each set of IF2 parameters. Because 
-        # there are <N_LEE_SIMS> simulations for each set of parameters, we 
-        # take the median value for each set of parameters as the starting 
-        # value for the endemic model. 
-        lee1_epi_mif$start_states %>%
-          filter(param_set == i) %>%
-          select(-param_set) %>%
-          sapply(., median, na.rm = TRUE) -> rinit_parms
-
-        # Set the initial state by creating a new rinit function for endemic 
-        # model. 
-        new_rinit <- Csnippet(
-          sprintf(
-            "
-          S = nearbyint(%f);
-          E = nearbyint(%f);
-          I = nearbyint(%f);
-          A = nearbyint(%f);
-          R = nearbyint(%f);
-          incid = nearbyint(%f);
-          foival = %f;
-          Str0 = nearbyint(%f);
-          Sout = nearbyint(%f);
-          Sin = nearbyint(%f);
-          ",
-          rinit_parms['S'],
-          rinit_parms['E'],
-          rinit_parms['I'],
-          rinit_parms['A'],
-          rinit_parms['R'],
-          rinit_parms['incid'],
-          rinit_parms['foival'],
-          rinit_parms['Str0'],
-          rinit_parms['Sout'],
-          rinit_parms['Sin']
-          )
-        )
-
-        # Create a new pomp object representing the endemic model, where the 
-        # starting state is the median of the latent states from the epidemic 
-        # model for the parameter set i. 
-        h1_end <- h1_end %>% pomp(
-          rinit = new_rinit,
-          statenames = c(
-            "S", "E", "I", "A", "R", "incid",
-            "foival", "Str0", "Sout", "Sin"
-          )
-        )
-
-        # Set model coefficients to be the parameter set i.
-        coef(h1_end) <- r_params
-        mf_end <- mif2(
-          h1_end,
-          Np = NP_MIF,
-          Nmif = NMIF,
-          cooling.type = "hyperbolic",
-          cooling.fraction.50 = 0.05,  # Matches Lee et al (2020)
-          rw.sd = end_rw
-        )
-
-        coef(mf_end)
-      }
-    }
-  )
-}
-
-rm(end_rw)
-gc()
-
 if (RUN_LEVEL != 3 & file.exists("model1/run_level_3/lee1_end_evals.rds")) {
   lee_end_ll <- readRDS("model1/run_level_3/lee1_end_evals.rds")
 } else {
   lee_end_ll <- bake(
     file = paste0("model1/", rl_dir, "lee1_end_evals.rds"), {
 
+      end_params <- h1LeeStartsEnd[h1LeeStartsEnd$parid %in% lee_epi_ll$parid, ]
+
       # Create data.frame to save results
       lee_end_ll <- data.frame(
-        "pfLL" = rep(0, nrow(lee1_end_mif)),
-        "pfse" = rep(0, nrow(lee1_end_mif))
+        "pfLL" = NA_real_,
+        "pfse" = NA_real_,
+        'parid' = end_params$parid
       )
 
       # Perform particle filter to get likelihood estimates
       for (j in 1:nrow(lee_end_ll)) {
         # Get parameters of interest
-        pf_params <- lee1_end_mif[j, ]
+        pf_params <- end_params[j, ][names(coef(h1_end))]
 
         # make results reproducible
         registerDoRNG((j * 687383921) %% 7919)
@@ -599,34 +368,25 @@ if (RUN_LEVEL != 3 & file.exists("model1/run_level_3/lee1_end_evals.rds")) {
   )
 }
 
-rm(lee1_end_mif, lee1_epi_mif)
-gc()
+# Combine epidemic and endemic likelihoods by parid to get the likelihood of
+# the complete model.
+mod1_all_likes <- dplyr::inner_join(
+  x = lee_epi_ll,
+  y = lee_end_ll,
+  by = "parid"
+  ) %>%
+  dplyr::mutate(
+    joint_ll = pfLL.x + pfLL.y
+  )
 
-# MIF_params <- matrix(nrow = length(lee1_end_mif$m2) / 2, ncol = length(coef(lee1_end_mif[[1]])))
-# all_sims_end <- data.frame()
-# liks <- rep(0, nrow(end_start))
-# for (i in 1:nrow(end_start)) {
-#   MIF_params[i, ] <- coef(lee1_end_mif[[(2 * i) - 1]])
-#   all_sims_end <- rbind(all_sims_end, lee1_end_mif[[(2 * i)]])
-#   liks[i] <- logLik(lee1_end_mif[[(2 * i) - 1]])
-# }
-#
-# colnames(MIF_params) <- names(coef(lee1_end_mif[[1]]))
-# end_results <- as.data.frame(MIF_params)
-# end_results$logLik <- liks
-
-# GGally::ggpairs(
-#   filter(end_results, logLik > -2200),
-#   columns = c("rho", "tau", "beta1", "nu", "logLik")
-# )
-
-#-------------------------- Step 6 ----------------------
-
-mod1_lee_ll <- max(lee_end_ll$pfLL, na.rm = TRUE) + max(lee_epi_ll$pfLL, na.rm = TRUE)
+# Approximate the likelihood of the Lee et al (2020) version of Model 1 by
+# using the parameter sets that resulted in the maximum likelihood.
+mod1_lee_ll <- max(mod1_all_likes$joint_ll, na.rm = TRUE)
 
 rm(
-  lee_end_ll, lee_epi_ll, h1_end, h1_epi, end_start,
-  N_LEE_SIMS, N_PARAMS, NMIF, NP_EVAL, NP_MIF, NREPS_EVAL
+  lee_end_ll, lee_epi_ll, h1_end, h1_epi, i, mod1_all_likes,
+  N_LEE_SIMS, N_PARAMS, NP_EVAL, NREPS_EVAL, end_params, epi_params,
+  pf_params, j, ll_evals, which_params
 )
 gc()
 @
@@ -1970,9 +1730,10 @@ Number of &
 \hline
 \end{tabular}
 \caption{\label{tab:likes}Log-likelihood values for each models compared to their ARMA benchmarks.
-Values in parenthesis are corresponding values using \citet{lee20} parameter estimates.  $\textsuperscript{1}$The reported likelihood is an upper bound of the likelihood of the \citet{lee20} model as it is the largest likelihood obtained using their parameter calibration regime. $\textsuperscript{2}$\cite{lee20} fit Model~3 to a subset of the data (March 2014 onward, excluding data from Ouest in 2015-2016).
+Values in parenthesis are corresponding values using \citet{lee20} parameter estimates.  $\textsuperscript{1}$The reported likelihood is an upper bound of the likelihood of the \citet{lee20} model. $\textsuperscript{2}$\cite{lee20} fit Model~3 to a subset of the data (March 2014 onward, excluding data from Ouest in 2015-2016).
 On this subset, their model has a likelihood of $\Sexpr{myround(max(lee3_results$sub_ll_evals), 1)}$.
 On this same subset, our model has a likelihood of $\Sexpr{myround(mod3_spatPomp_res$subset_ll, 1)}$.
+See Sec.~S5 of the supplement material for more details on estimating the likelihood of the \cite{lee20} models.
 }
 \end{table}
 
