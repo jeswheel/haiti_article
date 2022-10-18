@@ -696,10 +696,7 @@ and Per-capita transition rates are given in Equations~\ref{eq:model3:SI}--\ref{
 \mu_{I_{u\vaccCounter}R_{u\vaccCounter 1}} &=& \mu_{A_{u\vaccCounter}R_{u\vaccCounter 1}} = \muIR,
 \\[-3pt]
 \label{eq:model3:IS}
-\mu_{I_{u\vaccCounter}S_{u0}} &=& \muDeath + \choleraDeath,
-\\[-3pt]
-\label{eq:model3:AS}
-\mu_{A_{u\vaccCounter}S_{u0}} &=& \muDeath,
+\mu_{I_{u\vaccCounter}S_{u0}} &=& \muDeath + \choleraDeath, \hspace{2mm} \mu_{A_{u\vaccCounter}S_{u0}} = \muDeath
 \\[-3pt]
 \label{eq:model3:RRnext}
 \mu_{R_{u\vaccCounter 1}R_{u\vaccCounter 2}} &=& \mu_{R_{u\vaccCounter 2}R_{u\vaccCounter 3}} = 3\muRS,
@@ -716,7 +713,7 @@ and Per-capita transition rates are given in Equations~\ref{eq:model3:SI}--\ref{
 As with Model~1, $d\Gamma_u(t)/dt$ is multiplicative Gamma-distributed white noise in \myeqref{eq:model3:SI} and \myeqref{eq:model3:SA}.
 In \eqref{eq:model3:water}, $J_u(t)$ is a dimensionless measurement of precipitation that has been standardized by dividing the observed rainfall at time $t$ by the maximum recorded rainfall in department $u$ during the epidemic, and $\mathrm{Den}_u$ is the population density.
 Demographic stochasticity is accounted for by modeling non-cholera related death rate $\muDeath$ in each compartment, along with an additional death rate $\choleraDeath$ in \myeqref{eq:model3:IS} to account for cholera induced deaths among infected individuals.
-All deaths are balanced by births into the susceptible compartment in \myeqref{eq:model3:AS} and \myeqref{eq:model3:RS}, thereby maintaining constant population in each department.
+All deaths are balanced by births into the susceptible compartment in \myeqref{eq:model3:IS} and \myeqref{eq:model3:RS}, thereby maintaining constant population in each department.
 
 Latent states are initialized using an approximation of the instantaneous number of infected, asymptomatic, and recovered individuals at time $t=0$ by using the first week of cholera incidence data.
 Specifically, we set $I_{u0}(0) = \frac{y^*_{u0}}{\reportRate(\muDeath + \choleraDeath + \muIR)}$, $A_{u0}(0) = \frac{1 - \symptomFrac}{\symptomFrac}I_{u0}(0)$, and $R_{u0k} = y^*_{u0} - I_{u0}(0) - A_{u0}(0)$, and all other compartments that represent population counts are set to zero at time $t=0$.
@@ -812,8 +809,11 @@ set.seed(1859687)
 unit_specific_names <- c("betaB", "foi_add", "Binit")
 shared_param_names <- c(
   "mu_B", "XthetaA", "thetaI", "lambdaR", "r", "std_W",
-  "epsilon", "k", "sigma"
+  "epsilon", "k", "sigma", "rho", "gamma"
 )
+
+mod3_n_params <- 10 * length(unit_specific_names) + length(shared_param_names)
+
 est_param_names <- c(
   unit_specific_names, shared_param_names
 )
@@ -821,28 +821,28 @@ est_param_names <- c(
 # Add unit numbers to each parameter
 est_param_names_expanded <- paste0(rep(est_param_names, each = 10), 1:10)
 
-setrw1 <- function(x) {
-  if (grepl('^r[[:digit:]]+$', x)) {
+set_rw_1 <- function(x) {
+  if (grepl('^foi_add[[:digit:]]+$', x) || grepl('^betaB[[:digit:]]+$', x)) {
     return(0.01 / 2)
   } else if (grepl('^Binit[[:digit:]]+$', x)) {
-    return(expression(ivp(0.02)))
+    return(expression(ivp(0.025)))
   } else {
     return(0.01)
   }
 }
 
-setrw2 <- function(x) {
-  if (grepl('^r[[:digit:]]+$', x)) {
-    return(0.0025 / 2)
+set_rw_2 <- function(x) {
+  if (grepl('^foi_add[[:digit:]]+$', x) || grepl('^betaB[[:digit:]]+$', x)) {
+    return(0.003 / 2)
   } else if (grepl('^Binit[[:digit:]]+$', x)) {
-    return(expression(ivp(0.005)))
+    return(expression(ivp(0.0075)))
   } else {
-    return(0.0025)
+    return(0.003)
   }
 }
 
-setrw3 <- function(x) {
-  if (grepl('^r[[:digit:]]+$', x)) {
+set_rw_3 <- function(x) {
+  if (grepl('^foi_add[[:digit:]]+$', x) || grepl('^betaB[[:digit:]]+$', x)) {
     return(0.001 / 2)
   } else if (grepl('^Binit[[:digit:]]+$', x)) {
     return(expression(ivp(0.002)))
@@ -852,17 +852,17 @@ setrw3 <- function(x) {
 }
 
 # First Search RW
-reg_rw_1.sd <- lapply(est_param_names_expanded, setrw1)
+reg_rw_1.sd <- lapply(est_param_names_expanded, set_rw_1)
 names(reg_rw_1.sd) <- est_param_names_expanded
 chol_rw_1.sd <- do.call(rw.sd, reg_rw_1.sd)
 
 # Second Search RW
-reg_rw_2.sd <- lapply(est_param_names_expanded, setrw2)
+reg_rw_2.sd <- lapply(est_param_names_expanded, set_rw_2)
 names(reg_rw_2.sd) <- est_param_names_expanded
 chol_rw_2.sd <- do.call(rw.sd, reg_rw_2.sd)
 
 # Third Search RW
-reg_rw_3.sd <- lapply(est_param_names_expanded, setrw3)
+reg_rw_3.sd <- lapply(est_param_names_expanded, set_rw_3)
 names(reg_rw_3.sd) <- est_param_names_expanded
 chol_rw_3.sd <- do.call(rw.sd, reg_rw_3.sd)
 
@@ -871,10 +871,10 @@ if (RUN_LEVEL == 1){
   SEARCH1 = list(
     NBPF = 5,
     NP = 50,
-    SPAT_REGRESSION = 0.5,
+    SPAT_REGRESSION = 0.05,
     NREPS = 6,
     NP_EVAL = 100,
-    NREPS_EVAL = 6,
+    NREPS_EVAL = 5,
     RW_SD = chol_rw_1.sd,
     COOLING = 0.5,
     KEEP_TRACES = TRUE
@@ -884,10 +884,10 @@ if (RUN_LEVEL == 1){
     TOP_N = 2,
     NBPF = 5,
     NP = 50,
-    SPAT_REGRESSION = 0.5,
+    SPAT_REGRESSION = 0.05,
     NREPS = 3,
     NP_EVAL = 100,
-    NREPS_EVAL = 6,
+    NREPS_EVAL = 5,
     RW_SD = chol_rw_2.sd,
     COOLING = 0.5,
     KEEP_TRACES = TRUE
@@ -897,7 +897,7 @@ if (RUN_LEVEL == 1){
     TOP_N = 2,
     NBPF = 5,
     NP = 100,
-    SPAT_REGRESSION = 0.5,
+    SPAT_REGRESSION = 0.05,
     NREPS = 3,
     NP_EVAL = 100,
     NREPS_EVAL = 6,
@@ -909,25 +909,25 @@ if (RUN_LEVEL == 1){
   N_SEARCHES <- 2L
 } else if (RUN_LEVEL == 2) {
   SEARCH1 = list(
-    NBPF = 50,
-    NP = 1000,
-    SPAT_REGRESSION = 0.5,
+    NBPF = 20,
+    NP = 500,
+    SPAT_REGRESSION = 0.05,
     NREPS = 36,
     NP_EVAL = 1000,
-    NREPS_EVAL = 36,
+    NREPS_EVAL = 12,
     RW_SD = chol_rw_1.sd,
-    COOLING = 0.36,
+    COOLING = 0.5,
     KEEP_TRACES = TRUE
   )
 
   SEARCH2 = list(
     TOP_N = 6,
-    NBPF = 50,
-    NP = 1000,
-    SPAT_REGRESSION = 0.5,
+    NBPF = 20,
+    NP = 500,
+    SPAT_REGRESSION = 0.05,
     NREPS = 6,
     NP_EVAL = 1000,
-    NREPS_EVAL = 36,
+    NREPS_EVAL = 12,
     RW_SD = chol_rw_2.sd,
     COOLING = 0.5,
     KEEP_TRACES = TRUE
@@ -935,59 +935,61 @@ if (RUN_LEVEL == 1){
 
   SEARCH3 = list(
     TOP_N = 6,
-    NBPF = 50,
-    NP = 1000,
-    SPAT_REGRESSION = 0.5,
+    NBPF = 20,
+    NP = 500,
+    SPAT_REGRESSION = 0.05,
     NREPS = 6,
     NP_EVAL = 1000,
-    NREPS_EVAL = 36,
+    NREPS_EVAL = 12,
     RW_SD = chol_rw_3.sd,
     COOLING = 0.5,
     KEEP_TRACES = TRUE
   )
 
-  N_SEARCHES <- 3L
+  N_SEARCHES <- 1L
 } else if (RUN_LEVEL == 3) {
 
   SEARCH1 = list(
     NBPF = 100,
-    NP = 10000,
-    SPAT_REGRESSION = 0.5,
-    NREPS = 72,
-    NP_EVAL = 10000,
-    NREPS_EVAL = 36,
+    NP = 5000,
+    SPAT_REGRESSION = 0.05,
+    NREPS = 144,
+    NP_EVAL = 5000,
+    NREPS_EVAL = 18,
     RW_SD = chol_rw_1.sd,
     COOLING = 0.5,
     KEEP_TRACES = TRUE
   )
 
   SEARCH2 = list(
-    TOP_N = 9,
+    TOP_N = 12,
     NBPF = 100,
-    NP = 10000,
-    SPAT_REGRESSION = 0.5,
-    NREPS = 4,
-    NP_EVAL = 10000,
-    NREPS_EVAL = 36,
+    NP = 5000,
+    SPAT_REGRESSION = 0.05,
+    NREPS = 6,
+    NP_EVAL = 5000,
+    NREPS_EVAL = 18,
     RW_SD = chol_rw_2.sd,
     COOLING = 0.5,
     KEEP_TRACES = TRUE
   )
 
   SEARCH3 = list(
-    TOP_N = 6,
+    TOP_N = 9,
     NBPF = 100,
-    NP = 10000,
-    SPAT_REGRESSION = 0.5,
-    NREPS = 6,
-    NP_EVAL = 10000,
-    NREPS_EVAL = 36,
+    NP = 5000,
+    SPAT_REGRESSION = 0.05,
+    NREPS = 8,
+    NP_EVAL = 5000,
+    NREPS_EVAL = 18,
     RW_SD = chol_rw_3.sd,
     COOLING = 0.5,
     KEEP_TRACES = TRUE
   )
 
   N_SEARCHES <- 3L
+} else {
+  stop("Run level must be 1, 2 or 3.")
 }
 
 if (RUN_LEVEL != 3 & file.exists("model3/run_level_3/haiti3_coupled_fit.rds")) {
@@ -1000,7 +1002,9 @@ if (RUN_LEVEL != 3 & file.exists("model3/run_level_3/haiti3_coupled_fit.rds")) {
         search1 = SEARCH1,
         search2 = SEARCH2,
         search3 = SEARCH3,
-        ncores = cores
+        ncores = cores,
+        search_rho = TRUE,
+        search_gamma = TRUE
       )
     }
   )
@@ -1015,9 +1019,9 @@ mod3_ll <- max(
 
 # Just a bit of tidying up: removing parameters that we won't use again.
 rm(
-  SEARCH1, SEARCH2, SEARCH3, N_SEARCHES, unit_specific_names,
-  shared_param_names, est_param_names, est_param_names_expanded,
-  setrw1, setrw2, setrw3, reg_rw_1.sd, reg_rw_2.sd, reg_rw_3.sd,
+  SEARCH1, SEARCH2, SEARCH3, N_SEARCHES,
+  est_param_names, est_param_names_expanded,
+  set_rw_1, set_rw_2, set_rw_3, reg_rw_1.sd, reg_rw_2.sd, reg_rw_3.sd,
   chol_rw_1.sd, chol_rw_2.sd, chol_rw_3.sd
 )
 gc()
@@ -1033,28 +1037,22 @@ best_m3 <- which.max(haiti3_fit[[length(haiti3_fit)]]$logLiks$logLik)
 # Save the parameters that correspond to the MLE of Model 3.
 p3 <- haiti3_fit[[length(haiti3_fit)]]$params[best_m3, ]
 
-p3_specific <- c("foi_add", "betaB", "Binit")
-p3_shared <- c(
-  "mu_B", "XthetaA", "thetaI", "lambdaR", "r", "std_W",
-  "epsilon", "k", "sigma"
-)
+p3u <- matrix(nrow = length(unit_specific_names), ncol = 10)
+rownames(p3u) <- unit_specific_names
+p3s <- numeric(length(shared_param_names))
+names(p3s) <- shared_param_names
 
-p3u <- matrix(nrow = length(p3_specific), ncol = 10)
-rownames(p3u) <- p3_specific
-p3s <- numeric(length(p3_shared))
-names(p3s) <- p3_shared
-
-for (p in p3_shared) {
+for (p in shared_param_names) {
   pat <- paste0("^", p, "[[:digit:]]+$")
   p3s[p] <-  mean(p3[grepl(pat, names(p3))])
 }
 
-for (p in p3_specific) {
+for (p in unit_specific_names) {
   pat <- paste0("^", p, "[[:digit:]]+$")
   p3u[p, ] <- p3[grepl(pat, names(p3))]
 }
 
-rm(p3_specific, p3_shared, p, pat)
+rm(unit_specific_names, shared_param_names, p, pat)
 
 stew(file = "models.rda", {
   h1 <- haiti1_joint()
@@ -1279,23 +1277,23 @@ Simulations from the fitted model are displayed in Fig.~\ref{fig:h3spatsims}.
 # a run level to avoid time/memory issues when editing. Final results shown
 # with RUN_LEVEL = 3.
 
-h3_spat_nsim <- switch(RUN_LEVEL, 20, 100, 500)
+h3_nsim <- switch(RUN_LEVEL, 20, 100, 500)
 
 # Check if run_level_3 results exit, and use them if they do.
-if (RUN_LEVEL != 3 & file.exists("model3/run_level_3/SpatPompSims.rds")) {
-  h3Spat_quants <- readRDS("model3/run_level_3/SpatPompSims.rds")
+if (RUN_LEVEL != 3 & file.exists("model3/run_level_3/h3Sims.rds")) {
+  h3_quants <- readRDS("model3/run_level_3/h3Sims.rds")
 } else {
-  h3Spat_quants <- bake(
-    file = paste0('model3/', rl_dir, 'SpatPompSims.rds'), {
+  h3_quants <- bake(
+    file = paste0('model3/', rl_dir, 'h3Sims.rds'), {
 
       # Simulate from the fitted version of Model 3
-      h3Spat_sims <- simulate(
-        h3Spat, nsim = h3_spat_nsim, format = 'data.frame'
+      h3_sims <- simulate(
+        h3Spat, nsim = h3_nsim, format = 'data.frame'
       )
 
       # For each department and time-point, calculate percentiles of the
       # simulations
-      h3Spat_sims %>%
+      h3_sims %>%
         rename(dep = unitname) %>%
         group_by(dep, time) %>%
         summarise(
@@ -1308,9 +1306,6 @@ if (RUN_LEVEL != 3 & file.exists("model3/run_level_3/SpatPompSims.rds")) {
         mutate(
           date = lubridate::date_decimal(time)
         ) %>%
-        # filter(
-        #   date >= as.Date(lubridate::round_date(lubridate::date_decimal(h3Spat@t0), unit = 'day'))
-        #   ) %>%
         mutate(date = as.Date(lubridate::round_date(date, unit = 'day')))
     },
     timing = FALSE
@@ -1325,10 +1320,10 @@ if (RUN_LEVEL != 3 & file.exists("model3/run_level_3/SpatPompSims.rds")) {
 # Plot the reported cases and confidence region for each department.
 
 ggplot() +
-  geom_line(data = h3Spat_quants, aes(x = date, y = q50 + 1), col = 'blue') +
+  geom_line(data = h3_quants, aes(x = date, y = q50 + 1), col = 'blue') +
   geom_line(data = dep_plot_df, aes(x = date, y = cases + 1), col = 'black') +
   geom_ribbon(  # plot confidence region.
-    data = h3Spat_quants,
+    data = h3_quants,
     aes(x = date, ymin = q05 + 1, ymax = q95 + 1),
     alpha = 0.4
   ) +
@@ -1356,7 +1351,7 @@ The black curve represents true case count, the blue line the median of 500 simu
 \end{figure}
 
 <<Remove Model3 spatSims, cache=FALSE, include=FALSE, message=FALSE, echo=FALSE>>=
-rm(h3Spat_quants, h3_spat_nsim)
+rm(h3_quants, h3_nsim)
 gc()
 @
 
@@ -1409,9 +1404,8 @@ Large advantages (shortcomings) in model likelihood relative to the benchmark fo
 
 <<Table 2 Input, echo=FALSE, eval=TRUE>>=
 
-# TODO: Not needed after fitting Model 3.
 NREPS_EVAL <- switch(RUN_LEVEL,   3,   8,    36)
-NP_EVAL    <- switch(RUN_LEVEL, 100, 500, 10000)
+NP_EVAL    <- switch(RUN_LEVEL, 100, 500,  5000)
 
 # Objective function of model 2, epidemic phase
 epi_ofun <- traj_objfun(
@@ -1425,7 +1419,7 @@ mod2_ll <- mod2_epi_ll - sum(log(h2_epi@data + 1), na.rm = TRUE)
 arima_lik2 <- 0
 
 # model 2 AIC
-mod2_n_params <- 16  # TODO: adjust Number of parameters fit in Model 2
+mod2_n_params <- h2_fit$n_fit_params
 mod2_aic <- 2 * mod2_n_params - 2 * mod2_ll
 
 # model 1 AIC
@@ -1433,27 +1427,24 @@ mod1_n_params <- 13
 mod1_aic <- 2 * mod1_n_params - 2 * mod1_ll
 
 # model 3 AIC
-mod3_n_params <- 29
 mod3_aic <- 2 * mod3_n_params - 2 * mod3_ll
 
 # h3Spat <- haiti3_spatPomp()
 # coef(h3Spat) <- haitipkg:::panelParms_toSpatParms3(p3)
 
-# TODO: The code below will not be needed once we update the fitting of model 3.
 # Calculate likelihood via block-particle filter
-if (RUN_LEVEL != 3 & file.exists("model3/run_level_3/SpatPomp_res.rds")) {
-  mod3_spatPomp_res <- readRDS("model3/run_level_3/SpatPomp_res.rds")
+if (RUN_LEVEL != 3 & file.exists("model3/run_level_3/mod3_eval_res.rds")) {
+  mod3_eval_res <- readRDS("model3/run_level_3/mod3_eval_res.rds")
 } else{
-  mod3_spatPomp_res <- bake(
-    file = paste0('model3/', rl_dir, 'SpatPomp_res.rds'), {
+  mod3_eval_res <- bake(
+    file = paste0('model3/', rl_dir, 'mod3_eval_res.rds'), {
 
       # Create a list to store results
       results <- list()
 
       # Perform block-particle filter
       h3_bpf <- foreach(i = 1:NREPS_EVAL, .combine = c) %dopar% {
-        bpfilter(h3Spat, Np = NP_EVAL, block_size = 1,
-                 params = haitipkg:::panelParms_toSpatParms3(p3))
+        bpfilter(h3Spat, Np = NP_EVAL, block_size = 1)
       }
 
 
@@ -1481,9 +1472,8 @@ if (RUN_LEVEL != 3 & file.exists("model3/run_level_3/SpatPomp_res.rds")) {
   )
 }
 
-mod3_spatPomp_n_params <- 29
-mod3_spatPomp_aic <- 2 * mod3_spatPomp_n_params - 2 * mod3_spatPomp_res$ll
-mod3_spatPomp_res$subset_aic <- 2 * mod3_spatPomp_n_params - 2 * mod3_spatPomp_res$subset_ll
+mod3_aic <- 2 * mod3_n_params - 2 * mod3_eval_res$ll
+mod3_eval_res$subset_aic <- 2 * mod3_n_params - 2 * mod3_eval_res$subset_ll
 
 rm(NREPS_EVAL, NP_EVAL)
 @
@@ -1697,7 +1687,7 @@ mod3_lee_coupled_partial_aic <- 2 * lee3_results$n_params - 2 * max(lee3_results
 \multirow{2}{*}{Log-likelihood} &
   $\Sexpr{myround(mod1_ll, 1)}$ &
   $\Sexpr{myround(mod2_ll, 1)}$ &
-  $\Sexpr{myround(mod3_spatPomp_res$ll, 1)}$ \\
+  $\Sexpr{myround(mod3_eval_res$ll, 1)}$ \\
     & ($\Sexpr{myround(mod1_lee_ll, 1)}$)\footnotemark[1] &
   ($\Sexpr{myround(h2_fit$leeFit_ll, 1)}$) &
   ($\Sexpr{myround(max(lee3_results[["all_ll_evals"]]), 1)}$)\footnotemark[2]
@@ -1706,7 +1696,7 @@ mod3_lee_coupled_partial_aic <- 2 * lee3_results$n_params - 2 * max(lee3_results
 Number of &
   $\Sexpr{as.character(mod1_n_params)}$ &
   $\Sexpr{as.character(mod2_n_params)}$ &
-  $\Sexpr{mod3_spatPomp_n_params}$ \\
+  $\Sexpr{as.character(mod3_n_params)}$ \\
  Fit Parameters &
  (\Sexpr{as.character(mod1_lee_n_params)}) &
  ($\Sexpr{as.character(h2_fit$leeFit_n_params)}$) &
@@ -1716,7 +1706,7 @@ Number of &
 \multirow{2}{*}{AIC} &
   $\Sexpr{myround(mod1_aic, 1)}$ &
   $\Sexpr{myround(mod2_aic, 1)}$ &
-  $\Sexpr{myround(mod3_spatPomp_aic, 1)}$ \\
+  $\Sexpr{myround(mod3_aic, 1)}$ \\
   & ($\Sexpr{myround(mod1_lee_aic, 1)}$)\footnotemark[1] &
   ($\Sexpr{myround(mod2_lee_aic, 1)}$) &
   ($\Sexpr{myround(mod3_lee_coupled_aic, 1)}$)\footnotemark[2]
@@ -1732,7 +1722,7 @@ Number of &
 \caption{\label{tab:likes}Log-likelihood values for each models compared to their ARMA benchmarks.
 Values in parenthesis are corresponding values using \citet{lee20} parameter estimates.  $\textsuperscript{1}$The reported likelihood is an upper bound of the likelihood of the \citet{lee20} model. $\textsuperscript{2}$\cite{lee20} fit Model~3 to a subset of the data (March 2014 onward, excluding data from Ouest in 2015-2016).
 On this subset, their model has a likelihood of $\Sexpr{myround(max(lee3_results$sub_ll_evals), 1)}$.
-On this same subset, our model has a likelihood of $\Sexpr{myround(mod3_spatPomp_res$subset_ll, 1)}$.
+On this same subset, our model has a likelihood of $\Sexpr{myround(mod3_eval_res$subset_ll, 1)}$.
 See Sec.~S5 of the supplement material for more details on estimating the likelihood of the \cite{lee20} models.
 }
 \end{table}
@@ -2440,7 +2430,7 @@ Infection (day)
   & \eqref{model1:toR}
   & {\fixed $\muIR^{-1}=\Sexpr{myround(365/h2_fit$h2_params["gamma"],1)}$}
   & \eqref{model2:mu_IR}
-  & {\fixed $\muIR^{-1}=\Sexpr{myround(365/p3["gamma"],1)}$ }
+  & {\fixed $\muIR^{-1}=\Sexpr{myround(365/p3s["gamma"],1)}$ }
   & \eqref{eq:model3:IR}
 \\
 Latency (day)
@@ -2514,7 +2504,7 @@ Birth/death (yr)
   & \eqref{model1:death}
   & \multicolumn{1}{c}{\hspace{16pt}\missing}
   &
-  & {\fixed $\muDeath^{-1} = \Sexpr{myround(1/p3s["mu"],1)}$}
+  & {\fixed $\muDeath^{-1} = \Sexpr{myround(1/p3["mu1"],1)}$}
   & \eqref{eq:model3:IS}
 \\
 Symptomatic frac.
