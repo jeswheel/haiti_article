@@ -812,7 +812,7 @@ shared_param_names <- c(
   "epsilon", "k", "sigma", "rho", "gamma"
 )
 
-mod3_n_params <- 10 * length(unit_specific_names) + length(shared_param_names)
+mod3_n_params <- length(unit_specific_names) * 10 + length(shared_param_names)
 
 est_param_names <- c(
   unit_specific_names, shared_param_names
@@ -909,7 +909,7 @@ if (RUN_LEVEL == 1){
   N_SEARCHES <- 2L
 } else if (RUN_LEVEL == 2) {
   SEARCH1 = list(
-    NBPF = 20,
+    NBPF = 25,
     NP = 500,
     SPAT_REGRESSION = 0.05,
     NREPS = 36,
@@ -917,12 +917,13 @@ if (RUN_LEVEL == 1){
     NREPS_EVAL = 12,
     RW_SD = chol_rw_1.sd,
     COOLING = 0.5,
-    KEEP_TRACES = TRUE
+    KEEP_TRACES = TRUE,
+    KEEP_LIK_MAT = TRUE
   )
 
   SEARCH2 = list(
     TOP_N = 6,
-    NBPF = 20,
+    NBPF = 25,
     NP = 500,
     SPAT_REGRESSION = 0.05,
     NREPS = 6,
@@ -930,12 +931,13 @@ if (RUN_LEVEL == 1){
     NREPS_EVAL = 12,
     RW_SD = chol_rw_2.sd,
     COOLING = 0.5,
-    KEEP_TRACES = TRUE
+    KEEP_TRACES = TRUE,
+    KEEP_LIK_MAT = TRUE
   )
 
   SEARCH3 = list(
     TOP_N = 6,
-    NBPF = 20,
+    NBPF = 25,
     NP = 500,
     SPAT_REGRESSION = 0.05,
     NREPS = 6,
@@ -943,7 +945,8 @@ if (RUN_LEVEL == 1){
     NREPS_EVAL = 12,
     RW_SD = chol_rw_3.sd,
     COOLING = 0.5,
-    KEEP_TRACES = TRUE
+    KEEP_TRACES = TRUE,
+    KEEP_LIK_MAT = TRUE
   )
 
   N_SEARCHES <- 1L
@@ -1004,7 +1007,8 @@ if (RUN_LEVEL != 3 & file.exists("model3/run_level_3/haiti3_coupled_fit.rds")) {
         search3 = SEARCH3,
         ncores = cores,
         search_rho = TRUE,
-        search_gamma = TRUE
+        search_gamma = TRUE,
+        search_Binit = FALSE
       )
     }
   )
@@ -1403,7 +1407,6 @@ In such a case, a benchmark model can be fit to each spatial resolution being co
 Large advantages (shortcomings) in model likelihood relative to the benchmark for a given spatial scale that are not present in other spatial scales may provide weak evidence for (against) the statistical fit of models across a range of spatial resolutions.
 
 <<Table 2 Input, echo=FALSE, eval=TRUE>>=
-
 NREPS_EVAL <- switch(RUN_LEVEL,   3,   8,    36)
 NP_EVAL    <- switch(RUN_LEVEL, 100, 500,  5000)
 
@@ -1428,9 +1431,6 @@ mod1_aic <- 2 * mod1_n_params - 2 * mod1_ll
 
 # model 3 AIC
 mod3_aic <- 2 * mod3_n_params - 2 * mod3_ll
-
-# h3Spat <- haiti3_spatPomp()
-# coef(h3Spat) <- haitipkg:::panelParms_toSpatParms3(p3)
 
 # Calculate likelihood via block-particle filter
 if (RUN_LEVEL != 3 & file.exists("model3/run_level_3/mod3_eval_res.rds")) {
