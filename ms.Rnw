@@ -961,7 +961,7 @@ if (RUN_LEVEL == 1){
     NREPS_EVAL = 18,
     RW_SD = chol_rw_1.sd,
     COOLING = 0.5,
-    KEEP_TRACES = TRUE
+    KEEP_TRACES = FALSE
   )
 
   SEARCH2 = list(
@@ -974,7 +974,7 @@ if (RUN_LEVEL == 1){
     NREPS_EVAL = 18,
     RW_SD = chol_rw_2.sd,
     COOLING = 0.5,
-    KEEP_TRACES = TRUE
+    KEEP_TRACES = FALSE
   )
 
   SEARCH3 = list(
@@ -987,7 +987,7 @@ if (RUN_LEVEL == 1){
     NREPS_EVAL = 18,
     RW_SD = chol_rw_3.sd,
     COOLING = 0.5,
-    KEEP_TRACES = TRUE,
+    KEEP_TRACES = FALSE,
     KEEP_LIK_MAT = TRUE
   )
 
