@@ -806,7 +806,7 @@ h2_fit <- bake(
 set.seed(1859687)
 
 # Create vectors for the unit and shared parameters
-unit_specific_names <- c("betaB", "foi_add", "Binit")
+unit_specific_names <- c("betaB", "foi_add")
 shared_param_names <- c(
   "mu_B", "XthetaA", "thetaI", "lambdaR", "r", "std_W",
   "epsilon", "k", "sigma", "rho", "gamma"
@@ -987,7 +987,8 @@ if (RUN_LEVEL == 1){
     NREPS_EVAL = 18,
     RW_SD = chol_rw_3.sd,
     COOLING = 0.5,
-    KEEP_TRACES = TRUE
+    KEEP_TRACES = TRUE,
+    KEEP_LIK_MAT = TRUE
   )
 
   N_SEARCHES <- 3L
