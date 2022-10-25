@@ -1291,6 +1291,7 @@ if (RUN_LEVEL != 3 & file.exists("model3/run_level_3/h3Sims.rds")) {
   h3_quants <- bake(
     file = paste0('model3/', rl_dir, 'h3Sims.rds'), {
 
+      coef(h3Spat) <- p3
       # Simulate from the fitted version of Model 3
       h3_sims <- simulate(
         h3Spat, nsim = h3_nsim, format = 'data.frame'
@@ -1443,11 +1444,12 @@ if (RUN_LEVEL != 3 & file.exists("model3/run_level_3/mod3_eval_res.rds")) {
       # Create a list to store results
       results <- list()
 
+      coef(h3Spat) <- p3
+
       # Perform block-particle filter
       h3_bpf <- foreach(i = 1:NREPS_EVAL, .combine = c) %dopar% {
         bpfilter(h3Spat, Np = NP_EVAL, block_size = 1)
       }
-
 
       ll <- logLik(h3_bpf)
       results$ll <- logmeanexp(ll[!is.na(ll)], se = FALSE)
@@ -1473,7 +1475,6 @@ if (RUN_LEVEL != 3 & file.exists("model3/run_level_3/mod3_eval_res.rds")) {
   )
 }
 
-mod3_aic <- 2 * mod3_n_params - 2 * mod3_eval_res$ll
 mod3_eval_res$subset_aic <- 2 * mod3_n_params - 2 * mod3_eval_res$subset_ll
 
 rm(NREPS_EVAL, NP_EVAL)
@@ -1688,7 +1689,7 @@ mod3_lee_coupled_partial_aic <- 2 * lee3_results$n_params - 2 * max(lee3_results
 \multirow{2}{*}{Log-likelihood} &
   $\Sexpr{myround(mod1_ll, 1)}$ &
   $\Sexpr{myround(mod2_ll, 1)}$ &
-  $\Sexpr{myround(mod3_eval_res$ll, 1)}$ \\
+  $\Sexpr{myround(mod3_ll, 1)}$ \\
     & ($\Sexpr{myround(mod1_lee_ll, 1)}$)\footnotemark[1] &
   ($\Sexpr{myround(h2_fit$leeFit_ll, 1)}$) &
   ($\Sexpr{myround(max(lee3_results[["all_ll_evals"]]), 1)}$)\footnotemark[2]
@@ -2008,6 +2009,7 @@ if (RUN_LEVEL != 3 & file.exists("model3/run_level_3/h3_bpf_end_states.rds")) {
   h3_bpf_end_states <- bake(
     file = paste0("model3/", rl_dir, "h3_bpf_end_states.rds"),
     expr = {
+      coef(h3Spat) <- p3
       h3_bpf <- bpfilter(h3Spat, Np = NP_BPF, block_size = 1, save_states = TRUE)
       ss <- h3_bpf@saved.states
       ss[[length(ss)]]
@@ -2027,6 +2029,7 @@ if (RUN_LEVEL != 3 & file.exists("model3/run_level_3/mod3_V0_res.rds")) {
 
       # Get "noVacc" scenario parameters
       h3_S0_par <- get_model3_vacc_scenario_params(scenario = "noVacc")
+      coef(h3Spat) <- p3
       coef(h3Spat)[names(h3_S0_par)] <- h3_S0_par
 
       # Using parameters and filtered distribution, project system
@@ -2057,6 +2060,7 @@ if (RUN_LEVEL != 3 & file.exists("model3/run_level_3/mod3_V1_res.rds")) {
 
       # Get "noVacc" scenario parameters
       h3_V1_par <- get_model3_vacc_scenario_params(scenario = "2dep")
+      coef(h3Spat) <- p3
       coef(h3Spat)[names(h3_V1_par)] <- h3_V1_par
 
       # Using parameters and filtered distribution, project system
@@ -2087,6 +2091,7 @@ if (RUN_LEVEL != 3 & file.exists("model3/run_level_3/mod3_V2_res.rds")) {
 
       # Get "noVacc" scenario parameters
       h3_V2_par <- get_model3_vacc_scenario_params(scenario = "3dep")
+      coef(h3Spat) <- p3
       coef(h3Spat)[names(h3_V2_par)] <- h3_V2_par
 
       # Using parameters and filtered distribution, project system
@@ -2117,6 +2122,7 @@ if (RUN_LEVEL != 3 & file.exists("model3/run_level_3/mod3_V3_res.rds")) {
 
       # Get "noVacc" scenario parameters
       h3_V3_par <- get_model3_vacc_scenario_params(scenario = "slowNation")
+      coef(h3Spat) <- p3
       coef(h3Spat)[names(h3_V3_par)] <- h3_V3_par
 
       # Using parameters and filtered distribution, project system
@@ -2147,6 +2153,7 @@ if (RUN_LEVEL != 3 & file.exists("model3/run_level_3/mod3_V4_res.rds")) {
 
       # Get "noVacc" scenario parameters
       h3_V4_par <- get_model3_vacc_scenario_params(scenario = "fastNation")
+      coef(h3Spat) <- p3
       coef(h3Spat)[names(h3_V4_par)] <- h3_V4_par
 
       # Using parameters and filtered distribution, project system
