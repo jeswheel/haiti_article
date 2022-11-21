@@ -929,7 +929,7 @@ This figure should be compared to Figure S18 of \cite{lee20}.
 We note that slight differences may be accounted for due to variance in the model simulations and the difference in programming language used to produce the figure.
 
 <<Model3Replication, echo=FALSE, cache=TRUE>>=
-NSIM <- switch(run_level, 50, 100, 1000)
+NSIM <- switch(run_level, 50, 200, 500)
 
 plot_order <- c(
   'Artibonite',
@@ -963,7 +963,7 @@ dep_labeller <- as_labeller(
   )
 )
 
-lee3 <- haiti3_lee_et_al()
+lee3 <- lee3_spatPomp()
 lee3_sims <- simulate(lee3, nsim = NSIM, seed = 321, format = 'data.frame')
 
 sub_cases <- haitiCholera %>%
@@ -987,15 +987,7 @@ sub_cases <- haitiCholera %>%
   )
 
 quants <- lee3_sims %>%
-  dplyr::select(-CasesAll) %>%
-  tidyr::pivot_longer(
-    data = .,
-    cols = starts_with("cases"),
-    names_prefix = "cases",
-    names_to = "dep",
-    values_to = "cases"
-  ) %>%
-  dplyr::group_by(dep, time) %>%
+  dplyr::group_by(unitname, time) %>%
   dplyr::summarise(
     q05 = quantile(cases, 0.025, na.rm = T),
     mean = mean(cases, na.rm = T),
@@ -1006,14 +998,14 @@ quants <- lee3_sims %>%
   dplyr::mutate(
     date = lubridate::date_decimal(time),
     date = as.Date(lubridate::round_date(date))
-  )
+  ) %>%
+  dplyr::rename(dep = unitname)
 
 quants <- quants %>%
   dplyr::filter(
     !(dep == "Ouest" & date < '2017-06-10')
   )
 @
-
 
 \begin{figure}[ht]
 <<PlotMod3Rep, echo=FALSE, message=FALSE, fig.height=3.75>>=

@@ -1611,18 +1611,18 @@ lee3_NREP <- switch(RUN_LEVEL,  3,   8,   36)
 registerDoRNG(49637421)
 
 # Create Lee et al (2020a) version of model 3 on sub-data
-lee3_sub <- haiti3_lee_et_al()
+lee3_sub <- lee3_spatPomp()
 
 # This model is only fit for a subset of the data, so we will set data
 # that are not part of this subset as NA. This will allow us to estimate
 # the likelihood for only the values that were considered during the
 # parameter estimation phase.
-set_as_na <- lee3_sub@times < lubridate::decimal_date(as.Date('2017-06-10'))
-temp_ouest_cases <- lee3_sub@data['casesOuest', ]
-temp_ouest_cases[set_as_na] <- NA_real_
-lee3_sub@data['casesOuest', ] <- temp_ouest_cases
+# set_as_na <- lee3_sub@times < lubridate::decimal_date(as.Date('2017-06-10'))
+# temp_ouest_cases <- lee3_sub@data['casesOuest', ]
+# temp_ouest_cases[set_as_na] <- NA_real_
+# lee3_sub@data['casesOuest', ] <- temp_ouest_cases
 
-lee3_all <- haiti3_lee_et_al(start_time = "2010-10-23")
+lee3_all <- lee3_spatPomp(start_date = "2010-10-23")
 
 rm(set_as_na, temp_ouest_cases)
 gc()
@@ -1637,30 +1637,49 @@ if (RUN_LEVEL != 3 & file.exists("model3/run_level_3/lee3_results.rds")) {
       lee3_results <- list()
 
       # Save how long it takes for sub-data
-      lee3_results[["sub_pf_time"]] <- system.time({
+      lee3_results[["sub_bpf_time"]] <- system.time({
 
-        # Save all likelihood evaluations
-        lee3_results[["sub_ll_evals"]] <- foreach(
-          i = 1:lee3_NREP, .combine = c
+        lee3_sub_ll_evals <- foreach(
+          i = 1:lee3_NREP, .combine = rbind
         ) %dopar% {
-          logLik(pfilter(lee3_sub, Np = lee3_NP))  # Get likelihood evaluations
+
+          liks <- numeric(10L)
+
+          lee_bpf_out <- bpfilter(lee3_sub, block_size = 1, Np = lee3_NP)
+          Ouest_ind <- which(lee_bpf_out@unit_names == "Ouest")
+
+          for (u in 1:10) {
+            if (u == Ouest_ind) {
+              liks[u] <- sum(lee_bpf_out@block.cond.loglik[u, lee3_sub@times >= lubridate::decimal_date(as.Date('2017-06-10'))])
+            } else {
+              liks[u] <- sum(lee_bpf_out@block.cond.loglik[u, ])
+            }
+          }
+
+          liks
         }
       })
+
+      # Save all likelihood evaluations
+      lee3_results[["sub_ll_eval"]] <- logmeanexp(rowSums(lee3_sub_ll_evals)[!is.na(rowSums(lee3_sub_ll_evals))])
 
       registerDoRNG(2789131)
 
       # Save how long it takes for all data
       lee3_results[["all_pf_time"]] <- system.time({
-
         # Save all likelihood evaluations
-        lee3_results[["all_ll_evals"]] <- foreach(
+
+        lee3_all_ll_evals <- foreach(
           i = 1:lee3_NREP, .combine = c
         ) %dopar% {
-          logLik(pfilter(lee3_all, Np = lee3_NP))  # Get likelihood evaluations
+          logLik(bpfilter(lee3_all, block_size = 1, Np = lee3_NP))  # Get likelihood evaluations
         }
+
+        lee3_results[["all_ll_eval"]] <- logmeanexp(lee3_all_ll_evals[!is.na(lee3_all_ll_evals)])
+
       })
 
-      lee3_results[["n_params"]] <- 29
+      lee3_results[["n_params"]] <- 29  # TODO: Check to make sure this is the correct number.
 
       lee3_results
     },
@@ -1671,9 +1690,9 @@ if (RUN_LEVEL != 3 & file.exists("model3/run_level_3/lee3_results.rds")) {
 rm(lee3_sub, lee3_all, lee3_NP, lee3_NREP)
 gc()
 
-mod3_lee_coupled_aic <- 2 * lee3_results$n_params - 2 * max(lee3_results$all_ll_evals)
+mod3_lee_coupled_aic <- 2 * lee3_results$n_params - 2 * lee3_results$all_ll_eval
 
-mod3_lee_coupled_partial_aic <- 2 * lee3_results$n_params - 2 * max(lee3_results$sub_ll_evals)
+mod3_lee_coupled_partial_aic <- 2 * lee3_results$n_params - 2 * lee3_results$sub_ll_eval
 
 @
 
@@ -1692,7 +1711,7 @@ mod3_lee_coupled_partial_aic <- 2 * lee3_results$n_params - 2 * max(lee3_results
   $\Sexpr{myround(mod3_ll, 1)}$ \\
     & ($\Sexpr{myround(mod1_lee_ll, 1)}$)\footnotemark[1] &
   ($\Sexpr{myround(h2_fit$leeFit_ll, 1)}$) &
-  ($\Sexpr{myround(max(lee3_results[["all_ll_evals"]]), 1)}$)\footnotemark[2]
+  ($\Sexpr{myround(lee3_results[["all_ll_eval"]], 1)}$)\footnotemark[2]
 \\
 \hline
 Number of &
@@ -1723,7 +1742,7 @@ Number of &
 \end{tabular}
 \caption{\label{tab:likes}Log-likelihood values for each models compared to their ARMA benchmarks.
 Values in parenthesis are corresponding values using \citet{lee20} parameter estimates.  $\textsuperscript{1}$The reported likelihood is an upper bound of the likelihood of the \citet{lee20} model. $\textsuperscript{2}$\cite{lee20} fit Model~3 to a subset of the data (March 2014 onward, excluding data from Ouest in 2015-2016).
-On this subset, their model has a likelihood of $\Sexpr{myround(max(lee3_results$sub_ll_evals), 1)}$.
+On this subset, their model has a likelihood of $\Sexpr{myround(lee3_results$sub_ll_eval, 1)}$.
 On this same subset, our model has a likelihood of $\Sexpr{myround(mod3_eval_res$subset_ll, 1)}$.
 See Sec.~S5 of the supplement material for more details on estimating the likelihood of the \cite{lee20} models.
 }
