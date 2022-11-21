@@ -455,7 +455,7 @@ Model~1 is stochastic and describes cholera at the national level;
 Model~2 is deterministic with spatial structure, and includes transmission via contaminated water;
 Model~3 is stochastic with spatial structure, and accounts for measured rainfall.
 Model~4 has an agent-based construction, featuring considerable mechanistic detail but limited ability to calibrate these details to data.
-The strengths and weaknesses of the agent-based modeling approach  \citep{tracy18} are outside the scope of this article, and we focus on Models~1--3.
+We focus on Models~1--3, as the strengths and weaknesses of the agent-based modeling approach  \citep{tracy18} are outside the scope of this article, and we focus on Models~1--3.
 
 The four independent teams were given the task of estimating the
 potential effect of prospective oral cholera vaccine (OCV) programs.
@@ -464,9 +464,10 @@ Advances in OCV technology and vaccine availability, however, raised the possibi
 In the study, certain data were shared between the groups, including demography and vaccination history; vaccine efficacy was also fixed at a shared value between groups.
 Beyond this, the groups made autonomous decisions on what to include and exclude from their models.
 The groups largely adhered to existing guidelines on creating models to inform policy \citep{behrend20,saltelli20} and, despite their autonomy, obtained a consensus that an extensive nationwide vaccination campaign would be necessary to eliminate cholera from Haiti.
-This conclusion is inconsistent with the fact that there have been no confirmed cases since February, 2019 \citep{trevisin22} without the implementation of a national vaccination program.
+Although several cholera chases have recently been detected in Haiti (\citep{TODO}),
+their conclusion is inconsistent with the prolonged period with no confirmed cholera cases between February, 2019 \citep{trevisin22} and \jwc{TODO}.
 
-The discrepancy between the model based conclusions of \cite{lee20} and the subsequent elimination of cholera cholera has been debated \citep{francois20,rebaudetComment20,henrys20,leeReply20}.
+The discrepancy between the model based conclusions of \cite{lee20} and the prolonged absence of cholera in Haiti has been debated \citep{francois20,rebaudetComment20,henrys20,leeReply20}.
 Suggested origins of this discrepancy include the use of unrealistic models \citep{rebaudetComment20} and unrealistic criteria for cholera elimination \citep{henrys20}.
 We find a more nuanced conclusion: attention to methodological details in model fitting, diagnosis and forecasting can improve each of the proposed model's ability to quantitatively describe observed data.
 These improvements result in forecasts that are more consistent with the observed outcome, without requiring major changes to the model structures.
@@ -1078,17 +1079,18 @@ Each of the three models considered in this study describes cholera dynamics as 
 Each model is indexed by a parameter vector, $\paramVec$, and different values of $\paramVec$ can result in qualitative differences in the predicted behavior of the system.
 Therefore, the choice of $\paramVec$ used to make inference about the system can greatly affect model based conclusions.
 Elements of $\paramVec$ can be fixed at a constant value based on scientific understanding of the system, but parameters can also be calibrated to data by maximizing a measure of congruency between the observed data and the assumed mechanistic structure.
-Calibrating model parameters does not guarantee that the resulting model successfully approximates real-world mechanisms, since model assumptions may be incorrect, and do not change as the model is calibrated to data.
-However, the congruency between the model and observed data serves as a proxy for the congruency between the model and the true underlying dynamic system, since the observed data are a result of the system.
-In the following subsections we describe our approach to fitting the three proposed mechanistic models by calibrating $\paramVec$ to observed cholera incidence data.
+Calibrating model parameters to observed data does not guarantee that the resulting model successfully approximates real-world mechanisms, since model assumptions may be incorrect, and do not change as the model is calibrated to data.
+However, the congruency between the model and observed data serves as a proxy for the congruency between the model and the true underlying dynamic system, since the observed data are a result of the generating system.
+As such, the best possible fit of the proposed mechanistic structure to the observed data is desirable.
+In the following subsections we describe our approach to calibrating the three proposed mechanistic models to observed cholera incidence data.
 
 \subsubsection{Calibrating Model~1 Parameters}\label{sec:fit1}
 
 Model~1 describes cholera dynamics at the nationally aggregated scale so that $\bm{Y}^{(1)}_n \in \R$ for each observation time $n \in 1:N$, and the latent state vector $\bm{X}^{(1)}(t)$ is comprised of national level population counts.
-Several algorithms exist, both frequentist and Bayesian, that can be used to obtain estimates of the parameters for the class of models.
+Several algorithms exist, both frequentist and Bayesian, that can be used to obtain estimates of the parameters for this class of models.
 In order to retain the ability to propose models that are scientifically meaningful rather than only those that are simply statistically convenient, we restrict ourselves to parameter estimation techniques that have the plug-and-play property, which is that the fitting procedure only requires the ability to simulate the latent process instead of evaluating transition densities \citep{breto09,he10}.
 Plug-and-play algorithms include Bayesian approaches like ABC and PMCMC \citep{toni09,andrieu10}, but here we use frequentist methods to maximize model likelihoods.
-To our knowledge, the only plug-and-play frequentist methods that can maximize the likelihood for POMP models of this complexity are iterated filtering algorithms, which modify the well-known particle filter \citep{arulampalam02} by performing a random walk for each parameter and particle.
+To our knowledge, the only plug-and-play, frequentist methods that can maximize the likelihood for POMP models of this complexity are iterated filtering algorithms \citep{ionides15}, which modify the well-known particle filter \citep{arulampalam02} by performing a random walk for each parameter and particle.
 These perturbations are carried out iteratively over multiple filtering operations, using the collection of parameters from the previous filtering pass as the parameter initialization for the next iteration, and decreasing the random walk variance at each step.
 
 The ability to maximize the likelihood allows for likelihood-based inference, such as performing statistical tests for potential model improvements.
@@ -1200,10 +1202,10 @@ gc()
 
 \subsubsection{Calibrating Model~2 Parameters}\label{sec:fit2}
 
-As previously stated, Model~2 is a deterministic compartmental model defined by a set of coupled differential equations.
+Model~2 is a deterministic compartmental model defined by a set of coupled differential equations.
 The use of deterministic compartment models have a long history in the field of infectious disease epidemiology \citep{kermack1927,brauer2017,giordano20},
 and can be justified by asymptotic considerations in a large-population limit \citep{dadlani2020,ndii17}.
-Because the process model of Model~2 is deterministic, the parameter estimation problem for Model~2 reduces to a least squares calculation when combined with a Gaussian measurement model (see supplement material for details).
+Because the process model of Model~2 is deterministic, the parameter estimation problem for Model~2 reduces to a least squares calculation when combined with a Gaussian measurement model (see supplement material for details) \jwc{TODO: cite which part of supplement}.
 \cite{lee20} fit two versions of model~2 based on a presupposed change in cholera transmission from a epidemic phase to endemic phase that occurred in March, 2014.
 The inclusion of a change-point in model states and parameters increases the flexibility of the model and hence the ability to fit the observed data.
 The increase in model flexibility, however, results in hidden states that are inconsistent between model phases.
@@ -1245,12 +1247,10 @@ h2_traj <- h2_epi_traj %>%
 
 \subsubsection{Calibrating Model~3 Parameters}\label{sec:fit3}
 Both the latent and observable processes in Model~3 can be be factored into department specific processes which interact with each other.
-The decision to address metapopulation dynamics via a spatially explicit model, rather than to aggregate over space, is double-edged.
+The decision to address metapopulation dynamics using a spatially explicit model, rather than to aggregate over space, is double-edged.
 Evidence for the former approach has been provided in previous studies \citep{king15}, including the specific case of heterogeneity between Haitian departments in cholera transmission \citep{collins14}.
 However, a legitimate preference for simplicity \citep{saltelli20,green15} can support a decision to consider nationally aggregated models.
-
-Fitting scientifically flexible metapopulation models is a challenging statistical problem.
-In particular, parameter estimation techniques based on the particle filter become computationally intractable as the number of spatial units increase.
+One issue that arises when fitting spatially explicit models is that parameter estimation techniques based on the particle filter become computationally intractable as the number of spatial units increase.
 This is a result of the approximation error of particle filters growing exponentially in the dimension of the model \citep{rebeschini15,park20}.
 
 Model~3 parameters that are calibrated to data are primarily shared between each department, meaning that the estimated parameter value for department $u$ is the same value as the parameter value in department $v$, with $u, v \in \seq{1}{U}$.
@@ -1261,8 +1261,8 @@ Reducing a spatially coupled model to individual units in this fashion requires 
 In particular, when considering a model for department $u$, the values $I_\nu(t)$ and $A_\nu(t)$, are unknown for $u \neq v$.
 To address this issue, \cite{lee20} conditioned each department level model on reported cholera cases in other departments and approximated the values of $I_\nu(t)$ and $A_\nu(t)$ using the respective reported cases.
 
-The simplified, spatially-decoupled version of Model~3 relies on the observed cholera cases for each department to describe cholera dynamics, making it impossible to obtain forecasts for future time points from the fitted model.
-In order to obtain model forecasts, the parameters fit for the conditionally independent department level models were used in the fully coupled version of Model~3.
+The simplified, spatially-decoupled version of Model~3 implemented by \cite{lee20} relies on the observed cholera cases for each department to describe cholera dynamics, making it impossible to obtain forecasts for future time points from the fitted model.
+Therefore, in order to obtain model forecasts, the parameters of the calibrated conditionally independent department level models were used in the fully coupled version of Model~3.
 This approach of model calibration and forecasting avoids the issue of particle depletion by simplifying the parameter estimation problem, but this advantage raises new issues.
 One concern is that cholera dynamics in department $u$ are highly related to the dynamics in the remaining departments;
 calibrating model parameters using observed cases in other departments as a model covariate may therefore lead to an over-dependence on observed cholera cases.
@@ -1385,8 +1385,7 @@ Standard statistical models, interpreted as associative models without requiring
 Examples include linear regression, auto-regressive moving average time series models, or even independent and identically distributed measurements.
 The benchmarks enable us to evaluate the goodness of fit that can be expected of a suitable mechanistic model.
 
-Goodness-of-fit alone does not guarantee that a model provides a correct causal interpretation of the model.
-Indeed, associative models are not constrained to have a causal interpretation, and typically are designed with the sole goal of providing a statistical fit to data.
+Associative models are not constrained to have a causal interpretation, and typically are designed with the sole goal of providing a statistical fit to data.
 Consequently, we should not require a candidate mechanistic model to beat all benchmarks.
 However, a mechanistic model which falls far short against benchmarks is evidently failing to explain some substantial aspect of the data.
 A convenient measure of fit should have interpretable differences that help to operationalize the meaning of far short.
@@ -1398,7 +1397,7 @@ Because of this, we use a log-linear Gaussian ARMA model as an associative bench
 The theory and practice of ARMA models is well developed, and these linear models are appropriate on a log scale due to the exponential growth and decay characteristic of biological dynamics.
 Likelihoods of Models~1--3 and their respective ARMA benchmark models are provided in Table~\ref{tab:likes}.
 
-It should be universal practice to present measures of goodness of fit for published models, and mechanistic models should be compared against benchmarks.
+\jwc{TODO: CHECK} It should be universal practice to present measures of goodness of fit for published models, and mechanistic models should be compared against benchmarks.
 In our literature review of the Haiti cholera epidemic, no benchmark models were considered in any of the 24 papers which calibrated a mechanistic model to data in order to obtain scientific conclusions.
 Including benchmarks would help authors and readers to detect and confront any major statistical limitations of the proposed mechanistic models.
 In addition, the published goodness of fit provides a concrete point of comparison for subsequent scientific investigations.
@@ -1624,9 +1623,6 @@ lee3_sub <- lee3_spatPomp()
 
 lee3_all <- lee3_spatPomp(start_date = "2010-10-23")
 
-rm(set_as_na, temp_ouest_cases)
-gc()
-
 if (RUN_LEVEL != 3 & file.exists("model3/run_level_3/lee3_results.rds")) {
   lee3_results <- readRDS("model3/run_level_3/lee3_results.rds")
 } else {
@@ -1748,11 +1744,11 @@ See Sec.~S5 of the supplement material for more details on estimating the likeli
 }
 \end{table}
 
-Similar to comparing log-likelihoods across models, an additional powerful diagnosis tool is the comparison of conditional log-likelihoods.
-Conditional likelihoods, defined as the density $f_{Y_k | Y_1, \ldots, Y_{k - 1}}\big(Y_k = y_k^* | y_{1:k-1}^*\big)$, provide a basic description of how well the proposed model can describe each data point, given the previous observations.
-Comparing these results across models---including benchmark models---can help researchers identify potential model deficiencies, or errors in the observed data.
-Additional tools for assessing the goodness-of-fit of a model include plotting the effective sample size of each observation \citep{liu01}, and comparing summary statistics of the observed data to simulations from the model \citep{wood10}.
-These summary statistics are sometimes called diagnostic probes \citep{king15,king16}.
+Table~\ref{tab:likes} shows that despite the significant improvements that were made by using a contemporary approach of parameter calibration for Model~3, this model still fails to beat a log-linear ARMA benchmark.
+This suggests that Model~3 is failing to adequately explain some substantial aspect of the data.
+As our goal for this article is the estimation and diagnosis of the models at hand, we explore the shortcoming in log-likelihood further in section \jwc{TODO} of the supplement material.
+There, we use additional tools like conditional log-likelihoods to understand how well the model describes each data point, given the previous observations.
+Additional tools for assessing the goodness-of-fit of a model include plotting the effective sample size of each observation \citep{liu01}, and comparing summary statistics of the observed data to simulations from the model \citep{wood10}; these summary statistics are sometimes called diagnostic probes \citep{king15,king16}.
 
 \subsection{Forecasts}\label{sec:filter}
 
@@ -1773,7 +1769,7 @@ In this case study, projecting the future state of the cholera epidemic starting
 Uncertainty in just a single parameter can lead to drastically different forecasts \citep{saltelli20}.
 Therefore, parameter uncertainty should also be considered when obtaining model forecasts to influence policy.
 If a Bayesian technique is used for parameter estimation, a natural way to account for parameter uncertainty is to obtain simulations from the model where each simulation is obtained using parameters drawn from the estimated posterior distribution.
-For frequentist inference, an empirical Bayes approach leads to similar methodology \citep{king15}; details are provided in the supplement.
+For frequentist inference, one possible approach obtaining model forecasts from various values of $\theta$, and then weighing the resulting forecasts by their corresponding log-likelihoods \citep{king15}; see section \jwc{TODO} of the supplement material for more details.
 Both of these approaches share the similarity that parameters are chosen for the forecast approximately in proportion to their corresponding value of the likelihood function, $f^{(m)}_{\bm{Y}_{1:N}}(\bm{y}_{1:N}^*; \theta)$.
 
 The primary forecasting goal of \citet{lee20} was to investigate the potential consequences of vaccination interventions on a system to inform policy.
@@ -2852,15 +2848,15 @@ The robust statistical conclusion is that a model which allows for change fits b
 \section{Discussion}\label{sec:discussion}
 
 The ongoing global COVID-19 pandemic has provided a clear example on how government policy may be affected by the conclusions of scientific models \citep{saltelli20}.
-This article demonstrates that fitting appropriate scientific models remains a challenging statistical task, and therefore great care is needed when fitting scientific models for policy recommendations.
+This article demonstrates that fitting appropriate scientific models remains a challenging statistical task, and therefore great care is needed when fitting scientific models with the purpose of making policy recommendations.
 We provided a few suggestions that may aid the fitting of mechanistic models such as comparing model likelihoods to a benchmark.
 Improved model fits allows for meaningful statistical inference that may provide valuable insight on a dynamic system and may improve the accuracy of model forecasts.
 Caution is nonetheless needed when making policy based on modeling conclusions, as model misspecification may invalidate conclusions.
 
-In this article we argue that careful attention to important statistical details could have led the models proposed by \cite{lee20} to correctly predict the imminent cholera elimination.
+In this article we argue that careful attention to important statistical details could have led the models proposed by \cite{lee20} to correctly predict the initial elimination of cholera from Haiti in 2019.
 We acknowledge the benefit of hindsight: our demonstration of a statistically principled route to obtain better-fitting models with more accurate predictions does not rule out the possibility of discovering other models that fit well yet predict poorly.
 We used the same data and models, and even much of the same code, as \citet{lee20}, and yet ended up with drastically different conclusions.
-At a minimum, we have shown that the conclusions are sensitive to details in how the data analysis is carried out, and that attention to statistical fit (including numerical issues such as likelihood maximization) can lead to improved policy guidance.
+At a minimum, we have shown that the conclusions are sensitive to details in how the data analysis is carried out, and that attention to statistical fit (including numerical consideration such as likelihood maximization) can lead to improved policy guidance.
 
 Inference for mechanistic time series models offers opportunities for understanding and controlling complex dynamic systems.
 This case study has investigated issues requiring attention when applying powerful new statistical techniques that can enable statistically efficient inference for a general class of partially observed Markov process models.
@@ -2895,9 +2891,8 @@ This work was supported by National Science Foundation grants DMS-1761603 and DM
 \begin{supplement}
 \stitle{Eliminating cholera in Haiti: Supplement}
 \sdescription{
-This document contains additional details for Models~1--3, as well as a translation table that facilitates comparisons between these models and those described by \cite{lee20}.
-The supplement also demonstrates our capability to faithfully replicate the results
-of \cite{lee20}.
+This document contains additional details about the numerical implementations of Models~1--3, as well as a translation table that facilitates comparisons between these models and those described by \cite{lee20}.
+The supplement also demonstrates our capability to faithfully estimate the likelihood of the models of \cite{lee20}.
 }
 \end{supplement}
 
