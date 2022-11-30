@@ -1,4 +1,4 @@
-%% Template for the submission to:
+%% Based on the template for the submission to:
 %%   The Annals of Applied Statistics [AOAS]
 
 %\documentclass[aoas]{imsart}
@@ -130,6 +130,17 @@ for (i in c(1, 3)) {
 
 # Model 2 doesn't need a run_level, since all computations are the same.
 if (!dir.exists('model2')) dir.create("model2/")
+
+
+if (RUN_LEVEL == 3) {
+  # Print session info into a txt file. Only update if RUN_LEVEL == 3, which
+  # is when the final results are calculated.
+  cat(
+    utils::capture.output(sessionInfo()),
+    file = "sessionInfo.txt",
+    sep="\n"
+  )
+}
 
 opts_knit$set(concordance=TRUE)
 opts_chunk$set(
@@ -805,13 +816,17 @@ h2_fit <- bake(
 set.seed(1859687)
 
 # Create vectors for the unit and shared parameters
-unit_specific_names <- c("betaB", "foi_add")
+unit_specific_names <- c("betaB", "foi_add", "aHur", "hHur", "Iinit")
 shared_param_names <- c(
   "mu_B", "XthetaA", "thetaI", "lambdaR", "r", "std_W",
-  "epsilon", "k", "sigma", "rho", "gamma"
+  "epsilon", "k"
 )
 
-mod3_n_params <- length(unit_specific_names) * 10 + length(shared_param_names)
+# betaB + foi_add for all 10 units +
+# aHur3, aHur9, hHur3, hHur9 +
+# Iinit3, Iinit7, Iinit9 +
+# shared_parameters
+mod3_n_params <- 2 * 10 + 7 + length(shared_param_names)
 
 est_param_names <- c(
   unit_specific_names, shared_param_names
@@ -821,32 +836,44 @@ est_param_names <- c(
 est_param_names_expanded <- paste0(rep(est_param_names, each = 10), 1:10)
 
 set_rw_1 <- function(x) {
-  if (grepl('^foi_add[[:digit:]]+$', x) || grepl('^betaB[[:digit:]]+$', x)) {
-    return(0.01 / 2)
-  } else if (grepl('^Binit[[:digit:]]+$', x)) {
-    return(expression(ivp(0.025)))
-  } else {
+  if (gsub("[[:digit:]]+$", "", x) %in% shared_param_names) {
     return(0.01)
+  } else if (x %in% paste0(rep(c("aHur", 'hHur'), each = 2), c(3, 9))) {
+    return(expression(ifelse(time >= 2016.754 & time <= 2017, 0.015, 0)))
+  } else if (x %in% c("Iinit3", "Iinit7", "Iinit10")) {
+    return(expression(ivp(0.25)))
+  } else if (grepl('^foi_add[[:digit:]]+$', x)) {
+    return(0.015)
+  } else {
+    return(0)
   }
 }
 
 set_rw_2 <- function(x) {
-  if (grepl('^foi_add[[:digit:]]+$', x) || grepl('^betaB[[:digit:]]+$', x)) {
-    return(0.003 / 2)
-  } else if (grepl('^Binit[[:digit:]]+$', x)) {
-    return(expression(ivp(0.0075)))
-  } else {
+  if (gsub("[[:digit:]]+$", "", x) %in% shared_param_names) {
     return(0.003)
+  } else if (x %in% paste0(rep(c("aHur", 'hHur'), each = 2), c(3, 9))) {
+    return(expression(ifelse(time >= 2016.754 & time <= 2017, 0.005, 0)))
+  } else if (x %in% c("Iinit3", "Iinit7", "Iinit10")) {
+    return(expression(ivp(0.125)))
+  } else if (grepl('^foi_add[[:digit:]]+$', x)) {
+    return(0.005)
+  } else {
+    return(0)
   }
 }
 
 set_rw_3 <- function(x) {
-  if (grepl('^foi_add[[:digit:]]+$', x) || grepl('^betaB[[:digit:]]+$', x)) {
-    return(0.001 / 2)
-  } else if (grepl('^Binit[[:digit:]]+$', x)) {
-    return(expression(ivp(0.002)))
+  if (gsub("[[:digit:]]+$", "", x) %in% shared_param_names) {
+    return(0.0025)
+  } else if (x %in% paste0(rep(c("aHur", 'hHur'), each = 2), c(3, 9))) {
+    return(expression(ifelse(time >= 2016.754 & time <= 2017, 0.005, 0)))
+  } else if (x %in% c("Iinit3", "Iinit7", "Iinit10")) {
+    return(expression(ivp(0.125)))
+  } else if (grepl('^foi_add[[:digit:]]+$', x)) {
+    return(0.003)
   } else {
-    return(0.001)
+    return(0)
   }
 }
 
@@ -868,52 +895,52 @@ chol_rw_3.sd <- do.call(rw.sd, reg_rw_3.sd)
 # Search hyper-parameters for each run-level and search
 if (RUN_LEVEL == 1){
   SEARCH1 = list(
-    NBPF = 5,
-    NP = 50,
-    SPAT_REGRESSION = 0.05,
-    NREPS = 6,
-    NP_EVAL = 100,
-    NREPS_EVAL = 5,
-    RW_SD = chol_rw_1.sd,
-    COOLING = 0.5,
-    KEEP_TRACES = TRUE
-  )
-
-  SEARCH2 = list(
-    TOP_N = 2,
-    NBPF = 5,
-    NP = 50,
-    SPAT_REGRESSION = 0.05,
-    NREPS = 3,
-    NP_EVAL = 100,
-    NREPS_EVAL = 5,
-    RW_SD = chol_rw_2.sd,
-    COOLING = 0.5,
-    KEEP_TRACES = TRUE
-  )
-
-  SEARCH3 = list(
-    TOP_N = 2,
-    NBPF = 5,
-    NP = 100,
-    SPAT_REGRESSION = 0.05,
-    NREPS = 3,
-    NP_EVAL = 100,
-    NREPS_EVAL = 6,
-    RW_SD = chol_rw_3.sd,
-    COOLING = 0.5,
-    KEEP_TRACES = TRUE
-  )
-
-  N_SEARCHES <- 2L
-} else if (RUN_LEVEL == 2) {
-  SEARCH1 = list(
-    NBPF = 25,
+    NBPF = 15,
     NP = 500,
     SPAT_REGRESSION = 0.05,
     NREPS = 36,
+    NP_EVAL = 500,
+    NREPS_EVAL = 3,
+    RW_SD = chol_rw_1.sd,
+    COOLING = 0.5,
+    KEEP_TRACES = TRUE
+  )
+
+  SEARCH2 = list(
+    TOP_N = 9,
+    NBPF = 10,
+    NP = 500,
+    SPAT_REGRESSION = 0.05,
+    NREPS = 4,
+    NP_EVAL = 500,
+    NREPS_EVAL = 3,
+    RW_SD = chol_rw_2.sd,
+    COOLING = 0.5,
+    KEEP_TRACES = TRUE
+  )
+
+  SEARCH3 = list(
+    TOP_N = 6,
+    NBPF = 10,
+    NP = 500,
+    SPAT_REGRESSION = 0.05,
+    NREPS = 6,
+    NP_EVAL = 500,
+    NREPS_EVAL = 3,
+    RW_SD = chol_rw_3.sd,
+    COOLING = 0.5,
+    KEEP_TRACES = TRUE
+  )
+
+  N_SEARCHES <- 3L
+} else if (RUN_LEVEL == 2) {
+  SEARCH1 = list(
+    NBPF = 100,
+    NP = 1000,
+    SPAT_REGRESSION = 0.05,
+    NREPS = 72,
     NP_EVAL = 1000,
-    NREPS_EVAL = 12,
+    NREPS_EVAL = 8,
     RW_SD = chol_rw_1.sd,
     COOLING = 0.5,
     KEEP_TRACES = TRUE,
@@ -921,13 +948,13 @@ if (RUN_LEVEL == 1){
   )
 
   SEARCH2 = list(
-    TOP_N = 6,
-    NBPF = 25,
-    NP = 500,
+    TOP_N = 9,
+    NBPF = 100,
+    NP = 1000,
     SPAT_REGRESSION = 0.05,
-    NREPS = 6,
+    NREPS = 4,
     NP_EVAL = 1000,
-    NREPS_EVAL = 12,
+    NREPS_EVAL = 9,
     RW_SD = chol_rw_2.sd,
     COOLING = 0.5,
     KEEP_TRACES = TRUE,
@@ -936,53 +963,55 @@ if (RUN_LEVEL == 1){
 
   SEARCH3 = list(
     TOP_N = 6,
-    NBPF = 25,
-    NP = 500,
+    NBPF = 100,
+    NP = 1000,
     SPAT_REGRESSION = 0.05,
     NREPS = 6,
     NP_EVAL = 1000,
-    NREPS_EVAL = 12,
+    NREPS_EVAL = 9,
     RW_SD = chol_rw_3.sd,
     COOLING = 0.5,
     KEEP_TRACES = TRUE,
     KEEP_LIK_MAT = TRUE
   )
 
-  N_SEARCHES <- 1L
+  N_SEARCHES <- 3L
 } else if (RUN_LEVEL == 3) {
 
   SEARCH1 = list(
     NBPF = 100,
-    NP = 5000,
+    NP = 2000,
     SPAT_REGRESSION = 0.05,
     NREPS = 144,
-    NP_EVAL = 5000,
+    NP_EVAL = 2000,
     NREPS_EVAL = 18,
     RW_SD = chol_rw_1.sd,
     COOLING = 0.5,
-    KEEP_TRACES = FALSE
+    KEEP_TRACES = FALSE,
+    KEEP_LIKE_MAT = FALSE
   )
 
   SEARCH2 = list(
     TOP_N = 12,
     NBPF = 100,
-    NP = 5000,
+    NP = 2000,
     SPAT_REGRESSION = 0.05,
     NREPS = 6,
-    NP_EVAL = 5000,
+    NP_EVAL = 2000,
     NREPS_EVAL = 18,
     RW_SD = chol_rw_2.sd,
     COOLING = 0.5,
-    KEEP_TRACES = FALSE
+    KEEP_TRACES = FALSE,
+    KEEP_LIK_MAT = FALSE
   )
 
   SEARCH3 = list(
     TOP_N = 9,
     NBPF = 100,
-    NP = 5000,
+    NP = 2000,
     SPAT_REGRESSION = 0.05,
     NREPS = 8,
-    NP_EVAL = 5000,
+    NP_EVAL = 2000,
     NREPS_EVAL = 18,
     RW_SD = chol_rw_3.sd,
     COOLING = 0.5,
@@ -991,8 +1020,6 @@ if (RUN_LEVEL == 1){
   )
 
   N_SEARCHES <- 3L
-} else {
-  stop("Run level must be 1, 2 or 3.")
 }
 
 if (RUN_LEVEL != 3 & file.exists("model3/run_level_3/haiti3_coupled_fit.rds")) {
@@ -1005,10 +1032,11 @@ if (RUN_LEVEL != 3 & file.exists("model3/run_level_3/haiti3_coupled_fit.rds")) {
         search1 = SEARCH1,
         search2 = SEARCH2,
         search3 = SEARCH3,
-        ncores = cores,
-        search_rho = TRUE,
-        search_gamma = TRUE,
-        search_Binit = FALSE
+        search_rho = FALSE,
+        search_gamma = FALSE,
+        search_Iinit = TRUE,
+        search_hur = TRUE,
+        ncores = cores
       )
     }
   )
@@ -1047,8 +1075,7 @@ p3s <- numeric(length(shared_param_names))
 names(p3s) <- shared_param_names
 
 for (p in shared_param_names) {
-  pat <- paste0("^", p, "[[:digit:]]+$")
-  p3s[p] <-  mean(p3[grepl(pat, names(p3))])
+  p3s[p] <- p3[paste0(p, 1)]  # They are the same for 1:10
 }
 
 for (p in unit_specific_names) {
@@ -1069,7 +1096,6 @@ stew(file = "models.rda", {
   coef(h3Spat) <- p3
 })
 @
-
 
 \subsection{Model Fitting}\label{sec:model_fitting}
 
