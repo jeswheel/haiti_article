@@ -844,6 +844,8 @@ set_rw_1 <- function(x) {
     return(expression(ivp(0.25)))
   } else if (grepl('^foi_add[[:digit:]]+$', x)) {
     return(0.015)
+  } else if (grepl('^betaB[[:digit:]]+$', x)) {
+    return(0.01)
   } else {
     return(0)
   }
@@ -858,6 +860,8 @@ set_rw_2 <- function(x) {
     return(expression(ivp(0.125)))
   } else if (grepl('^foi_add[[:digit:]]+$', x)) {
     return(0.005)
+  } else if (grepl('^betaB[[:digit:]]+$', x)) {
+    return(0.003)
   } else {
     return(0)
   }
@@ -872,6 +876,8 @@ set_rw_3 <- function(x) {
     return(expression(ivp(0.125)))
   } else if (grepl('^foi_add[[:digit:]]+$', x)) {
     return(0.003)
+  } else if (grepl('^betaB[[:digit:]]+$', x)) {
+    return(0.0025)
   } else {
     return(0)
   }
