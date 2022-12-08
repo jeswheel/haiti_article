@@ -118,7 +118,7 @@ library(tidyverse)
 #
 # Throughout the document, if run_level_3 results exist already exist,
 # then these results are used.
-RUN_LEVEL <- 1
+RUN_LEVEL <- 3
 rl_dir <- paste0("run_level_", RUN_LEVEL, "/")
 
 # Check if run_level_* directories exist; if not, create them.
@@ -1540,7 +1540,7 @@ gc()
 ### Model 2 ###
 ###
 
-h2_data <- haiti2_data()
+h2_data <- haiti2_data(recreate = FALSE)
 
 # model 2 ARIMA benchmark
 h2_dep_names <- h2_data$department %>% unique()
