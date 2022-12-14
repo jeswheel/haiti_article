@@ -35,6 +35,9 @@
 \newcommand\asymptomRelativeInfect{\epsilon}
 \newcommand\asymptomRelativeShed{\epsilon_{W}}
 \newcommand\Wbeta[1]{\beta_{W#1}}
+\newcommand\Whur[1]{\beta_{W#1}^{hm}}
+\newcommand\hHur[1]{h_{#1}^{hm}}
+\newcommand\tHur{t_{hm}}
 \newcommand\Wremoval{\delta_W}
 \newcommand\Wshed{\mu_W}
 \newcommand\mixExponent{\nu}
@@ -693,9 +696,13 @@ $k\in\seq{1}{3}$ models non-exponential duration in the recovered class before w
 The force of infection is
 \begin{equation}
 \label{eq:model3:foi}
-\lambda_u(t) = \Wbeta{_u} \frac{W_u(t)}{1+W_u(t)} + \transmission_u \sum_{{\varv}\neq u}\big(I_{\varv 0}(t)+ \asymptomRelativeInfect A_{\varv 0}(t)\big),
+\lambda_u(t) = \left(\Wbeta{_u} + 1_{(t \geq \tHur)}\Whur{_u} e^{-\hHur{u}\left(t - \tHur\right)}\right) \frac{W_u(t)}{1+W_u(t)} + \transmission_u \sum_{{\varv}\neq u}\big(I_{\varv 0}(t)+ \asymptomRelativeInfect A_{\varv 0}(t)\big),
 \end{equation}
-and Per-capita transition rates are given in Equations~\ref{eq:model3:SI}--\ref{eq:model3:Decay}.
+where $\tHur$ is the time Hurricane Matthew struck Haiti \jwc{TODO Cite}, and $1_{(A)}$ is the indicator function for event $A$.
+In \cite{lee20}, $\Whur{_u}$ and $\hHur{u}$ were set to zero for all $u$;
+the need to account for the effect Hurricane Matthew had on cholera transmission for this model is explored in Sec. \jwc{TODO} of the supplement.
+
+Per-capita transition rates are given in Equations~\ref{eq:model3:SI}--\ref{eq:model3:Decay}.
 \begin{eqnarray}
 \label{eq:model3:SI}
 \mu_{S_{u\vaccCounter}I_{u\vaccCounter}} &=& \symptomFrac \,  \lambda_u \big(1-\eta_{u\vaccCounter}(t)\big) \, d\Gamma/dt,
@@ -727,12 +734,13 @@ Demographic stochasticity is accounted for by modeling non-cholera related death
 All deaths are balanced by births into the susceptible compartment in \myeqref{eq:model3:IS} and \myeqref{eq:model3:RS}, thereby maintaining constant population in each department.
 
 Latent states are initialized using an approximation of the instantaneous number of infected, asymptomatic, and recovered individuals at time $t_0$ by using the first week of cholera incidence data.
-Specifically, we set $I_{u0}(0) = \frac{y^*_{1u}}{\reportRate(\muDeath + \choleraDeath + \muIR)}$, $A_{u0}(0) = \frac{1 - \symptomFrac}{\symptomFrac}I_{u0}(0)$, $R_{u0k} = y^*_{1u} - I_{u0}(0) - A_{u0}(0)$, and initialize $B_{u}(0)$ by enforcing the rainfall dynamics supposed by the one step transition model; 
+Specifically, we set $I_{u0}(0) = \frac{y^*_{1u}}{\reportRate(\muDeath + \choleraDeath + \muIR)}$, $A_{u0}(0) = \frac{1 - \symptomFrac}{\symptomFrac}I_{u0}(0)$, $R_{u0k} = y^*_{1u} - I_{u0}(0) - A_{u0}(0)$, and initialize $B_{u}(0)$ by enforcing the rainfall dynamics supposed by the one step transition model;
 all other compartments that represent population counts are set to zero at time $t_0$.
 For each unit $u$ with zero case counts at time $t_1$, this initialization scheme results in having zero individuals in the Infected and Asymptomatic compartments, as well as having no bacteria in the aquatic reservoir.
-In reality, it's plausible that some bacteria or infected individuals were present in unit $u$ but simply went unreported. 
-As such, for departments with zero case counts in week 1, we consider estimating the number of infected individuals rather then treating this value as a constant. 
-Finally, reported cholera cases are assumed to come from a negative binomial measurement model with mean equal to a fraction ($\reportRate$) of individuals in each unit who develop symptoms seek healthcare (see Sec.~S4 of the supplement material for more details).
+In reality, it's plausible that some bacteria or infected individuals were present in unit $u$ but simply went unreported.
+As such, for departments with zero case counts in week 1, we consider estimating the number of infected individuals rather then treating this value as a constant (see supplement Sec. \jwc{TODO} for more details).
+Finally, reported cholera cases are assumed to come from a negative binomial measurement model with mean equal to a fraction ($\reportRate$) of individuals in each unit who develop symptoms seek healthcare
+(see Sec. \jwc{TODO} of the supplement).
 
 \section{Statistical Analysis}\label{sec:methods}
 
@@ -1146,7 +1154,7 @@ The reported results for Model~1 in the remainder of this article were obtained 
 
 \begin{figure}[ht]
 \centering
-<<Beta_trend_Figure, fig.height=2.5, fig.width=3.7, fig.align='center'>>=
+<<Beta_trend_Figure, fig.height=2.4, fig.width=3.6, fig.align='center'>>=
 ggplot() +
   geom_point(data = h1_prof_res, aes(x = betat, y = logLik)) +
   geom_line(data = mcap_results$fit, aes(x = parameter, y = smoothed), col = 'blue') +
@@ -1171,7 +1179,7 @@ The large difference in likelihoods that were obtain by these two approaches (se
 
 \begin{figure}[ht]
 \centering
-<<Model_1_Sims_Figure, fig.height=2.4, fig.width=4.7, fig.align='center'>>=
+<<Model_1_Sims_Figure, fig.height=2.35, fig.width=4.6, fig.align='center'>>=
 # This code chunk creates the figure containing simulations from Model 1
 
 # Simulate Model 1 from initial conditions.
@@ -1238,7 +1246,8 @@ gc()
 Model~2 is a deterministic compartmental model defined by a set of coupled differential equations.
 The use of deterministic compartment models have a long history in the field of infectious disease epidemiology \citep{kermack1927,brauer2017,giordano20},
 and can be justified by asymptotic considerations in a large-population limit \citep{dadlani2020,ndii17}.
-Because the process model of Model~2 is deterministic, the parameter estimation problem for Model~2 reduces to a least squares calculation when combined with a Gaussian measurement model (see supplement material for details) \jwc{TODO: cite which part of supplement}.
+Because the process model of Model~2 is deterministic, the parameter estimation problem for Model~2 reduces to a least squares calculation when combined with a Gaussian measurement model (see supplement material for details)
+\jwc{TODO: cite which part of supplement}.
 \cite{lee20} fit two versions of model~2 based on a presupposed change in cholera transmission from a epidemic phase to endemic phase that occurred in March, 2014.
 The inclusion of a change-point in model states and parameters increases the flexibility of the model and hence the ability to fit the observed data.
 The increase in model flexibility, however, results in hidden states that are inconsistent between model phases.
@@ -1286,21 +1295,21 @@ However, a legitimate preference for simplicity \citep{saltelli20,green15} can s
 One issue that arises when fitting spatially explicit models is that parameter estimation techniques based on the particle filter become computationally intractable as the number of spatial units increase.
 This is a result of the approximation error of particle filters growing exponentially in the dimension of the model \citep{rebeschini15,park20}.
 
-Model~3 parameters that are calibrated to data are primarily shared between each department, meaning that the estimated parameter value for department $u$ is the same value as the parameter value in department $v$, with $u, v \in \seq{1}{U}$.
-The exception to this being the parameters $\beta_{W_u}$, and $\beta_u$, which take department-specific values for each department $u$.
-To avoid the parameter estimation issue in high-dimensional models, \citet{lee20} simplified the problem by using the IF2 algorithm to estimate parameters separately for independent department-level models;
-the shared parameters were calibrated using the cholera incidence data from Artibonite, and the department-specific parameters ($\beta_{W_u}$ and $\beta_u$) were fit using the data from their respective department.
+% Model~3 parameters that are calibrated to data are primarily shared between each department, meaning that the estimated parameter value for department $u$ is the same value as the parameter value in department $v$, with $u, v \in \seq{1}{U}$.
+% The exception to this being the parameters $\beta_{W_u}$, and $\beta_u$, which take department-specific values for each department $u$.
+To avoid the approximation error present in high-dimensional models, \citet{lee20} simplified the problem of estimating the parameters of Model~3 by creating an approximate version of the model where the units are independent given the observed data.
+% and fitting using the IF2 algorithm to estimate parameters separately for independent department-level models;
+% the shared parameters were calibrated using the cholera incidence data from Artibonite, and the department-specific parameters ($\beta_{W_u}$ and $\beta_u$) were fit using the data from their respective department.
 Reducing a spatially coupled model to individual units in this fashion requires special treatment of any interactive mechanisms between spatial units, such as found in Eq.~\myeqref{eq:model3:foi}.
-In particular, when considering a model for department $u$, the values $I_\nu(t)$ and $A_\nu(t)$, are unknown for $u \neq v$.
-To address this issue, \cite{lee20} conditioned each department level model on reported cholera cases in other departments and approximated the values of $I_\nu(t)$ and $A_\nu(t)$ using the respective reported cases.
-
-The simplified, spatially-decoupled version of Model~3 implemented by \cite{lee20} relies on the observed cholera cases for each department to describe cholera dynamics, making it impossible to obtain forecasts for future time points from the fitted model.
-Therefore, in order to obtain model forecasts, the parameters of the calibrated conditionally independent department level models were used in the fully coupled version of Model~3.
-This approach of model calibration and forecasting avoids the issue of particle depletion by simplifying the parameter estimation problem, but this advantage raises new issues.
+% In particular, when considering a model for department $u$, the values $I_\nu(t)$ and $A_\nu(t)$, are unknown for $u \neq v$.
+% To address this issue, \cite{lee20} conditioned each department level model on reported cholera cases in other departments and approximated the values of $I_\nu(t)$ and $A_\nu(t)$ using the respective reported cases.
+Because the simplified, spatially-decoupled version of Model~3 implemented by \cite{lee20} relies on the observed cholera cases it is impossible to obtain forecasts for future time points from the fitted model.
+Therefore, in order to obtain model forecasts, \cite{lee20} used the parameters estimates from the spatially-decoupled approximation of Model~3 to obtain forecasts using the fully coupled version of the model.
+This approach of model calibration and forecasting avoids the issue of particle depletion, but may also be problematic.
 One concern is that cholera dynamics in department $u$ are highly related to the dynamics in the remaining departments;
-calibrating model parameters using observed cases in other departments as a model covariate may therefore lead to an over-dependence on observed cholera cases.
-Another concern is that the two versions of the model are not the same, resulting in sub-optimal parameter estimates for the spatially coupled model.
-This is because the likelihood of the coupled model at its maximum likelihood estimate (MLE) is greater than or equal to the likelihood of the coupled model at the MLE of the decoupled model.
+calibrating model parameters while conditioning on the observed cases in other departments may therefore lead to an over-dependence on observed cholera cases.
+Another concern is that the two versions of the model are not the same, resulting in sub-optimal parameter estimates for the spatially coupled model,
+as set of parameters that maximize the likelihood of the decoupled model almost certainly do not maximize the likelihood of the fully coupled model.
 These two concerns may explain the unrealistic forecasts and low likelihood of the model (see Table~\ref{tab:likes}).
 
 For our analysis, we calibrate the parameters of the spatially coupled version of Model~3 using the iterated block particle filter (IBPF) algorithm of \cite{ionides22}.
@@ -1401,7 +1410,7 @@ Obtaining the best fitting set of parameters for a given model does not, however
 Model misspecification, which may be thought of as the omission of a mechanism in the model that is an important feature of the dynamic system, is inevitable at all levels of model complexity.
 To make progress, while accepting proper limitations, one must bear in mind the much-quoted observation of \citet{box79} that ``all models are wrong but some are useful.''
 Beyond being good practical advice for applied statistics, this assertion is relevant for the philosophical justification of statistical inference as severe testing \citep[][Sec.~4.8]{mayo18}.
-In this section, we provide some tools and suggestions for diagnosing mechanistic models with the goal of making the subjective assessment of model ``usefulness'' more objective.
+In this section, we discuss some tools for diagnosing mechanistic models with the goal of making the subjective assessment of model ``usefulness'' more objective.
 To do this, we will rely on the quantitative and statistical ability of the model to match the observed data, which we call the model's {\it goodness-of-fit}, with the guiding principle that a model which cannot adequately describe observed data may not be reliable for useful purposes.
 Goodness-of-fit may provide evidence supporting the causal interpretation of one model versus another, but cannot by itself rule out the possibility of alternative explanations.
 
@@ -1412,7 +1421,7 @@ The study by \citet{lee20} provides an example of this: their models and paramet
 Alternative forms of model validation should therefore be used in conjunction with visual comparisons of simulations to observed data.
 
 Another approach is to compare a quantitative measure of the model fit (such as MSE, predictive accuracy, or model likelihood) among all proposed models.
-These comparisons provide insight into how each model performs relative to the others.
+These comparisons, which provide insight into how each model performs relative to the others, are quite common \jwc{CITE SOME HAITI PAPERS}.
 To calibrate relative measures of fit, it is useful to compare against a model that has well-understood statistical ability to fit data, and we call this model a {\it benchmark}.
 Standard statistical models, interpreted as associative models without requiring any mechanistic interpretation of their parameters, provide suitable benchmarks.
 Examples include linear regression, auto-regressive moving average time series models, or even independent and identically distributed measurements.
@@ -1460,7 +1469,11 @@ mod2_n_params <- h2_fit$n_fit_params
 mod2_aic <- 2 * mod2_n_params - 2 * mod2_ll
 
 # model 1 AIC
-mod1_n_params <- 13
+mod1_n_params <- length(
+  c('beta1', 'beta2', 'beta3', 'beta4', 'beta5', 'beta6',
+    'rho', 'nu', 'E_0', 'I_0', 'tau_epi',
+    'tau_end', 'sig_sq_epi', 'sig_sq_end', 'betat')
+)
 mod1_aic <- 2 * mod1_n_params - 2 * mod1_ll
 
 # model 3 AIC
@@ -1762,14 +1775,14 @@ Number of &
   ($\Sexpr{myround(mod3_lee_coupled_aic, 1)}$)\footnotemark[2]
 \\
 \hline
-\thead{Log-ARMA(2,1) \\ Log-likelihood} &
-  $\Sexpr{myround(ARMA_benchmarks$m1, 1)}$ &
-  $\Sexpr{myround(ARMA_benchmarks$m2, 1)}$ &
-  $\Sexpr{myround(ARMA_benchmarks$m3, 1)}$
+\thead{Log-ARMA(2,1) \\ AIC} &
+  $\Sexpr{myround(-2 * ARMA_benchmarks$m1 + 2 * 5, 1)}$ &
+  $\Sexpr{myround(-2 * ARMA_benchmarks$m2 + 2 * 5, 1)}$ &
+  $\Sexpr{myround(-2 * ARMA_benchmarks$m3 + 2 * 5, 1)}$
 \\
 \hline
 \end{tabular}
-\caption{\label{tab:likes}Log-likelihood values for each models compared to their ARMA benchmarks.
+\caption{\label{tab:likes}AIC values for each models compared to their ARMA benchmarks.
 Values in parenthesis are corresponding values using \citet{lee20} parameter estimates.  $\textsuperscript{1}$The reported likelihood is an upper bound of the likelihood of the \citet{lee20} model. $\textsuperscript{2}$\cite{lee20} fit Model~3 to a subset of the data (March 2014 onward, excluding data from Ouest in 2015-2016).
 On this subset, their model has a likelihood of $\Sexpr{myround(lee3_results$sub_ll_eval, 1)}$.
 On this same subset, our model has a likelihood of $\Sexpr{myround(mod3_eval_res$subset_ll, 1)}$.
@@ -1777,11 +1790,10 @@ See Sec.~S5 of the supplement material for more details on estimating the likeli
 }
 \end{table}
 
-Table~\ref{tab:likes} shows that despite the significant improvements that were made by using a contemporary approach of parameter calibration for Model~3, this model still fails to beat a log-linear ARMA benchmark.
-This suggests that Model~3 is failing to adequately explain some substantial aspect of the data.
-As our goal for this article is the estimation and diagnosis of the models at hand, we explore the shortcoming in log-likelihood further in section \jwc{TODO} of the supplement material.
-There, we use additional tools like conditional log-likelihoods to understand how well the model describes each data point, given the previous observations.
-Additional tools for assessing the goodness-of-fit of a model include plotting the effective sample size of each observation \citep{liu01}, and comparing summary statistics of the observed data to simulations from the model \citep{wood10}; these summary statistics are sometimes called diagnostic probes \citep{king15,king16}.
+While a useful practice, comparing model log-likelihoods to a suitable benchmark alone may not be sufficient to diagnosing the goodness-of-fit of a given model.
+Additional techniques include the inspection of conditional log-likelihoods of each observation given the previous observations in order to understand how well the model describes each data point.
+Other tools include plotting the effective sample size of each observation \citep{liu01}; plotting the values of the hidden states from simulations (see supplement Sec.\jwc{TODO});
+and comparing summary statistics of the observed data to simulations from the model \citep{wood10,king15}.
 
 \subsection{Forecasts}\label{sec:filter}
 
@@ -1802,7 +1814,7 @@ In this case study, projecting the future state of the cholera epidemic starting
 Uncertainty in just a single parameter can lead to drastically different forecasts \citep{saltelli20}.
 Therefore, parameter uncertainty should also be considered when obtaining model forecasts to influence policy.
 If a Bayesian technique is used for parameter estimation, a natural way to account for parameter uncertainty is to obtain simulations from the model where each simulation is obtained using parameters drawn from the estimated posterior distribution.
-For frequentist inference, one possible approach obtaining model forecasts from various values of $\theta$, and then weighing the resulting forecasts by their corresponding log-likelihoods \citep{king15}; see section \jwc{TODO} of the supplement material for more details.
+For frequentist inference, one possible approach obtaining model forecasts from various values of $\theta$, and then weighing the resulting forecasts by their corresponding log-likelihoods \citep{king15}; see Sec. \jwc{TODO} of the supplement material for more details.
 Both of these approaches share the similarity that parameters are chosen for the forecast approximately in proportion to their corresponding value of the likelihood function, $f^{(m)}_{\bm{Y}_{1:N}}(\bm{y}_{1:N}^*; \theta)$.
 
 The primary forecasting goal of \citet{lee20} was to investigate the potential consequences of vaccination interventions on a system to inform policy.
@@ -2311,7 +2323,7 @@ Blue line indicates the simulated median of reported cases, and the ribbon repre
 \end{figure}
 
 \begin{figure}[ht]
-<<Mod2Fit_and_Scenarios_Figure, fig.height=2, fig.width=5, fig.align='center'>>=
+<<Mod2Fit_and_Scenarios_Figure, fig.height=1.9, fig.width=4.8, fig.align='center'>>=
 ggplot() +
   geom_line(data = h2_traj, aes(x = date, y = Ctotal + 1), col = 'blue') +
   geom_line(data = true_agg_cases, aes(x = date, y = ReportedAll + 1)) +
@@ -2451,7 +2463,7 @@ all_prob_elims <- dplyr::bind_rows(mod1_probElims, mod3_probElims)
 @
 
 \begin{figure}[ht]
-<<Elimination_Probs_Figure, fig.height=2.5>>=
+<<Elimination_Probs_Figure, fig.height=2.2>>=
 ggplot(tidyr::drop_na(all_prob_elims), aes(x = time, y = elim_prob, col = mod)) +
   geom_line() +
   facet_wrap(~scenario, nrow = 1) +
@@ -2510,7 +2522,10 @@ Seasonality
       \Sexpr{myround(p1["beta6"],1)})
     \end{array}$
   & \eqref{model1:beta}
-  & {\fixed $\seasAmplitude=0.4$ }
+  & $\begin{array}{l}
+     {\fixed \seasAmplitude=0.4} \\
+     \phaseParm = \Sexpr{myround(h2_fit$h2_params['phase'], 2)}
+     \end{array}$
   & \eqref{model2:lambda}
   & $\begin{array}{l} \seasAmplitude=\Sexpr{myround(p3s["lambdaR"],2)} \\ r=\Sexpr{signif(p3s["r"],3)} \end{array}$
   & \eqref{eq:model3:water}
@@ -2522,19 +2537,18 @@ $\begin{array}{l}
 \end{array}$
   & {\fixed $\muRS^{-1}=\Sexpr{myround(1/p1["alpha"]/52,1)}$}
   & \eqref{model1:RS}
-  & {\fixed
+  &
     $\begin{array}{l}
     \muRS^{-1}= \Sexpr{signif(1/h2_fit$h2_params["sigma"],2)} \\
-     \omega_1^{-1} = \Sexpr{myround(1/h2_fit$h2_params["Omega1"],1)} \\
-    \omega_2^{-1} = \Sexpr{myround(1/h2_fit$h2_params["Omega2"],1)}
+    {\fixed \omega_1^{-1} = \Sexpr{myround(1/h2_fit$h2_params["Omega1"],1)}} \\
+    {\fixed \omega_2^{-1} = \Sexpr{myround(1/h2_fit$h2_params["Omega2"],1)}}
     \end{array}$
-    }
   & $\begin{array}{l}
     \eqref{model2:RS} \\
     \eqref{model2:omega1} \\
     \eqref{model2:omega1}
     \end{array} $
-  & {\fixed $\muRS^{-1}=\Sexpr{myround(1/p3s["rho"],1)}$}
+  & {\fixed $\muRS^{-1}=\Sexpr{myround(1/p3['rho1'],1)}$}
   & \eqref{eq:model3:RRnext}
 \\
 \hline
@@ -2568,7 +2582,7 @@ Symptomatic frac.
   & (\ref{model1:EI}-\ref{model1:EA})
   & {\fixed $\symptomFrac=\Sexpr{myround(h2_fit$h2_params["k"],1)}$}
   & \eqref{model2:mu_EI}
-  & {\fixed $\symptomFrac=\Sexpr{myround(p3s["sigma"],2)}$}
+  & {\fixed $\symptomFrac=\Sexpr{myround(p3["sigma1"],2)}$}
   & \eqref{eq:model3:SA}
 \\
 $\begin{array}{l}
@@ -2663,7 +2677,7 @@ $\begin{array}{l}
 \end{array}$
   & \multicolumn{1}{c}{\hspace{16pt}\missing}
   &
-  & $\Wremoval^{-1} = $ \Sexpr{signif(52/h2_fit$h2_params["Delta"],3)}
+  & {\fixed $\Wremoval^{-1} = $ \Sexpr{signif(52/h2_fit$h2_params["Delta"],3)}}
   & \eqref{model2:from_W}
   & $\Wremoval^{-1}=\Sexpr{myround(52/p3s["mu_B"],2)}$
   & \eqref{eq:model3:Decay}
@@ -2846,6 +2860,7 @@ cowplot::plot_grid(gg_rain, gg_trans, align = "v", ncol = 1)
 \caption{\label{fig:h1SeasRain}
 (Top) weekly rainfall in Haiti, lighter colors representing more recent years.
 (Bottom) estimated seasonality in the transmission rate (dashed line) plotted alongside mean rainfall (solid line).
+The outsided effect of rainfall in the fall may be due to Hurricane Matthew, which struck Haiti in October of 2016 and resulted in an increase of cholera cases in the nation.
 }
 \end{figure}
 
