@@ -480,7 +480,7 @@ their conclusion is inconsistent with the prolonged period with no confirmed cho
 The discrepancy between the model based conclusions of \cite{lee20} and the prolonged absence of cholera in Haiti has been debated \citep{francois20,rebaudetComment20,henrys20,leeReply20}.
 Suggested origins of this discrepancy include the use of unrealistic models \citep{rebaudetComment20} and unrealistic criteria for cholera elimination \citep{henrys20}.
 We find a more nuanced conclusion: attention to methodological details in model fitting, diagnosis and forecasting can improve each of the proposed model's ability to quantitatively describe observed data.
-These improvements result in forecasts that are more consistent with the observed outcome, without requiring major changes to the model structures.
+This improved ability may result in more accurate forecasts and facilitates the exploration of model assumptions.
 Based on this retrospective analysis, we offer suggestions on fitting mechanistic models to dynamic systems for future studies.
 
 While this work is focused on the models proposed by \cite{lee20}, our suggestions have broader relevance.
@@ -540,7 +540,7 @@ While the latent process exists between observation times, the value of the late
 We therefore write $\bm{X}^{(\modelCounter)}_n = \bm{X}^{(\modelCounter)}(t_n)$ to denote the value of the latent process at the $n$th observation time, and $\bm{X}^{(\modelCounter)}_{1:N}$ is the collection of latent state values for all observed time points.
 The observable random variables $\bm{Y}^{(\modelCounter)}_{1:N}$ are assumed to be conditionally independent given $\bm{X}^{(\modelCounter)}_{0:N}$.
 Together, with the density for the initial value of the latent state $\bm{X}^{(\modelCounter)}_{0} = \bm{X}^{(\modelCounter)}(t_0)$, each model assumes a joint density $f_{\bm{X}^{(\modelCounter)}_{0:N}, \bm{Y}^{(\modelCounter)}_{1:N}}\big(\bm{x}^{(\modelCounter)}_{0:N}, \bm{y}^{(\modelCounter)}_{1:N};\paramVec\big)$, where $\paramVec$ is a parameter vector that indexes the model.
-The observed data $\bm{y}_{1:N}^*$, along with the unobserved true value of the latent state, are modeled as a realization of this joint distribution.
+The observed data $\bm{y}_{1:N}^* = y_{1:N,1:U}^*$, along with the unobserved true value of the latent state, are modeled as a realization of this joint distribution.
 
 For each model $\modelCounter \in \{1, 2, 3\}$, the latent state vector $\bm{X}^{(\modelCounter)}(t)$ consists of individuals labeled as susceptible (S), infected (I), asymptomatically infected (A), vaccinated (V), and recovered (R), with various sub-divisions sometimes considered.
 Models~2 and~3 have metapopulation structure, meaning that each individual is a member of a spatial unit, denoted by a subscript $u\in \seq{1}{U}$.
@@ -726,10 +726,13 @@ In \eqref{eq:model3:water}, $J_u(t)$ is a dimensionless measurement of precipita
 Demographic stochasticity is accounted for by modeling non-cholera related death rate $\muDeath$ in each compartment, along with an additional death rate $\choleraDeath$ in \myeqref{eq:model3:IS} to account for cholera induced deaths among infected individuals.
 All deaths are balanced by births into the susceptible compartment in \myeqref{eq:model3:IS} and \myeqref{eq:model3:RS}, thereby maintaining constant population in each department.
 
-Latent states are initialized using an approximation of the instantaneous number of infected, asymptomatic, and recovered individuals at time $t=0$ by using the first week of cholera incidence data.
-Specifically, we set $I_{u0}(0) = \frac{y^*_{u0}}{\reportRate(\muDeath + \choleraDeath + \muIR)}$, $A_{u0}(0) = \frac{1 - \symptomFrac}{\symptomFrac}I_{u0}(0)$, and $R_{u0k} = y^*_{u0} - I_{u0}(0) - A_{u0}(0)$, and all other compartments that represent population counts are set to zero at time $t=0$.
-We replace $J_u(0)$ in \eqref{eq:model3:water} with initial value parameters $\Binit_u$ to allow for some flexibility in initializing the bacterial compartment $W_{u}(0)$ while still maintaining the primary dynamics of the model.
-Reported cholera cases are assumed to come from a negative binomial measurement model with mean equal to a fraction ($\reportRate$) of individuals in each unit who develop symptoms seek healthcare (see Sec.~S4 of the supplement material for more details).
+Latent states are initialized using an approximation of the instantaneous number of infected, asymptomatic, and recovered individuals at time $t_0$ by using the first week of cholera incidence data.
+Specifically, we set $I_{u0}(0) = \frac{y^*_{1u}}{\reportRate(\muDeath + \choleraDeath + \muIR)}$, $A_{u0}(0) = \frac{1 - \symptomFrac}{\symptomFrac}I_{u0}(0)$, $R_{u0k} = y^*_{1u} - I_{u0}(0) - A_{u0}(0)$, and initialize $B_{u}(0)$ by enforcing the rainfall dynamics supposed by the one step transition model; 
+all other compartments that represent population counts are set to zero at time $t_0$.
+For each unit $u$ with zero case counts at time $t_1$, this initialization scheme results in having zero individuals in the Infected and Asymptomatic compartments, as well as having no bacteria in the aquatic reservoir.
+In reality, it's plausible that some bacteria or infected individuals were present in unit $u$ but simply went unreported. 
+As such, for departments with zero case counts in week 1, we consider estimating the number of infected individuals rather then treating this value as a constant. 
+Finally, reported cholera cases are assumed to come from a negative binomial measurement model with mean equal to a fraction ($\reportRate$) of individuals in each unit who develop symptoms seek healthcare (see Sec.~S4 of the supplement material for more details).
 
 \section{Statistical Analysis}\label{sec:methods}
 
