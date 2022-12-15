@@ -2102,6 +2102,23 @@ if (RUN_LEVEL != 3 & file.exists("model3/run_level_3/mod3_V0_res.rds")) {
       h3_V0_res$mod3_V0_sims <- agg_mod3_sims(h3_V0_sims)
       h3_V0_res$mod3_V0_probs <- get_elimProbs(h3_V0_sims, model = 3)
 
+      # For the supplement material, save quantiles of the Susceptible individuals
+      h3_V0_res$SQuants <- h3_V0_sims %>%
+        mutate(
+          date = as.Date(lubridate::round_date(lubridate::date_decimal(time), unit = 'day'))
+        ) %>%
+        group_by(unitname, date) %>%
+        mutate(
+          pop = h3Spat@params[paste0("H", which(first(unitname) == unit_names(h3Spat)))]
+        ) %>%
+        summarize(
+          Q025 = quantile((S + VSd + VSdd + VSdd_alt + VSd_alt) / pop, probs = 0.025),
+          Q50 = quantile((S + VSd + VSdd + VSdd_alt + VSd_alt) / pop, probs = 0.5),
+          Q975 = quantile((S + VSd + VSdd + VSdd_alt + VSd_alt) / pop, probs = 0.975)
+        ) %>%
+        ungroup() %>%
+        rename(dep = unitname)
+
       # Return results
       h3_V0_res
 
