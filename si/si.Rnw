@@ -114,6 +114,8 @@ myround <- function (x, digits = 1) {
 \newcommand\vaccClass{Z}
 \newcommand\vaccCounter{z}
 \newcommand\modelCounter{m}
+\newcommand\Whur[1]{\beta_{W#1}^{hm}}
+\newcommand\hHur[1]{h_{#1}^{hm}}
 
 \newcommand\missing{\hspace{6mm} ---}
 \newcommand\fixed{\color{blue}}
@@ -1327,17 +1329,16 @@ ggplot(ARMA_M3_joined, aes(x = ll, y = reorder(unit, ll))) +
   theme(legend.title = element_blank(),
         axis.title.y = element_blank())
 @
-\caption{\label{fig:h3UnitLikes}Log-likelihoods of Model~3 for each department compared to the corresponding log-ARMA benchmark.}
+\caption{\label{fig:h3UnitLikes}Log-likelihoods of Model~3 for each department compared to the corresponding log-ARMA benchmark prior to the inclusion of parameters for initial values and Hurricane Matthew.}
 \end{figure}
 
-To investigate the goodness-of-fit of Model~3 further and attempt to determine why the model is underperforming in some departments, we plot the conditional log likelihoods of each observation given the previous observations for each department in Fig.~\ref{fig:condLL}.
+In an attempt to determine why the model is underperforming in some departments, we plot the conditional log likelihoods of each observation given the previous observations for each department in Fig.~\ref{fig:condLL}.
 This figure reveals that the fitted model has difficult time explaining certain features of the data.
-For example, many departments (in particular Sud and Ouest) have observations with lower conditional log-likelihoods near October 2016 than at other time points.
+For example, many departments (in particular Sud) have observations with lower conditional log-likelihoods near October 2016 than at other time points.
 Further investigation of the model output reveals that the model is struggling to explain the sudden surge in cholera cases that occurred at this time, which coincides with the time that Hurricane Matthew struck Haiti.
-While the model does include a mechanism to account for increased cholera transmission due to large rainfall events, the mechanism does not appear to be sufficient to capture the damaging effects of the hurricane, which was most impactful in the the Sud and Ouest departments \jwc{TODO: CITE}.
-This result led us to include parameters that would increase the transmission between environmental cholera and humans for Sud and Ouest \jwc{TODO: just check these are the correct departments}.
-Other \jwc{TODO: IVPs}.
-
+While the model does include a mechanism to account for increased cholera transmission due to large rainfall events, the mechanism does not appear to be sufficient to capture the damaging effects of the hurricane, which had the greatest impact in the the Sud and Grand'Anse departments \jwc{TODO: CITE}.
+This result led us to include parameters $\Whur{u}$ and $\hHur{u}$ in Eq.~23 that would increase the transmission between environmental cholera and humans for Sud and Grand'Anse.
+The effect of the hurricane on cholera transmission is assumed to have an exponential decay, where the magnitude is determined by $\Whur{u}$ and the duration of the effect determined by $\hHur{u}$.
 
 \begin{figure}[ht]
 <<CondLLFig, echo=FALSE, message=FALSE, fig.height=3>>=
@@ -1368,6 +1369,133 @@ t(bpf_out@block.cond.loglik) %>%
 @
 \caption{\label{fig:condLL}Conditional log-likelihoods of Model~3 prior to the inclusion of parameters for initial values and Hurricane Matthew.}
 \end{figure}
+
+Other points of concern include the observations at or near the start of the recorded cases, for example, in Nord-Ouest and Sud-Est.
+These low conditional log-likelihoods are a result of having zero or near zero confirmed cases in the first week of observed data, followed by a rapid growth of cases.
+The model cannot explain the rapid growth of cholera in the absence of starting cases because the initialization scheme forces departments with no recorded cases in the first week to have hidden states $I_{u0}(0) = A_{u0}(0) = B_{u}(0) = 0$.
+In reality, however, it is possible to have some infected or asymptomatic individuals in a department when no cases are recorded due to under-reporting.
+This may be particularly true at the onset of an infectious disease outbreak, as lower public awareness and inadequate testing infrastructure may result in many cases going undetected \jwc{TODO: CITE}.
+We therefore include and estimate $I_{0u}$ that determines the initial number of Infected individuals at the start of the pandemic for the departments Grande'Anse, Nord-Ouest, and Sud-Est;
+each of these departments have both low starting case counts followed by rapid growth, and low initial values of the conditinoal log-likelihood.
+
+<<loadFinalModel3, echo=FALSE, include=FALSE, message=FALSE>>=
+h3_final_results <- readRDS("../model3/run_level_3/haiti3_coupled_fit.rds")
+
+best_m <- which.max(h3_final_results$search3$logLiks$logLik)
+best_params <- h3_final_results$search3$params[best_m, ]
+all_liks <- as.data.frame(h3_final_results$search3$likMat)
+all_liks$which <- rep(1:72, each = 18)
+best_mod <- dplyr::filter(all_liks, which == best_m)
+
+unitLikesM3 <- best_mod %>%
+  pivot_longer(
+    cols = -which,
+    names_to = "unit",
+    names_prefix = "V",
+    values_to = "logLik"
+  ) %>%
+  select(-which) %>%
+  group_by(unit) %>%
+  summarize(
+    ll_est = pomp::logmeanexp(logLik),
+    ll_se = pomp::logmeanexp(logLik, se = TRUE)[2]
+  ) %>%
+  ungroup() %>%
+  mutate(unit = as.numeric(unit)) %>%
+  arrange(unit)
+
+ARMA_M3_joined <- dplyr::left_join(
+  x = unitLikesM3,
+  y = unitLikesARMA,
+  by = "unit"
+) %>%
+  select(-ll_se) %>%
+  mutate(unit = as.character(unit)) %>%
+  pivot_longer(
+    cols = -unit,
+    names_to = "type",
+    values_to = "ll"
+  ) %>%
+  mutate(unit = paste0(unit, ": ", deps[as.numeric(unit)]))
+@
+
+We refit Model~3 after introducing these seven parameters---three initial value parameters and four parameters related to Hurricane Matthew---using the same successive search scheme described above.
+The resulting model has a log-likelihood value of $\Sexpr{round(max(h3_final_results$search3$logLiks$logLik), 1)}$.
+We also provide figures for department specific log-likelihoods and conditional log-likelihoods in Figs.~\ref{fig:finalUnitLL} and \ref{fig:finalCondLL}.
+
+\begin{figure}[ht]
+<<finalUnitLLFig, fig.height=3, fig.width=5.5, echo=FALSE>>=
+ggplot(ARMA_M3_joined, aes(x = ll, y = reorder(unit, ll))) +
+  geom_point(aes(col = type)) +
+  ylab("Unit") +
+  xlab("Log Likelihood") +
+  scale_color_manual(
+    labels = c("ll" = "ARMA", "ll_est" = "Model 3"),
+    values = c("ll" = "#1b9e77", "ll_est" = "#d95f02")
+  ) +
+  theme(legend.title = element_blank(),
+        axis.title.y = element_blank())
+@
+\caption{\label{fig:finalUnitLL}Log-likelihoods of Model~3 for each department compared to the corresponding log-ARMA benchmark after adding and estimating parameters related to initial values and Hurricane Matthew.}
+\end{figure}
+
+<<finalModel3BPF, echo=FALSE, message=FALSE, include=FALSE>>=
+coef(h3)[names(best_params)] <- best_params
+
+bpf_out <- bake(
+  file = "../model3/run_level_3/si_h3_final_bpf.rds", {
+    h3 %>% bpfilter(
+      Np = 2000,
+      block_size = 1,
+      save_states = TRUE
+    )
+  },
+  seed = 786321
+)
+@
+
+\begin{figure}[ht]
+<<finalCondLLFig, echo=FALSE, message=FALSE, fig.height=3>>=
+t(bpf_out@block.cond.loglik) %>%
+  as.data.frame() %>%
+  mutate(t = bpf_out@times) %>%
+  pivot_longer(
+    cols = -t,
+    values_to = 'likelihood',
+    names_prefix = "V",
+    names_to = 'Unit'
+  ) %>%
+  mutate(date = as.Date(lubridate::date_decimal(t))) %>%
+  ggplot(aes(x = date, y = likelihood)) +
+  geom_line() +
+  geom_point() +
+  facet_wrap(~Unit, labeller = myLabeller, scales = 'free_y',
+             nrow = 2) +
+  theme_bw() +
+  theme(axis.title.x = element_blank()) +
+  ylab("Conditional log-likelihoods")
+@
+\caption{\label{fig:finalCondLL}Conditional log-likelihoods of Model~3 after adding and estimating the parameters for initial values and Hurricane Matthew.}
+\end{figure}
+
+While the addition of the Hurricane parameters seems to have resulted in a dramatic increase of conditional likelihoods around and after October 2016, the inclusion of the initial value parameters does not appear to have fixed the low conditional log-likelihood values in Sud-Est and Nord-Ouest.
+This could be due to many factors, including the possibility that the coupling between units forces low initial value parameters in a given department in order for the model to fit the data in the remaining departments.
+Whatever the case may be, the inclusion of the seven parameters resulted in a $\Sexpr{round(max(h3_final_results$search3$logLiks$logLik - haiti3_orig_fit$search3$logLiks$logLik), 1)}$, which is a highly statistically significant difference.
+One could similarly test whether the inclusion of the initial value parameters resulted in a significantly better fit to the observed data, but we do not do this here due to the large computational effort that would be required.
+
+\subsection{Examining the Hidden States of the Calibrated Model}
+
+For mechanistic models, beating a suitable statistical benchmark does not alone guarantee that the model provides an accurate description of a dynamic process.
+Indeed, a good statistical fit does not require the model to assert a causal explanation.
+For example, reconstructed latent variables should make sense in the context of alternative measurements of these variables \citep{grad12}.
+We demonstrate this principle by examining the latent state of the calibrated model.
+In particular, we examine the compartment of susceptible individuals under various scenarios, as this compartment drives transmission dynamics in SIR models for infectious disease outbreaks.
+
+Recall that the filtering distribution for the calibrated version of Model~3 at time $t_k$ is defined as the distribution of the latent state at time $t_k$ given the data from times $t_{1}:t_{k}$, i.e. $f^{(3)}_{\bm{X}_k|\bm{Y}_{1:k}}(\bm{x}_{k} | \bm{y}^*_{1:k} ; \hat\theta)$.
+In general, one may expect simulations from the filtering distribution of a model with a good statistical fit to result in hidden states that are highly consistent with the observed data because the filtering distribution is conditioned on the observed data.
+Fig.~\ref{fig:h3Sus} shows the number of susceptible individuals from various simulations of the model:
+simulations from Model~3 under initial conditions are displayed in red; simulations from the filtering distribution of model are displayed in blue.
+
 
 \section{Translating to \citet{lee20} notation}
 

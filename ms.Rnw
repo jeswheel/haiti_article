@@ -1288,7 +1288,7 @@ h2_traj <- h2_epi_traj %>%
 
 
 \subsubsection{Calibrating Model~3 Parameters}\label{sec:fit3}
-Both the latent and observable processes in Model~3 can be be factored into department specific processes which interact with each other.
+Model~3 describes cholera dynamics in Haiti using a metapopulation model, where the hidden states in each administrative department has an effect on the dymanics in other departments.
 The decision to address metapopulation dynamics using a spatially explicit model, rather than to aggregate over space, is double-edged.
 Evidence for the former approach has been provided in previous studies \citep{king15}, including the specific case of heterogeneity between Haitian departments in cholera transmission \citep{collins14}.
 However, a legitimate preference for simplicity \citep{saltelli20,green15} can support a decision to consider nationally aggregated models.
@@ -1805,7 +1805,7 @@ Recent information about a dynamic system should be more relevant for a forecast
 This assertion may seem self-evident, but it is not the case for deterministic models, for which the initial conditions together with the parameters are sufficient for forecasting, and so recent data do not have special importance.
 Epidemiological forecasts based on deterministic models are not uncommon in practice, despite their limitations \citep{king15}.
 That may explain why \citet{lee20} chose to obtain forecasts by simulating the calibrated models forward from initial conditions.
-Here, we compare with a forecast projected from the filtered distribution: to obtain a forecast using POMP model $m$ at a collection of times $t_{N+1:N+s}$, where $N$ is the index for the last available data, we simulate forward from a draw from
+Here, we compare with a forecast projected from the filtering distribution: to obtain a forecast using POMP model $m$ at a collection of times $t_{N+1:N+s}$, where $N$ is the index for the last available data, we simulate forward from a draw from
 $f^{(m)}_{\bm{X}_N|\bm{Y}_{1:N}}(\bm{x}_{N} | \bm{y}^*_{1:N} ; \hat\theta)$
 where $\hat\theta$ is a vector of calibrated parameters.
 The decision not to do this partially explains the unsuccessful forecasts of \cite{lee20}: their Table~S7 shows that the subset of their simulations which were consistent with observing zero cases in 2019 predicted the elimination of cholera.
