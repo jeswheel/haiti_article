@@ -1033,9 +1033,6 @@ gc()
 <<CalibrateOrig3, echo=FALSE>>=
 set.seed(8636712)
 
-# Set Run Level for debug, timing, and full computation
-RUN_LEVEL = 2
-
 # Create vectors for the unit and shared parameters
 unit_specific_names <- c("betaB", "foi_add")
 shared_param_names <- c(
@@ -1147,21 +1144,21 @@ N_SEARCHES <- 3L
 save_file <- "../model3/run_level_2/fit_orig_model.rds"
 
 # TODO: replace with bake
-haiti3_orig_fit <- readRDS(save_file)
+# haiti3_orig_fit <- readRDS(save_file)
 
-# haiti3_orig_fit <- bake(
-#   file = save_file, {
-#     fit_coupled_haiti3(
-#       nsearches = N_SEARCHES,
-#       search1 = SEARCH1,
-#       search2 = SEARCH2,
-#       search3 = SEARCH3,
-#       search_rho = FALSE,
-#       search_gamma = FALSE,
-#       ncores = cores
-#     )
-#   }
-# )
+haiti3_orig_fit <- bake(
+  file = save_file, {
+    fit_coupled_haiti3(
+      nsearches = N_SEARCHES,
+      search1 = SEARCH1,
+      search2 = SEARCH2,
+      search3 = SEARCH3,
+      search_rho = FALSE,
+      search_gamma = FALSE,
+      ncores = cores
+    )
+  }
+)
 
 best_m <- which.max(haiti3_orig_fit$search3$logLiks$logLik)
 
