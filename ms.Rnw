@@ -477,7 +477,7 @@ Advances in OCV technology and vaccine availability, however, raised the possibi
 In the study, certain data were shared between the groups, including demography and vaccination history; vaccine efficacy was also fixed at a shared value between groups.
 Beyond this, the groups made autonomous decisions on what to include and exclude from their models.
 The groups largely adhered to existing guidelines on creating models to inform policy \citep{behrend20,saltelli20} and, despite their autonomy, obtained a consensus that an extensive nationwide vaccination campaign would be necessary to eliminate cholera from Haiti.
-Although several cholera cases have recently been detected in Haiti (\citep{world2010outbreak}),
+Although several cholera cases have recently been detected in Haiti \citep{world2010outbreak,rubin22},
 their conclusion is inconsistent with the prolonged period with no confirmed cholera cases between February, 2019 \citep{trevisin22} and October, 2022.
 
 The discrepancy between the model based conclusions of \cite{lee20} and the prolonged absence of cholera in Haiti has been debated \citep{francois20,rebaudetComment20,henrys20,leeReply20}.
@@ -552,6 +552,7 @@ Here, the spatial units are the $U=10$ Haitian administrative d\'{e}partements (
 In the following subsections, descriptions of Models~1--3 are provided.
 While the model description is scientifically critical, as well as necessary for transparency and reproducibility, the model details are not essential to our methodological discussions of how to diagnose and address model misspecification with the purpose of informing policy.
 A first-time reader may choose to skim through the rest of this section, and return later.
+Additional details about the numeric implementation of these models are provided in Secs.~S1 and S2 of the supplement.
 
 %%%%%%%%% 11111111111 %%%%%%%%%%
 
@@ -610,9 +611,10 @@ In \eqref{model1:EA} and~\eqref{model1:EI} the asymptomatic ratio for non-vaccin
 For $\vaccCounter\in\seq{1}{\vaccClass}$, the vaccination cohort $\vaccCounter$ is assigned a time $\tau_{\vaccCounter}$, and we take $\symptomFrac_{\vaccCounter}(t) = c \, \theta^*(t-\tau_{\vaccCounter})$
 where $\theta^*(t)$ is efficacy at time $t$ since vaccination for adults, taken from \cite{lee20}, Table~S4, and $c=\big(1-(1-0.4688)\times 0.11\big)$ is a correction to allow for reduced efficacy in the 11\% of the population aged under 5 years.
 Single and double vaccine doses were modeled by changing the waning of protection; protection was assumed to be equal between single and double dose until 52 weeks after vaccination, at which point the single dose becomes ineffective.
+
 The latent state vector $\bm{X}^{(1)}(t)$ is initialized by setting each compartment count for each vaccination scenario $\vaccCounter \neq 0$ as zero, and introducing initial-value parameters $I_{0,0}$ and $E_{0, 0}$ such that $R_{0}(0) = 0$, $I_{0}(0) = \mathrm{Pop} \times I_{0, 0}$, $E_{0}(0) = \mathrm{Pop} \times E_{0, 0}$ and $S_{0}(0) = \mathrm{Pop} \times (1 - I_{0, 0} - E_{0, 0})$, where $\mathrm{Pop}$ is the total population of Haiti.
 Reported cholera cases at time point $n$ ($\bm{Y}^{(1)}_n$) are assumed to come from a negative binomial measurement model, where only a fraction ($\reportRate$) of new weekly cases are reported.
-See Sec.~S4 of the supplement material for more details.
+See Sec.~S3 of the supplement material for more details.
 
 %%%%%%% 222222222222 %%%%%%%%%%
 
@@ -683,7 +685,7 @@ In \eqref{model2:water_transport}, $T^W_{u\varv}$ is a measure of river flow bet
 The unit of $W_u(t)$ is cells per ml, with dose response modeled via a saturation constant of $\Wsat$ in \eqref{model2:lambda}.
 The starting value for each element of the latent state vector $\bm{X}^{(2)}(0)$ are set to zero except for $I_{u0}(0) = y_u^*(0)/\reportRate$ and $R_{u0}(0) = \mathrm{Pop}_u - I_{u0}(0)$, where $y_u^*(0)$ is the reported number of cholera cases in department $u$ at time $t = 0$.
 Reported cases are assumed to come from a log-normal distribution, with the log-scale mean equal to the reporting rate $\reportRate$ times the number of newly infected individuals.
-See Sec.~\ref{sec:fit2} and Sec.~S4.2 of the supplement for more details.
+See Sec.~\ref{sec:fit2} and Sec.~S3.2 of the supplement for more details.
 
 %%%%%%% 333333333 %%%%%%%%%%
 
@@ -698,9 +700,9 @@ The force of infection is
 \label{eq:model3:foi}
 \lambda_u(t) = \left(\Wbeta{_u} + 1_{(t \geq \tHur)}\Whur{_u} e^{-\hHur{u}\left(t - \tHur\right)}\right) \frac{W_u(t)}{1+W_u(t)} + \transmission_u \sum_{{\varv}\neq u}\big(I_{\varv 0}(t)+ \asymptomRelativeInfect A_{\varv 0}(t)\big),
 \end{equation}
-where $\tHur$ is the time Hurricane Matthew struck Haiti \jwc{TODO Cite}, and $1_{(A)}$ is the indicator function for event $A$.
+where $\tHur$ is the time Hurricane Matthew struck Haiti \citep{ferreirai16}, and $1_{(A)}$ is the indicator function for event $A$.
 In \cite{lee20}, $\Whur{_u}$ and $\hHur{u}$ were set to zero for all $u$;
-the need to account for the effect Hurricane Matthew had on cholera transmission for this model is explored in Sec. \jwc{TODO} of the supplement.
+the need to account for the effect Hurricane Matthew had on cholera transmission for this model is explored in Sec.~S5 of the supplement.
 
 Per-capita transition rates are given in Equations~\ref{eq:model3:SI}--\ref{eq:model3:Decay}.
 \begin{eqnarray}
@@ -738,9 +740,9 @@ Specifically, we set $I_{u0}(0) = \frac{y^*_{1u}}{\reportRate(\muDeath + \choler
 all other compartments that represent population counts are set to zero at time $t_0$.
 For each unit $u$ with zero case counts at time $t_1$, this initialization scheme results in having zero individuals in the Infected and Asymptomatic compartments, as well as having no bacteria in the aquatic reservoir.
 In reality, it's plausible that some bacteria or infected individuals were present in unit $u$ but simply went unreported.
-As such, for departments with zero case counts in week 1, we consider estimating the number of infected individuals rather then treating this value as a constant (see supplement Sec. \jwc{TODO} for more details).
+As such, for departments with zero case counts in week 1, we consider estimating the number of infected individuals rather then treating this value as a constant (see supplement Sec.~S5 for more details).
 Finally, reported cholera cases are assumed to come from a negative binomial measurement model with mean equal to a fraction ($\reportRate$) of individuals in each unit who develop symptoms seek healthcare
-(see Sec. \jwc{TODO} of the supplement).
+(see Sec.~S3.3 of the supplement).
 
 \section{Statistical Analysis}\label{sec:methods}
 
@@ -1246,8 +1248,7 @@ gc()
 Model~2 is a deterministic compartmental model defined by a set of coupled differential equations.
 The use of deterministic compartment models have a long history in the field of infectious disease epidemiology \citep{kermack1927,brauer2017,giordano20},
 and can be justified by asymptotic considerations in a large-population limit \citep{dadlani2020,ndii17}.
-Because the process model of Model~2 is deterministic, the parameter estimation problem for Model~2 reduces to a least squares calculation when combined with a Gaussian measurement model (see supplement material for details)
-\jwc{TODO: cite which part of supplement}.
+Because the process model of Model~2 is deterministic, the parameter estimation problem for Model~2 reduces to a least squares calculation when combined with a Gaussian measurement model (see Sec.~S3.2 of the supplement material for details)
 \cite{lee20} fit two versions of model~2 based on a presupposed change in cholera transmission from a epidemic phase to endemic phase that occurred in March, 2014.
 The inclusion of a change-point in model states and parameters increases the flexibility of the model and hence the ability to fit the observed data.
 The increase in model flexibility, however, results in hidden states that are inconsistent between model phases.
@@ -1421,7 +1422,7 @@ The study by \citet{lee20} provides an example of this: their models and paramet
 Alternative forms of model validation should therefore be used in conjunction with visual comparisons of simulations to observed data.
 
 Another approach is to compare a quantitative measure of the model fit (such as MSE, predictive accuracy, or model likelihood) among all proposed models.
-These comparisons, which provide insight into how each model performs relative to the others, are quite common \jwc{CITE SOME HAITI PAPERS}.
+These comparisons, which provide insight into how each model performs relative to the others, are quite common \citep{rinaldo12,sallah17}.
 To calibrate relative measures of fit, it is useful to compare against a model that has well-understood statistical ability to fit data, and we call this model a {\it benchmark}.
 Standard statistical models, interpreted as associative models without requiring any mechanistic interpretation of their parameters, provide suitable benchmarks.
 Examples include linear regression, auto-regressive moving average time series models, or even independent and identically distributed measurements.
@@ -1721,7 +1722,7 @@ if (RUN_LEVEL != 3 & file.exists("model3/run_level_3/lee3_results.rds")) {
 
       })
 
-      lee3_results[["n_params"]] <- 29  # TODO: Check to make sure this is the correct number.
+      lee3_results[["n_params"]] <- 29
 
       lee3_results
     },
@@ -1786,18 +1787,18 @@ Number of &
 Values in parenthesis are corresponding values using \citet{lee20} parameter estimates.  $\textsuperscript{1}$The reported likelihood is an upper bound of the likelihood of the \citet{lee20} model. $\textsuperscript{2}$\cite{lee20} fit Model~3 to a subset of the data (March 2014 onward, excluding data from Ouest in 2015-2016).
 On this subset, their model has a likelihood of $\Sexpr{myround(lee3_results$sub_ll_eval, 1)}$.
 On this same subset, our model has a likelihood of $\Sexpr{myround(mod3_eval_res$subset_ll, 1)}$.
-See Sec.~S5 of the supplement material for more details on estimating the likelihood of the \cite{lee20} models.
+See Sec.~S6 of the supplement material for more details on estimating the likelihood of the \cite{lee20} models.
 }
 \end{table}
 
 While a useful practice, comparing model log-likelihoods to a suitable benchmark alone may not be sufficient to diagnosing the goodness-of-fit of a given model.
 Additional techniques include the inspection of conditional log-likelihoods of each observation given the previous observations in order to understand how well the model describes each data point.
-Other tools include plotting the effective sample size of each observation \citep{liu01}; plotting the values of the hidden states from simulations (see supplement Sec.\jwc{TODO});
+Other tools include plotting the effective sample size of each observation \citep{liu01}; plotting the values of the hidden states from simulations (supplement Sec.~5.1);
 and comparing summary statistics of the observed data to simulations from the model \citep{wood10,king15}.
 
 \subsection{Forecasts}\label{sec:filter}
 
-Forecasts aim to provide an accurate estimate of the future state of a system based on currently available data, together with an assessment of uncertainty.
+Forecasts are an attempt to provide an accurate estimate of the future state of a system based on currently available data, together with an assessment of uncertainty.
 Mechanistic forecasting models, compatible with current scientific understanding, may also provide estimates of the future effects of potential interventions.
 Further, they may enable real-time testing of new scientific hypotheses \citep{lewis22}.
 
@@ -1814,8 +1815,10 @@ In this case study, projecting the future state of the cholera epidemic starting
 Uncertainty in just a single parameter can lead to drastically different forecasts \citep{saltelli20}.
 Therefore, parameter uncertainty should also be considered when obtaining model forecasts to influence policy.
 If a Bayesian technique is used for parameter estimation, a natural way to account for parameter uncertainty is to obtain simulations from the model where each simulation is obtained using parameters drawn from the estimated posterior distribution.
-For frequentist inference, one possible approach obtaining model forecasts from various values of $\theta$, and then weighing the resulting forecasts by their corresponding log-likelihoods \citep{king15}; see Sec. \jwc{TODO} of the supplement material for more details.
+For frequentist inference, one possible approach obtaining model forecasts from various values of $\theta$, where the values of $\theta$ are sampled proportionally their corresponding likelihoods \citep{king15}; see Sec.~S7 of the supplement material for more details.
 Both of these approaches share the similarity that parameters are chosen for the forecast approximately in proportion to their corresponding value of the likelihood function, $f^{(m)}_{\bm{Y}_{1:N}}(\bm{y}_{1:N}^*; \theta)$.
+In this analysis, our forecasts do not account for parameter uncertainty as our goal is to comment on the estimation and diagnosis of mechanistic models, rather than suggesting our results to be used to influence vaccination policy in Haiti.
+Furthermore, we use the projections from a single point estimate to highlight a deficiency of deterministic models, which is that the only variability in model projections is a result of parameter uncertainty, which leads to over-confidence in forecasts \cite{king15}.
 
 The primary forecasting goal of \citet{lee20} was to investigate the potential consequences of vaccination interventions on a system to inform policy.
 Outcomes of their study include estimates for the probability of cholera elimination and cumulative number of cholera infections under several possible vaccination scenarios.
@@ -2515,7 +2518,7 @@ Infection (day)
   & \eqref{model1:toR}
   & {\fixed $\muIR^{-1}=\Sexpr{myround(365/h2_fit$h2_params["gamma"],1)}$}
   & \eqref{model2:mu_IR}
-  & {\fixed $\muIR^{-1}=\Sexpr{myround(365/p3s["gamma"],1)}$ }
+  & {\fixed $\muIR^{-1}=\Sexpr{myround(365/p3["gamma1"],1)}$ }
   & \eqref{eq:model3:IR}
 \\
 Latency (day)
@@ -2527,7 +2530,7 @@ Latency (day)
   &
 \\
 \hline
-Seasonality
+\multirow{2}{*}{Seasonality}
   & $\begin{array}{l}
     \hspace{-1mm} \transmission_{1:6}=(
       \Sexpr{myround(p1["beta1"],1)},
@@ -2539,15 +2542,17 @@ Seasonality
       \Sexpr{myround(p1["beta6"],1)})
     \end{array}$
   & \eqref{model1:beta}
-  & $\begin{array}{l}
-     {\fixed \seasAmplitude=0.4} \\
-     \phaseParm = \Sexpr{myround(h2_fit$h2_params['phase'], 2)}
-     \end{array}$
+  & {\fixed \seasAmplitude=0.4}
   & \eqref{model2:lambda}
-  & $\begin{array}{l} \seasAmplitude=\Sexpr{myround(p3s["lambdaR"],2)} \\ r=\Sexpr{signif(p3s["r"],3)} \end{array}$
+  & $\seasAmplitude = \Sexpr{myround(p3s["lambdaR"],2)}$
+  & \eqref{eq:model3:water} \\
+  & $\transmissionTrend = \Sexpr{myround(p1["betat"],2)}$ [N]
+  & \eqref{model1:betat}
+  & $\phaseParm = \Sexpr{myround(h2_fit$h2_params['phase'], 2)}$ [N]
+  & \eqref{model2:lambda}
+  & $r = \Sexpr{signif(p3s["r"],3)}$
   & \eqref{eq:model3:water}
-\\
-\hline
+  \\\hline
 $\begin{array}{l}
 \text{Immunity} \\
 \text{(year)}
@@ -2569,20 +2574,20 @@ $\begin{array}{l}
   & \eqref{eq:model3:RRnext}
 \\
 \hline
-Vaccine efficacy
-  & \multicolumn{1}{c}{\hspace{16pt}\missing}
-  &
-  & $\begin{array}{l}
-      \hspace{-1mm} \fixed{\vaccineEfficacy_{1:4} = (
-        \Sexpr{myround(1 - h2_fit$h2_params["VE1"] * 0.4688, 2)},
-        \Sexpr{myround(1 - h2_fit$h2_params["VE2"] * 0.4688, 2)}} \\
-        \fixed{\Sexpr{myround(1 - h2_fit$h2_params["VE1"], 2)},
-        \Sexpr{myround(1 - h2_fit$h2_params["VE2"], 2)}})
-        \end{array}$
-  & \eqref{model2:mu_SE}
-  & \fixed{$\eta_{ud}(t)$}
-  &
-  \\
+% Vaccine efficacy
+%   & \multicolumn{1}{c}{\hspace{16pt}\missing}
+%   &
+%   & $\begin{array}{l}
+%       \hspace{-1mm} \fixed{\vaccineEfficacy_{1:4} = (
+%         \Sexpr{myround(1 - h2_fit$h2_params["VE1"] * 0.4688, 2)},
+%         \Sexpr{myround(1 - h2_fit$h2_params["VE2"] * 0.4688, 2)}} \\
+%         \fixed{\Sexpr{myround(1 - h2_fit$h2_params["VE1"], 2)},
+%         \Sexpr{myround(1 - h2_fit$h2_params["VE2"], 2)}})
+%         \end{array}$
+%   & \eqref{model2:mu_SE}
+%   & \fixed{$\eta_{ud}(t)$}
+%   &
+%   \\
 Birth/death (yr)
   & \fixed{$\begin{array}{l}
     \muBirth^{-1} = \Sexpr{myround(1/p1["mu"]/52,1)} \\
@@ -2618,7 +2623,7 @@ $\begin{array}{l}
     \end{tabular}
   &  $\begin{array}{l}
       {\fixed \asymptomRelativeInfect =1 } \\
-      {\fixed \asymptomRelativeShed = \Sexpr{myround(p3s["XthetaA"],3)} }
+      \asymptomRelativeShed = \Sexpr{myround(p3s["XthetaA"],3)}
     \end{array}$
   & \begin{tabular}{l}
       \eqref{eq:model3:foi} \\
@@ -2711,7 +2716,7 @@ $\begin{array}{l}
 \text{Process} \\
 \text{noise} (\text{wk}^{1/2})
 \end{array}$
-  & $\sigmaProc=(\Sexpr{myround(sqrt(p1["sig_sq_epi"]),2)}, \Sexpr{myround(sqrt(p1["sig_sq_end"]),2)})$
+  & $\sigmaProc=(\Sexpr{myround(sqrt(p1["sig_sq_epi"]),2)}, \Sexpr{myround(sqrt(p1["sig_sq_end"]),2)})$ [N]
   & \eqref{model1:lambda}
   & \multicolumn{1}{c}{\hspace{16pt}\missing}
   &
@@ -2720,24 +2725,30 @@ $\begin{array}{l}
 \\
 Reporting rate
   & $\reportRate=\Sexpr{myround(p1["rho"], 3)}$
-  & (S16) % TODO: Make sure manual equations match!
+  & (S15)
   & {\fixed $\reportRate=\Sexpr{myround(h2_fit$h2_params["Rho"],2)}$}
-  & (S17)
+  & (S16)
   & $\reportRate=\Sexpr{myround(p3s["epsilon"],2)}$
-  & (S18)
+  & (S19)
 \\
 $\begin{array}{l}
 \text{Observation} \\
-\text{overdispersion}
+\text{variance}
 \end{array}$
-  & $\obsOverdispersion=(\Sexpr{round(p1["tau_epi"],2)}, \Sexpr{round(p1["tau_end"],2)})$
+  & $\obsOverdispersion = (\Sexpr{myround(p1["tau_epi"],2)}, \Sexpr{round(p1["tau_end"],2)})$
+  & (S15)
+  & $\obsOverdispersion = \Sexpr{signif(h2_fit$h2_params['sigma'], 3)}$
   & (S16)
-  &
-  &
-  & $\obsOverdispersion=\Sexpr{myround(p3s["k"],2)}$
-  & (S18)
+  & $\obsOverdispersion = \Sexpr{myround(p3s["k"],2)}$
+  & (S19)
 \\
 \hline
+\multirow{2}{*}{Initial Values} & $I_{0,0} = \Sexpr{round(prod(p1[c('pop_0', 'I_0')]))}$ & & \multicolumn{1}{c}{\multirow{2}{*}{\hspace{16pt}\missing}} & & \multirow{2}{*}{$I_{3,7,10;0}(0)= (
+        \Sexpr{round(prod(p3[c('H3', 'Iinit3')]))}, \Sexpr{round(prod(p3[c('H7', 'Iinit7')]))}, \Sexpr{round(prod(p3[c('H10', 'Iinit10')]))})$ [N]} & \\
+& $E_{0,0} = \Sexpr{round(prod(p1[c('pop_0', 'E_0')]))}$ & & \multicolumn{1}{c}{} & & & \\\hline
+Hurricane & \multicolumn{1}{c}{\multirow{2}{*}{\hspace{16pt}\missing}} & & \multicolumn{1}{c}{\multirow{2}{*}{\hspace{16pt}\missing}} & & $\Whur{3, 9} = (\Sexpr{myround(p3['aHur3'], 2)}, \Sexpr{myround(p3['aHur9'], 2)})$ [N] & \multirow{2}{*}{\eqref{eq:model3:foi}} \\
+Parameters & \multicolumn{1}{c}{} & & \multicolumn{1}{c}{} & & $\hHur{3, 9} = (\Sexpr{myround(p3['hHur3'], 2)}, \Sexpr{myround(p3['hHur9'], 2)})$ [N] & \\\hline
+
 \end{tabular}}
 \caption{References to the relevant equation are given in parentheses.
 Parameters in blue were fixed based on scientific reasoning and not fitted to the data.
