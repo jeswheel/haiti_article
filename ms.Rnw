@@ -406,8 +406,8 @@ gc()
 
 \begin{frontmatter}
 
-\title{Informing policy via dynamic models: Eliminating cholera in Haiti}
-\runtitle{Eliminating Cholera in Haiti}
+\title{Informing policy via dynamic models: Cholera in Haiti}
+\runtitle{Cholera in Haiti}
 
 \begin{aug}
 
@@ -436,7 +436,8 @@ Such decisions can be posed as statistical questions about scientifically motiva
 Thus, we encounter the methodological task of building credible, data-informed decisions based on stochastic, partially observed, nonlinear dynamic models.
 This necessitates addressing the tradeoff between biological fidelity and model simplicity, and the reality of misspecification for models at all levels of complexity.
 As a case study, we consider a cholera epidemic in Haiti.
-The 2010 introduction of cholera to Haiti led to an extensive outbreak and sustained transmission until it was eliminated in 2019.
+The 2010 introduction of cholera to Haiti led to an extensive outbreak and sustained transmission.
+Cholera was eliminated in 2019, though it returned in 2022.
 We study three models developed by expert teams to advise on vaccination policies.
 We assess methods used for fitting and evaluating these models, leading to recommendations for future studies.
 Diagnosis of model misspecification and development of alternative models can lead to improved statistical fit, but caution is nevertheless required in drawing policy conclusions based on causal interpretations of the models.
@@ -477,8 +478,7 @@ Advances in OCV technology and vaccine availability, however, raised the possibi
 In the study, certain data were shared between the groups, including demography and vaccination history; vaccine efficacy was also fixed at a shared value between groups.
 Beyond this, the groups made autonomous decisions on what to include and exclude from their models.
 The groups largely adhered to existing guidelines on creating models to inform policy \citep{behrend20,saltelli20} and, despite their autonomy, obtained a consensus that an extensive nationwide vaccination campaign would be necessary to eliminate cholera from Haiti.
-Although several cholera cases have recently been detected in Haiti \citep{world2010outbreak,rubin22},
-their conclusion is inconsistent with the prolonged period with no confirmed cholera cases between February, 2019 \citep{trevisin22} and October, 2022.
+Their conclusion is inconsistent with the prolonged period with no confirmed cholera cases between February, 2019 and September, 2022 \citep{trevisin22} though cholera has recently reemerged in Haiti \citep{rubin22}.
 
 The discrepancy between the model based conclusions of \cite{lee20} and the prolonged absence of cholera in Haiti has been debated \citep{francois20,rebaudetComment20,henrys20,leeReply20}.
 Suggested origins of this discrepancy include the use of unrealistic models \citep{rebaudetComment20} and unrealistic criteria for cholera elimination \citep{henrys20}.
@@ -2976,7 +2976,7 @@ The supplement also demonstrates our capability to faithfully estimate the likel
 \stitle{Auxiliary software: \code{haitipkg}}
 \sdescription{
 The \code{haitipkg} R package is maintained in a GitHub repository, \code{jeswheel/haitipkg}. The submitted version of this package will be archived on Zenodo.
-The package contains all of the data and code used to create and fit the models, as well as other useful functions that were used in this article.
+The package contains all of the data and code used to create, fit and explore the models presented in this article.
 }
 \end{supplement}
 
