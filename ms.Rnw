@@ -1836,7 +1836,7 @@ Mimicking their efforts, we define cholera elimination as having less than one i
 
 # Number of particles and simulations to use for pfilter and project from filter, respectively.
 h1_scen_NP   <- switch(RUN_LEVEL, 50, 500, 5000)
-h1_scen_sims <- switch(RUN_LEVEL, 20, 100,  500)
+h1_scen_sims <- switch(RUN_LEVEL, 20, 100, 1000)
 
 # Simulate vaccination scenario from filtering distribution. The code
 # below creates a model, samples from the filtering distribution, and then
@@ -1903,7 +1903,7 @@ if (RUN_LEVEL != 3 & file.exists("model1/run_level_3/S2_sims.rds")) {
       end_states <- end_states[[length(end_states)]]
 
       # project vacc scenario, with filtering dist, and model.
-      h1_S2_sims <- project_from_filter(mod = s2, end_states = end_states, nsims = h1_scen_NP)
+      h1_S2_sims <- project_from_filter(mod = s2, end_states = end_states, nsims = h1_scen_sims)
 
       results <- list()
       results$mod1_V1_sims <- agg_mod1_sims(h1_S2_sims)
@@ -1947,7 +1947,7 @@ if (RUN_LEVEL != 3 & file.exists("model1/run_level_3/S4_sims.rds")) {
       end_states <- end_states[[length(end_states)]]
 
       # project vacc scenario, with filtering dist, and model.
-      h1_S4_sims <- project_from_filter(mod = s4, end_states = end_states, nsims = h1_scen_NP)
+      h1_S4_sims <- project_from_filter(mod = s4, end_states = end_states, nsims = h1_scen_sims)
 
       results <- list()
       results$mod1_V2_sims <- agg_mod1_sims(h1_S4_sims)
@@ -1991,7 +1991,7 @@ if (RUN_LEVEL != 3 & file.exists("model1/run_level_3/S3_sims.rds")) {
       end_states <- end_states[[length(end_states)]]
 
       # project vacc scenario, with filtering dist, and model.
-      h1_S3_sims <- project_from_filter(mod = s3, end_states = end_states, nsims = h1_scen_NP)
+      h1_S3_sims <- project_from_filter(mod = s3, end_states = end_states, nsims = h1_scen_sims)
 
       results <- list()
       results$mod1_V3_sims <- agg_mod1_sims(h1_S3_sims)
@@ -2035,7 +2035,7 @@ if (RUN_LEVEL != 3 & file.exists("model1/run_level_3/S1_sims.rds")) {
       end_states <- end_states[[length(end_states)]]
 
       # project vacc scenario, with filtering dist, and model.
-      h1_S1_sims <- project_from_filter(mod = s1, end_states = end_states, nsims = h1_scen_NP)
+      h1_S1_sims <- project_from_filter(mod = s1, end_states = end_states, nsims = h1_scen_sims)
 
       results <- list()
       results$mod1_V4_sims <- agg_mod1_sims(h1_S1_sims)
@@ -2063,8 +2063,8 @@ mod2_VaccScenarios <- bake(
 @
 
 <<Load Model 3 Vacc Scenarios, message=FALSE, include=FALSE>>=
-NP_BPF <- switch(RUN_LEVEL, 50, 200, 1000)
-NSIM   <- switch(RUN_LEVEL, 10,  50,  500)
+NP_BPF <- switch(RUN_LEVEL, 50, 200, 2000)
+NSIM   <- switch(RUN_LEVEL, 10,  50, 1000)
 
 if (RUN_LEVEL != 3 & file.exists("model3/run_level_3/h3_bpf_end_states.rds")) {
   h3_bpf_end_states <- readRDS("model3/run_level_3/h3_bpf_end_states.rds")

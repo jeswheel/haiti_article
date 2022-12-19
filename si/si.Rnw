@@ -4,7 +4,7 @@
 
 \newcommand\secTitleSpace{\hspace{3mm}}
 
-<<packages, include=FALSE, cache=FALSE, echo=FALSE>>=
+<<packages, include=FALSE>>=
 library(tidyverse)
 library(pomp)
 library(haitipkg)
@@ -13,19 +13,21 @@ library(doParallel)
 library(doRNG)
 
 cores <-  as.numeric(Sys.getenv('SLURM_NTASKS_PER_NODE', unset = NA))
-# if(is.na(cores)) cores <- detectCores()
-cores <- 20
+if(is.na(cores)) cores <- detectCores()
+# cores <- 20
 registerDoParallel(cores)
 theme_set(theme_bw())
+
+if (!dir.exists("../model3/si")) {
+  dir.create("../model3/si", recursive = TRUE)
+}
 @
 
-<<set-opts, include=FALSE, cache=FALSE, echo=FALSE>>=
-
+<<set-opts, include=FALSE>>=
 options(
   scipen = 2,
   help_type = "html",
   stringsAsFactors = FALSE,
-  # prompt = "R> ",
   continue = "+  ",
   width = 70,
   useFancyQuotes = FALSE,
@@ -34,8 +36,8 @@ options(
 )
 @
 
-<<knitr-opts, include=FALSE, cache=FALSE, purl=FALSE>>=
-library("knitr")
+<<knitr-opts, include=FALSE, purl=FALSE>>=
+library(knitr)
 opts_knit$set(concordance=TRUE)
 opts_chunk$set(
   progress=TRUE,prompt=TRUE,highlight=FALSE,
@@ -47,17 +49,14 @@ opts_chunk$set(
   warning=FALSE,
   message=FALSE,
   error=TRUE,
-  echo=TRUE,
+  echo=FALSE,
   cache=FALSE,
   strip.white=TRUE,
   results="markup",
-  background="#FFFFFF00",
-  size="normalsize",
   fig.path="figure/",
   fig.lp="fig:",
   fig.align="center",
   fig.show="asis",
-  #    dpi=300,
   dev="pdf",
   dev.args=list(
     bg="transparent",
@@ -119,7 +118,7 @@ myround <- function (x, digits = 1) {
 \newcommand\fixed{\color{blue}}
 \newcommand\demography{D}
 
-\newcommand\mytitle{Informing policy via dynamic models: Eliminating cholera in Haiti}
+\newcommand\mytitle{Informing policy via dynamic models: Cholera in Haiti}
 \newcommand\comma{{\hspace{-0.25mm},\hspace{-0.2mm}}}
 
 %%%%%%%%%%%%%%%% START OF USER DEFINITIONS %%%%%%%%%%%%%%%5
@@ -324,14 +323,16 @@ In Sections 2.1, 2.2 and 2.3 of the main article, we define compartment models i
 For a discrete population model, these rates define a Markov chain.
 For a continuous and deterministic model, the rates define a system of ordinary differential equations.
 Here, we add additional details to clarify the mapping from a collection of rate functions to a fully specified process.
-Our treatment follows \citet{breto09}.
+Our treatment follows \citet{breto09} \jwc{TODO: Cite the short course}.
 
-A general compartment model is a vector-valued process $X(t)=(X_1(t),\dots,X_c(t))$ denoting the (integer or real-valued) counts in each of $c$ compartments.
+A general compartment model is a vector-valued process $X(t)=(X_1(t),\dots,X_c(t))$ denoting the (integer or real-valued) counts in each of $c$ compartments, where $t$ is any continuous value in the interval  $\left[t_0, \infty\right)$ for some real valued starting time $t_0$.
 The compartments may also have names, but to set up general notation we simply refer to them by their numerical index.
-The basic characteristic of a compartment model is that $X(t)$ can be written in terms of the flows $N_{ij}(t)$ from $i$ to $j$, together with flows into and out of each compartment denoted by $N_{\bullet i}(t)$ and $N_{i\bullet}(t)$ respectively.
+The basic characteristic of a compartment model is that $X(t)$ can be written in terms of the flows $N_{ij}(t)$ from $i$ to $j$.
+A flow into compartment $i$ from outside the system is denoted by $N_{\circ i}$, and a flow out of the system from compartment $i$ is denoted by $N_{i\circ}$.
+We call $\circ$ a source/sink compartment, though it is an irregular compartment since $X_{circ}(t)$ is not defined.
 These flows are required to satisfy a ``conservation of mass'' identity:
 \begin{equation}
-X_i(t)=X_i(0)+N_{\bullet i}(t) - N_{i\bullet}(t) + \sum_{j\neq
+X_i(t)=X_i(t_0)+N_{\bullet i}(t) - N_{i\bullet}(t) + \sum_{j\neq
 i}N_{ji}(t)-\sum_{j\neq i}N_{ij}(t). \label{eq:conservation}
 \end{equation}
 Each {\em flow} $N_{ij}(t)$ is associated with a {\em rate} function
@@ -364,11 +365,11 @@ A basic approach to this is to define
 \begin{eqnarray}
 \label{eq:smcs1}
 \prob\big[ N_{ij}(t+\delta)-N_{ij}(t)=0 \given X(t)\big]
- &=& 1-\delta \mu_{ij}\big(t,X(t)\big) + o(\delta),
+ &=& 1-\delta \mu_{ij}\big(t,X(t)\big)X_i(t) + o(\delta),
 \\
 \label{eq:smcs2}
 \prob\big[ N_{ij}(t+\delta)-N_{ij}(t)=1 \given X(t)\big]
- &=& \delta \mu_{ij}\big(t,X(t)\big) + o(\delta),
+ &=& \delta \mu_{ij}\big(t,X(t)\big)X_i(t) + o(\delta),
 \end{eqnarray}
 for $i\in \seq{1}{c}$ and $j\in\seq{1}{c}\cup\{\bullet\}$ with $i\neq j$.
 As with the ODE case, we need special attention for flows into the system, and we define
@@ -389,7 +390,6 @@ We note that the special case of Model~1 used by \cite{lee20} (with $\sigmaProc 
 To permit more general mean-variance relationships for a Markov counting system, we must permit jumps of size greater than one.
 The utility of overdispersed models, where the infinitesimal variance of the flow exceeds the infinitesimal mean, has become widely recognized \citep{stocks20,he10}.
 
-
 \subsection{Overdispersed Markov counting system interpretation}
 \label{subsec:odmcs}
 
@@ -405,9 +405,9 @@ where $\Gamma_{ij}(t)$ is a stochastic process having independent gamma distribu
 \label{eq:odmcs2}
 \E\big[\Gamma_{ij}(t)\big] = t, \quad \var\big[\Gamma_{ij}(t)\big] = \sigma_{ij}^2 t.
 \end{equation}
-Formally interpreting the meaning of \myeqref{eq:odmcs1} is not trivial, and we do so by defining the solution of \myeqref{eq:odmcs1} to be the limit of an Euler scheme.
+Formally interpreting the meaning of \myeqref{eq:odmcs1} is not trivial, and we do so by constructing a Markov process $X(t)$ as the limit of the Euler scheme descrived in Section~\ref{sec:numerics}, below.
 Therefore, the numerical scheme in Sec.~\ref{sec:numerics} can be taken as a definition of the meaning of \myeqref{eq:odmcs1}.
-The Markov chain defined by the limit of this Euler scheme as the step size decreases is an overdispersed Markov counting system, with the possibility of instantaneus jumps of size greater than one \citep{breto11}.
+The Markov chain defined by the limit of this Euler scheme as the step size decreases is an overdispersed Markov counting system, with the possibility of instantaneous jumps of size greater than one \citep{breto11}.
 
 \section{Numerical solutions to compartment models}
 \label{sec:numerics}
@@ -443,14 +443,16 @@ These probabilities correspond to competing hazards for every individual in comp
 Then, $\big(\Delta N_{i1},\dots,\Delta N_{ic},\Delta N_{i\bullet}\big)$ has the multinomial distribution where $X_i(t)$ individuals are allocated independently to $\seq{1}{c}\cup\{\bullet\}$ with probabilities given by \eqref{eq:numerics3} and \eqref{eq:numerics4}.
 We use the \code{reulermultinom} function in the \code{pomp} package to draw from this multionomial distribution.
 
-For the case $i=\bullet$, one can use
+Different treatments of demographic flows---such as birth, death, immigration and emigration---are possible.
+For the case $i=\bullet$, the treatment used by Model~1 is to set
 \begin{equation}
 \label{eq:numerics6}
 \Delta N_{\bullet j} \sim \mathrm{poisson}( \mu_{\bullet j} \delta),
 \end{equation}
-an independent Poisson random variable with mean $\mu_{\bullet j} \delta$, as was done in Model~1.
+an independent Poisson random variable with mean $\mu_{\bullet j} \delta$.
 
-Another common approach is to balance the total number of flows in and out of the compartment, i.e., $\sum_{i}N_{\bullet i}(t) = \sum_{i}N_{i \bullet}(t)$, in order to make the model consistent with the known total population, as was done in Models~2 and~3. In this case, we formally model the death rate as a rate of returning to the susceptible class $S$, and use external transitions from $\bullet$ into $S$ to describe only net population increase.
+Models~2 and 3 used an alternative approach, balancing the total number of flows in and out of the compartment, i.e., $\sum_{i}N_{\bullet i}(t) = \sum_{i}N_{i \bullet}(t)$, in order to make the model consistent with the known total population.
+In this case, we formally model the death rate as a rate of returning to the susceptible class $S$, and use external transitions from $\bullet$ into $S$ to describe only net population increase.
 
 \section{Measurement Models}
 
@@ -511,34 +513,35 @@ where $\Delta N_{S_{u \vaccCounter}I_{u \vaccCounter}}(n)$ is the number of indi
 This measurement model is a minor change from that used by \cite{lee20}, which allowed for a change in the reporting rate on January 1st, 2018.
 The fitted values of the reporting rate---before and after January 2018---were $0.97$ and $0.097$, respectively.
 An instantaneous change from near perfect to almost non-existent reporting can be problematic, as it forces the model to explain the observed reduction in reported cases as a decrease in the reporting of cases, rather than a decrease in the prevalence of cholera.
-This shift was justified by a "change of the case definition that occurred on January 1st, 2018";
+This shift was justified by a ``change of the case definition that occurred on January 1st, 2018";
 this claim was not cited, and we could find no evidence that such a drastic change in the reporting rate would be warranted.
 We therefore do not allow a change in reporting rate when fitting Model~3.
 
 \section{Initial Values}
 
-To perform inference on POMP models, it is necessary to propose an initial density for the latent process $f_{X_0}(x_0;\theta)$.
+To perform inference on POMP models, it is necessary to propose an initial probability density for the latent process $f_{X_0}(x_0;\theta)$, including the possibility that the initial values could be known, or could be a non-random function of the unknown parameter vector, $\theta$.
 This density is used to obtain initial values of the latent state when fitting and evaluating the model.
 For each of the models considered in this analysis, the initial conditions are derived by enforcing the model dynamics on reported cholera cases.
-It is also sometimes necessary to fit some initial value parameters in order to help determine starting values for weakly identifiable compartments.
+It is also sometimes necessary to fit some initial value parameters in order to help determine initial values for weakly identifiable compartments.
 In the following subsections, we mention initial value parameters that were fit for each model.
 
 \subsection{Model~1}
 
-For this model, the number of individuals in the Recovered and Asymptomatic compartments are set to zero, but the initial proportion of Infected and Exposed individuals is estimated as initial value parameters ($I(0)$ and $E(0)$, respectively) using the MIF2 algorithm.
+For this model, the number of individuals in the Recovered and Asymptomatic compartments are set to zero, but the initial proportion of Infected and Exposed individuals is estimated as initial value parameters ($I(0)$ and $E(0)$, respectively) using the IF2 algorithm, implemented as \texttt{mif2} in the \texttt{pomp} package.
 Finally, the initial proportion of Susceptible individuals $S_0$ is calculated as $S(0) = 1 - I(0) - E(0)$.
 
 \subsection{Model~2}
 
-Model~2 assumes that the initial vales are known and constant, and so no initial value parameters need to be estimated.
-Starting values for latent state compartments are chosen so as to enforce the model dynamics on the observed number of cases.
-Specifically, the model sets $I_{u}(0) = y^*_{u}(0) / \reportRate$ for each unit $u \in 1:10$, where $I_{u}(t)$ is the number of infected individuals in unit $u$ at time $t$, $y^*_{u}(t)$ is the reported number of cases, and $\reportRate$ is the reporting rate.
+Model~2 assumes that the initial values are a deterministic function of the reporting rate and the initial case reports, and so no initial value parameters need to be estimated.
+Initial values for latent state compartments are chosen so as to enforce the model dynamics on the observed number of cases.
+Specifically, the model sets $I_{u0}(0) = y^*_{1u} / \reportRate$ for each unit $u \in 1:10$, where $I_{u0}(t)$ is the number of infected individuals in unit $u$ at time $t$, vaccination scenario $z = 0$, $y^*_{tu}$ is the reported number of cases, and $\reportRate$ is the reporting rate.
 
 \subsection{Model~3}
 
 As described in the main test, the latent states are initialized by estimating of the number of infected, asymptomatic, and recovered individuals at time $t_0$ by using observed case counts at time $t_1$.
 The initial value for the bacteria compartment is then determined using the rainfall dynamics of Eq.~23.
-For the departments of Grande'Anse, Nord-Ouest, and Sud-Est, estimating the latent states at time $t_0$ using the observed data at time $t_1$ is problematic (see Sec.~\ref{sec:mod3Cal}), so we instead estimate initial value parameters $I_{u0}(0)$ for the integers $u \in \{3, 7, 9\}$, which correspond to the aforementioned departments, and the remaining hidden states are estimated by enforcing model dynamics using this result.
+For the departments of Grande'Anse, Nord-Ouest, and Sud-Est, estimating the latent states at time $t_0$ using the observed data at time $t_1$ is problematic (see Sec.~\ref{sec:mod3Cal}), so we instead estimate initial value of the latent state $I_{u0}(t_0)$ for the integers $u \in \{3, 7, 9\}$, which correspond to the aforementioned departments.
+The remaining hidden states are estimated by enforcing model dynamics using this result.
 
 % \section{Block Panel Iterated Filter}
 %
@@ -598,7 +601,7 @@ For the departments of Grande'Anse, Nord-Ouest, and Sud-Est, estimating the late
 
 \section{Calibrating Model~3 to observed cases}\label{sec:mod3Cal}
 
-<<CalibrateOrig3, echo=FALSE>>=
+<<CalibrateOrig3>>=
 set.seed(8636712)
 
 # Create vectors for the unit and shared parameters
@@ -607,6 +610,8 @@ shared_param_names <- c(
   "mu_B", "XthetaA", "thetaI", "lambdaR", "r", "std_W",
   "epsilon", "k"
 )
+
+# Vector containing all of the estimate parameter names.
 est_param_names <- c(
   unit_specific_names, shared_param_names
 )
@@ -614,6 +619,7 @@ est_param_names <- c(
 # Add unit numbers to each parameter
 est_param_names_expanded <- paste0(rep(est_param_names, each = 10), 1:10)
 
+# This function sets the rw.sd for named parameters, first search.
 set_rw_1 <- function(x) {
   if (gsub("[[:digit:]]+$", "", x) %in% shared_param_names) {
     return(0.01)
@@ -626,6 +632,7 @@ set_rw_1 <- function(x) {
   }
 }
 
+# This function sets the rw.sd for named parameters, second search.
 set_rw_2 <- function(x) {
   if (gsub("[[:digit:]]+$", "", x) %in% shared_param_names) {
     return(0.003)
@@ -638,6 +645,7 @@ set_rw_2 <- function(x) {
   }
 }
 
+# This function sets the rw.sd for named parameters, final search.
 set_rw_3 <- function(x) {
   if (gsub("[[:digit:]]+$", "", x) %in% shared_param_names) {
     return(0.0025)
@@ -665,7 +673,7 @@ reg_rw_3.sd <- lapply(est_param_names_expanded, set_rw_3)
 names(reg_rw_3.sd) <- est_param_names_expanded
 chol_rw_3.sd <- do.call(rw.sd, reg_rw_3.sd)
 
-# Search hyper-parameters for each run-level and search
+# Search1 hyper-parameters
 SEARCH1 = list(
   NBPF = 100,
   NP = 1000,
@@ -675,10 +683,11 @@ SEARCH1 = list(
   NREPS_EVAL = 8,
   RW_SD = chol_rw_1.sd,
   COOLING = 0.5,
-  KEEP_TRACES = TRUE,
-  KEEP_LIK_MAT = TRUE
+  KEEP_TRACES = FALSE,
+  KEEP_LIK_MAT = FALSE
 )
 
+# Search2 hyper-parameters
 SEARCH2 = list(
   TOP_N = 9,
   NBPF = 100,
@@ -689,10 +698,11 @@ SEARCH2 = list(
   NREPS_EVAL = 9,
   RW_SD = chol_rw_2.sd,
   COOLING = 0.5,
-  KEEP_TRACES = TRUE,
-  KEEP_LIK_MAT = TRUE
+  KEEP_TRACES = FALSE,
+  KEEP_LIK_MAT = FALSE
 )
 
+# Search3 hyper-parameters
 SEARCH3 = list(
   TOP_N = 6,
   NBPF = 100,
@@ -703,16 +713,15 @@ SEARCH3 = list(
   NREPS_EVAL = 9,
   RW_SD = chol_rw_3.sd,
   COOLING = 0.5,
-  KEEP_TRACES = TRUE,
+  KEEP_TRACES = FALSE,
   KEEP_LIK_MAT = TRUE
 )
 
 N_SEARCHES <- 3L
 
-# TODO: Move to run_level_3 folder...
+save_file <- "../model3/si/fit_orig_model.rds"
 
-save_file <- "../model3/run_level_2/fit_orig_model.rds"
-
+# Fit the model and save the results
 haiti3_orig_fit <- bake(
   file = save_file, {
     fit_coupled_haiti3(
@@ -727,14 +736,18 @@ haiti3_orig_fit <- bake(
   }
 )
 
+# Find model index with best log-likelihood
 best_m <- which.max(haiti3_orig_fit$search3$logLiks$logLik)
 
+# Find parameters using best_m index
 best_params <- haiti3_orig_fit$search3$params[best_m, ]
 
+# Get unit log-likelihoods for the best model.
 all_liks <- as.data.frame(haiti3_orig_fit$search3$likMat)
-all_liks$which <- rep(1:36, each = 9)
+all_liks$which <- rep(1:(SEARCH3$TOP_N * SEARCH3$NREPS), each = SEARCH3$NREPS_EVAL)
 best_mod <- filter(all_liks, which == best_m)
 
+# Pivot longer to get estimate of log-likelihood for each unit.
 unitLikesM3 <- best_mod %>%
   pivot_longer(
     cols = -which,
@@ -754,7 +767,11 @@ unitLikesM3 <- best_mod %>%
 @
 
 
-<<M3_bench, echo=FALSE, message=FALSE, include=FALSE>>=
+<<M3_bench, echo=FALSE, message=FALSE, include=FALSE, cache=TRUE>>=
+
+# Create dataset that will be used to fit ARMA models. To do this, we
+# need to make sure that missing values are marked as NA, so we check
+# for any jumps in time.
 MODEL3_CASES <- haitiCholera %>%
   dplyr::rename(
     date = date_saturday, Grande_Anse = Grand.Anse,
@@ -765,8 +782,10 @@ MODEL3_CASES <- haitiCholera %>%
   dplyr::select(-report) %>%
   dplyr::mutate(time_diff = date - lag(date))
 
+# Find jumps
 jumps <- which(MODEL3_CASES$time_diff > lubridate::make_difftime(day = 7))
 
+# If there is a jump, insert NA between observations
 temp <- MODEL3_CASES
 for (j in 1:length(jumps)) {
   temp <- rbind(
@@ -776,8 +795,7 @@ for (j in 1:length(jumps)) {
   )
 }
 
-mod3_cases <- temp %>%
-  dplyr::select(-time_diff)
+mod3_cases <- temp %>% dplyr::select(-time_diff)
 
 mod3_departements <-
   c(
@@ -825,6 +843,8 @@ unitLikesARMA <- data.frame(
 <<combineARMA_M3, echo=FALSE>>=
 h3 <- haiti3_spatPomp()
 deps <- h3@unit_names
+
+# Combine tables with model 3 and benchmark likelihoods.
 ARMA_M3_joined <- dplyr::left_join(
   x = unitLikesM3,
   y = unitLikesARMA,
@@ -842,22 +862,36 @@ ARMA_M3_joined <- dplyr::left_join(
 
 <<M3bpf, echo=FALSE, message=FALSE, include=FALSE>>=
 
+# Change model parameters to the best set of parameters from previous
+# search
 coef(h3)[names(best_params)] <- best_params
 
-registerDoRNG(40765101)
+registerDoRNG(40765101)  # for modular, reproducible results
 
-bpf_out <- bake(
-  file = "../model3/run_level_3/si_bpf.rds", {
-    h3 %>% bpfilter(
+# Perform block partical filter with fitted model, to get conditional
+# log-likelihoods.
+bpf_orig3_out <- bake(
+  file = "../model3/si/bpf_orig3_cond_LL.rds", {
+
+    results <- list()
+
+    bpf_out <- h3 %>% bpfilter(
       Np = 2000,
       block_size = 1,
       save_states = TRUE
     )
-  }
+
+    results$Sus_df <- foreach(i=1:length(h3@times), .combine = bind_rows) %do% {
+      get_h3_S_quants(bpf_out, i)
+    }
+
+    results$block.cond.loglik <- bpf_out@block.cond.loglik
+    results$times <- bpf_out@times  # Saved for convenience
+    results
+  },
+  seed = 432235
 )
-
 @
-
 
 In this section, we provide more detail on the process that was used to estimate the coefficients used in Model~3.
 In particular, we discuss why we decided to include additional model parameters that were not considered by \cite{lee20} (parameters related to initial conditions and Hurricane Matthew).
@@ -901,20 +935,22 @@ This figure reveals that the fitted model has difficult time explaining certain 
 For example, many departments (in particular Sud) have observations with lower conditional log-likelihoods near October 2016 than at other time points.
 Further investigation of the model output reveals that the model is struggling to explain the sudden surge in cholera cases that occurred at this time, which coincides with the time that Hurricane Matthew struck Haiti.
 While the model does include a mechanism to account for increased cholera transmission due to large rainfall events, the mechanism does not appear to be sufficient to capture the damaging effects of the hurricane, which had the greatest impact in the the Sud and Grand'Anse departments \citep{ferreirai16}.
-This result led us to include parameters $\Whur{u}$ and $\hHur{u}$ in Eq.~23 that would increase the transmission between environmental cholera and humans for Sud and Grand'Anse.
+This result led us to include parameters $\Whur{u}$ and $\hHur{u}$ in Eq.~23 of the main text, which allows for an increase in the transmission rate between environmental cholera and humans for Sud and Grand'Anse during and after the hurricane.
 The effect of the hurricane on cholera transmission is assumed to have an exponential decay, where the magnitude is determined by $\Whur{u}$ and the duration of the effect determined by $\hHur{u}$.
 
 \begin{figure}[ht]
 <<CondLLFig, echo=FALSE, message=FALSE, fig.height=3>>=
+
+# Changing labels to human-readable labels.
 deps[grepl("_", deps)] <- gsub("_", "-", deps[grepl("_", deps)])
 deps[deps == "Grande-Anse"] <- "Grand\'Anse"
 names(deps) <- as.character(1:10)
-
 myLabeller <- as_labeller(deps)
 
-t(bpf_out@block.cond.loglik) %>%
+# Plot conditional log-likelihoods for each unit
+t(bpf_orig3_out$block.cond.loglik) %>%
   as.data.frame() %>%
-  mutate(t = bpf_out@times) %>%
+  mutate(t = bpf_orig3_out$times) %>%
   pivot_longer(
     cols = -t,
     values_to = 'likelihood',
@@ -944,14 +980,19 @@ We therefore include and estimate $I_{0u}$ that determines the initial number of
 each of these departments have both low starting case counts followed by rapid growth, and low initial values of the conditinoal log-likelihood.
 
 <<loadFinalModel3, echo=FALSE, include=FALSE, message=FALSE>>=
+
+# This result was used in the manuscript, so it doesn't need to be recalculated.
 h3_final_results <- readRDS("../model3/run_level_3/haiti3_coupled_fit.rds")
 
+# Save best_m as index for the model parameters with the best likelihood.
+# Then, save the model parameter values and the likelihood evaluations
 best_m <- which.max(h3_final_results$search3$logLiks$logLik)
 best_params <- h3_final_results$search3$params[best_m, ]
 all_liks <- as.data.frame(h3_final_results$search3$likMat)
 all_liks$which <- rep(1:72, each = 18)
 best_mod <- dplyr::filter(all_liks, which == best_m)
 
+# Get repeated estimates of unit log-likelihoods
 unitLikesM3 <- best_mod %>%
   pivot_longer(
     cols = -which,
@@ -969,6 +1010,7 @@ unitLikesM3 <- best_mod %>%
   mutate(unit = as.numeric(unit)) %>%
   arrange(unit)
 
+# Combine model likelihood table to benchmarks
 ARMA_M3_joined <- dplyr::left_join(
   x = unitLikesM3,
   y = unitLikesARMA,
@@ -1005,15 +1047,25 @@ ggplot(ARMA_M3_joined, aes(x = ll, y = reorder(unit, ll))) +
 \end{figure}
 
 <<finalModel3BPF, echo=FALSE, message=FALSE, include=FALSE>>=
+
+# Set the model parameters to the best results from previous search
 coef(h3)[names(best_params)] <- best_params
 
-bpf_out <- bake(
-  file = "../model3/run_level_3/si_h3_final_bpf.rds", {
-    h3 %>% bpfilter(
+# block particle filter to get conditional log-likelihoods.
+bpf_final3_out <- bake(
+  file = "../model3/si/h3_final_bpf_cond_ll.rds", {
+
+    results <- list()
+
+    bpf_out <- h3 %>% bpfilter(
       Np = 2000,
       block_size = 1,
       save_states = TRUE
     )
+
+    results$block.cond.loglik <- bpf_out@block.cond.loglik
+    results$times <- bpf_out@times  # saved for convenience
+    results
   },
   seed = 786321
 )
@@ -1021,9 +1073,9 @@ bpf_out <- bake(
 
 \begin{figure}[ht]
 <<finalCondLLFig, echo=FALSE, message=FALSE, fig.height=3>>=
-t(bpf_out@block.cond.loglik) %>%
+t(bpf_final3_out$block.cond.loglik) %>%
   as.data.frame() %>%
-  mutate(t = bpf_out@times) %>%
+  mutate(t = bpf_final3_out$times) %>%
   pivot_longer(
     cols = -t,
     values_to = 'likelihood',
@@ -1046,7 +1098,7 @@ t(bpf_out@block.cond.loglik) %>%
 
 While the addition of the Hurricane parameters seems to have resulted in a dramatic increase of conditional likelihoods around and after October 2016, the inclusion of the initial value parameters does not appear to have fixed the low conditional log-likelihood values in Sud-Est and Nord-Ouest.
 This could be due to many factors, including the possibility that the coupling between units forces low initial value parameters in a given department in order for the model to fit the data in the remaining departments.
-Whatever the case may be, the inclusion of the seven parameters resulted in a $\Sexpr{round(max(h3_final_results$search3$logLiks$logLik - haiti3_orig_fit$search3$logLiks$logLik), 1)}$, which is a highly statistically significant difference.
+Whatever the case may be, the inclusion of the seven parameters resulted in a $\Sexpr{round(max(h3_final_results$search3$logLiks$logLik) - max(haiti3_orig_fit$search3$logLiks$logLik), 1)}$ increase in log-likelihood, which is a highly statistically significant difference.
 One could similarly test whether the inclusion of the initial value parameters resulted in a significantly better fit to the observed data, but we do not do this here due to the large computational effort that would be required.
 
 \subsection{Examining the Hidden States of the Calibrated Model}
@@ -1066,18 +1118,29 @@ This also appears true in later stages of the time period of observed data, wher
 This result demonstrates that the calibrated model favors a more rapid growth in cholera cases than what is typically seen in the observed data, which explains why the model fails to predict the absence of cases between February, 2019 and October, 2022.
 
 <<h3SusFigSetup, echo=FALSE, message=FALSE, include=FALSE>>=
+
+# This bake perfoms the following:
+#  (1) simulates the model from initial conditions
+#  (2) get the values of the hidden states at the end of each simulation, and
+#      saves these for later use.
+#  (3) Obtain quantiles for the Susceptible pool from the simulations.
 init_conditions_results <- bake(
-  file = "../model3/run_level_3/si_InitSimsQuants.rds", {
+  file = "../model3/si/InitSimsQuants.rds", {
 
-    results <- list()
+    results <- list()  # To return final output of bake
 
+    # Simulate from the fitted model
     h3Spat_sims <- simulate(
-      h3, nsim = 200, format = 'data.frame'
+      h3, nsim = 2000, format = 'data.frame'
     )
 
+    # Get states at the end of the simulations
     h3_spat_end <- h3Spat_sims %>%
       filter(time == max(time))
 
+    # Save hidden state values at the end of the simulation. Saved as a matrix
+    # in the same format as the output from a block-particle filter, so that
+    # it can be used as the input to project_from_filter.
     results[["end_conditions"]] <- h3_spat_end %>%
       select(-time, -cases) %>%
       mutate(
@@ -1108,6 +1171,7 @@ init_conditions_results <- bake(
       as.matrix() %>%
       t()
 
+    # Get the quantiles for the Susceptible pool from the simulations
     results[["SQuants"]] <- h3Spat_sims %>%
       rename(dep = unitname) %>%
       group_by(dep, time) %>%
@@ -1125,7 +1189,11 @@ init_conditions_results <- bake(
         Q50  = Q50  / h3@params[paste0("H", unit_num)],
         Q975 = Q975 / h3@params[paste0("H", unit_num)]
       ) %>%
-      filter(date >= as.Date(lubridate::round_date(lubridate::date_decimal(h3@t0), unit = 'day'))) %>%
+      filter(
+        date >= as.Date(
+          lubridate::round_date(lubridate::date_decimal(h3@t0), unit = 'day')
+        )
+      ) %>%
       mutate(date = as.Date(lubridate::round_date(date, unit = 'day')))
 
     results
@@ -1133,10 +1201,13 @@ init_conditions_results <- bake(
   seed = 834687
 )
 
+# Get the output of the "bake" call for plotting.
 h3Spat_quants <- init_conditions_results[["SQuants"]]
 
+# This bake call uses the ending hidden states from above to forecast cholera
+# cases in the future under the V0 vaccination scenario
 mod3_V0_initcond_res <- bake(
-  file = '../model3/run_level_3/si_vacc_sim_from_init.rds', {
+  file = '../model3/si/vacc_sim_from_init.rds', {
     h3_V0_res <- list()
 
     # Get "noVacc" scenario parameters
@@ -1148,10 +1219,10 @@ mod3_V0_initcond_res <- bake(
 
     h3_bpf_end_states <- init_conditions_results$end_conditions
 
-    # Using parameters and filtered distribution, project system
+    # Using parameters and end state values, obtain projections
     h3_V0_sims <- project_from_filter(
       h3Spat, end_states = h3_bpf_end_states, covarGen = project_rain,
-      nsims = 500, seed = 184697
+      nsims = 1000, seed = 184697
     )
 
     # Store nationally aggregated results
@@ -1182,9 +1253,18 @@ mod3_V0_initcond_res <- bake(
         ]
       ) %>%
       summarize(
-        Q025 = quantile((S + VSd + VSdd + VSdd_alt + VSd_alt) / pop, probs = 0.025),
-        Q50 = quantile((S + VSd + VSdd + VSdd_alt + VSd_alt) / pop, probs = 0.5),
-        Q975 = quantile((S + VSd + VSdd + VSdd_alt + VSd_alt) / pop, probs = 0.975)
+        Q025 = quantile(
+          (S + VSd + VSdd + VSdd_alt + VSd_alt) / pop,
+          probs = 0.025
+        ),
+        Q50 = quantile(
+          (S + VSd + VSdd + VSdd_alt + VSd_alt) / pop,
+          probs = 0.5
+        ),
+        Q975 = quantile(
+          (S + VSd + VSdd + VSdd_alt + VSd_alt) / pop,
+          probs = 0.975
+        )
       ) %>%
       ungroup() %>%
       rename(dep = unitname)
@@ -1193,14 +1273,8 @@ mod3_V0_initcond_res <- bake(
   }
 )
 
-Sus_df <- bake(
-  file = "../model3/run_level_3/si_S_quants.rds", {
-    foreach(i=1:length(h3@times), .combine = bind_rows) %do% {
-      get_h3_S_quants(bpf_out, i)
-    }
-  }
-)
-
+# This result was already used in the manuscript; it doesn't need to
+# be recalculated.
 mod3_V0_res <- readRDS("../model3/run_level_3/mod3_V0_res.rds")
 @
 
@@ -1223,12 +1297,12 @@ ggplot() +
   ) +
   # Sims from filtered distribution
   geom_line(
-    data = Sus_df,
+    data = bpf_orig3_out$Sus_df,
     aes(x = as.Date(lubridate::date_decimal(time)), y = Q50),
     col = 'blue'
   ) +
   geom_ribbon(
-    data = Sus_df,
+    data = bpf_orig3_out$Sus_df,
     aes(x = as.Date(lubridate::date_decimal(time)), ymin = Q025, ymax = Q975),
     fill = 'blue', alpha = 0.5
   ) +
@@ -1251,14 +1325,14 @@ Simulations from Model~3 under initial conditions are displayed in red; simulati
 The dashed line represents the end of the observed data.}
 \end{figure}
 
-\section{Lee et al. (2020) Replication}
+\section{Replication of \cite{lee20}}
 
 In this article we claimed that we were able to obtain better fits to the observed data using the same models that were proposed by \cite{lee20}.
 Along with visual comparisons to the data, this claim was supported by comparing likelihoods and AIC values in Table~1.
 Because model likelihoods were not provided by \cite{lee20}, it is necessary to replicate these models in order to obtain likelihood estimates.
 Here we would like to thank the authors of \cite{lee20}, who provided detailed descriptions of their models, which enabled us to build on their work.
 In the following subsections, we use our \code{R} package \code{haitipkg} to reproduce some of the results of \cite{lee20}.
-This reproduction allows us to estimate the likelihoods of the \cite{lee20} version of Models~1--3, and also provides a demonstration on reproducibility.
+This reproduction allows us to estimate the likelihoods of the \cite{lee20} version of Models~1--3, and also provides a demonstration of reproducibility.
 
 \subsection{Model~1 Replication}
 
@@ -1420,7 +1494,11 @@ ggplot() +
         axis.text.x = element_text(hjust = 1, angle = 45))
 @
 
-To calculate an upper-bound on the likelihood of this model---which uses a large number of parameters that each have a different likelihood value---we estimate the likelihood corresponding to each parameter set using a particle filter, and report the maximum of these likelihoods.
+Because the model forecasts provided by \cite{lee20} come from various sets of parameters---which each correspond to a unique log-likelihood value---it is not obvious how one would obtain an estimate for the log-likelihood of the model that was used for simulations by the Model~1 authors.
+One approach could be to calculate the logarithm of the weighted mean of the likelihoods for each parameter sets used to obtain the forecasts, where the weights are proportional to the number of times the parameter set was used.
+However, in an effort to not underestimate the likelihood of the model of the Model~1 authors, we report the estimated log-likelihood as the log-likelihood value corresponding to the parameter set with the largest likelihood value, even though the majority of simulations were obtained using parameter sets with lower likelihood values.
+In this sense, we consider the log-likelihood reported in Table~1 of the main text to be an upper-bound of the log-likelihood of the model used by \cite{lee20}.
+For each parameter set, the log-likelihood was estimated using a particle filter, implemented as the \texttt{pfilter} function in the \texttt{pomp} package.
 
 \subsection{Model~2 Replication}\label{sec:mod2rep}
 
@@ -1593,14 +1671,43 @@ dep_labeller <- as_labeller(
 )
 
 lee3 <- lee3_spatPomp()
-lee3_sims <- bake("../model3/run_level_3/si_lee3Sims.rds", {
-  simulate(lee3, nsim = NSIM, seed = 321, format = 'data.frame')
+lee3_sims_quants <- bake("../model3/si/lee3Sims.rds", {
+
+  # Simulate from lee et al 2020 model
+  sims_temp <- simulate(
+    lee3, nsim = NSIM,
+    seed = 321, format = 'data.frame'
+  )
+
+  # Get desired quantiles of reported cases from simulations
+  quants <- sims_temp %>%
+    dplyr::group_by(unitname, time) %>%
+    dplyr::summarise(
+      q05 = quantile(cases, 0.025, na.rm = T),
+      mean = mean(cases, na.rm = T),
+      q50 = quantile(cases, 0.5, na.rm = T),
+      q95 = quantile(cases, 0.975, na.rm = T)
+    ) %>%
+    dplyr::ungroup() %>%
+    dplyr::mutate(
+      date = lubridate::date_decimal(time),
+      date = as.Date(lubridate::round_date(date))
+    ) %>%
+    dplyr::rename(dep = unitname)
+
+  # Remove cases from Ouest that were not considered by Lee et al. (2020)
+  quants %>%
+    dplyr::filter(
+      !(dep == "Ouest" & date < '2017-06-10')
+    )
+
 })
 
+# Get the subset of cholera cases that match simulations from Lee et al. (2020) model.
 sub_cases <- haitiCholera %>%
   dplyr::mutate(date = as.Date(date_saturday)) %>%
   dplyr::select(-report, -date_saturday) %>%
-  dplyr::filter(lubridate::decimal_date(date) >= min(lee3_sims$time)) %>%
+  dplyr::filter(lubridate::decimal_date(date) >= min(lee3@times)) %>%
   tidyr::pivot_longer(
     data = .,
     cols = -date,
@@ -1616,36 +1723,32 @@ sub_cases <- haitiCholera %>%
       TRUE ~ dep
     )
   )
-
-quants <- lee3_sims %>%
-  dplyr::group_by(unitname, time) %>%
-  dplyr::summarise(
-    q05 = quantile(cases, 0.025, na.rm = T),
-    mean = mean(cases, na.rm = T),
-    q50 = quantile(cases, 0.5, na.rm = T),
-    q95 = quantile(cases, 0.975, na.rm = T)
-  ) %>%
-  dplyr::ungroup() %>%
-  dplyr::mutate(
-    date = lubridate::date_decimal(time),
-    date = as.Date(lubridate::round_date(date))
-  ) %>%
-  dplyr::rename(dep = unitname)
-
-quants <- quants %>%
-  dplyr::filter(
-    !(dep == "Ouest" & date < '2017-06-10')
-  )
 @
 
 \begin{figure}[ht]
 <<PlotMod3Rep, echo=FALSE, message=FALSE, fig.height=3.75>>=
 ggplot() +
-  geom_ribbon(data = quants, aes(x = date, ymin = q05, ymax = q95),
-              fill = 'darkblue', alpha = 0.5) +
-  geom_line(data = quants, aes(x = date, y = q50), col = 'darkblue') +
-  geom_point(data = dplyr::filter(sub_cases, cases < 500), aes(x = date, y = cases), size = 0.2) +
-  facet_wrap(~factor(dep, levels = plot_order), nrow = 2, labeller = dep_labeller) +
+  # Region for upper and lower simulation bounds
+  geom_ribbon(
+    data = lee3_sims_quants,
+    aes(x = date, ymin = q05, ymax = q95),
+    fill = 'darkblue', alpha = 0.5
+  ) +
+  # Median line
+  geom_line(
+    data = lee3_sims_quants,
+    aes(x = date, y = q50),
+    col = 'darkblue'
+  ) +
+  # Observed data
+  geom_point(
+    data = dplyr::filter(sub_cases, cases < 500),
+    aes(x = date, y = cases), size = 0.2
+  ) +
+  facet_wrap(
+    ~factor(dep, levels = plot_order),
+    nrow = 2, labeller = dep_labeller
+  ) +
   labs(y = 'Reported Cholera Cases') +
   scale_x_date(date_breaks = "6 months", date_labels = "%Y-%m") +
   theme(
@@ -1660,7 +1763,7 @@ Compare to Figure S18 of \cite{lee20}.
 \end{figure}
 
 <<lee3Cleanup, echo=FALSE, include=FALSE, message=FALSE>>=
-rm(lee3, lee3_sims, quants, sub_cases)
+rm(lee3, lee3_sims_quants, sub_cases)
 gc()
 @
 
@@ -1675,13 +1778,13 @@ In a Bayesian modelling paradigm, the most natural way to account for parameter 
 When frequentist methods are used, however, there does not exist a posterior distribution from which one could sample.
 A common approach could be to obtain a weighted average of the simulations from various models \citep{hoeting99}, but this can be problematic when forecasts from each model are very different from each other \citep{grueber11}.
 A similar approach that has been taken \citep{king15} is to obtain model forecasts using multiple sets of parameter values and then sample from the resulting forecasts using weights proportional to the corresponding likelihoods of the parameter values.
-This approach could be considered a quasi-Empirical Bayes, as it is equivalent to using a discrete uniform prior where the set of values in the prior distribution is determined by a stochastic routine applied to the observed data, as discussed below.
+This approach could be considered as empirical Bayes, as it is equivalent to using a discrete uniform prior where the set of values in the prior distribution is determined by a stochastic routine applied to the observed data, as discussed below.
 
 For each $i \in 1:k$, let $\Theta_i$ be a random vector of model parameters.
 Then, letting $\Theta$ denote the true model parameters, we endow the set $\{\Theta_1, \Theta_2, \ldots, \Theta_k\}$ with a discrete uniform distribution, such that $P\big(\Theta = \Theta_i\big) = \frac{1}{K}$ for all values $i \in \seq{1}{k}$.
 Using this as a prior distribution, the posterior distribution of $\Theta | Y_{1:N} = y_{1:N}^*$ can be expressed as:
 $P\big(\Theta = \Theta_k | Y_{1:N} = y_{1:N}^*\big) = \frac{f_{Y_{1:N}}(y_{1:N}^*| \Theta_k)}{\sum_{l = 1}^K f_{Y_{1:N}}(y_{1:N}^*| \theta_l)}$.
-In a true Empirical Bayes analysis, the values $\Theta_1, \ldots, \Theta_k$ of the prior distribution would be chosen using the observed data, resulting in a posterior distribution that weighs the prior parameter vectors proportional to their corresponding likelihoods.
+In a standard empirical Bayes analysis, the values $\Theta_1, \ldots, \Theta_k$ of the prior distribution would be chosen using the observed data, resulting in a posterior distribution that weighs the prior parameter vectors proportional to their corresponding likelihoods.
 Instead, we choose $\Theta_i$ to be the output of a stochastic routine applied to the observed data by setting $\Theta_i$ to be the output of an iterated filtering algorithm.
 In practice, because the likelihood maximization routines of iterated filtering methods are stochastic, it is common to run the iterated filtering method multiple times for each model in order to obtain a maximum likelihood estimate for model parameters.
 This results in a natural set of parameters near the MLE that could be used in in the discrete prior distribution.
