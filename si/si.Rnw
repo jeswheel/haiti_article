@@ -881,10 +881,6 @@ bpf_orig3_out <- bake(
       save_states = TRUE
     )
 
-    results$Sus_df <- foreach(i=1:length(h3@times), .combine = bind_rows) %do% {
-      get_h3_S_quants(bpf_out, i)
-    }
-
     results$block.cond.loglik <- bpf_out@block.cond.loglik
     results$times <- bpf_out@times  # Saved for convenience
     results
@@ -1063,6 +1059,10 @@ bpf_final3_out <- bake(
       save_states = TRUE
     )
 
+    results$Sus_df <- foreach(i=1:length(h3@times), .combine = bind_rows) %do% {
+      get_h3_S_quants(bpf_out, i)
+    }
+
     results$block.cond.loglik <- bpf_out@block.cond.loglik
     results$times <- bpf_out@times  # saved for convenience
     results
@@ -1217,6 +1217,7 @@ mod3_V0_initcond_res <- bake(
     coef(h3Spat) <- p3
     coef(h3Spat)[names(h3_S0_par)] <- h3_S0_par
 
+    # store the end states that will be used as initial values
     h3_bpf_end_states <- init_conditions_results$end_conditions
 
     # Using parameters and end state values, obtain projections
@@ -1229,9 +1230,12 @@ mod3_V0_initcond_res <- bake(
     h3_V0_res$mod3_V0_sims <- agg_mod3_sims(h3_V0_sims)
     h3_V0_res$mod3_V0_probs <- get_elimProbs(h3_V0_sims, model = 3)
 
+    # Get quantiles of observed cases for each department and time
     h3_V0_res$UnitQuants <- h3_V0_sims %>%
       mutate(
-        date = as.Date(lubridate::round_date(lubridate::date_decimal(time), unit = 'day'))
+        date = as.Date(  # Get date object from decimal time
+          lubridate::round_date(lubridate::date_decimal(time), unit = 'day')
+        )
       ) %>%
       group_by(unitname, date) %>%
       summarize(
@@ -1242,17 +1246,19 @@ mod3_V0_initcond_res <- bake(
       ungroup() %>%
       rename(dep = unitname)
 
+    # Get quantiles of susceptible individuals for each department and time
     h3_V0_res$SQuants <- h3_V0_sims %>%
       mutate(
-        date = as.Date(lubridate::round_date(lubridate::date_decimal(time), unit = 'day'))
+        date = as.Date(
+          lubridate::round_date(lubridate::date_decimal(time), unit = 'day')
+        )
       ) %>%
       group_by(unitname, date) %>%
       mutate(
-        pop = h3@params[
-          paste0("H", which(first(unitname) == unit_names(h3)))
-        ]
+        # Get the population for each unit
+        pop = h3@params[paste0("H", which(first(unitname) == unit_names(h3)))]
       ) %>%
-      summarize(
+      summarize(  # Calculate the quantiles
         Q025 = quantile(
           (S + VSd + VSdd + VSdd_alt + VSd_alt) / pop,
           probs = 0.025
@@ -1297,12 +1303,12 @@ ggplot() +
   ) +
   # Sims from filtered distribution
   geom_line(
-    data = bpf_orig3_out$Sus_df,
+    data = bpf_final3_out$Sus_df,
     aes(x = as.Date(lubridate::date_decimal(time)), y = Q50),
     col = 'blue'
   ) +
   geom_ribbon(
-    data = bpf_orig3_out$Sus_df,
+    data = bpf_final3_out$Sus_df,
     aes(x = as.Date(lubridate::date_decimal(time)), ymin = Q025, ymax = Q975),
     fill = 'blue', alpha = 0.5
   ) +
