@@ -437,10 +437,11 @@ Thus, we encounter the methodological task of building credible, data-informed d
 This necessitates addressing the tradeoff between biological fidelity and model simplicity, and the reality of misspecification for models at all levels of complexity.
 As a case study, we consider a cholera epidemic in Haiti.
 The 2010 introduction of cholera to Haiti led to an extensive outbreak and sustained transmission.
-Cholera was eliminated in 2019, though it returned in 2022.
-We study three models developed by expert teams to advise on vaccination policies.
-We assess methods used for fitting and evaluating these models, leading to recommendations for future studies.
-Diagnosis of model misspecification and development of alternative models can lead to improved statistical fit, but caution is nevertheless required in drawing policy conclusions based on causal interpretations of the models.
+Cholera was considered eliminated in 2019, though it reemerged in 2022.
+We study three dynamic models developed by expert teams to advise on vaccination policies.
+We assess previous methods used for fitting and evaluating these models, and we develop data analysis strategies leading to improved statistical fit.
+Specifically, we present approaches to diagnosis of model misspecification, development of alternative models, and computational improvements in optimization, in the context of likelihood-based inference on nonlinear dynamic systems.
+Our workflow is reproducible and extendable, facilitating future investigations of this disease system.
 \end{abstract}
 
 \begin{keyword}
