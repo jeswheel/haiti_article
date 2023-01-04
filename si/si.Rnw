@@ -116,7 +116,7 @@ myround <- function (x, digits = 1) {
 
 \newcommand\missing{\hspace{6mm} ---}
 \newcommand\fixed{\color{blue}}
-\newcommand\demography{D}
+\newcommand\demography{\bullet}
 
 \newcommand\mytitle{Informing policy via dynamic models: Cholera in Haiti}
 \newcommand\comma{{\hspace{-0.25mm},\hspace{-0.2mm}}}
@@ -328,15 +328,15 @@ Our treatment follows \citet{breto09} \jwc{TODO: Cite the short course}.
 A general compartment model is a vector-valued process $X(t)=(X_1(t),\dots,X_c(t))$ denoting the (integer or real-valued) counts in each of $c$ compartments, where $t$ is any continuous value in the interval  $\left[t_0, \infty\right)$ for some real valued starting time $t_0$.
 The compartments may also have names, but to set up general notation we simply refer to them by their numerical index.
 The basic characteristic of a compartment model is that $X(t)$ can be written in terms of the flows $N_{ij}(t)$ from $i$ to $j$.
-A flow into compartment $i$ from outside the system is denoted by $N_{\circ i}$, and a flow out of the system from compartment $i$ is denoted by $N_{i\circ}$.
-We call $\circ$ a source/sink compartment, though it is an irregular compartment since $X_{circ}(t)$ is not defined.
+A flow into compartment $i$ from outside the system is denoted by $N_{\demography i}$, and a flow out of the system from compartment $i$ is denoted by $N_{i\demography}$.
+We call $\demography$ a source/sink compartment, though it is an irregular compartment since $X_{\demography}(t)$ is not defined.
 These flows are required to satisfy a ``conservation of mass'' identity:
 \begin{equation}
-X_i(t)=X_i(t_0)+N_{\bullet i}(t) - N_{i\bullet}(t) + \sum_{j\neq
+X_i(t)=X_i(t_0)+N_{\demography i}(t) - N_{i\demography}(t) + \sum_{j\neq
 i}N_{ji}(t)-\sum_{j\neq i}N_{ij}(t). \label{eq:conservation}
 \end{equation}
 Each {\em flow} $N_{ij}(t)$ is associated with a {\em rate} function
-$\mu_{ij}=\mu_{ij}(t,X(t))$, where we include the possibility that $i$ or $j$ takes value $\bullet$.
+$\mu_{ij}=\mu_{ij}(t,X(t))$, where we include the possibility that $i$ or $j$ takes value $\demography$.
 
 There are different ways to use a collection of rate functions to build a fully specified model.
 We proceed to describe the ones we use in this paper: via a system of ordinary differential equations (Sec.~\ref{subsec:ode}), a simple Markov counting system (Sec.~\ref{subsec:smcs}), and an overdispersed Markov counting system (Sec.~\ref{subsec:odmcs}). Other representations include stochastic differential equations driven by Gaussian noise or Gamma noise \citep{bhadra11}.
@@ -347,14 +347,14 @@ We proceed to describe the ones we use in this paper: via a system of ordinary d
 A basic deterministic specification is
 \begin{equation}
 \label{eq:ode1}
-dN_{ij}/dt = \mu_{ij}\big(t,X(t) \big) X_i(t), \hspace{3mm} i\in \seq{1}{c}, \hspace{3mm} j\in \seq{1}{c} \cup\{\bullet\}, \hspace{3mm} i\neq j,
+dN_{ij}/dt = \mu_{ij}\big(t,X(t) \big) X_i(t), \hspace{3mm} i\in \seq{1}{c}, \hspace{3mm} j\in \seq{1}{c} \cup\{\demography\}, \hspace{3mm} i\neq j,
 \end{equation}
 where $\mu_{ij}\big(t,X(t)\big)$ is called a per-capita rate or a unit rate.
-Flows into the system require special treatment since $X_i(t)$ in \myeqref{eq:ode1} is not defined for $i=\bullet$.
+Flows into the system require special treatment since $X_i(t)$ in \myeqref{eq:ode1} is not defined for $i=\demography$.
 Instead, we specify
 \begin{equation}
 \label{eq:ode2}
-dN_{\bullet i}/dt = \mu_{\bullet i}\big(t,X(t) \big).
+dN_{\demography i}/dt = \mu_{\demography i}\big(t,X(t) \big).
 \end{equation}
 This is the the interpretation and implementation used for Model~2 in our study.
 
@@ -371,16 +371,16 @@ A basic approach to this is to define
 \prob\big[ N_{ij}(t+\delta)-N_{ij}(t)=1 \given X(t)\big]
  &=& \delta \mu_{ij}\big(t,X(t)\big)X_i(t) + o(\delta),
 \end{eqnarray}
-for $i\in \seq{1}{c}$ and $j\in\seq{1}{c}\cup\{\bullet\}$ with $i\neq j$.
+for $i\in \seq{1}{c}$ and $j\in\seq{1}{c}\cup\{\demography\}$ with $i\neq j$.
 As with the ODE case, we need special attention for flows into the system, and we define
 \begin{eqnarray}
 \label{eq:smcs3}
-\prob\big[ N_{\bullet i}(t+\delta)-N_{\bullet i}(t)=0 \given X(t)\big]
- &=& 1-\delta \mu_{\bullet i}\big(t,X(t)\big) + o(\delta),
+\prob\big[ N_{\demography i}(t+\delta)-N_{\demography i}(t)=0 \given X(t)\big]
+ &=& 1-\delta \mu_{\demography i}\big(t,X(t)\big) + o(\delta),
 \\
 \label{eq:smcs4}
-\prob\big[ N_{\bullet i}(t+\delta)-N_{\bullet i}(t)=1 \given X(t)\big]
- &=& \delta \mu_{\bullet i}\big(t,X(t)\big) + o(\delta).
+\prob\big[ N_{\demography i}(t+\delta)-N_{\demography i}(t)=1 \given X(t)\big]
+ &=& \delta \mu_{\demography i}\big(t,X(t)\big) + o(\delta).
 \end{eqnarray}
 Together with the initial conditions $X(0)$, equations \myeqref{eq:smcs1}--\myeqref{eq:smcs4} define a Markov chain.
 Each flow is a simple counting process, meaning a non-decreasing integer-valued process that only has jumps of size one.
@@ -419,13 +419,13 @@ For ODE models, numerical methods are well studied and a standard numerical solu
 For SMCS and ODMCS models, exact schemes are feasible when the number of events is small, which may be the case for small populations.
 However, for applicability to larger populations, we use instead the following Euler scheme.
 Write $\delta$ for an Euler time step, and $\Delta N_{ij}$ for the numerical approximation to $N_{ij}(t+\delta)-N_{ij}(t)$ given $X(t)$.
-For each $i$ and $j$ in $\seq{1}{c} \cup \{\bullet\}$ with $i \neq j$, we draw independent Gamma distributed noise increments with mean $\delta$ and variance $\sigma_{ij}^2 \delta$, denoted using a mean-variance parameterization of the gamma distribution as
+For each $i$ and $j$ in $\seq{1}{c} \cup \{\demography\}$ with $i \neq j$, we draw independent Gamma distributed noise increments with mean $\delta$ and variance $\sigma_{ij}^2 \delta$, denoted using a mean-variance parameterization of the gamma distribution as
 \begin{equation}
 \label{eq:numerics1}
 \Delta\Gamma_{ij} \sim \mathrm{gamma}(\delta, \sigma_{ij}^2 \delta).
 \end{equation}
 In the case of an SMCS model, $\sigma_{ij}=0$ for all $i$ and $j$, so we have $\Delta\Gamma_{ij}=\delta$.
-Then, for $i\neq\bullet$ and $j\neq i$, and writing
+Then, for $i\neq \demography$ and $j\neq i$, and writing
 \begin{equation}
 \label{eq:numerics2}
 \mu_{ij}=\bar\mu_{ij}\big(t,X(t)\big) \Delta\Gamma_{ij} / \delta,
@@ -433,26 +433,26 @@ Then, for $i\neq\bullet$ and $j\neq i$, and writing
 we calculate transition probabilities
 \begin{eqnarray}
 \label{eq:numerics3}
-p_{ij} &=& \exp\left\{-\sum_{k\in 1:c \, \cup \{\bullet\}} \mu_{ik} \, \delta \right\}
-\frac{\mu_{ij}}{\sum_{k\in 1:c\cup \{\bullet\}} \mu_{ik}},
+p_{ij} &=& \exp\left\{-\sum_{k\in 1:c \, \cup \{\demography\}} \mu_{ik} \, \delta \right\}
+\frac{\mu_{ij}}{\sum_{k\in 1:c\cup \{\demography\}} \mu_{ik}},
 \\
 \label{eq:numerics4}
 p_{ii} &=& 1 - \sum_{j\neq i} p_{ij}.
 \end{eqnarray}
 These probabilities correspond to competing hazards for every individual in compartment $i$ to transition to some compartment $j$, interpreting $j=i$ to mean that the individual remains in $i$.
-Then, $\big(\Delta N_{i1},\dots,\Delta N_{ic},\Delta N_{i\bullet}\big)$ has the multinomial distribution where $X_i(t)$ individuals are allocated independently to $\seq{1}{c}\cup\{\bullet\}$ with probabilities given by \eqref{eq:numerics3} and \eqref{eq:numerics4}.
+Then, $\big(\Delta N_{i1},\dots,\Delta N_{ic},\Delta N_{i\demography}\big)$ has the multinomial distribution where $X_i(t)$ individuals are allocated independently to $\seq{1}{c}\cup\{\demography\}$ with probabilities given by \eqref{eq:numerics3} and \eqref{eq:numerics4}.
 We use the \code{reulermultinom} function in the \code{pomp} package to draw from this multionomial distribution.
 
 Different treatments of demographic flows---such as birth, death, immigration and emigration---are possible.
-For the case $i=\bullet$, the treatment used by Model~1 is to set
+For the case $i=\demography$, the treatment used by Model~1 is to set
 \begin{equation}
 \label{eq:numerics6}
-\Delta N_{\bullet j} \sim \mathrm{poisson}( \mu_{\bullet j} \delta),
+\Delta N_{\demography j} \sim \mathrm{poisson}( \mu_{\demography j} \delta),
 \end{equation}
-an independent Poisson random variable with mean $\mu_{\bullet j} \delta$.
+an independent Poisson random variable with mean $\mu_{\demography j} \delta$.
 
-Models~2 and 3 used an alternative approach, balancing the total number of flows in and out of the compartment, i.e., $\sum_{i}N_{\bullet i}(t) = \sum_{i}N_{i \bullet}(t)$, in order to make the model consistent with the known total population.
-In this case, we formally model the death rate as a rate of returning to the susceptible class $S$, and use external transitions from $\bullet$ into $S$ to describe only net population increase.
+Models~2 and 3 used an alternative approach, balancing the total number of flows in and out of the compartment, i.e., $\sum_{i}N_{\demography i}(t) = \sum_{i}N_{i \demography}(t)$, in order to make the model consistent with the known total population.
+In this case, we formally model the death rate as a rate of returning to the susceptible class $S$, and use external transitions from $\demography$ into $S$ to describe only net population increase.
 
 \section{Measurement Models}
 

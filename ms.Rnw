@@ -52,7 +52,7 @@
 \newcommand\modelCounter{m}
 \newcommand\missing{---}
 \newcommand\fixed{\color{blue}}
-\newcommand\demography{D}
+\newcommand\demography{\bullet}
 \newcommand\code[1]{\texttt{#1}}
 \newcommand\paramVec{\theta}
 
@@ -435,9 +435,7 @@ These decisions should be informed by data on the epidemic as well as current un
 Such decisions can be posed as statistical questions about scientifically motivated dynamic models.
 Thus, we encounter the methodological task of building credible, data-informed decisions based on stochastic, partially observed, nonlinear dynamic models.
 This necessitates addressing the tradeoff between biological fidelity and model simplicity, and the reality of misspecification for models at all levels of complexity.
-As a case study, we consider a cholera epidemic in Haiti.
-The 2010 introduction of cholera to Haiti led to an extensive outbreak and sustained transmission.
-Cholera was considered eliminated in 2019, though it reemerged in 2022.
+As a case study, we consider the 2010-2019 cholera epidemic in Haiti.
 We study three dynamic models developed by expert teams to advise on vaccination policies.
 We assess previous methods used for fitting and evaluating these models, and we develop data analysis strategies leading to improved statistical fit.
 Specifically, we present approaches to diagnosis of model misspecification, development of alternative models, and computational improvements in optimization, in the context of likelihood-based inference on nonlinear dynamic systems.
@@ -470,7 +468,7 @@ Model~1 is stochastic and describes cholera at the national level;
 Model~2 is deterministic with spatial structure, and includes transmission via contaminated water;
 Model~3 is stochastic with spatial structure, and accounts for measured rainfall.
 Model~4 has an agent-based construction, featuring considerable mechanistic detail but limited ability to calibrate these details to data.
-We focus on Models~1--3, as the strengths and weaknesses of the agent-based modeling approach  \citep{tracy18} are outside the scope of this article, and we focus on Models~1--3.
+We focus on Models~1--3, as the strengths and weaknesses of the agent-based modeling approach  \citep{tracy18} are outside the scope of this article.
 
 The four independent teams were given the task of estimating the
 potential effect of prospective oral cholera vaccine (OCV) programs.
@@ -529,13 +527,13 @@ Models that focus on learning relationships between variables in a dataset are c
 The danger in using forecasting techniques which rely on associative models to predict the consequence of interventions is called the Lucas critique in an econometric context.
 \citet{lucas76} pointed out that it is naive to predict the effects of an intervention on a given system based entirely on historical associations.
 To successfully predict the effect of an intervention, a model should therefore both provide a quantitative explanation of existing data and should have a causal interpretation: a manipulation of the system should correspond quantitatively with the corresponding change to the model.
-This motivates the development of mechanistic statistical models, which provides a statistical fit to the available data while also supporting a causal interpretation.
+This motivates the development of mechanistic models, which provides a statistical fit to the available data while also supporting a causal interpretation.
 
 The four mechanistic models of \citet{lee20} were deliberately developed with limited coordination.
 This allows us to treat the models as fairly independently developed expert approaches to understanding cholera transmission.
 However, it led to differences in notation, and in subsets of the data chosen for analysis, that hinder direct comparison.
 Here, we have put all three models into a common notational framework.
-Translations back to the original notation of \citet{lee20} are given in Table~S-1.
+Translations back to the original notation of \citet{lee20} are given in Table~S-1 of the supplement.
 
 Each model describes the cholera dynamics as a partially observed Markov process (POMP) with a latent state vector $\bm{X}^{(\modelCounter)}(t)$ for each continuous time point $t$ and model $\modelCounter \in \{1, 2, 3\}$.
 $N$ observations on the system are collected at time points $t_1,\dots,t_N$, written as $t_{1:N}$.
@@ -543,17 +541,17 @@ The observation at time $t_n$ is modeled by the random vector $\bm{Y}^{(\modelCo
 While the latent process exists between observation times, the value of the latent state at observations times is of particular interest.
 We therefore write $\bm{X}^{(\modelCounter)}_n = \bm{X}^{(\modelCounter)}(t_n)$ to denote the value of the latent process at the $n$th observation time, and $\bm{X}^{(\modelCounter)}_{1:N}$ is the collection of latent state values for all observed time points.
 The observable random variables $\bm{Y}^{(\modelCounter)}_{1:N}$ are assumed to be conditionally independent given $\bm{X}^{(\modelCounter)}_{0:N}$.
-Together, with the density for the initial value of the latent state $\bm{X}^{(\modelCounter)}_{0} = \bm{X}^{(\modelCounter)}(t_0)$, each model assumes a joint density $f_{\bm{X}^{(\modelCounter)}_{0:N}, \bm{Y}^{(\modelCounter)}_{1:N}}\big(\bm{x}^{(\modelCounter)}_{0:N}, \bm{y}^{(\modelCounter)}_{1:N};\paramVec\big)$, where $\paramVec$ is a parameter vector that indexes the model. \arc{(Perhaps have this next sentence later when $U$ has been defined?)}
-The observed data $\bm{y}_{1:N}^* = y_{1:N,1:U}^*$, along with the unobserved true value of the latent state, are modeled as a realization of this joint distribution.
+Together, with the density for the initial value of the latent state $\bm{X}^{(\modelCounter)}_{0} = \bm{X}^{(\modelCounter)}(t_0)$, each model assumes a joint density $f_{\bm{X}^{(\modelCounter)}_{0:N}, \bm{Y}^{(\modelCounter)}_{1:N}}\big(\bm{x}^{(\modelCounter)}_{0:N}, \bm{y}^{(\modelCounter)}_{1:N};\paramVec\big)$, where $\paramVec$ is a parameter vector that indexes the model.
+The observed data $\bm{y}_{1:N}^*$, along with the unobserved true value of the latent state, are modeled as a realization of this joint distribution.
 
 For each model $\modelCounter \in \{1, 2, 3\}$, the latent state vector $\bm{X}^{(\modelCounter)}(t)$ consists of individuals labeled as susceptible (S), infected (I), asymptomatically infected (A), vaccinated (V), and recovered (R), with various sub-divisions sometimes considered.
-Models~2 and~3 have metapopulation structure, meaning that each individual is a member of a spatial unit, denoted by a subscript $u\in \seq{1}{U}$.
+Models~2 and~3 have metapopulation structure, meaning that each individual is a member of a spatial unit, denoted by a subscript $u\in \seq{1}{U}$, in which case we denote the observed data for each unit using $\bm{y}_{1:N}^* = y_{1:N,1:U}^*$.
 Here, the spatial units are the $U=10$ Haitian administrative d\'{e}partements (henceforth anglicized as departments).
 
 In the following subsections, descriptions of Models~1--3 are provided.
 While the model description is scientifically critical, as well as necessary for transparency and reproducibility, the model details are not essential to our methodological discussions of how to diagnose and address model misspecification with the purpose of informing policy.
 A first-time reader may choose to skim through the rest of this section, and return later.
-Additional details about the numeric implementation of these models are provided in Secs.~S1 and S2 of the supplement.
+Additional details about the numeric implementation of these models are provided in Sec.~S1 and S2 of the supplement.
 
 %%%%%%%%% 11111111111 %%%%%%%%%%
 
@@ -737,7 +735,7 @@ Demographic stochasticity is accounted for by modeling non-cholera related death
 All deaths are balanced by births into the susceptible compartment in \myeqref{eq:model3:IS} and \myeqref{eq:model3:RS}, thereby maintaining constant population in each department.
 
 Latent states are initialized using an approximation of the instantaneous number of infected, asymptomatic, and recovered individuals at time $t_0$ by using the first week of cholera incidence data.
-Specifically, we set $I_{u0}(0) = \frac{y^*_{1u}}{\reportRate(\muDeath + \choleraDeath + \muIR)}$, $A_{u0}(0) = \frac{1 - \symptomFrac}{\symptomFrac}I_{u0}(0)$, $R_{u0k} = y^*_{1u} - I_{u0}(0) - A_{u0}(0)$, and initialize $B_{u}(0)$ \arc{(define $B_{u}$?)} by enforcing the rainfall dynamics supposed by the one step transition model;
+Specifically, we set $I_{u0}(0) = \frac{y^*_{1u}}{\reportRate(\muDeath + \choleraDeath + \muIR)}$, $A_{u0}(0) = \frac{1 - \symptomFrac}{\symptomFrac}I_{u0}(0)$, $R_{u0k} = y^*_{1u} - I_{u0}(0) - A_{u0}(0)$, and initialize $W_{u}(0)$ by enforcing the rainfall dynamics supposed by the one step transition model;
 all other compartments that represent population counts are set to zero at time $t_0$.
 For each unit $u$ with zero case counts at time $t_1$, this initialization scheme results in having zero individuals in the Infected and Asymptomatic compartments, as well as having no bacteria in the aquatic reservoir.
 In reality, it's plausible that some bacteria or infected individuals were present in unit $u$ but simply went unreported.
@@ -1148,7 +1146,7 @@ The proposal of a linear trend in transmission is a result of observing an appar
 While several factors may contribute to this decrease, one explanation is that case-area targeted interventions (CATIs), which included education sessions, increased monitoring, household decontamination, soap distribution, and water chlorination in infected areas \citep{rebaudet19CATI}, may have greatly reduced cholera transmission \citep{rebaudet21}.
 
 We perform a statistical test to determine whether or not the data indicate the presence of a linear trend in transmissibility.
-To do this, we perform a profile-likelihood search on the parameter $\transmissionTrend$ and obtain a confidence interval \arc{(confidence level?)} via a Monte Carlo Adjusted Profile (MCAP) \citep{ionides17}.
+To do this, we perform a profile-likelihood search on the parameter $\transmissionTrend$ and obtain a $95\%$ confidence interval via a Monte Carlo Adjusted Profile (MCAP) \citep{ionides17}.
 \cite{lee20} implemented Model~1 by fitting two distinct phases: an epidemic phase from October 2010 through March 2015, and an endemic phase from March 2015 onward.
 We similarly allow the re-estimation of process and measurement overdispersion parameters ($\sigmaProc^2$ and $\obsOverdispersion$), and require that the latent Markov process $X(t)$ carry over from one phase into the next.
 The resulting confidence interval for $\transmissionTrend$ is $(\Sexpr{myround(mcap_results$ci[1], digits = 3)}, \Sexpr{myround(mcap_results$ci[2], digits = 3)})$, with the full results displayed in Fig.~\ref{fig:betat}.
@@ -1170,7 +1168,7 @@ ggplot() +
 @
 \caption{\label{fig:betat}
 Monte Carlo adjusted profile of $\transmissionTrend$.
-The blue curve is the profile, the blue line indicates the MLE, and the dashed lines indicate the confidence interval. \arc{level?}
+The blue curve is the profile, the blue line indicates the MLE, and the dashed lines indicate the $95\%$ confidence interval.
 }
 \end{figure}
 
@@ -1305,7 +1303,7 @@ To avoid the approximation error present in high-dimensional models, \citet{lee2
 Reducing a spatially coupled model to individual units in this fashion requires special treatment of any interactive mechanisms between spatial units, such as found in Eq.~\myeqref{eq:model3:foi}.
 % In particular, when considering a model for department $u$, the values $I_\nu(t)$ and $A_\nu(t)$, are unknown for $u \neq v$.
 % To address this issue, \cite{lee20} conditioned each department level model on reported cholera cases in other departments and approximated the values of $I_\nu(t)$ and $A_\nu(t)$ using the respective reported cases.
-Because the simplified, spatially-decoupled version of Model~3 implemented by \cite{lee20} relies on the observed cholera cases it is impossible to obtain forecasts for future time points from the fitted model.
+Because the simplified, spatially-decoupled version of Model~3 implemented by \cite{lee20} relies on the observed cholera cases, the calibrated model cannot be used to obtain forecasts.
 Therefore, in order to obtain model forecasts, \cite{lee20} used the parameters estimates from the spatially-decoupled approximation of Model~3 to obtain forecasts using the fully coupled version of the model.
 This approach of model calibration and forecasting avoids the issue of particle depletion, but may also be problematic.
 One concern is that cholera dynamics in department $u$ are highly related to the dynamics in the remaining departments;
@@ -1447,7 +1445,7 @@ Including benchmarks would help authors and readers to detect and confront any m
 In addition, the published goodness of fit provides a concrete point of comparison for subsequent scientific investigations.
 When combined with online availability of data and code, objective measures of fit provide a powerful tool to accelerate scientific progress, following the paradigm of the {\it common task framework} \citep[][Sec.~6]{donoho17}.
 
-The use of benchmarks may also be beneficial when developing models at differing spatial scales, where a direct comparison between model\ar{s} likelihoods is meaningless.
+The use of benchmarks may also be beneficial when developing models at differing spatial scales, where a direct comparison between model likelihoods is meaningless.
 In such a case, a benchmark model can be fit to each spatial resolution being considered, and each model compared to their respective benchmark.
 Large advantages (shortcomings) in model likelihood relative to the benchmark for a given spatial scale that are not present in other spatial scales may provide weak evidence for (against) the statistical fit of models across a range of spatial resolutions.
 
@@ -1793,14 +1791,14 @@ See Sec.~S6 of the supplement material for more details on estimating the likeli
 \end{table}
 
 While a useful practice, comparing model log-likelihoods to a suitable benchmark alone may not be sufficient to diagnosing the goodness-of-fit of a given model.
-Additional techniques include the inspection of conditional log-likelihoods of each observation given the previous observations in order to understand how well the model describes each data point.
+Additional techniques include the inspection of conditional log-likelihoods of each observation given the previous observations in order to understand how well the model describes each data point (Sec.~S5).
 Other tools include plotting the effective sample size of each observation \citep{liu01}; plotting the values of the hidden states from simulations (supplement Sec.~5.1);
 and comparing summary statistics of the observed data to simulations from the model \citep{wood10,king15}.
 
 \subsection{Forecasts}\label{sec:filter}
 
 Forecasts are an attempt to provide an accurate estimate of the future state of a system based on currently available data, together with an assessment of uncertainty.
-Mechanistic forecasting models, compatible with current scientific understanding, may also provide estimates of the future effects of potential interventions.
+Forecasts from mechanistic models that are compatible with current scientific understanding may also provide estimates of the future effects of potential interventions.
 Further, they may enable real-time testing of new scientific hypotheses \citep{lewis22}.
 
 Recent information about a dynamic system should be more relevant for a forecast than older information.
@@ -1810,20 +1808,19 @@ That may explain why \citet{lee20} chose to obtain forecasts by simulating the c
 Here, we compare with a forecast projected from the filtering distribution: to obtain a forecast using POMP model $m$ at a collection of times $t_{N+1:N+s}$, where $N$ is the index for the last available data, we simulate forward from a draw from
 $f^{(m)}_{\bm{X}_N|\bm{Y}_{1:N}}(\bm{x}_{N} | \bm{y}^*_{1:N} ; \hat\theta)$
 where $\hat\theta$ is a vector of calibrated parameters.
-The decision not to do this partially explains the unsuccessful forecasts of \cite{lee20}: their Table~S7 shows that the subset of their simulations which were consistent with observing zero cases in 2019 predicted the elimination of cholera.
-In this case study, projecting the future state of the cholera epidemic starting from latent states that are draws from the filtering distribution allows the model-based forecasts to benefit from the fact that very few cholera cases were observed in 2018 and January 2019.
+The decision not to do this partially explains the unsuccessful forecasts of \cite{lee20}: their Table~S7 shows that the subset of their simulations which were consistent with observing zero cases in 2019 also accurately predicted the prolonged absence of detected cholera.
 
 Uncertainty in just a single parameter can lead to drastically different forecasts \citep{saltelli20}.
 Therefore, parameter uncertainty should also be considered when obtaining model forecasts to influence policy.
 If a Bayesian technique is used for parameter estimation, a natural way to account for parameter uncertainty is to obtain simulations from the model where each simulation is obtained using parameters drawn from the estimated posterior distribution.
 For frequentist inference, one possible approach is obtaining model forecasts from various values of $\theta$, where the values of $\theta$ are sampled proportionally according to their corresponding likelihoods \citep{king15}; see Sec.~S7 of the supplement material for more details.
 Both of these approaches share the similarity that parameters are chosen for the forecast approximately in proportion to their corresponding value of the likelihood function, $f^{(m)}_{\bm{Y}_{1:N}}(\bm{y}_{1:N}^*; \theta)$.
-In this analysis, our forecasts do not account for parameter uncertainty as our goal is to comment on the estimation and diagnosis of mechanistic models, rather than suggesting our results to be used to influence vaccination policy in Haiti.
+In this analysis, our forecasts do not account for parameter uncertainty as our goal is to comment on the estimation and diagnosis of mechanistic models, rather than influencing vaccination policy in Haiti.
 Furthermore, we use the projections from a single point estimate to highlight a deficiency of deterministic models, which is that the only variability in model projections is a result of parameter uncertainty, which leads to over-confidence in forecasts \cite{king15}.
 
 The primary forecasting goal of \citet{lee20} was to investigate the potential consequences of vaccination interventions on a system to inform policy.
-Outcomes of their study include estimates for the probability of cholera elimination and cumulative number of cholera infections under several possible vaccination scenarios.
-Mimicking their efforts, we define cholera elimination as having less than one infection of cholera over at least 52 consecutive weeks, and provide forecasts under the following vaccination scenarios:
+One outcome of their study include estimates for the probability of cholera elimination under several possible vaccination scenarios.
+Mimicking their efforts, we define cholera elimination as having no cholera infections over at least 52 consecutive weeks, and provide forecasts under the following vaccination scenarios:
 
 \begin{itemize}
   \item[$V0$:] No additional vaccines are administered.
@@ -2257,15 +2254,10 @@ if (RUN_LEVEL != 3 & file.exists("model3/run_level_3/mod3_V4_res.rds")) {
 
 Simulations from probabilistic models (Models~1 and~3) represent possible trajectories of the dynamic system under the scientific assumptions of the models.
 Estimates of the probability of cholera elimination can therefore be obtained as the proportion of simulations from these models that result in cholera elimination.
-The results of these projections are summarized in Figs.~\ref{fig:Mod1Scenarios}--\ref{fig:elimProbs}, and suggest that cholera elimination was likely even without increased vaccination efforts---consistent with observed reality \citep{trevisin22}.
+The results of these projections are summarized in Figs.~\ref{fig:Mod1Scenarios}--\ref{fig:elimProbs}.
 
 Probability of elimination estimates of this form are not meaningful for deterministic models, as the trajectory of these models only represent the mean behavior of the system rather than individual potential outcomes.
-We therefore do not provide probability of elimination estimates under Model~2.
-Still, trajectories obtained by Model~2 are consistent with the simulation results of Models~1 and~3, and suggest that cholera was in the process of being eliminated from Haiti.
-
-In additional to probability of elimination estimates, we provide estimates for the cumulative number of infections under each vaccination scenario from February 2019 -- February 2024.
-Notably, the median number of cumulative cholera infections under the no-vaccination scenario using Models 1 and 3 were $\Sexpr{prettyNum(round(as.numeric(h1_S0_results$mod1_V0_probs$cumInf['q50'])), big.mark = ",")}$ and $\Sexpr{prettyNum(round(as.numeric(mod3_V0_res$mod3_V0_probs$cumInf['q50'])), big.mark = ",")}$, respectively.
-While there is remaining time during this projection period in which new cholera infections can be detected, up to this point our estimates are far more consistent with the observed number of reported cholera cases than the corresponding estimates of \cite{lee20}, which were approximately $400,000$ and $1,000,000$. \arc{(I don't fully understand how both of our Model 1 and 3 cumulative case estimates can be more consistent with observed cases if our Model 1 has a lower estimate than theirs and our Model 3 has a higher estimate than theirs.)}
+We therefore do not provide probability of elimination estimates under Model~2, but show trajectories under the various vaccination scenarios using this model (Fig.~\ref{fig:mod2Traj}).
 
 <<Create Model 1 VaccScen plots>>=
 gg_m1_V0 <- ggplot() +
@@ -2769,7 +2761,7 @@ Specifically, we examine the results of fitting the flexible cubic spline term i
 The cubic splines permit flexible estimation of seasonality in the force of infection, $\transmission(t)$.
 Fig.~\ref{fig:h1SeasRain} shows that the estimated seasonal transmission rate $\transmission$ mimics the rainfall dynamics in Haiti, despite Model~1 not having access to rainfall data.
 This is consistent with previous studies finding that rainfall played an important role in cholera transmission in Haiti \citep{lemaitre19,eisenberg13}.
-The estimated seasonality also features an increased transmission rate during the Fall, which was noticed at an earlier stage of the epidemic \citep{rinaldo12}.
+The estimated seasonality also features an increased transmission rate during the Fall, which was noticed at an earlier stage of the epidemic \citep{rinaldo12}; the high transimission rate in the fall may also be a result of the increase transission that occured in the fall of 2016, when hurricane Matthew struck Haiti.
 
 <<Get Model 1 Seasonality>>=
 # plot_model_fun <- function(mod) {
@@ -2898,7 +2890,7 @@ In epidemiological studies, for example, quantitative understanding of individua
 This makes direct interpretation of estimated parameters delicate.
 
 Our case study provides an example of this in the parameter estimate for the duration of natural immunity due to cholera infection $\muRS^{-1}$.
-Under the framework of Model~2, the best estimate for this parameter is $\Sexpr{signif(1/h2_fit$h2_params["sigma"],3)}$, suggesting that individuals have effectively permanent immunity to cholera once infected, and thus the pool of susceptible individuals decreases over time.
+Under the framework of Model~2, the best estimate for this parameter is $\Sexpr{signif(1/h2_fit$h2_params["sigma"],3)}$, suggesting that individuals have effectively permanent immunity to cholera once infected.
 To interpret this result, we bear in mind that the data ranged from 2010-2019, and therefore estimates of immunity longer than 10 years---the upper end of previous estimates of natural immunity \citep{king08}---effectively result in the same model dynamics.
 The depletion of susceptible individuals may also be attributed to confounding mechanisms---such as localized vaccination programs and non-pharmaceutical interventions that reduce cholera transmission \citep{trevisin22, rebaudet21}---that were not accounted for in the model.
 Perhaps the best interpretation of the estimated parameter, then, is that under model assumptions, the model most adequately describes the observed data by having a steady decrease in the number of susceptible individuals.
@@ -2912,7 +2904,9 @@ A model which aspires to provide quantitative guidance for assessing interventio
 However, strong statistical fit does not guarantee a correct causal structure: it does not even necessarily require the model to assert a causal explanation.
 A causal interpretation is strengthened by corroborative evidence.
 For example, reconstructed latent variables (such as numbers of susceptible and recovered individuals) should make sense in the context of alternative measurements of these variables \citep{grad12}.
-In addition, parameters that have been calibrated to data should make sense in the context of alternative lines of evidence about the phenomena being modeled, while making allowance for the possibility that the interpretations of parameters may vary when modeling across differing spatial scales.
+In the context of our case study, by reconstructing the latent states of Model~3, we notice that the calibrated model favors higher levels of cholera transmission than what was typically observed in the incidence data (Sec.~S5.1 of the supplement).
+This result hints at the possibility of model mispecification, and should prompt us to be sceptical of the reliability of forecasts from this model.
+Similarly, parameters that have been calibrated to data should make sense in the context of alternative lines of evidence about the phenomena being modeled, while making allowance for the possibility that the interpretations of parameters may vary when modeling across differing spatial scales.
 
 If a mechanistic model including a feature (such as a representation of a mechanism, or the inclusion of a covariate) fits better than mechanistic models without that feature, and also has competitive fit compared to associative benchmarks, this may be taken as evidence supporting the scientific relevance of the feature.
 As for any analysis of observational data, we must be alert to the possibility of confounding.
@@ -2930,8 +2924,8 @@ We provided a few suggestions that may aid the fitting of mechanistic models suc
 Improved model fits allow for meaningful statistical inference that may provide valuable insight on a dynamic system and may improve the accuracy of model forecasts.
 Caution is nonetheless needed when making policy based on modeling conclusions, as model misspecification may invalidate conclusions.
 
-In this article we argue that careful attention to important statistical details could have led the models proposed by \cite{lee20} to correctly predict the initial elimination of cholera from Haiti in 2019.
-We acknowledge the benefit of hindsight: our demonstration of a statistically principled route to obtain better-fitting models with more accurate predictions does not rule out the possibility of discovering other models that fit well yet predict poorly.
+In this article we argue that careful attention to important statistical details could have resulted in improved statistical fits to the observed incidence data.
+We acknowledge the benefit of hindsight: our demonstration of a statistically principled route to obtain better-fitting models resulting in more robust insights does not rule out the possibility of discovering other models that fit well yet predict poorly.
 We used the same data and models, and even much of the same code, as \citet{lee20}, and yet ended up with drastically different conclusions.
 At a minimum, we have shown that the conclusions are sensitive to details in how the data analysis is carried out, and that attention to statistical fit (including numerical consideration such as likelihood maximization) can lead to improved policy guidance.
 
@@ -2946,7 +2940,7 @@ Cautionary warnings about the difficulties inherent in understanding complex sys
 \subsection{Reproducibility and Extendability}
 
 \citet{lee20} published their code and data online, and this reproducibility facilitated our work.
-Robust data analysis requires not only reproducibility but also extendability: if one wishes to try new model variations, or new approaches to fitting the existing models, or plotting the results in a different way, this should \ar{be not} not be excessively burdensome.
+Robust data analysis requires not only reproducibility but also extendability: if one wishes to try new model variations, or new approaches to fitting the existing models, or plotting the results in a different way, this should not be excessively burdensome.
 Scientific results are only trustworthy so far as they can be critically questioned, and an extendable analysis should facilitate such examination \citep{gentleman07}.
 
 We provide a strong form of reproducibility, as well as extendability, by developing our analysis in the context of a software package, \code{haitipkg}, written in the R language \citep{r}.
