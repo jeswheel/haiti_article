@@ -1330,6 +1330,8 @@ Simulations from Model~3 under initial conditions are displayed in red; simulati
 The dashed line represents the end of the observed data.}
 \end{figure}
 
+\clearpage
+
 \section{Replication of \cite{lee20}}
 
 In this article we claimed that we were able to obtain better fits to the observed data using the same models that were proposed by \cite{lee20}.

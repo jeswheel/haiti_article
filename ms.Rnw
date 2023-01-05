@@ -679,7 +679,7 @@ In \eqref{model2:transport} the spatial coupling is specified by a gravity model
 T_{u\varv} = v_{\mathrm{rate}} \times \frac{\mathrm{Pop}_u \mathrm{Pop}_{\varv}}{D_{u\varv}^2},
 \end{equation}
 where $\mathrm{Pop}_u$ is the mean population for department $u$,
-$D_{u\varv}$ is a distance measure estimating average road distance between randomly chosen members of each population, and $v_{\mathrm{rate}}= 10^{-12}$ \eic{UNITS?} was treated as a fixed constant.
+$D_{u\varv}$ is a distance measure estimating average road distance between randomly chosen members of each population, and $v_{\mathrm{rate}}= 10^{-12} \,\mbox{km$^2$yr$^{-1}$}$  was treated as a fixed constant.
 In \eqref{model2:water_transport}, $T^W_{u\varv}$ is a measure of river flow between departments.
 The unit of $W_u(t)$ is cells per ml, with dose response modeled via a saturation constant of $\Wsat$ in \eqref{model2:lambda}.
 The starting value for each element of the latent state vector $\bm{X}^{(2)}(0)$ are set to zero except for $I_{u0}(0) = y_u^*(0)/\reportRate$ and $R_{u0}(0) = \mathrm{Pop}_u - I_{u0}(0)$, where $y_u^*(0)$ is the reported number of cholera cases in department $u$ at time $t = 0$.
@@ -2913,19 +2913,11 @@ The robust statistical conclusion is that a model which allows for change fits b
 
 \section{Discussion}\label{sec:discussion}
 
-\eic{I THINK THERE IS SOME REDUNDANCY IN THIS SECTION; IDEAS MENTIONED MORE THAN ONCE. LET'S DISCUSS POSSIBLE EDITS.}
-
-
 The ongoing global COVID-19 pandemic has provided a clear example on how government policy may be affected by the conclusions of scientific models \citep{saltelli20}.
-This article demonstrates that fitting appropriate scientific models remains a challenging statistical task, and therefore care is needed when fitting scientific models with the purpose of making policy recommendations.
-We have provided suggestions that may aid the fitting of mechanistic models such as comparing model likelihoods to a benchmark.
-Improved model fits allow for meaningful statistical inference that may provide valuable insight on a dynamic system and may improve the accuracy of model forecasts.
-Caution is nonetheless needed when making policy based on modeling conclusions, as model misspecification may invalidate conclusions.
-
-In our case study, we found that careful attention to statistical details could have resulted in improved statistical fits to the observed incidence data.
-We acknowledge the benefit of hindsight: our demonstration of a statistically principled route to obtain better-fitting models resulting in more robust insights does not rule out the possibility of discovering other models that fit well yet predict poorly.
+This article demonstrates that fitting appropriate scientific models to guide policy is a challenging statistical task.
+In our case study, we found that additional attention to statistical details could have resulted in improved statistical fits to the observed incidence data, leading to improvements in the accuracy of the resulting policy guidance.
 We used the same data and models, and even much of the same code, as \citet{lee20}, and yet ended up with drastically different conclusions.
-At a minimum, we have shown that the conclusions are sensitive to details in how the data analysis is carried out, and that attention to statistical fit (including numerical considerations such as likelihood maximization) can lead to improved policy guidance.
+We acknowledge the benefit of hindsight: our demonstration of a statistically principled route to obtain better-fitting models resulting in more robust insights does not rule out the possibility of discovering other models that fit well yet predict poorly.
 
 Inference for mechanistic time series models offers opportunities for understanding and controlling complex dynamic systems.
 This case study has investigated issues requiring attention when applying powerful new statistical techniques that can enable statistically efficient inference for a general class of partially observed Markov process models.
