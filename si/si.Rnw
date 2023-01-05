@@ -323,7 +323,7 @@ In Sections 2.1, 2.2 and 2.3 of the main article, we define compartment models i
 For a discrete population model, these rates define a Markov chain.
 For a continuous and deterministic model, the rates define a system of ordinary differential equations.
 Here, we add additional details to clarify the mapping from a collection of rate functions to a fully specified process.
-Our treatment follows \citet{breto09} \jwc{TODO: Cite the short course}.
+Our treatment follows \citet{breto09}.
 
 A general compartment model is a vector-valued process $X(t)=(X_1(t),\dots,X_c(t))$ denoting the (integer or real-valued) counts in each of $c$ compartments, where $t$ is any continuous value in the interval  $\left[t_0, \infty\right)$ for some real valued starting time $t_0$.
 The compartments may also have names, but to set up general notation we simply refer to them by their numerical index.
@@ -896,11 +896,10 @@ Due to the novelty of this algorithm, there does not exist published examples th
 
 \cite{lee20} were only able to estimate model parameters to a simplified version of Model~3 on a subset of the available data, as no method existed at the time of their publication to fit a fully coupled meta-population model to disease incidence data.
 Building on their results, we fit the fully coupled version of Model~3 to all available data.
-Our preliminary results (not shown) suggest that a single search for the MLE using the IBPF algorithm is insufficient;
-this result is consistent with the findings of \cite{ionides22}, who used a sequence of successive searches for the MLE in order to properly maximize the model likelihood.
-We therefore use a similar approach by performing three successive searches for the MLE.
-The first search is performed by obtaining initial values for the parameters by uniformly sampling values from a predefined hypercube.
-Subsequent searches use the resulting parameter values that correspond the largest model likelihoods.
+In order to properly maximize the model likelihood, we found that it was necessary to use multiple searches for the MLE, periodically pruning away less successful searches.
+The first collection of searches was performed by obtaining initial values for the parameters by uniformly sampling values from a predefined hypercube.
+Two subsequent refinement searches used starting values corresponding to the largest model likelihoods obtained in the previous round.
+This is similar to the approach used by \cite{ionides22}. 
 
 We use the technique described above to fit the fully coupled version of Model~3 proposed by \cite{lee20} to all observed cholera data.
 The maximum likelihood we obtained with the model was $\Sexpr{round(max(haiti3_orig_fit$search3$logLiks$logLik))}$, which is higher than the log-ARMA benchmark ($\Sexpr{round(sum(unitLikesARMA$ll))}$).
@@ -1512,7 +1511,7 @@ Model~2 was developed by a team that consisted of members from the Fred Hutchins
 While Model~2 is the only deterministic model we considered in our analysis, it contains perhaps the most complex descriptions of cholera in Haiti: Model~2 accounts for movement between spatial units; human-to-human and environment-to-human cholera infections; and transfer of water between spatial units based on elevation charts and river flows.
 
 The source code that the Model~2 authors used to generate their results was written in the \code{Python} programming language, and is publicly available at \url{10.5281/zenodo.3360857} and its accompanying GitHub repository \url{https://github.com/lulelita/HaitiCholeraMultiModelingProject}.
-In order to perform our analysis in a unified framework, we re-implemented this model in the \code{R} programming language using the \code{spatPomp} package \citep{asfaw21github}, which facilitates the creation of meta-population models.
+In order to perform our analysis in a unified framework, we re-implemented this model in the \code{R} programming language using the \code{spatPomp} package \citep{asfaw22cran}, which facilitates the creation of meta-population models.
 We note that the travel and water matrices used to implement the complex dynamics in Model~2 \citep{lee20sup} are not available in either the Zenodo archive or the GitHub repository;
 instead, we obtained these matrices via personal correspondence with the Model~2 authors.
 Using these matrices, and the point estimates for model parameters provided by \citep{lee20sup}, we created trajectories of the cholera dynamics and compared this to available data.
@@ -1621,7 +1620,7 @@ There are minor differences between Figure~\ref{fig:mod2rep} and Figure~S15 of \
 While the discrepancy appears minor, the deterministic nature of Model~2 implies that an exact replication of model trajectories should be possible.
 In this case, these discrepancies may be attributed to implementing the model in two different programing languages.
 Another potential explanation for the discrepancy is that the parameters that we used are only approximately the same as those used by \citet{lee20sup}.
-For example, the parameters $\transmission$, $\Wbeta{}$ (See Table~\ref{tab:translate}) had reported values of $9.9 \times 10^{-7}$ and $4.03 \times 10^{-2}$, respectively (Table~S13 of \cite{lee20sup}), but were actually fit to data and therefore likely had values that were far more precise.
+For example, the parameters $\transmission$, $\Wbeta{}$ (See Table~\ref{tab:translate}) had reported values of $9.9 \times 10^{-7}$ and $4.03 \times 10^{-2}$, respectively (Table~S13 of \cite{lee20sup}), but were actually fit to data and therefore likely these values have been rounded.
 Additionally, our implementation of Model~2 used a time scale of years and many of the parameters were reported on a weekly scale, so small differences may result due to unit conversions.
 The collective effect of these small differences in model parameters likely will result in small differences in model trajectories.
 
