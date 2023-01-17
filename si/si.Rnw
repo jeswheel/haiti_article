@@ -288,7 +288,7 @@ myround <- function (x, digits = 1) {
 
 \date{\today}
 \title{Supplement to ``{\mytitle}''}
-  \author{Jesse Wheeler, Anna Rosengart, Zhuoxun Jiang, \\ Kevin Hao En Tan, Noah Treutle, Edward L. Ionides
+  \author{Jesse Wheeler, AnnaElaine L. Rosengart, Zhuoxun Jiang, \\ Kevin Tan, Noah Treutle and Edward L. Ionides
  \\ \hspace{.2cm}\\
     Department of Statistics, University of Michigan\\
 }
@@ -1513,7 +1513,7 @@ Model~2 was developed by a team that consisted of members from the Fred Hutchins
 While Model~2 is the only deterministic model we considered in our analysis, it contains perhaps the most complex descriptions of cholera in Haiti: Model~2 accounts for movement between spatial units; human-to-human and environment-to-human cholera infections; and transfer of water between spatial units based on elevation charts and river flows.
 
 The source code that the Model~2 authors used to generate their results was written in the \code{Python} programming language, and is publicly available at \url{10.5281/zenodo.3360857} and its accompanying GitHub repository \url{https://github.com/lulelita/HaitiCholeraMultiModelingProject}.
-In order to perform our analysis in a unified framework, we re-implemented this model in the \code{R} programming language using the \code{spatPomp} package \citep{asfaw22cran}, which facilitates the creation of meta-population models.
+In order to perform our analysis in a unified framework, we re-implemented this model in the \code{R} programming language using the \code{spatPomp} package \citep{asfaw23arxiv}, which facilitates the creation of meta-population models.
 We note that the travel and water matrices used to implement the complex dynamics in Model~2 \citep{lee20sup} are not available in either the Zenodo archive or the GitHub repository;
 instead, we obtained these matrices via personal correspondence with the Model~2 authors.
 Using these matrices, and the point estimates for model parameters provided by \citep{lee20sup}, we created trajectories of the cholera dynamics and compared this to available data.

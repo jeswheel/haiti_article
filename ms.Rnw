@@ -412,14 +412,17 @@ gc()
 \begin{aug}
 
 \author[A]{\fnms{Jesse}~\snm{Wheeler}\ead[label=e1]{jeswheel@umich.edu}\orcid{0000-0003-3941-3884}},
-\author[A]{\fnms{AnnaElaine}~\snm{Rosengart}\ead[label=e2]{aelr@umich.edu}}
+\author[B]{\fnms{AnnaElaine L.}~\snm{Rosengart}\ead[label=e2]{arosenga@andrew.cmu.edu}}
 \author[A]{\fnms{Zhuoxun}~\snm{Jiang}\ead[label=e3]{zhuoxunj@umich.edu}},
-\author[A]{\fnms{Kevin}~\snm{Hao En Tan}\ead[label=e4]{kevtan@umich.edu}},
+\author[A]{\fnms{Kevin}~\snm{Tan}\ead[label=e4]{kevtan@umich.edu}},
 \author[A]{\fnms{Noah}~\snm{Treutle}\ead[label=e5]{ntreutle@umich.edu}}
 \and
-\author[A]{\fnms{Edward}~\snm{Ionides}\ead[label=e6]{ionides@umich.edu}}
+\author[A]{\fnms{Edward L.}~\snm{Ionides}\ead[label=e6]{ionides@umich.edu}}
 
-\address[A]{Statistics Department, University of Michigan\printead[presep={,\ }]{e1,e2,e3,e4,e5,e6}}
+\address[A]{Statistics Department, University of Michigan\printead[presep={,\ }]{e1,e3,e4,e5,e6}}
+
+\address[B]{Statistics \& Data Science Department, Carnegie Mellon University\printead[presep={,\ }]{e2}}
+
 
 \end{aug}
 
@@ -1260,7 +1263,7 @@ An alternative solution is to change the measurement model to include overdisper
 This permits the consideration of demographic stochasticity, which is dominant for small infected populations, together with log scale stochasticity (also called multiplicative, or environmental, or extra-demographic) which is dominant at high population counts.
 Here we chose to fit the model to transformed case counts rather than adding overdispersion to the measurement model with the goal of minimizing the changes to the model proposed by \cite{lee20}.
 
-We implemented this model using the \code{spatPomp} \code{R} package \citep{asfaw22cran}.
+We implemented this model using the \code{spatPomp} \code{R} package \citep{asfaw23arxiv}.
 The model was then fit using the subplex algorithm, implemented in the  \code{subplex} package \citep{king2020Subplex}.
 A comparison of the trajectory of the fitted model to the data is given in Fig~\ref{fig:mod2Traj}.
 
