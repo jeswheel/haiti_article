@@ -2963,7 +2963,7 @@ The supplement also demonstrates our capability to faithfully estimate the likel
 \begin{supplement}
 \stitle{Auxiliary software: \code{haitipkg}}
 \sdescription{
-The \code{haitipkg} R package is maintained in a GitHub repository, \code{jeswheel/haitipkg}. The submitted version of this package will be archived on Zenodo.
+The \code{haitipkg} R package is maintained in a GitHub repository, \code{jeswheel/haitipkg}. The submitted version of this package is archived on Zenodo: \code{10.5281/zenodo.7557099}
 The package contains all of the data and code used to create, fit and explore the models presented in this article.
 }
 \end{supplement}
