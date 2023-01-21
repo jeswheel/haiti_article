@@ -899,7 +899,7 @@ Building on their results, we fit the fully coupled version of Model~3 to all av
 In order to properly maximize the model likelihood, we found that it was necessary to use multiple searches for the MLE, periodically pruning away less successful searches.
 The first collection of searches was performed by obtaining initial values for the parameters by uniformly sampling values from a predefined hypercube.
 Two subsequent refinement searches used starting values corresponding to the largest model likelihoods obtained in the previous round.
-This is similar to the approach used by \cite{ionides22}. 
+This is similar to the approach used by \cite{ionides22}.
 
 We use the technique described above to fit the fully coupled version of Model~3 proposed by \cite{lee20} to all observed cholera data.
 The maximum likelihood we obtained with the model was $\Sexpr{round(max(haiti3_orig_fit$search3$logLiks$logLik))}$, which is higher than the log-ARMA benchmark ($\Sexpr{round(sum(unitLikesARMA$ll))}$).
@@ -1443,7 +1443,7 @@ GGally::ggpairs(
 )
 @
 
-<<echo=FALSE, include=FALSE, message=FALSE>>=
+<<calcMod1LeeLikes, echo=FALSE, include=FALSE, message=FALSE>>=
 h1_epi_evals <- readRDS("../model1/run_level_3/lee1_epi_evals.rds")
 h1_end_evals <- readRDS("../model1/run_level_3/lee1_end_evals.rds")
 

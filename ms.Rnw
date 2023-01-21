@@ -427,9 +427,9 @@ gc()
 \end{aug}
 
 \begin{abstract}
-\begin{center}
-Working draft, \today
-\end{center}
+% \begin{center}
+% Working draft, \today
+% \end{center}
 
 \vspace{3mm}
 
@@ -1179,7 +1179,7 @@ We implemented Model~1 using the \code{pomp} package \citep{king16}, relying hea
 Both analyses used the \code{mif2} implementation of the IF2 algorithm to estimate $\paramVec$ by maximum likelihood.
 One change we made in the statistical analysis that led to larger model likelihoods was increasing the computational effort in the numerical maximization.
 While IF2 enables parameter estimation for a large class of models, the theoretic ability to maximize the likelihood depends on asymptotics in both the number of particles and the number of filtering iterations.
-Many Monte Carlo replications are then required to quantify and further reduce the error. 
+Many Monte Carlo replications are then required to quantify and further reduce the error.
 The large difference in likelihoods that were obtain by these two approaches (see Table~\ref{tab:likes}) highlights the importance of carefully determining the necessary computational effort needed to maximize model likelihoods and acting accordingly.
 
 \begin{figure}[ht]
