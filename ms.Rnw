@@ -2,7 +2,7 @@
 %%   The Annals of Applied Statistics [AOAS]
 
 %\documentclass[aoas]{imsart}
-\documentclass[aoas,preprint]{imsart}
+\documentclass[aoas]{imsart}
 
 %% Packages
 \RequirePackage{amsthm,amsmath,amsfonts,amssymb,graphicx,enumerate,url,xr,lmodern}
@@ -430,8 +430,7 @@ gc()
 % \begin{center}
 % Working draft, \today
 % \end{center}
-
-\vspace{3mm}
+% \vspace{3mm}
 
 Public health decisions must be made about when and how to implement interventions to control an infectious disease epidemic.
 These decisions should be informed by data on the epidemic as well as current understanding about the transmission dynamics.
@@ -498,7 +497,7 @@ We proceed by introducing Models~1--3 in Sec.~\ref{sec:models};
 in Sec.~\ref{sec:methods}, we present a systematic approach to examining and refining these models and then use improved model fits to project cholera incidence in Haiti under various vaccination scenarios.
 This is followed by a consideration of the robustness of model based policy recommendations in Sec.~\ref{sec:advice}, and a discussion in Sec.~\ref{sec:discussion}.
 
-\begin{figure}[ht]
+\begin{figure}
 <<Plot_Reported_Cases, echo=FALSE, fig.height=3.5>>=
 
 # Plot reported cholera cases, by department. Creates Figure 1.
@@ -1156,7 +1155,7 @@ The resulting confidence interval for $\transmissionTrend$ is $(\Sexpr{myround(m
 These results are suggestive that the inclusion of a trend in transmission rate improves the quantitative ability of Model~1 to describe the observed data.
 The reported results for Model~1 in the remainder of this article were obtained with the inclusion of the parameter $\transmissionTrend$.
 
-\begin{figure}[ht]
+\begin{figure}
 \centering
 <<Beta_trend_Figure, fig.height=2.4, fig.width=3.6, fig.align='center'>>=
 ggplot() +
@@ -1182,7 +1181,7 @@ While IF2 enables parameter estimation for a large class of models, the theoreti
 Many Monte Carlo replications are then required to quantify and further reduce the error.
 The large difference in likelihoods that were obtain by these two approaches (see Table~\ref{tab:likes}) highlights the importance of carefully determining the necessary computational effort needed to maximize model likelihoods and acting accordingly.
 
-\begin{figure}[ht]
+\begin{figure}
 \centering
 <<Model_1_Sims_Figure, fig.height=2.35, fig.width=4.6, fig.align='center'>>=
 # This code chunk creates the figure containing simulations from Model 1
@@ -1360,7 +1359,7 @@ if (RUN_LEVEL != 3 & file.exists("model3/run_level_3/h3Sims.rds")) {
 
 @
 
-\begin{figure}[ht]
+\begin{figure}
 <<Model3_SpatPOMP_sims_Figure, fig.height=3>>=
 
 # Plot the reported cases and confidence region for each department.
@@ -1736,7 +1735,7 @@ mod3_lee_coupled_partial_aic <- 2 * lee3_results$n_params - 2 * lee3_results$sub
 
 @
 
-\begin{table}[ht]
+\begin{table}
 \centering
 
 \begin{tabular}{|c|c|c|c|}
@@ -2318,7 +2317,7 @@ gg_m1_V4 <- ggplot() +
 
 @
 
-\begin{figure}[ht]
+\begin{figure}
 <<Plot_Model1_Scenarios, fig.height=2>>=
 lay <- rbind(c(1, 1, 1, 1, 2, 2, 2, 3, 3, 3, 4, 4, 4, 5, 5, 5))
 gridExtra::grid.arrange(
@@ -2333,7 +2332,7 @@ Blue line indicates the simulated median of reported cases, and the ribbon repre
 }
 \end{figure}
 
-\begin{figure}[ht]
+\begin{figure}
 <<Mod2Fit_and_Scenarios_Figure, fig.height=1.9, fig.width=4.8, fig.align='center'>>=
 ggplot() +
   geom_line(data = h2_traj, aes(x = date, y = Ctotal + 1), col = 'blue') +
@@ -2421,7 +2420,7 @@ gg_m3_V4 <- ggplot() +
 @
 
 
-\begin{figure}[ht]
+\begin{figure}
 <<Plot_Model3_Scenarios, fig.height=2>>=
 lay <- rbind(c(1, 1, 1, 1, 2, 2, 2, 3, 3, 3, 4, 4, 4, 5, 5, 5))
 gridExtra::grid.arrange(
@@ -2473,7 +2472,7 @@ mod3_probElims$time <- as.Date(lubridate::round_date(lubridate::date_decimal(mod
 all_prob_elims <- dplyr::bind_rows(mod1_probElims, mod3_probElims)
 @
 
-\begin{figure}[ht]
+\begin{figure}
 <<Elimination_Probs_Figure, fig.height=2.2>>=
 ggplot(tidyr::drop_na(all_prob_elims), aes(x = time, y = elim_prob, col = mod)) +
   geom_line() +
@@ -2496,9 +2495,9 @@ Compare to Figure 3A of \cite{lee20}.}
 %%% table tttttttttt
 
 \begin{table}
+\centering
 % \small
-\resizebox{\textwidth}{!}{
-\hspace{-10mm}\begin{tabular}{|l@{}|l@{}t@{}|l@{}t@{}|l@{}t@{}|}
+\begin{tabular}{|l@{}|l@{}t@{}|l@{}t@{}|l@{}t@{}|}
 \hline
 Mechanism & Model 1 && Model 2 && Model 3 &
 \\
@@ -2537,17 +2536,14 @@ Latency (day)
   & \eqref{model2:lambda}
   & $\seasAmplitude = \Sexpr{myround(p3s["lambdaR"],2)}$
   & \eqref{eq:model3:water} \\
-  & $\transmissionTrend = \Sexpr{myround(p1["betat"],2)}$ [N]
+  & $\transmissionTrend = \Sexpr{myround(p1["betat"],2)}^*$
   & \eqref{model1:betat}
-  & $\phaseParm = \Sexpr{myround(h2_fit$h2_params['phase'], 2)}$ [N]
+  & $\phaseParm = \Sexpr{myround(h2_fit$h2_params['phase'], 2)}^*$
   & \eqref{model2:lambda}
   & $r = \Sexpr{signif(p3s["r"],3)}$
   & \eqref{eq:model3:water}
   \\\hline
-$\begin{array}{l}
-\text{Immunity} \\
-\text{(year)}
-\end{array}$
+  Immunity (yr)
   & {\fixed $\muRS^{-1}=\Sexpr{myround(1/p1["alpha"]/52,1)}$}
   & \eqref{model1:RS}
   &
@@ -2565,20 +2561,6 @@ $\begin{array}{l}
   & \eqref{eq:model3:RRnext}
 \\
 \hline
-% Vaccine efficacy
-%   & \multicolumn{1}{c}{\hspace{16pt}\missing}
-%   &
-%   & $\begin{array}{l}
-%       \hspace{-1mm} \fixed{\vaccineEfficacy_{1:4} = (
-%         \Sexpr{myround(1 - h2_fit$h2_params["VE1"] * 0.4688, 2)},
-%         \Sexpr{myround(1 - h2_fit$h2_params["VE2"] * 0.4688, 2)}} \\
-%         \fixed{\Sexpr{myround(1 - h2_fit$h2_params["VE1"], 2)},
-%         \Sexpr{myround(1 - h2_fit$h2_params["VE2"], 2)}})
-%         \end{array}$
-%   & \eqref{model2:mu_SE}
-%   & \fixed{$\eta_{ud}(t)$}
-%   &
-%   \\
 Birth/death (yr)
   & \fixed{$\begin{array}{l}
     \muBirth^{-1} = \Sexpr{myround(1/p1["mu"]/52,1)} \\
@@ -2590,7 +2572,7 @@ Birth/death (yr)
   & {\fixed $\muDeath^{-1} = \Sexpr{myround(1/p3["mu1"],1)}$}
   & \eqref{eq:model3:IS}
 \\
-Symptomatic frac.
+Sympt. frac.
   & {\fixed $\symptomFrac_z(t)=c\theta^*(t-\tau_d)$}
   & (\ref{model1:EI}-\ref{model1:EA})
   & {\fixed $\symptomFrac=\Sexpr{myround(h2_fit$h2_params["k"],1)}$}
@@ -2599,7 +2581,7 @@ Symptomatic frac.
   & \eqref{eq:model3:SA}
 \\
 $\begin{array}{l}
-\text{Asymptomatic} \\
+\text{Asympt.} \\
 \text{infectivity}
 \end{array}$
   & {\fixed $\asymptomRelativeInfect=0.05$ }
@@ -2707,7 +2689,7 @@ $\begin{array}{l}
 \text{Process} \\
 \text{noise} (\text{wk}^{1/2})
 \end{array}$
-  & $\sigmaProc=(\Sexpr{myround(sqrt(p1["sig_sq_epi"]),2)}, \Sexpr{myround(sqrt(p1["sig_sq_end"]),2)})$ [N]
+  & $\sigmaProc=(\Sexpr{myround(sqrt(p1["sig_sq_epi"]),2)}, \Sexpr{myround(sqrt(p1["sig_sq_end"]),2)})^*$
   & \eqref{model1:lambda}
   & \multicolumn{1}{c}{\hspace{16pt}\missing}
   &
@@ -2735,15 +2717,15 @@ $\begin{array}{l}
 \\
 \hline
 \multirow{2}{*}{Initial Values} & $I_{0,0} = \Sexpr{round(prod(p1[c('pop_0', 'I_0')]))}$ & & \multicolumn{1}{c}{\multirow{2}{*}{\hspace{16pt}\missing}} & & \multirow{2}{*}{$I_{3,7,10;0}(0)= (
-        \Sexpr{round(prod(p3[c('H3', 'Iinit3')]))}, \Sexpr{round(prod(p3[c('H7', 'Iinit7')]))}, \Sexpr{round(prod(p3[c('H10', 'Iinit10')]))})$ [N]} & \\
+        \Sexpr{round(prod(p3[c('H3', 'Iinit3')]))}, \Sexpr{round(prod(p3[c('H7', 'Iinit7')]))}, \Sexpr{round(prod(p3[c('H10', 'Iinit10')]))})^*$} & \\
 & $E_{0,0} = \Sexpr{round(prod(p1[c('pop_0', 'E_0')]))}$ & & \multicolumn{1}{c}{} & & & \\\hline
-Hurricane & \multicolumn{1}{c}{\multirow{2}{*}{\hspace{16pt}\missing}} & & \multicolumn{1}{c}{\multirow{2}{*}{\hspace{16pt}\missing}} & & $\Whur{3, 9} = (\Sexpr{myround(p3['aHur3'], 2)}, \Sexpr{myround(p3['aHur9'], 2)})$ [N] & \multirow{2}{*}{\eqref{eq:model3:foi}} \\
-Parameters & \multicolumn{1}{c}{} & & \multicolumn{1}{c}{} & & $\hHur{3, 9} = (\Sexpr{myround(p3['hHur3'], 2)}, \Sexpr{myround(p3['hHur9'], 2)})$ [N] & \\\hline
+Hurricane & \multicolumn{1}{c}{\multirow{2}{*}{\hspace{16pt}\missing}} & & \multicolumn{1}{c}{\multirow{2}{*}{\hspace{16pt}\missing}} & & $\Whur{3, 9} = (\Sexpr{myround(p3['aHur3'], 2)}, \Sexpr{myround(p3['aHur9'], 2)})^*$ & \multirow{2}{*}{\eqref{eq:model3:foi}} \\
+Parameters & \multicolumn{1}{c}{} & & \multicolumn{1}{c}{} & & $\hHur{3, 9} = (\Sexpr{myround(p3['hHur3'], 2)}, \Sexpr{myround(p3['hHur9'], 2)})^*$ & \\\hline
 
-\end{tabular}}
+\end{tabular}
 \caption{References to the relevant equation are given in parentheses.
 Parameters in blue were fixed based on scientific reasoning and not fitted to the data.
-[N] denotes parameters added during our re-analysis, not considered by Lee et al.
+$^*$ denotes parameters added during our re-analysis, not considered by Lee et al.
 Translations back into the notation of \citet{lee20} are given in Table~S1.
 }
 \end{table}
@@ -2871,7 +2853,7 @@ gg_trans <- ggplot() +
 
 @
 
-\begin{figure}[ht]
+\begin{figure}
 \centering
 <<Model1_Seasonality_Figure, fig.height=2.9, fig.width=5, fig.align='center'>>=
 cowplot::plot_grid(gg_rain, gg_trans, align = "v", ncol = 1)
