@@ -27,7 +27,7 @@
 \newcommand\seasAmplitude{a}
 \newcommand\rainfallExponent{r}
 \newcommand\muRS{\mu_{RS}}
-\newcommand\vaccineEfficacy{\theta}
+\newcommand\vaccineEfficacy{\vartheta}
 \newcommand\muBirth{\mu_S}
 \newcommand\muDeath{\delta}
 \newcommand\choleraDeath{\delta_{C}}
@@ -55,6 +55,7 @@
 \newcommand\demography{\bullet}
 \newcommand\code[1]{\texttt{#1}}
 \newcommand\paramVec{\theta}
+\newcommand\childReduce{q}
 
 \DeclareSymbolFont{matha}{OML}{txmi}{m}{it}% txfonts
 \DeclareMathSymbol{\varv}{\mathord}{matha}{118}
@@ -581,10 +582,10 @@ Per-capita transition rates are given in Equations~\ref{model1:SE}-\ref{model1:b
 \mu_{S_{\vaccCounter}E_{\vaccCounter}} &=& \lambda(t),
 \\[-3pt]
 \label{model1:EI}
-\mu_{E_{\vaccCounter}I_{\vaccCounter}} &=& \muEI\big(1-\symptomFrac_{\vaccCounter}(t)\big),
+\mu_{E_{\vaccCounter}I_{\vaccCounter}} &=& \muEI\big(1-\vaccineEfficacy_\vaccCounter(t)\big),
 \\[-3pt]
 \label{model1:EA}
-\mu_{E_{\vaccCounter}A_{\vaccCounter}} &=& \muEI\, \symptomFrac_{\vaccCounter}(t),
+\mu_{E_{\vaccCounter}A_{\vaccCounter}} &=& \muEI\, \vaccineEfficacy_\vaccCounter(t),
 \\[-3pt]
 \label{model1:toR}
 \mu_{I_{\vaccCounter}R_{\vaccCounter}} &=& \mu_{A_{\vaccCounter}R_{\vaccCounter}} = \muIR,
@@ -609,8 +610,8 @@ Thus, $\mu_{A\demography}$ is a rate of exiting the study population from compar
 In Model~1, the advantage afforded to vaccinated individuals is an increased probability that an infection is asymptomatic.
 Conditional on infection status, vaccinated individuals are also less infectious than their non-vaccinated counterparts by a rate of $\asymptomRelativeInfect = 0.05$ in Eq.~\eqref{model1:lambda}.
 In \eqref{model1:EA} and~\eqref{model1:EI} the asymptomatic ratio for non-vaccinated individuals is set $\symptomFrac_0(t)=0$, so that the asymptomatic route is reserved for vaccinated individuals.
-For $\vaccCounter\in\seq{1}{\vaccClass}$, the vaccination cohort $\vaccCounter$ is assigned a time $\tau_{\vaccCounter}$, and we take $\symptomFrac_{\vaccCounter}(t) = c \, \theta^*(t-\tau_{\vaccCounter})$
-where $\theta^*(t)$ is efficacy at time $t$ since vaccination for adults, taken from \cite{lee20}, Table~S4, and $c=\big(1-(1-0.4688)\times 0.11\big)$ is a correction to allow for reduced efficacy in the 11\% of the population aged under 5 years.
+For $\vaccCounter\in\seq{1}{\vaccClass}$, the vaccination cohort $\vaccCounter$ is assigned a time $\tau_{\vaccCounter}$, and we take $\vaccineEfficacy_\vaccCounter(t) = c \, \vaccineEfficacy^*(t-\tau_{\vaccCounter})$
+where $\vaccineEfficacy^*(t)$ is efficacy at time $t$ since vaccination for adults, taken from \cite{lee20}, Table~S4, and $c=\big(1-(1-0.4688)\times 0.11\big)$ is a correction to allow for reduced efficacy in the 11\% of the population aged under 5 years.
 Single and double vaccine doses were modeled by changing the waning of protection; protection was assumed to be equal between single and double dose until 52 weeks after vaccination, at which point the single dose becomes ineffective.
 
 The latent state vector $\bm{X}^{(1)}(t)$ is initialized by setting each compartment count for each vaccination scenario $\vaccCounter \neq 0$ as zero, and introducing initial-value parameters $I_{0,0}$ and $E_{0, 0}$ such that $R_{0}(0) = 0$, $I_{0}(0) = \mathrm{Pop} \times I_{0, 0}$, $E_{0}(0) = \mathrm{Pop} \times E_{0, 0}$ and $S_{0}(0) = \mathrm{Pop} \times (1 - I_{0, 0} - E_{0, 0})$, where $\mathrm{Pop}$ is the total population of Haiti.
@@ -684,6 +685,10 @@ where $\mathrm{Pop}_u$ is the mean population for department $u$,
 $D_{u\varv}$ is a distance measure estimating average road distance between randomly chosen members of each population, and $v_{\mathrm{rate}}= 10^{-12} \,\mbox{km$^2$yr$^{-1}$}$  was treated as a fixed constant.
 In \eqref{model2:water_transport}, $T^W_{u\varv}$ is a measure of river flow between departments.
 The unit of $W_u(t)$ is cells per ml, with dose response modeled via a saturation constant of $\Wsat$ in \eqref{model2:lambda}.
+In \eqref{model2:mu_SE}, $\vaccineEfficacy_\vaccCounter$ denotes the vaccine efficacy for each vaccination campaign $\vaccCounter \in \vaccClass$, with $\vaccineEfficacy_0 = 1$, $\vaccineEfficacy_1 = 1 - 0.429 \childReduce$, $\vaccineEfficacy_2 = 1 - 0.519 \childReduce$, $\vaccineEfficacy_3 = 1 - 0.429$, and $\vaccineEfficacy_4 = 1 - 0.519$
+Here, $\childReduce = 0.4688$ represents the reduced efficacy of the vaccination for children under the age of five years, and the values $0.429$ and $0.519$ are the median effectiveness of one and two doses over their effective period respectively, according to Table S4 in the supplement material of \citet{lee20}.
+Because vaccine efficacy remains constant, individuals in this model transition from a vaccinated compartment to the susceptible compartment at the end of the vaccine coverage period.
+
 The starting value for each element of the latent state vector $\bm{X}^{(2)}(0)$ are set to zero except for $I_{u0}(0) = y_u^*(0)/\reportRate$ and $R_{u0}(0) = \mathrm{Pop}_u - I_{u0}(0)$, where $y_u^*(0)$ is the reported number of cholera cases in department $u$ at time $t = 0$.
 Reported cases are assumed to come from a log-normal distribution, with the log-scale mean equal to the reporting rate $\reportRate$ times the number of newly infected individuals.
 See Sec.~\ref{sec:fit2} and Sec.~S3.2 of the supplement for more details.
@@ -693,13 +698,13 @@ See Sec.~\ref{sec:fit2} and Sec.~S3.2 of the supplement for more details.
 \subsection{Model~3}
 \label{sec:model3}
 
-The latent state is described as $\bm{X}^{(3)}(t) = \big(S_{u\vaccCounter}(t),\allowbreak I_{u\vaccCounter}(t),\allowbreak A_{u\vaccCounter}(t),\allowbreak R_{u\vaccCounter k}(t),\allowbreak W_u(t),\allowbreak u \in \seq{0}{U},\allowbreak \vaccCounter \in \seq{0}{4},\allowbreak k \in \seq{1}{3}\big)$.
+The latent state is described as $\bm{X}^{(3)}(t) = \big(S_{u\vaccCounter}(t),\allowbreak I_{u}(t),\allowbreak A_{u}(t),\allowbreak R_{u\vaccCounter k}(t),\allowbreak W_u(t),\allowbreak u \in \seq{0}{U},\allowbreak \vaccCounter \in \seq{0}{4},\allowbreak k \in \seq{1}{3}\big)$.
 Here, $\vaccCounter=0$ corresponds to unvaccinated, $\vaccCounter=2j-1$ corresponds to a single dose on the $j$th vaccination campaign in unit $u$ and $\vaccCounter=2j$ corresponds to receiving two doses on the $j$th vaccination campaign.
 $k\in\seq{1}{3}$ models non-exponential duration in the recovered class before waning of immunity.
 The force of infection is
 \begin{equation}
 \label{eq:model3:foi}
-\lambda_u(t) = \left(\Wbeta{_u} + 1_{(t \geq \tHur)}\Whur{_u} e^{-\hHur{u}\left(t - \tHur\right)}\right) \frac{W_u(t)}{1+W_u(t)} + \transmission_u \sum_{{\varv}\neq u}\big(I_{\varv 0}(t)+ \asymptomRelativeInfect A_{\varv 0}(t)\big),
+\lambda_u(t) = \left(\Wbeta{_u} + 1_{(t \geq \tHur)}\Whur{_u} e^{-\hHur{u}\left(t - \tHur\right)}\right) \frac{W_u(t)}{1+W_u(t)} + \transmission_u \sum_{{\varv}\neq u}\big(I_{\varv}(t)+ \asymptomRelativeInfect A_{\varv}(t)\big),
 \end{equation}
 where $\tHur$ is the time Hurricane Matthew struck Haiti \citep{ferreirai16}, and $1_{(A)}$ is the indicator function for event $A$.
 In \cite{lee20}, $\Whur{_u}$ and $\hHur{u}$ were set to zero for all $u$;
@@ -708,16 +713,16 @@ the need to account for the effect Hurricane Matthew had on cholera transmission
 Per-capita transition rates are given in Equations~\ref{eq:model3:SI}--\ref{eq:model3:Decay}.
 \begin{eqnarray}
 \label{eq:model3:SI}
-\mu_{S_{u\vaccCounter}I_{u\vaccCounter}} &=& \symptomFrac \,  \lambda_u \big(1-\eta_{u\vaccCounter}(t)\big) \, d\Gamma/dt,
+\mu_{S_{u\vaccCounter}I_{u}} &=& \symptomFrac \,  \lambda_u \big(1-\vaccineEfficacy_{u\vaccCounter}(t)\big) \, d\Gamma/dt,
 \\[-3pt]
 \label{eq:model3:SA}
-\mu_{S_{u\vaccCounter}A_{u\vaccCounter}} &=& (1-\symptomFrac) \,  \lambda_u \big(1-\eta_{u\vaccCounter}(t)\big) \,  d\Gamma/dt,
+\mu_{S_{u\vaccCounter}A_{u}} &=& (1-\symptomFrac) \,  \lambda_u \big(1-\vaccineEfficacy_{u\vaccCounter}(t)\big) \,  d\Gamma/dt,
 \\[-3pt]
 \label{eq:model3:IR}
-\mu_{I_{u\vaccCounter}R_{u\vaccCounter 1}} &=& \mu_{A_{u\vaccCounter}R_{u\vaccCounter 1}} = \muIR,
+\mu_{I_{u}R_{u\vaccCounter 1}} &=& \mu_{A_{u}R_{u\vaccCounter 1}} = \muIR,
 \\[-3pt]
 \label{eq:model3:IS}
-\mu_{I_{u\vaccCounter}S_{u0}} &=& \muDeath + \choleraDeath, \hspace{2mm} \mu_{A_{u\vaccCounter}S_{u0}} = \muDeath
+\mu_{I_{u}S_{u0}} &=& \muDeath + \choleraDeath, \hspace{2mm} \mu_{A_{u}S_{u0}} = \muDeath
 \\[-3pt]
 \label{eq:model3:RRnext}
 \mu_{R_{u\vaccCounter 1}R_{u\vaccCounter 2}} &=& \mu_{R_{u\vaccCounter 2}R_{u\vaccCounter 3}} = 3\muRS,
@@ -726,7 +731,7 @@ Per-capita transition rates are given in Equations~\ref{eq:model3:SI}--\ref{eq:m
 \mu_{R_{u\vaccCounter k}S_{u0}} &=& \muDeath + 3\muRS \, \mathbf{1}_{\{k=3\}},
 \\[-3pt]
 \label{eq:model3:water}
-\mu_{{\demography}W_u} &=& \big[1 + \seasAmplitude \big(J_u(t))^r \big] \mathrm{Den}_u \, \Wshed \big[ I_{u0}(t)+ \asymptomRelativeShed A_{u0}(t) \big],
+\mu_{{\demography}W_u} &=& \big[1 + \seasAmplitude \big(J_u(t))^r \big] \mathrm{Den}_u \, \Wshed \big[ I_{u}(t)+ \asymptomRelativeShed A_{u}(t) \big],
 \\[-3pt]
 \label{eq:model3:Decay}
 \mu_{W_u\demography} &=& \Wremoval.
@@ -735,6 +740,9 @@ As with Model~1, $d\Gamma_u(t)/dt$ is multiplicative Gamma-distributed white noi
 In \eqref{eq:model3:water}, $J_u(t)$ is a dimensionless measurement of precipitation that has been standardized by dividing the observed rainfall at time $t$ by the maximum recorded rainfall in department $u$ during the epidemic, and $\mathrm{Den}_u$ is the population density.
 Demographic stochasticity is accounted for by modeling non-cholera related death rate $\muDeath$ in each compartment, along with an additional death rate $\choleraDeath$ in \myeqref{eq:model3:IS} to account for cholera induced deaths among infected individuals.
 All deaths are balanced by births into the susceptible compartment in \myeqref{eq:model3:IS} and \myeqref{eq:model3:RS}, thereby maintaining constant population in each department.
+
+Similar to Model~1, there are no distinct compartments for individuals under five years of age, and the vaccination efficacy is taken as a age adjusted weighted average of the efficacy for individuals both over and under five years of age:  $\vaccineEfficacy_{u \vaccCounter}(t) = c\vaccineEfficacy^*(t - \tau_{uz})$, where $\tau_{uz}$ is the vaccination time for unit $u$ and vaccination campaign $z$.
+The value $c$ and the function $\vaccineEfficacy^*$ are equivalent to those described in Sec.~\ref{sec:model1}.
 
 Latent states are initialized using an approximation of the instantaneous number of infected, asymptomatic, and recovered individuals at time $t_0$ by using the first week of cholera incidence data.
 Specifically, we set $I_{u0}(0) = \frac{y^*_{1u}}{\reportRate(\muDeath + \choleraDeath + \muIR)}$, $A_{u0}(0) = \frac{1 - \symptomFrac}{\symptomFrac}I_{u0}(0)$, $R_{u0k} = y^*_{1u} - I_{u0}(0) - A_{u0}(0)$, and we initialize $W_{u}(0)$ by enforcing the rainfall dynamics supposed by the one step transition model;
@@ -900,17 +908,17 @@ set_rw_3 <- function(x) {
 # First Search RW
 reg_rw_1.sd <- lapply(est_param_names_expanded, set_rw_1)
 names(reg_rw_1.sd) <- est_param_names_expanded
-chol_rw_1.sd <- do.call(rw.sd, reg_rw_1.sd)
+chol_rw_1.sd <- do.call(rw_sd, reg_rw_1.sd)
 
 # Second Search RW
 reg_rw_2.sd <- lapply(est_param_names_expanded, set_rw_2)
 names(reg_rw_2.sd) <- est_param_names_expanded
-chol_rw_2.sd <- do.call(rw.sd, reg_rw_2.sd)
+chol_rw_2.sd <- do.call(rw_sd, reg_rw_2.sd)
 
 # Third Search RW
 reg_rw_3.sd <- lapply(est_param_names_expanded, set_rw_3)
 names(reg_rw_3.sd) <- est_param_names_expanded
-chol_rw_3.sd <- do.call(rw.sd, reg_rw_3.sd)
+chol_rw_3.sd <- do.call(rw_sd, reg_rw_3.sd)
 
 # Search hyper-parameters for each run-level and search
 if (RUN_LEVEL == 1){
@@ -1803,15 +1811,15 @@ This assertion may seem self-evident, but it is not the case for deterministic m
 Epidemiological forecasts based on deterministic models are not uncommon in practice, despite their limitations \citep{king15}.
 That may explain why \citet{lee20} chose to obtain forecasts by simulating the calibrated models forward from initial conditions.
 Here, we compare with a forecast projected from the filtering distribution: to obtain a forecast using POMP model $m$ at a collection of times $t_{N+1:N+s}$, where $N$ is the index for the last available data, we simulate forward from a draw from
-$f^{(m)}_{\bm{X}_N|\bm{Y}_{1:N}}(\bm{x}_{N} | \bm{y}^*_{1:N} ; \hat\theta)$
-where $\hat\theta$ is a vector of calibrated parameters.
+$f^{(m)}_{\bm{X}_N|\bm{Y}_{1:N}}(\bm{x}_{N} | \bm{y}^*_{1:N} ; \hat\paramVec)$
+where $\hat\paramVec$ is a vector of calibrated parameters.
 The decision not to do this partially explains the unsuccessful forecasts of \cite{lee20}: their Table~S7 shows that the subset of their simulations which were consistent with observing zero cases in 2019 also accurately predicted the prolonged absence of detected cholera.
 
 Uncertainty in just a single parameter can lead to drastically different forecasts \citep{saltelli20}.
 Therefore, parameter uncertainty should also be considered when obtaining model forecasts to influence policy.
 If a Bayesian technique is used for parameter estimation, a natural way to account for parameter uncertainty is to obtain simulations from the model where each simulation is obtained using parameters drawn from the estimated posterior distribution.
-For frequentist inference, one possible approach is obtaining model forecasts from various values of $\theta$, where the values of $\theta$ are sampled proportionally according to their corresponding likelihoods \citep{king15}; see Sec.~S7 of the supplement material for more details.
-Both of these approaches share the similarity that parameters are chosen for the forecast approximately in proportion to their corresponding value of the likelihood function, $f^{(m)}_{\bm{Y}_{1:N}}(\bm{y}_{1:N}^*; \theta)$.
+For frequentist inference, one possible approach is obtaining model forecasts from various values of $\paramVec$, where the values of $\paramVec$ are sampled proportionally according to their corresponding likelihoods \citep{king15}; see Sec.~S7 of the supplement material for more details.
+Both of these approaches share the similarity that parameters are chosen for the forecast approximately in proportion to their corresponding value of the likelihood function, $f^{(m)}_{\bm{Y}_{1:N}}(\bm{y}_{1:N}^*; \paramVec)$.
 In this analysis, we do not construct forecasts accounting for parameter uncertainty as our focus is on the estimation and diagnosis of mechanistic models.
 Furthermore, we use the projections from a single point estimate to highlight the deficiency of deterministic models that the only variability in model projections is a result of parameter uncertainty, which can lead to over-confidence in forecasts \cite{king15}.
 
@@ -2573,7 +2581,7 @@ Birth/death (yr)
   & \eqref{eq:model3:IS}
 \\
 Sympt. frac.
-  & {\fixed $\symptomFrac_z(t)=c\theta^*(t-\tau_d)$}
+  & {\fixed $\symptomFrac_z(t)=c\vaccineEfficacy^*(t-\tau_d)$}
   & (\ref{model1:EI}-\ref{model1:EA})
   & {\fixed $\symptomFrac=\Sexpr{myround(h2_fit$h2_params["k"],1)}$}
   & \eqref{model2:mu_EI}
