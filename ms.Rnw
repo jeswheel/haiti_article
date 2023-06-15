@@ -538,21 +538,28 @@ However, it led to differences in notation, and in subsets of the data chosen fo
 Here, we have put all three models into a common notational framework.
 Translations back to the original notation of \citet{lee20} are given in Table~S-1 of the supplement.
 
-Each model describes the cholera dynamics as a partially observed Markov process (POMP) with a latent state vector $\bm{X}^{(\modelCounter)}(t)$ for each continuous time point $t$ and model $\modelCounter \in \{1, 2, 3\}$.
+Each model describes the cholera dynamics as a partially observed Markov process (POMP) with a latent state vector $\bm{X}(t)$ for each continuous time point $t$.
 $N$ observations on the system are collected at time points $t_1,\dots,t_N$, written as $t_{1:N}$.
-The observation at time $t_n$ is modeled by the random vector $\bm{Y}^{(\modelCounter)}_n$.
+The observation at time $t_n$ is modeled by the random vector $\bm{Y}_n$.
 While the latent process exists between observation times, the value of the latent state at observations times is of particular interest.
-We therefore write $\bm{X}^{(\modelCounter)}_n = \bm{X}^{(\modelCounter)}(t_n)$ to denote the value of the latent process at the $n$th observation time, and $\bm{X}^{(\modelCounter)}_{1:N}$ is the collection of latent state values for all observed time points.
-The observable random variables $\bm{Y}^{(\modelCounter)}_{1:N}$ are assumed to be conditionally independent given $\bm{X}^{(\modelCounter)}_{0:N}$.
-Together, with the density for the initial value of the latent state $\bm{X}^{(\modelCounter)}_{0} = \bm{X}^{(\modelCounter)}(t_0)$, each model assumes a joint density $f_{\bm{X}^{(\modelCounter)}_{0:N}, \bm{Y}^{(\modelCounter)}_{1:N}}\big(\bm{x}^{(\modelCounter)}_{0:N}, \bm{y}^{(\modelCounter)}_{1:N};\paramVec\big)$, where $\paramVec$ is a parameter vector that indexes the model.
+We therefore write $\bm{X}_n = \bm{X}(t_n)$ to denote the value of the latent process at the $n$th observation time, and $\bm{X}_{1:N}$ is the collection of latent state values for all observed time points.
+The observable random variables $\bm{Y}_{1:N}$ are assumed to be conditionally independent given $\bm{X}_{0:N}$.
+Together, with the density for the initial value of the latent state $\bm{X}_{0} = \bm{X}(t_0)$, each model assumes a joint density $f_{\bm{X}_{0:N}, \bm{Y}_{1:N}}\big(\bm{x}_{0:N}, \bm{y}_{1:N};\paramVec\big)$, where $\paramVec$ is a parameter vector that indexes the model.
 The observed data $\bm{y}_{1:N}^*$, along with the unobserved true value of the latent state, are modeled as a realization of this joint distribution.
 
-For each model $\modelCounter \in \{1, 2, 3\}$, the latent state vector $\bm{X}^{(\modelCounter)}(t)$ consists of individuals labeled as susceptible (S), infected (I), asymptomatically infected (A), vaccinated (V), and recovered (R), with various sub-divisions sometimes considered.
+Because of the probabilistic nature of both the unobserved latent state and the observable random variables, it is possible to consider various marginal and conditional densities of these two jointly random vectors.
+An important example is the marginal density of the observed random vector $\bm{Y}_{1:N}$, evaluated at the observed data $\bm{y}_{1:N}^*$: $f_{\bm{Y}_{1:N}}\big(\bm{y}_{1:N}^*; \paramVec\big) = \int f_{\bm{X}_{0:N}, \bm{Y}_{1:N}}\big(\bm{x}_{0:N}, \bm{y}_{1:N};\paramVec\big) d\bm{x}_{0:N}$.
+When treated as a function of the parameter vector $\paramVec$, this is called the \emph{likelihood function}, which is the basis of likelihood based statistical inference.
+
+Using the conditional independence of $\bm{Y}_{1:N}$ given $\bm{X}_{0:N}$ and the Markov property of $\bm{X}_{0:N}$, the joint density can be refactored as: $f_{\bm{X}_{0:N}, \bm{Y}_{1:N}}\big(\bm{x}_{0:N}, \bm{y}_{1:N};\paramVec\big) = f_{\bm{X}_0}\big(\bm{x}_0;\paramVec\big)\prod_{n = 1}^N f_{\bm{X}_n|\bm{X}_{n-1}}\big(\bm{x}_{n}|\bm{x}_{n-1}; \paramVec\big)f_{\bm{Y}_n|\bm{X}_{n}}\big(\bm{y}_n|\bm{x}_{n}\big)$.
+This factorization is useful because it demonstrates that POMP models may be completely described using three parts: the \emph{initialization model} for the latent states $f_{\bm{X}_0}\big(\bm{x}_0;\paramVec\big)$; the \emph{one-step transition density}, or \emph{the process model} $f_{\bm{X}_n|\bm{X}_{n-1}}\big(\bm{x}_{n}|\bm{x}_{n-1}; \paramVec\big)$; and the \emph{measurement model} $f_{\bm{Y}_n|\bm{X}_{n}}\big(\bm{y}_n|\bm{x}_{n}\big)$.
+In the following subsections, we describe Models 1--3 in terms of these three components.
+The latent state vector $\bm{X}(t)$ for each model consists of individuals labeled as susceptible (S), infected (I), asymptomatically infected (A), vaccinated (V), and recovered (R), with various sub-divisions sometimes considered.
+The observable random vector $\bm{Y}_{1:N}$ represents the random vector of cholera incidence data for each model;
 Models~2 and~3 have metapopulation structure, meaning that each individual is a member of a spatial unit, denoted by a subscript $u\in \seq{1}{U}$, in which case we denote the observed data for each unit using $\bm{y}_{1:N}^* = y_{1:N,1:U}^*$.
 Here, the spatial units are the $U=10$ Haitian administrative d\'{e}partements (henceforth anglicized as departments).
 
-In the following subsections, descriptions of Models~1--3 are provided.
-While the model description is scientifically critical, as well as necessary for transparency and reproducibility, the model details are not essential to our methodological discussions of how to diagnose and address model misspecification with the purpose of informing policy.
+While the complete model description is scientifically critical, as well as necessary for transparency and reproducibility, the model details are not essential to our methodological discussions of how to diagnose and address model misspecification with the purpose of informing policy.
 A first-time reader may choose to skim through the rest of this section, and return later.
 Additional details about the numeric implementation of these models are provided in Sec.~S1 and S2 of the supplement.
 
@@ -560,7 +567,7 @@ Additional details about the numeric implementation of these models are provided
 
 \subsection{Model~1}
 \label{sec:model1}
-$\bm{X}^{(1)}(t) = \big(S_{\vaccCounter}(t),  E_{\vaccCounter}(t), I_{\vaccCounter}(t), A_{\vaccCounter}(t), R_{\vaccCounter}(t), \vaccCounter \in 0:\vaccClass\big)$ describes susceptible, latent (exposed), infected (and symptomatic), asymptomatic, and recovered individuals in vaccine cohort $\vaccCounter$.
+The latent state vector $\bm{X}(t) = \big(S_{\vaccCounter}(t),  E_{\vaccCounter}(t), I_{\vaccCounter}(t), A_{\vaccCounter}(t), R_{\vaccCounter}(t), \vaccCounter \in 0:\vaccClass\big)$ describes susceptible, latent (exposed), infected (and symptomatic), asymptomatic, and recovered individuals in vaccine cohort $\vaccCounter$ at time $t$.
 Here, $\vaccCounter=0$ corresponds to unvaccinated individuals, and $\vaccCounter \in \seq{1}{\vaccClass}$ describes hypothetical vaccination programs.
 The force of infection is
 \begin{equation}
@@ -576,6 +583,7 @@ The process noise $d\Gamma(t)/dt$ is multiplicative Gamma-distributed white nois
 \cite{lee20} included process noise in Model~3 but not in Model~1, i.e., they fixed $\sigmaProc^2 = 0$.
 Gamma white noise in the transmission rate gives rise to an over-dispersed latent Markov process \citep{breto11} which has been found to improve the statistical fit of disease transmission models \citep{stocks20,he10}.
 
+For any time point in $t_{1:N}$, the process model describes the movement of individuals from one latent state compartment to another.
 Per-capita transition rates are given in Equations~\ref{model1:SE}-\ref{model1:birth}:
 \begin{eqnarray}
 \label{model1:SE}
@@ -614,8 +622,8 @@ For $\vaccCounter\in\seq{1}{\vaccClass}$, the vaccination cohort $\vaccCounter$ 
 where $\vaccineEfficacy^*(t)$ is efficacy at time $t$ since vaccination for adults, taken from \cite{lee20}, Table~S4, and $c=\big(1-(1-0.4688)\times 0.11\big)$ is a correction to allow for reduced efficacy in the 11\% of the population aged under 5 years.
 Single and double vaccine doses were modeled by changing the waning of protection; protection was assumed to be equal between single and double dose until 52 weeks after vaccination, at which point the single dose becomes ineffective.
 
-The latent state vector $\bm{X}^{(1)}(t)$ is initialized by setting each compartment count for each vaccination scenario $\vaccCounter \neq 0$ as zero, and introducing initial-value parameters $I_{0,0}$ and $E_{0, 0}$ such that $R_{0}(0) = 0$, $I_{0}(0) = \mathrm{Pop} \times I_{0, 0}$, $E_{0}(0) = \mathrm{Pop} \times E_{0, 0}$ and $S_{0}(0) = \mathrm{Pop} \times (1 - I_{0, 0} - E_{0, 0})$, where $\mathrm{Pop}$ is the total population of Haiti.
-Reported cholera cases at time point $n$ ($\bm{Y}^{(1)}_n$) are assumed to come from a negative binomial measurement model, where only a fraction ($\reportRate$) of new weekly cases are reported.
+The latent state vector $\bm{X}(t)$ is initialized by setting each compartment count for each vaccination scenario $\vaccCounter \neq 0$ as zero, and introducing initial-value parameters $I_{0,0}$ and $E_{0, 0}$ such that $R_{0}(0) = 0$, $I_{0}(0) = \mathrm{Pop} \times I_{0, 0}$, $E_{0}(0) = \mathrm{Pop} \times E_{0, 0}$ and $S_{0}(0) = \mathrm{Pop} \times (1 - I_{0, 0} - E_{0, 0})$, where $\mathrm{Pop}$ is the total population of Haiti.
+The measurement model assumes reported cholera cases at time point $n$ come from a negative binomial distribution, where only a fraction ($\reportRate$) of new weekly cases are reported.
 See Sec.~S3 of the supplement material for more details.
 
 %%%%%%% 222222222222 %%%%%%%%%%
@@ -639,7 +647,7 @@ The force of infection depends on both direct transmission and an aquatic reserv
 \frac{\beta_W\, W_u(t)}{ \Wsat  + W_u(t)} +
 \transmission \left\{\sum_{\vaccCounter=0}^4 I_{u\vaccCounter}(t) + \asymptomRelativeInfect \sum_{\vaccCounter=0}^4 A_{u\vaccCounter}(t) \right\}.
 \end{equation}
-The latent state is therefore described by the vector $\bm{X}^{(2)}(t) = \big(S_{u\vaccCounter}(t),\allowbreak E_{u\vaccCounter}(t),\allowbreak I_{u\vaccCounter}(t),\allowbreak A_{u\vaccCounter}(t),\allowbreak R_{u\vaccCounter}(t),\allowbreak R_{u\vaccCounter}^A(t),\allowbreak W_u,\allowbreak u \in \seq{1}{U},\allowbreak \vaccCounter \in \seq{0}{4}\big)$.
+The latent state is therefore described by the vector $\bm{X}(t) = \big(S_{u\vaccCounter}(t),\allowbreak E_{u\vaccCounter}(t),\allowbreak I_{u\vaccCounter}(t),\allowbreak A_{u\vaccCounter}(t),\allowbreak R_{u\vaccCounter}(t),\allowbreak R_{u\vaccCounter}^A(t),\allowbreak W_u,\allowbreak u \in \seq{1}{U},\allowbreak \vaccCounter \in \seq{0}{4}\big)$.
 The cosine term in Eq.~\myeqref{model2:lambda} accounts for annual seasonality, with a phase parameter $\phaseParm$.
 The \cite{lee20} implementation of Model~2 fixes $\phaseParm = 0$.
 
@@ -689,7 +697,7 @@ In \eqref{model2:mu_SE}, $\vaccineEfficacy_\vaccCounter$ denotes the vaccine eff
 Here, $\childReduce = 0.4688$ represents the reduced efficacy of the vaccination for children under the age of five years, and the values $0.429$ and $0.519$ are the median effectiveness of one and two doses over their effective period respectively, according to Table S4 in the supplement material of \citet{lee20}.
 Because vaccine efficacy remains constant, individuals in this model transition from a vaccinated compartment to the susceptible compartment at the end of the vaccine coverage period.
 
-The starting value for each element of the latent state vector $\bm{X}^{(2)}(0)$ are set to zero except for $I_{u0}(0) = y_u^*(0)/\reportRate$ and $R_{u0}(0) = \mathrm{Pop}_u - I_{u0}(0)$, where $y_u^*(0)$ is the reported number of cholera cases in department $u$ at time $t = 0$.
+The starting value for each element of the latent state vector $\bm{X}(0)$ are set to zero except for $I_{u0}(0) = y_u^*(0)/\reportRate$ and $R_{u0}(0) = \mathrm{Pop}_u - I_{u0}(0)$, where $y_u^*(0)$ is the reported number of cholera cases in department $u$ at time $t = 0$.
 Reported cases are assumed to come from a log-normal distribution, with the log-scale mean equal to the reporting rate $\reportRate$ times the number of newly infected individuals.
 See Sec.~\ref{sec:fit2} and Sec.~S3.2 of the supplement for more details.
 
@@ -698,7 +706,7 @@ See Sec.~\ref{sec:fit2} and Sec.~S3.2 of the supplement for more details.
 \subsection{Model~3}
 \label{sec:model3}
 
-The latent state is described as $\bm{X}^{(3)}(t) = \big(S_{u\vaccCounter}(t),\allowbreak I_{u}(t),\allowbreak A_{u}(t),\allowbreak R_{u\vaccCounter k}(t),\allowbreak W_u(t),\allowbreak u \in \seq{0}{U},\allowbreak \vaccCounter \in \seq{0}{4},\allowbreak k \in \seq{1}{3}\big)$.
+The latent state is described as $\bm{X}(t) = \big(S_{u\vaccCounter}(t),\allowbreak I_{u}(t),\allowbreak A_{u}(t),\allowbreak R_{u\vaccCounter k}(t),\allowbreak W_u(t),\allowbreak u \in \seq{0}{U},\allowbreak \vaccCounter \in \seq{0}{4},\allowbreak k \in \seq{1}{3}\big)$.
 Here, $\vaccCounter=0$ corresponds to unvaccinated, $\vaccCounter=2j-1$ corresponds to a single dose on the $j$th vaccination campaign in unit $u$ and $\vaccCounter=2j$ corresponds to receiving two doses on the $j$th vaccination campaign.
 $k\in\seq{1}{3}$ models non-exponential duration in the recovered class before waning of immunity.
 The force of infection is
@@ -1133,17 +1141,23 @@ Therefore, the choice of $\paramVec$ used to make inference about the system can
 Elements of $\paramVec$ can be fixed at a constant value based on scientific understanding of the system, but parameters can also be calibrated to data by maximizing a measure of congruency between the observed data and the assumed mechanistic structure.
 Calibrating model parameters to observed data does not guarantee that the resulting model successfully approximates real-world mechanisms, since model assumptions may be incorrect, and do not change as the model is calibrated to data.
 However, the congruency between the model and observed data serves as a proxy for the congruency between the model and the true underlying dynamic system.
-As such, the best possible fit of the proposed mechanistic structure to the observed data is desirable.
+As such, it is desirable to obtain the best possible fit of the proposed mechanistic structure to the observed data.
 In the following subsections we describe our approach to calibrating the three proposed mechanistic models to observed cholera incidence data.
 
 \subsubsection{Calibrating Model~1 Parameters}\label{sec:fit1}
 
-Model~1 describes cholera dynamics at the nationally aggregated scale so that $\bm{Y}^{(1)}_n \in \R$ for each observation time $n \in 1:N$, and the latent state vector $\bm{X}^{(1)}(t)$ is comprised of national level population counts.
-Several algorithms exist, both frequentist and Bayesian, that can be used to obtain estimates of the parameters for this class of models.
+One of the most frequently used approaches to calibrate the parameters of a statistical model is maximum likelihood estimation.
+In the case of a POMP model, the likelihood function---as described in Sec.~\ref{sec:models}---is written as $\mathcal{L}(\paramVec) = \int f_{\bm{X}_{0:N}, \bm{Y}_{1:N}}\big(\bm{x}_{0:N}, \bm{y}_{1:N};\paramVec\big) d\bm{x}_{0:N}$.
+The high-dimensional integral in the likelihood, and the potentially non-linear nature of the process model, makes it impossible to obtain a closed form expression of the likelihood function of POMP models, except in the most basic cases.
+For example, the process model that defines Model~1 was developed with the intent of providing a plausible description of cholera dynamics rather than a providing statistically convenient description.
+Because of this, a closed form expression of the likelihood of Model~1 is not readily available.
+
 In order to retain the ability to propose models that are scientifically meaningful rather than only those that are simply statistically convenient, we restrict ourselves to parameter estimation techniques that have the plug-and-play property, which is that the fitting procedure only requires the ability to simulate the latent process instead of evaluating transition densities \citep{breto09,he10}.
-Plug-and-play algorithms include Bayesian approaches like ABC and PMCMC \citep{toni09,andrieu10}, but here we use frequentist methods to maximize model likelihoods.
-To our knowledge, the only plug-and-play, frequentist methods that can maximize the likelihood for POMP models of this complexity are iterated filtering algorithms \citep{ionides15}, which modify the well-known particle filter \citep{arulampalam02} by performing a random walk for each parameter and particle.
-These perturbations are carried out iteratively over multiple filtering operations, using the collection of parameters from the previous filtering pass as the parameter initialization for the next iteration, and decreasing the random walk variance at each step.
+Plug-and-play algorithms include Bayesian approaches like ABC and PMCMC \citep{toni09,andrieu10}, but here we use algorithms that enable maximum likelihood estimation.
+To our knowledge, the only plug-and-play methods that can maximize the likelihood for POMP models of this complexity are iterated filtering algorithms \citep{ionides15}, which modify the well-known \emph{particle filter} \citep{arulampalam02}.
+The particle filter is often used to obtain values of latent states, but can also be used to obtain likelihood estimates of a POMP model.
+Iterated filtering algorithms, like IF2 \citep{ionides15}, extend the particle filter by performing a random walk for each parameter and particle;
+these perturbations are carried out iteratively over multiple filtering operations, using the collection of parameters from the previous filtering pass as the parameter initialization for the next iteration, and decreasing the random walk variance at each step.
 
 The ability to maximize the likelihood allows for likelihood-based inference, such as performing statistical tests for potential model improvements.
 We demonstrate this capability by proposing a linear trend $\transmissionTrend$ in transmission in Eq.~\myeqref{model1:beta}:
@@ -1258,7 +1272,7 @@ gc()
 Model~2 is a deterministic compartmental model defined by a set of coupled differential equations.
 The use of deterministic compartment models have a long history in the field of infectious disease epidemiology \citep{kermack1927,brauer2017,giordano20},
 and can be justified by asymptotic considerations in a large-population limit \citep{dadlani2020,ndii17}.
-Because the process model of Model~2 is deterministic, the parameter estimation problem for Model~2 reduces to a least squares calculation when combined with a Gaussian measurement model (see Sec.~S3.2 of the supplement material for details).
+Because the process model of Model~2 is deterministic, maximum likelihood estimation reduces to a least squares calculation when combined with a Gaussian measurement model (see Sec.~S3.2 of the supplement material for details).
 \cite{lee20} fit two versions of Model~2 based on a presupposed change in cholera transmission from a epidemic phase to endemic phase that occurred in March, 2014.
 The inclusion of a change-point in model states and parameters increases the flexibility of the model and hence the ability to fit the observed data.
 The increase in model flexibility, however, results in hidden states that are inconsistent between model phases.
@@ -1297,7 +1311,6 @@ h2_traj <- h2_epi_traj %>%
   )
 @
 
-
 \subsubsection{Calibrating Model~3 Parameters}\label{sec:fit3}
 Model~3 describes cholera dynamics in Haiti using a metapopulation model, where the hidden states in each administrative department has an effect on the dynamics in other departments.
 The decision to address metapopulation dynamics using a spatially explicit model, rather than to aggregate over space, is double-edged.
@@ -1319,7 +1332,7 @@ These two concerns may explain the unrealistic forecasts and low likelihood of t
 
 For our analysis, we calibrate the parameters of the spatially coupled version of Model~3 using the iterated block particle filter (IBPF) algorithm of \cite{ionides22}.
 This algorithm extends the work of \cite{ning21ibpf}, who provided theoretic justification for the version of the algorithm that only estimates unit-specific parameters.
-While computationally intensive, the IBPF algorithm enables us to directly estimate the parameters of models describing high-dimensional partially-observed nonlinear dynamic systems via likelihood maximization.
+The IBPF algorithm enables us to directly estimate the parameters of models describing high-dimensional partially-observed nonlinear dynamic systems via likelihood maximization.
 The ability to directly estimate parameters of Model~3 is responsible for the large increase in model likelihoods reported in Table~\ref{tab:likes}, as no algorithm with similar capabilities existed when \cite{lee20} published their results.
 Simulations from the fitted model are displayed in Fig.~\ref{fig:h3spatsims}.
 
@@ -1811,7 +1824,7 @@ This assertion may seem self-evident, but it is not the case for deterministic m
 Epidemiological forecasts based on deterministic models are not uncommon in practice, despite their limitations \citep{king15}.
 That may explain why \citet{lee20} chose to obtain forecasts by simulating the calibrated models forward from initial conditions.
 Here, we compare with a forecast projected from the filtering distribution: to obtain a forecast using POMP model $m$ at a collection of times $t_{N+1:N+s}$, where $N$ is the index for the last available data, we simulate forward from a draw from
-$f^{(m)}_{\bm{X}_N|\bm{Y}_{1:N}}(\bm{x}_{N} | \bm{y}^*_{1:N} ; \hat\paramVec)$
+$f_{\bm{X}_N|\bm{Y}_{1:N}}(\bm{x}_{N} | \bm{y}^*_{1:N} ; \hat\paramVec)$
 where $\hat\paramVec$ is a vector of calibrated parameters.
 The decision not to do this partially explains the unsuccessful forecasts of \cite{lee20}: their Table~S7 shows that the subset of their simulations which were consistent with observing zero cases in 2019 also accurately predicted the prolonged absence of detected cholera.
 
@@ -1819,7 +1832,7 @@ Uncertainty in just a single parameter can lead to drastically different forecas
 Therefore, parameter uncertainty should also be considered when obtaining model forecasts to influence policy.
 If a Bayesian technique is used for parameter estimation, a natural way to account for parameter uncertainty is to obtain simulations from the model where each simulation is obtained using parameters drawn from the estimated posterior distribution.
 For frequentist inference, one possible approach is obtaining model forecasts from various values of $\paramVec$, where the values of $\paramVec$ are sampled proportionally according to their corresponding likelihoods \citep{king15}; see Sec.~S7 of the supplement material for more details.
-Both of these approaches share the similarity that parameters are chosen for the forecast approximately in proportion to their corresponding value of the likelihood function, $f^{(m)}_{\bm{Y}_{1:N}}(\bm{y}_{1:N}^*; \paramVec)$.
+Both of these approaches share the similarity that parameters are chosen for the forecast approximately in proportion to their corresponding value of the likelihood function, $f_{\bm{Y}_{1:N}}(\bm{y}_{1:N}^*; \paramVec)$.
 In this analysis, we do not construct forecasts accounting for parameter uncertainty as our focus is on the estimation and diagnosis of mechanistic models.
 Furthermore, we use the projections from a single point estimate to highlight the deficiency of deterministic models that the only variability in model projections is a result of parameter uncertainty, which can lead to over-confidence in forecasts \cite{king15}.
 
