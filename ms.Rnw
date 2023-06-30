@@ -950,7 +950,7 @@ haiti3_fit <- bake(
 # haiti3_fit contains ll estimate for many parameter sets, so we want to find
 # the highest value
 mod3_ll <- max(
-  haiti3_fit[[length(haiti3_fit)]]$logLiks[, 'logLik'],
+  haiti3_fit[[length(haiti3_fit)]]$logLiks$logLik,
   na.rm = TRUE
 )
 
