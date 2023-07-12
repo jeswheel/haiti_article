@@ -1,0 +1,2945 @@
+% Template for PLoS
+% Version 3.6 Aug 2022
+%
+% % % % % % % % % % % % % % % % % % % % % %
+%
+% -- IMPORTANT NOTE
+%
+% This template contains comments intended
+% to minimize problems and delays during our production
+% process. Please follow the template instructions
+% whenever possible.
+%
+% % % % % % % % % % % % % % % % % % % % % % %
+%
+% Once your paper is accepted for publication,
+% PLEASE REMOVE ALL TRACKED CHANGES in this file
+% and leave only the final text of your manuscript.
+% PLOS recommends the use of latexdiff to track changes during review, as this will help to maintain a clean tex file.
+% Visit https://www.ctan.org/pkg/latexdiff?lang=en for info or contact us at latex@plos.org.
+%
+%
+% There are no restrictions on package use within the LaTeX files except that no packages listed in the template may be deleted.
+%
+% Please do not include colors or graphics in the text.
+%
+% The manuscript LaTeX source should be contained within a single file (do not use \input, \externaldocument, or similar commands).
+%
+% % % % % % % % % % % % % % % % % % % % % % %
+%
+% -- FIGURES AND TABLES
+%
+% Please include tables/figure captions directly after the paragraph where they are first cited in the text.
+%
+% DO NOT INCLUDE GRAPHICS IN YOUR MANUSCRIPT
+% - Figures should be uploaded separately from your manuscript file.
+% - Figures generated using LaTeX should be extracted and removed from the PDF before submission.
+% - Figures containing multiple panels/subfigures must be combined into one image file before submission.
+% For figure citations, please use "Fig" instead of "Figure".
+% See http://journals.plos.org/plosone/s/figures for PLOS figure guidelines.
+%
+% Tables should be cell-based and may not contain:
+% - spacing/line breaks within cells to alter layout or alignment
+% - do not nest tabular environments (no tabular environments within tabular environments)
+% - no graphics or colored text (cell background color/shading OK)
+% See http://journals.plos.org/plosone/s/tables for table guidelines.
+%
+% For tables that exceed the width of the text column, use the adjustwidth environment as illustrated in the example table in text below.
+%
+% % % % % % % % % % % % % % % % % % % % % % % %
+%
+% -- EQUATIONS, MATH SYMBOLS, SUBSCRIPTS, AND SUPERSCRIPTS
+%
+% IMPORTANT
+% Below are a few tips to help format your equations and other special characters according to our specifications. For more tips to help reduce the possibility of formatting errors during conversion, please see our LaTeX guidelines at http://journals.plos.org/plosone/s/latex
+%
+% For inline equations, please be sure to include all portions of an equation in the math environment.  For example, x$^2$ is incorrect; this should be formatted as $x^2$ (or $\mathrm{x}^2$ if the romanized font is desired).
+%
+% Do not include text that is not math in the math environment. For example, CO2 should be written as CO\textsubscript{2} instead of CO$_2$.
+%
+% Please add line breaks to long display equations when possible in order to fit size of the column.
+%
+% For inline equations, please do not include punctuation (commas, etc) within the math environment unless this is part of the equation.
+%
+% When adding superscript or subscripts outside of brackets/braces, please group using {}.  For example, change "[U(D,E,\gamma)]^2" to "{[U(D,E,\gamma)]}^2".
+%
+% Do not use \cal for caligraphic font.  Instead, use \mathcal{}
+%
+% % % % % % % % % % % % % % % % % % % % % % % %
+%
+% Please contact latex@plos.org with any questions.
+%
+% % % % % % % % % % % % % % % % % % % % % % % %
+
+\documentclass[10pt,letterpaper]{article}
+\usepackage[top=0.85in,left=2.75in,footskip=0.75in]{geometry}
+
+% amsmath and amssymb packages, useful for mathematical formulas and symbols
+\usepackage{amsmath,amssymb}
+
+% Use adjustwidth environment to exceed column width (see example table in text)
+\usepackage{changepage}
+
+% textcomp package and marvosym package for additional characters
+\usepackage{textcomp,marvosym}
+
+% cite package, to clean up citations in the main text. Do not remove.
+\usepackage{cite}
+
+% Use nameref to cite supporting information files (see Supporting Information section for more info)
+\usepackage{nameref,hyperref}
+
+% line numbers
+\usepackage[right]{lineno}
+
+% ligatures disabled
+\usepackage[nopatch=eqnum]{microtype}
+\DisableLigatures[f]{encoding = *, family = * }
+
+% color can be used to apply background shading to table cells only
+\usepackage[table]{xcolor}
+
+% array package and thick rules for tables
+\usepackage{array}
+
+% create "+" rule type for thick vertical lines
+\newcolumntype{+}{!{\vrule width 2pt}}
+
+% create \thickcline for thick horizontal lines of variable length
+\newlength\savedwidth
+\newcommand\thickcline[1]{%
+  \noalign{\global\savedwidth\arrayrulewidth\global\arrayrulewidth 2pt}%
+  \cline{#1}%
+  \noalign{\vskip\arrayrulewidth}%
+  \noalign{\global\arrayrulewidth\savedwidth}%
+}
+
+% \thickhline command for thick horizontal lines that span the table
+\newcommand\thickhline{\noalign{\global\savedwidth\arrayrulewidth\global\arrayrulewidth 2pt}%
+\hline
+\noalign{\global\arrayrulewidth\savedwidth}}
+
+
+% Remove comment for double spacing
+%\usepackage{setspace}
+%\doublespacing
+
+% Text layout
+\raggedright
+\setlength{\parindent}{0.5cm}
+\textwidth 5.25in
+\textheight 8.75in
+
+% Bold the 'Figure #' in the caption and separate it from the title/caption with a period
+% Captions will be left justified
+\usepackage[aboveskip=1pt,labelfont=bf,labelsep=period,justification=raggedright,singlelinecheck=off]{caption}
+\renewcommand{\figurename}{Fig}
+
+% Use the PLoS provided BiBTeX style
+\bibliographystyle{plos2015}
+
+% Remove brackets from numbering in List of References
+\makeatletter
+\renewcommand{\@biblabel}[1]{\quad#1.}
+\makeatother
+
+% Header and Footer with logo
+\usepackage{lastpage,fancyhdr,graphicx}
+\usepackage{epstopdf}
+%\pagestyle{myheadings}
+\pagestyle{fancy}
+\fancyhf{}
+%\setlength{\headheight}{27.023pt}
+%\lhead{\includegraphics[width=2.0in]{PLOS-submission.eps}}
+\rfoot{\thepage/\pageref{LastPage}}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrule}{\hrule height 2pt \vspace{2mm}}
+\fancyheadoffset[L]{2.25in}
+\fancyfootoffset[L]{2.25in}
+\lfoot{\today}
+
+%% Include all macros below
+
+\newcommand{\lorem}{{\bf LOREM}}
+\newcommand{\ipsum}{{\bf IPSUM}}
+
+%% END MACROS SECTION
+
+\RequirePackage{amsthm,amsmath,amsfonts,amssymb,graphicx,enumerate,url,xr,lmodern}
+\usepackage{url}
+\usepackage{makecell}
+\usepackage{multirow}
+\usepackage{multicol}
+\usepackage[ruled,noline,linesnumbered]{algorithm2e}
+\usepackage{color}
+\usepackage[normalem]{ulem}% to use \sout in feedback commands
+\usepackage{bm}
+\usepackage[mathscr]{euscript}
+
+%%%% parameters %%%%%%%%%%%
+\newcommand\Wsat{W_{\mathrm{sat}}}
+\newcommand\muIR{\mu_{IR}}
+\newcommand\muEI{\mu_{EI}}
+\newcommand\transmission{\beta}
+\newcommand\seasAmplitude{a}
+\newcommand\rainfallExponent{r}
+\newcommand\muRS{\mu_{RS}}
+\newcommand\vaccineEfficacy{\vartheta}
+\newcommand\muBirth{\mu_S}
+\newcommand\muDeath{\delta}
+\newcommand\choleraDeath{\delta_{C}}
+\newcommand\symptomFrac{f}
+\newcommand\asymptomRelativeInfect{\epsilon}
+\newcommand\asymptomRelativeShed{\epsilon_{W}}
+\newcommand\Wbeta[1]{\beta_{W#1}}
+\newcommand\Whur[1]{\beta_{W#1}^{hm}}
+\newcommand\hHur[1]{h_{#1}^{hm}}
+\newcommand\tHur{t_{hm}}
+\newcommand\Wremoval{\delta_W}
+\newcommand\Wshed{\mu_W}
+\newcommand\mixExponent{\nu}
+\newcommand\sigmaProc{\sigma_{\mathrm{proc}}}
+\newcommand\reportRate{\rho}
+\newcommand\obsOverdispersion{\psi}
+\newcommand\phaseParm{\phi}
+\newcommand\transmissionTrend{\zeta}
+\newcommand\Binit{\xi}
+\newcommand\vaccClass{Z}
+\newcommand\vaccCounter{z}
+\newcommand\modelCounter{m}
+\newcommand\missing{---}
+\newcommand\fixed{\color{blue}}
+\newcommand\demography{\bullet}
+\newcommand\code[1]{\texttt{#1}}
+\newcommand\paramVec{\theta}
+\newcommand\childReduce{q}
+
+\DeclareSymbolFont{matha}{OML}{txmi}{m}{it}% txfonts
+\DeclareMathSymbol{\varv}{\mathord}{matha}{118}
+\DeclareMathOperator*{\argmax}{arg\,max}
+\newcommand\myeqref[1]{(\ref{#1})}
+\newcommand{\blind}{1}
+
+%% customized math macros
+\newcommand\seq[2]{{#1}\!:\!{#2}}
+\newcommand\R{\mathbb{R}}
+\newcommand\Var{\mathrm{Var}}
+\newcommand\var{\Var}
+\newcommand\Cov{\mathrm{Cov}}
+\newcommand\cov{\Cov}
+\newcommand\iid{\mathrm{iid}}
+\newcommand\dist{d}
+\def\lik{L}
+\def\loglik{\ell}
+
+%%%%%% EDITING MACROS %%%%%%%%%
+% orange for EI
+\definecolor{orange}{rgb}{1,0.5,0}
+\newcommand\ei[2]{\sout{#1} \textcolor{orange}{#2}}
+\newcommand\eic[1]{\textcolor{orange}{[#1]}}
+% green for JW
+\definecolor{green}{rgb}{0,0.5,0}
+\newcommand\jw[2]{\sout{#1} \textcolor{green}{#2}}
+\newcommand\jwc[1]{\textcolor{green}{[#1]}}
+% purple for JJ
+\definecolor{purple}{rgb}{0.5,0,1}
+\newcommand\jj[2]{\sout{#1} \textcolor{purple}{#2}}
+\newcommand\jjc[1]{\textcolor{purple}{[#1]}}
+% cyan for AR
+\definecolor{cyan}{rgb}{0,.5,.5}
+\newcommand\ar[2]{\sout{#1} \textcolor{cyan}{#2}}
+\newcommand\arc[1]{\textcolor{cyan}{#1}}
+% light brown for KT
+\definecolor{lightbrown}{rgb}{0.5,0.5,0}
+\newcommand\kt[2]{\sout{#1} \textcolor{lightbrown}{#2}}
+\newcommand\ktc[1]{\textcolor{lightbrown}{#1}}
+
+\newcolumntype{t}{>{\tiny}c}
+
+%% START CUSTOM MACROS
+
+
+%% END CUSTOM MACROS
+
+\begin{document}
+\vspace*{0.2in}
+
+% Title must be 250 characters or less.
+\begin{flushleft}
+{\Large
+\textbf\newline{Title of submission to PLOS journals} % Please use "sentence case" for title and headings (capitalize only the first word in a title (or heading), the first word in a subtitle (or subheading), and any proper nouns).
+}
+\newline
+% Insert author names, affiliations and corresponding author email (do not include titles, positions, or degrees).
+\\
+Jesse Wheeler\textsuperscript{1*},
+AnnaElaine L. Rosengart\textsuperscript{2},
+Zhuoxun Jiang\textsuperscript{1},
+Kevin Tan\textsuperscript{3},
+Noah Treutle\textsuperscript{1},
+Edward L. Ionides\textsuperscript{1}
+\\
+\bigskip
+\textbf{1} Statistics Department, University of Michigan, Ann Arbor, Michigan, USA
+\\
+\textbf{2} Affiliation Dept/Program/Center, Institution Name, City, State, Country
+\\
+\textbf{3} Affiliation Dept/Program/Center, Institution Name, City, State, Country
+\\
+\bigskip
+
+% Insert additional author notes using the symbols described below. Insert symbol callouts after author names as necessary.
+%
+% Remove or comment out the author notes below if they aren't used.
+%
+% Primary Equal Contribution Note
+% \Yinyang These authors contributed equally to this work.
+
+% Additional Equal Contribution Note
+% Also use this double-dagger symbol for special authorship notes, such as senior authorship.
+% \ddag These authors also contributed equally to this work.
+
+% Current address notes
+% \textcurrency Current Address: Dept/Program/Center, Institution Name, City, State, Country % change symbol to "\textcurrency a" if more than one current address note
+% \textcurrency b Insert second current address
+% \textcurrency c Insert third current address
+
+% Deceased author note
+% \dag Deceased
+
+% Group/Consortium Author Note
+% \textpilcrow Membership list can be found in the Acknowledgments section.
+
+% Use the asterisk to denote corresponding authorship and provide email address in note below.
+* jeswheel@umich.edu
+
+\end{flushleft}
+
+<<Setup, include=FALSE,echo=FALSE,results='hide'>>=
+
+# Load Required packages
+library(knitr)
+library(pomp)
+library(spatPomp)
+library(foreach)
+library(doParallel)
+library(doRNG)
+library(haitipkg)
+library(tidyverse)
+
+# Set run level:
+#   1: Used primarily for debugging
+#   2: Used to test various results in a way that provides meaningful results, yet doesn't require an extensive amount of time to run.
+#   3: Used to get final results.
+#
+# Throughout the document, if run_level_3 results exist already exist,
+# then these results are used.
+RUN_LEVEL <- 3
+rl_dir <- paste0("run_level_", RUN_LEVEL, "/")
+
+# Check if run_level_* directories exist; if not, create them.
+for (i in c(1, 3)) {
+  if (!dir.exists(paste0("model", i, '/', rl_dir))) {
+    dir.create(paste0("model", i, '/', rl_dir), recursive = TRUE)
+  }
+}
+
+# Model 2 doesn't need a run_level, since all computations are the same.
+if (!dir.exists('model2')) dir.create("model2/")
+
+
+if (RUN_LEVEL == 3) {
+  # Print session info into a txt file. Only update if RUN_LEVEL == 3, which
+  # is when the final results are calculated.
+  cat(
+    utils::capture.output(sessionInfo()),
+    file = "sessionInfo.txt",
+    sep="\n"
+  )
+}
+
+opts_knit$set(concordance=TRUE)
+opts_chunk$set(
+    concordance = TRUE,
+    tidy = TRUE,
+    message = FALSE,
+    tidy.opts = list(
+        keep.blank.line = FALSE
+    ),
+    comment = "",
+    echo = FALSE,
+    dev.args = list(
+        bg = "transparent",
+        pointsize = 9
+    ),
+    fig.path = "testFigs/"
+)
+
+myround <- function(x, digits = 1) {
+  # taken from the broman package
+  if (digits < 1)
+    stop("This is intended for the case digits >= 1.")
+  if (length(digits) > 1) {
+    digits <- digits[1]
+    warning("Using only digits[1]")
+  }
+  tmp <- sprintf(paste("%.", digits, "f", sep = ""), x)
+  zero <- paste0("0.", paste(rep("0", digits), collapse = ""))
+  tmp[tmp == paste0("-", zero)] <- zero
+  tmp
+}
+
+# Setting black and white ggplot2 theme for entire document.
+theme_set(theme_bw() + theme(plot.title = element_text(hjust = 0.5)))
+
+# Get the number of cores. The high performance computing cluster that we
+# used has 36 cores.
+cores <-  as.numeric(Sys.getenv('SLURM_NTASKS_PER_NODE', unset=NA))
+if(is.na(cores)) cores <- detectCores()
+registerDoParallel(cores)
+
+# Create a mapping between department names and what should be shown in figures
+dep_labeller <- as_labeller(
+  c(
+    'Artibonite' = 'Artibonite',
+    'Sud_Est' = 'Sud-Est',
+    'Sud.Est' = 'Sud-Est',
+    'Nippes' = 'Nippes',
+    'Nord_Est' = 'Nord-Est',
+    'Nord.Est' = 'Nord-Est',
+    'Ouest' = 'Ouest',
+    'Centre' = 'Centre',
+    'Nord' = 'Nord',
+    'Sud' = 'Sud',
+    'Nord_Ouest' = 'Nord-Ouest',
+    'Nord.Ouest' = 'Nord-Ouest',
+    'Grande_Anse' = 'Grand\'Anse',
+    'Grand.Anse' = 'Grand\'Anse'
+  )
+)
+
+# Vector used to arrange figures in the same order that was used in Lee et al (2020)
+plot_order <- c(
+  'Artibonite',
+  'Sud_Est',
+  'Nippes',
+  'Nord_Est',
+  'Ouest',
+  'Centre',
+  'Nord',
+  'Sud',
+  'Nord_Ouest',
+  'Grande_Anse'
+)
+
+options(
+  scipen = 0,
+  help_type = "html",
+  stringsAsFactors = FALSE,
+  continue = "+  ",
+  width = 70,
+  useFancyQuotes = FALSE,
+  reindent.spaces = 2,
+  xtable.comment = FALSE
+)
+
+# Create "long" version of the observed cholera cases, for plotting purposes.
+dep_plot_df <- haitiCholera %>%
+  select(-report) %>%
+  pivot_longer(
+    data = .,
+    cols = -date_saturday,
+    values_to = 'cases',
+    names_to = 'dep'
+  ) %>%
+  mutate(
+    date = as.Date(date_saturday),
+    dep = gsub("\\.", "_", dep)
+  ) %>%
+  mutate(
+    dep = case_when(dep == "Grand_Anse" ~ "Grande_Anse", TRUE ~ dep)
+  )
+
+# Calculate total number of nationally aggregated cholera cases, using previous
+# data.
+true_agg_cases <- dep_plot_df %>%
+  tidyr::pivot_wider(
+    data = .,
+    id_cols = c(date),
+    names_from = dep,
+    values_from = cases,
+    names_prefix = 'cases_'
+  ) %>%
+  mutate(
+    ReportedAll = cases_Artibonite + cases_Centre +
+      cases_Grande_Anse + cases_Nippes + cases_Nord +
+      cases_Nord_Est + cases_Ouest + cases_Sud +
+      cases_Sud_Est + cases_Nord_Ouest
+  )
+@
+
+<<CalculateLee1Likelihoods, echo=FALSE, message=FALSE, include=FALSE>>=
+
+# In this code chunk, we attempt to estimate the likelihood of Model 1 that
+# is described by Lee et al (2020). Because this chunk produces some
+# computationally intensive calculations that must also be done in the
+# supplement, we save some additional information in this chunk that is only
+# used in the supplement (si/si.Rnw) and not in the manuscript.
+
+# Setting algorithmic hyper-parameters based on RUN_LEVEL.
+#
+#                    RUN_LEVEL =  1,   2,    3
+N_PARAMS   <- switch(RUN_LEVEL,  10,  20,  nrow(h1LeeStartsEpi))  # Number of parameters to sample
+N_LEE_SIMS <- switch(RUN_LEVEL,  10,  20,   20)  # Number of simulations per parameter
+NP_EVAL    <- switch(RUN_LEVEL,  50, 200, 2000)  # Number of particles used to evaluate the likelihood
+NREPS_EVAL <- switch(RUN_LEVEL,   3,   5,   36)  # Number of replicates of likelihood evaluation.
+
+h1_epi <- haiti1()
+
+set.seed(141837)
+
+# Compute the run_level_<RUN_LEVEL> results and save them.
+lee_epi_ll <- bake(
+  file = paste0("model1/", rl_dir, "lee1_epi_evals.rds"), {
+
+    # Randomly sample from starting params used by Lee et al (2020).
+    # If RUN_LEVEL == 3, all starting parameters are used.
+    which_params <- sample(
+      1:nrow(h1LeeStartsEpi),
+      size = N_PARAMS,
+      replace = FALSE
+    )
+    epi_params <- h1LeeStartsEpi[which_params, ]
+
+    # Create data.frame to save results
+    lee_epi_ll <- data.frame(
+      "pfLL" = NA_real_,
+      "pfse" = NA_real_,
+      "parid" = epi_params$parid
+    )
+
+    for (j in 1:nrow(lee_epi_ll)) {
+      # Get parameters of interest
+      pf_params <- epi_params[j, -1][names(coef(h1_epi))]
+
+      # make results reproducible
+      registerDoRNG((j * 687383921) %% 7919)
+
+      # Calculate log likelihoods
+      ll_evals <- foreach(i=1:NREPS_EVAL, .combine = c) %dopar% {
+        logLik(pfilter(h1_epi, params = pf_params, Np = NP_EVAL))
+      }
+      lee_epi_ll[j, 'pfLL'] <- logmeanexp(ll_evals, se = TRUE)[1]  # Log-lik
+      lee_epi_ll[j, 'pfse'] <- logmeanexp(ll_evals, se = TRUE)[2]  # SE
+    }
+
+    lee_epi_ll
+  }
+)
+
+# Create the endemic version of the model
+h1_end <- haiti1(period = "endemic")
+
+lee_end_ll <- bake(
+  file = paste0("model1/", rl_dir, "lee1_end_evals.rds"), {
+
+    end_params <- h1LeeStartsEnd[h1LeeStartsEnd$parid %in% lee_epi_ll$parid, ]
+
+    # Create data.frame to save results
+    lee_end_ll <- data.frame(
+      "pfLL" = NA_real_,
+      "pfse" = NA_real_,
+      'parid' = end_params$parid
+    )
+
+    # Perform particle filter to get likelihood estimates
+    for (j in 1:nrow(lee_end_ll)) {
+      # Get parameters of interest
+      pf_params <- end_params[j, ][names(coef(h1_end))]
+
+      # make results reproducible
+      registerDoRNG((j * 687383921) %% 7919)
+
+      # Calculate log likelihoods
+      ll_evals <- foreach(i=1:NREPS_EVAL, .combine = c) %dopar% {
+        logLik(pfilter(h1_end, params = pf_params, Np = NP_EVAL))
+      }
+
+      lee_end_ll[j, 'pfLL'] <- logmeanexp(ll_evals, se = TRUE)[1]
+      lee_end_ll[j, 'pfse'] <- logmeanexp(ll_evals, se = TRUE)[2]
+    }
+
+    lee_end_ll
+  }
+)
+
+# Combine epidemic and endemic likelihoods by parid to get the likelihood of
+# the complete model.
+mod1_all_likes <- dplyr::inner_join(
+  x = lee_epi_ll,
+  y = lee_end_ll,
+  by = "parid"
+  ) %>%
+  dplyr::mutate(
+    joint_ll = pfLL.x + pfLL.y
+  )
+
+# Approximate the likelihood of the Lee et al (2020) version of Model 1 by
+# using the parameter sets that resulted in the maximum likelihood.
+mod1_lee_ll <- max(mod1_all_likes$joint_ll, na.rm = TRUE)
+
+rm(
+  lee_end_ll, lee_epi_ll, h1_end, h1_epi, i, mod1_all_likes,
+  N_LEE_SIMS, N_PARAMS, NP_EVAL, NREPS_EVAL, end_params, epi_params,
+  pf_params, j, ll_evals, which_params
+)
+gc()
+@
+
+
+% Please keep the abstract below 300 words
+\section*{Abstract}
+Public health decisions must be made about when and how to implement interventions to control an infectious disease epidemic.
+These decisions should be informed by data on the epidemic as well as current understanding about the transmission dynamics.
+Such decisions can be posed as statistical questions about scientifically motivated dynamic models.
+Thus, we encounter the methodological task of building credible, data-informed decisions based on stochastic, partially observed, nonlinear dynamic models.
+This necessitates addressing the tradeoff between biological fidelity and model simplicity, and the reality of misspecification for models at all levels of complexity.
+As a case study, we consider the 2010-2019 cholera epidemic in Haiti.
+We study three dynamic models developed by expert teams to advise on vaccination policies.
+We assess previous methods used for fitting and evaluating these models, and we develop data analysis strategies leading to improved statistical fit.
+Specifically, we present approaches to diagnosis of model misspecification, development of alternative models, and computational improvements in optimization, in the context of likelihood-based inference on nonlinear dynamic systems.
+Our workflow is reproducible and extendable, facilitating future investigations of this disease system.
+
+% Please keep the Author Summary between 150 and 200 words
+% Use first person. PLOS ONE authors please skip this step.
+% Author Summary not valid for PLOS ONE submissions.
+\section*{Author summary}
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur eget porta erat. Morbi consectetur est vel gravida pretium. Suspendisse ut dui eu ante cursus gravida non sed sem. Nullam sapien tellus, commodo id velit id, eleifend volutpat quam. Phasellus mauris velit, dapibus finibus elementum vel, pulvinar non tellus. Nunc pellentesque pretium diam, quis maximus dolor faucibus id. Nunc convallis sodales ante, ut ullamcorper est egestas vitae. Nam sit amet enim ultrices, ultrices elit pulvinar, volutpat risus.
+
+\linenumbers
+
+% Use "Eq" instead of "Equation" for equation citations.
+\section*{Introduction}
+
+Regulation of biological populations is a fundamental topic in epidemiology, ecology, fisheries and agriculture.
+Population dynamics may be nonlinear and stochastic, with the resulting complexities compounded by incomplete understanding of the underlying biological mechanisms and by partial observability of the system variables.
+Quantitative models for these dynamic systems offer potential for designing effective control measures.
+Developing and testing such models, and assessing their fitness for guiding policy, is a challenging statistical task.
+Questions of interest include: What indications should we look for in the data to assess whether the model-based inferences are trustworthy?
+What diagnostic tests and model variations can and should be considered in the course of the data analysis?
+What are the possible trade-offs of increasing model complexity, such as the inclusion of interactions across spatial units?
+
+This case study investigates the use of dynamic models and spatiotemporal data to inform a policy decision in the context of the cholera outbreak in Haiti, which started in 2010.
+We build on a multi-group modeling exercise by \cite{lee20} in which four expert modeling teams developed models to the same dataset with the goal of comparing conclusions on the feasibility of eliminating cholera by a vaccination campaign.
+Model~1 is stochastic and describes cholera at the national level;
+Model~2 is deterministic with spatial structure, and includes transmission via contaminated water;
+Model~3 is stochastic with spatial structure, and accounts for measured rainfall.
+Model~4 has an agent-based construction, featuring considerable mechanistic detail but limited ability to calibrate these details to data.
+We focus on Models~1--3, as the strengths and weaknesses of the agent-based modeling approach \cite{tracy18} are outside the scope of this article.
+
+The four independent teams were given the task of estimating the
+potential effect of prospective oral cholera vaccine (OCV) programs.
+While OCV is accepted as a safe and effective tool for controlling the spread of cholera, the global stockpile of OCV doses remains limited \cite{pezzoli20}.
+Advances in OCV technology and vaccine availability, however, raised the possibility of planning a national vaccination program \cite{lee20}.
+In the study, certain data were shared between the groups, including demography and vaccination history; vaccine efficacy was also fixed at a shared value between groups.
+Beyond this, the groups made autonomous decisions on what to include and exclude from their models.
+The groups largely adhered to existing guidelines on creating models to inform policy \cite{behrend20,saltelli20} and, despite their autonomy, obtained a consensus that an extensive nationwide vaccination campaign would be necessary to eliminate cholera from Haiti.
+Their conclusion is inconsistent with the prolonged period with no confirmed cholera cases between February, 2019 and September, 2022 \cite{trevisin22}, though cholera has recently reemerged in Haiti \cite{rubin22}.
+
+The discrepancy between the model based conclusions of \cite{lee20} and the prolonged absence of cholera in Haiti has been debated \cite{francois20,rebaudetComment20,henrys20,leeReply20}.
+Suggested origins of this discrepancy include the use of unrealistic models \cite{rebaudetComment20} and unrealistic criteria for cholera elimination \cite{henrys20}.
+We find a more nuanced conclusion: attention to methodological details in model fitting, diagnosis and forecasting can improve each of the proposed model's ability to quantitatively describe observed data.
+This improved ability may result in more accurate forecasts and facilitates the exploration of model assumptions.
+Based on this retrospective analysis, we offer suggestions on fitting mechanistic models to dynamic systems for future studies.
+
+While this work is focused on the models proposed by \cite{lee20}, our suggestions have broader relevance.
+To investigate the extent to which \cite{lee20} is typical of the substantial body of work on Haiti cholera dynamics, we preformed a literature review by searching PubMed with keywords: Haiti, cholera, model.
+The search resulted in 66 papers, of which 32 used dynamic models to describe the cholera epidemic in Haiti.
+The models make various choices on the dichotomies considered by \cite{lee20}; deterministic versus stochastic; compartment model versus agent-based; aggregated versus spatially explicit.
+This is no accident, since \cite{lee20} purposefully designed their study to cover the range of current modeling practice.
+
+We proceed by introducing Models~1--3 in Sec.~\ref{sec:models};
+in Sec.~\ref{sec:methods}, we present a systematic approach to examining and refining these models and then use improved model fits to project cholera incidence in Haiti under various vaccination scenarios.
+This is followed by a consideration of the robustness of model based policy recommendations in Sec.~\ref{sec:advice}, and a discussion in Sec.~\ref{sec:discussion}.
+
+\begin{figure}
+<<Plot_Reported_Cases, echo=FALSE, fig.height=3.5>>=
+
+# Plot reported cholera cases, by department. Creates Figure 1.
+ggplot(dep_plot_df, aes(x = date, y = cases + 1)) +
+  facet_wrap(~dep, nrow = 2, labeller = dep_labeller) +
+  geom_line() +
+  theme(axis.title.x = element_blank()) +
+  ylab('Reported Cases') +
+  scale_y_log10(
+    labels = scales::trans_format("log10", scales::math_format(10^.x))
+  ) +
+  scale_x_date(
+    date_labels = "'%y",
+    breaks = seq.Date(
+      from = as.Date("2011-01-01"),
+      to = as.Date("2019-01-01"),
+      by = '2 years'
+    )
+  )
+@
+\caption{\label{CholeraData}
+\small
+Weekly reported cholera cases in Haiti from October 2010 to January 2019.
+}
+\end{figure}
+
+\section*{Materials and methods}
+\subsection*{Mechanistic models for disease modeling}
+Models that focus on learning relationships between variables in a dataset are called {\it associative}, whereas models that incorporate a known scientific property of the system are called {\it causal} or {\it mechanistic}.
+The danger in using forecasting techniques which rely on associative models to predict the consequence of interventions is called the Lucas critique in an econometric context.
+\cite{lucas76} pointed out that it is naive to predict the effects of an intervention on a given system based entirely on historical associations.
+To successfully predict the effect of an intervention, a model should therefore both provide a quantitative explanation of existing data and should have a causal interpretation: a manipulation of the system should correspond quantitatively with the corresponding change to the model.
+This motivates the development of mechanistic models, which provides a statistical fit to the available data while also supporting a causal interpretation.
+
+The four mechanistic models of \cite{lee20} were deliberately developed with limited coordination.
+This allows us to treat the models as fairly independently developed expert approaches to understanding cholera transmission.
+However, it led to differences in notation, and in subsets of the data chosen for analysis, that hinder direct comparison.
+Here, we have put all three models into a common notational framework.
+Translations back to the original notation of \cite{lee20} are given in Table~S-1 of the supplement.
+
+Each model describes the cholera dynamics as a partially observed Markov process (POMP) with a latent state vector $\bm{X}(t)$ for each continuous time point $t$.
+$N$ observations on the system are collected at time points $t_1,\dots,t_N$, written as $t_{1:N}$.
+The observation at time $t_n$ is modeled by the random vector $\bm{Y}_n$.
+While the latent process exists between observation times, the value of the latent state at observations times is of particular interest.
+We therefore write $\bm{X}_n = \bm{X}(t_n)$ to denote the value of the latent process at the $n$th observation time, and $\bm{X}_{1:N}$ is the collection of latent state values for all observed time points.
+The observable random variables $\bm{Y}_{1:N}$ are assumed to be conditionally independent given $\bm{X}_{0:N}$.
+Together, with the density for the initial value of the latent state $\bm{X}_{0} = \bm{X}(t_0)$, each model assumes a joint density $f_{\bm{X}_{0:N}, \bm{Y}_{1:N}}\big(\bm{x}_{0:N}, \bm{y}_{1:N};\paramVec\big)$, where $\paramVec$ is a parameter vector that indexes the model.
+The observed data $\bm{y}_{1:N}^*$, along with the unobserved true value of the latent state, are modeled as a realization of this joint distribution.
+
+Because of the probabilistic nature of both the unobserved latent state and the observable random variables, it is possible to consider various marginal and conditional densities of these two jointly random vectors.
+An important example is the marginal density of the observed random vector $\bm{Y}_{1:N}$, evaluated at the observed data $\bm{y}_{1:N}^*$: $f_{\bm{Y}_{1:N}}\big(\bm{y}_{1:N}^*; \paramVec\big) = \int f_{\bm{X}_{0:N}, \bm{Y}_{1:N}}\big(\bm{x}_{0:N}, \bm{y}_{1:N};\paramVec\big) d\bm{x}_{0:N}$.
+When treated as a function of the parameter vector $\paramVec$, this is called the \emph{likelihood function}, which is the basis of likelihood based statistical inference.
+
+Using the conditional independence of $\bm{Y}_{1:N}$ given $\bm{X}_{0:N}$ and the Markov property of $\bm{X}_{0:N}$, the joint density can be refactored as: $f_{\bm{X}_{0:N}, \bm{Y}_{1:N}}\big(\bm{x}_{0:N}, \bm{y}_{1:N};\paramVec\big) = f_{\bm{X}_0}\big(\bm{x}_0;\paramVec\big)\prod_{n = 1}^N f_{\bm{X}_n|\bm{X}_{n-1}}\big(\bm{x}_{n}|\bm{x}_{n-1}; \paramVec\big)f_{\bm{Y}_n|\bm{X}_{n}}\big(\bm{y}_n|\bm{x}_{n}\big)$.
+This factorization is useful because it demonstrates that POMP models may be completely described using three parts: the \emph{initialization model} for the latent states $f_{\bm{X}_0}\big(\bm{x}_0;\paramVec\big)$; the \emph{one-step transition density}, or \emph{the process model} $f_{\bm{X}_n|\bm{X}_{n-1}}\big(\bm{x}_{n}|\bm{x}_{n-1}; \paramVec\big)$; and the \emph{measurement model} $f_{\bm{Y}_n|\bm{X}_{n}}\big(\bm{y}_n|\bm{x}_{n}\big)$.
+In the following subsections, we describe Models 1--3 in terms of these three components.
+The latent state vector $\bm{X}(t)$ for each model consists of individuals labeled as susceptible (S), infected (I), asymptomatically infected (A), vaccinated (V), and recovered (R), with various sub-divisions sometimes considered.
+The observable random vector $\bm{Y}_{1:N}$ represents the random vector of cholera incidence data for each model;
+Models~2 and~3 have metapopulation structure, meaning that each individual is a member of a spatial unit, denoted by a subscript $u\in \seq{1}{U}$, in which case we denote the observed data for each unit using $\bm{y}_{1:N}^* = y_{1:N,1:U}^*$.
+Here, the spatial units are the $U=10$ Haitian administrative d\'{e}partements (henceforth anglicized as departments).
+
+While the complete model description is scientifically critical, as well as necessary for transparency and reproducibility, the model details are not essential to our methodological discussions of how to diagnose and address model misspecification with the purpose of informing policy.
+A first-time reader may choose to skim through the rest of this section, and return later.
+Additional details about the numeric implementation of these models are provided in Sec.~S1 and S2 of the supplement.
+
+%%%%%%%%% 11111111111 %%%%%%%%%%
+
+\subsubsection*{Model~1}
+\label{sec:model1}
+The latent state vector $\bm{X}(t) = \big(S_{\vaccCounter}(t),  E_{\vaccCounter}(t), I_{\vaccCounter}(t), A_{\vaccCounter}(t), R_{\vaccCounter}(t), \vaccCounter \in 0:\vaccClass\big)$ describes susceptible, latent (exposed), infected (and symptomatic), asymptomatic, and recovered individuals in vaccine cohort $\vaccCounter$ at time $t$.
+Here, $\vaccCounter=0$ corresponds to unvaccinated individuals, and $\vaccCounter \in \seq{1}{\vaccClass}$ describes hypothetical vaccination programs.
+The force of infection is
+\begin{equation}
+\label{model1:lambda}
+\lambda(t) = \Big(\sum_{\vaccCounter=0}^{\vaccClass}  I_{\vaccCounter}(t) + \asymptomRelativeInfect \sum_{\vaccCounter=0}^{\vaccClass} A_{\vaccCounter}(t) \Big)^\nu \frac{d\Gamma(t)}{dt} \transmission(t)/N,
+\end{equation}
+where $\transmission(t)$ is a periodic cubic spline representation of seasonality, given in terms of a B-spline basis $\{ s_j(t), j\in \seq{1}{6}\}$ and parameters $\transmission_{1:6}$ as
+\begin{equation}
+\label{model1:beta}
+\log\transmission(t) = \sum_{j=1}^6 \transmission_j s_j(t).
+\end{equation}
+The process noise $d\Gamma(t)/dt$ is multiplicative Gamma-distributed white noise, with infinitesimal variance parameter $\sigmaProc^2$.
+\cite{lee20} included process noise in Model~3 but not in Model~1, i.e., they fixed $\sigmaProc^2 = 0$.
+Gamma white noise in the transmission rate gives rise to an over-dispersed latent Markov process \cite{breto11} which has been found to improve the statistical fit of disease transmission models \cite{stocks20,he10}.
+
+For any time point in $t_{1:N}$, the process model describes the movement of individuals from one latent state compartment to another.
+Per-capita transition rates are given in Eqs.~\ref{model1:SE}-\ref{model1:birth}:
+\begin{eqnarray}
+\label{model1:SE}
+\mu_{S_{\vaccCounter}E_{\vaccCounter}} &=& \lambda(t),
+\\[-3pt]
+\label{model1:EI}
+\mu_{E_{\vaccCounter}I_{\vaccCounter}} &=& \muEI\big(1-\vaccineEfficacy_\vaccCounter(t)\big),
+\\[-3pt]
+\label{model1:EA}
+\mu_{E_{\vaccCounter}A_{\vaccCounter}} &=& \muEI\, \vaccineEfficacy_\vaccCounter(t),
+\\[-3pt]
+\label{model1:toR}
+\mu_{I_{\vaccCounter}R_{\vaccCounter}} &=& \mu_{A_{\vaccCounter}R_{\vaccCounter}} = \muIR,
+\\[-3pt]
+\label{model1:RS}
+\mu_{R_{\vaccCounter}S_{\vaccCounter}} &=& \muRS,
+\\[-3pt]
+\label{model1:vacc}
+\mu_{S_0S_{\vaccCounter}} &=& \mu_{E_0E_{\vaccCounter}} = \mu_{I_0I_{\vaccCounter}} = \mu_{A_0A_{\vaccCounter}} = \mu_{R_0R_{\vaccCounter}} = \eta_{\vaccCounter}(t),
+\\[-3pt]
+\label{model1:death}
+\mu_{S_{\vaccCounter}\demography} &=& \mu_{E_{\vaccCounter}\demography} = \mu_{I_{\vaccCounter}\demography} = \mu_{A_{\vaccCounter}\demography}=\mu_{R_{\vaccCounter}\demography} = \delta,
+\\
+\label{model1:birth}
+\mu_{\demography S_0} &=& \muBirth,
+\end{eqnarray}
+where $\vaccCounter\in \seq{0}{\vaccClass}$.
+Here, $\mu_{AB}$ is a transition rate from compartment $A$ to $B$.
+We have an additional demographic source and sink compartment $\demography$ modeling entry into the study population due to birth or immigration, and exit from the study population due to death or immigration.
+Thus, $\mu_{A\demography}$ is a rate of exiting the study population from compartment $A$ and $\mu_{\demography B}$ is a rate of entering the study population into compartment $B$.
+
+In Model~1, the advantage afforded to vaccinated individuals is an increased probability that an infection is asymptomatic.
+Conditional on infection status, vaccinated individuals are also less infectious than their non-vaccinated counterparts by a rate of $\asymptomRelativeInfect = 0.05$ in Eq.~\eqref{model1:lambda}.
+In \eqref{model1:EA} and~\eqref{model1:EI} the asymptomatic ratio for non-vaccinated individuals is set $\symptomFrac_0(t)=0$, so that the asymptomatic route is reserved for vaccinated individuals.
+For $\vaccCounter\in\seq{1}{\vaccClass}$, the vaccination cohort $\vaccCounter$ is assigned a time $\tau_{\vaccCounter}$, and we take $\vaccineEfficacy_\vaccCounter(t) = c \, \vaccineEfficacy^*(t-\tau_{\vaccCounter})$
+where $\vaccineEfficacy^*(t)$ is efficacy at time $t$ since vaccination for adults, taken from \cite{lee20}, Table~S4, and $c=\big(1-(1-0.4688)\times 0.11\big)$ is a correction to allow for reduced efficacy in the 11\% of the population aged under 5 years.
+Single and double vaccine doses were modeled by changing the waning of protection; protection was assumed to be equal between single and double dose until 52 weeks after vaccination, at which point the single dose becomes ineffective.
+
+The latent state vector $\bm{X}(t)$ is initialized by setting each compartment count for each vaccination scenario $\vaccCounter \neq 0$ as zero, and introducing initial-value parameters $I_{0,0}$ and $E_{0, 0}$ such that $R_{0}(0) = 0$, $I_{0}(0) = \mathrm{Pop} \times I_{0, 0}$, $E_{0}(0) = \mathrm{Pop} \times E_{0, 0}$ and $S_{0}(0) = \mathrm{Pop} \times (1 - I_{0, 0} - E_{0, 0})$, where $\mathrm{Pop}$ is the total population of Haiti.
+The measurement model assumes reported cholera cases at time point $n$ come from a negative binomial distribution, where only a fraction ($\reportRate$) of new weekly cases are reported.
+See Sec.~S3 of the supplement material for more details.
+
+%%%%%%% 222222222222 %%%%%%%%%%
+
+\subsubsection*{Model~2}
+\label{sec:model2}
+Susceptible individuals are in compartments $S_{u\vaccCounter}(t)$, where $u\in\seq{1}{U}$ corresponds to the $U=10$ departments, and $\vaccCounter\in\seq{0}{4}$ describes vaccination status:
+\begin{itemize}
+  \item[$\vaccCounter=0$:] Unvaccinated or waned vaccination protection.
+  \item[$\vaccCounter=1$:] One dose at age under five years.
+  \item[$\vaccCounter=2$:] Two doses at age under five years.
+  \item[$\vaccCounter=3$:] One dose at age over five years.
+  \item[$\vaccCounter=4$:] Two doses at age over five years.
+\end{itemize}
+
+Individuals can progress to a latent infection $E_{u\vaccCounter}$ followed by symptomatic infection $I_{u\vaccCounter}$ with recovery to $R_{u\vaccCounter}$ or asymptomatic infection $A_{u\vaccCounter}$ with recovery to $R^A_{u\vaccCounter}$.
+The force of infection depends on both direct transmission and an aquatic reservoir, $W_u(t)$, and is given by
+\begin{equation}
+\label{model2:lambda}
+\lambda_{u}(t) = 0.5\big(1+\seasAmplitude \cos(2\pi t + \phaseParm)\big)
+\frac{\beta_W\, W_u(t)}{ \Wsat  + W_u(t)} +
+\transmission \left\{\sum_{\vaccCounter=0}^4 I_{u\vaccCounter}(t) + \asymptomRelativeInfect \sum_{\vaccCounter=0}^4 A_{u\vaccCounter}(t) \right\}.
+\end{equation}
+The latent state is therefore described by the vector $\bm{X}(t) = \big(S_{u\vaccCounter}(t),\allowbreak E_{u\vaccCounter}(t),\allowbreak I_{u\vaccCounter}(t),\allowbreak A_{u\vaccCounter}(t),\allowbreak R_{u\vaccCounter}(t),\allowbreak R_{u\vaccCounter}^A(t),\allowbreak W_u,\allowbreak u \in \seq{1}{U},\allowbreak \vaccCounter \in \seq{0}{4}\big)$.
+The cosine term in Eq.~\myeqref{model2:lambda} accounts for annual seasonality, with a phase parameter $\phaseParm$.
+The \cite{lee20} implementation of Model~2 fixes $\phaseParm = 0$.
+
+Individuals move from department $u$ to $v$ at rate $T_{uv}$, and aquatic cholera moves at rate $T^W_{uv}$.
+The nonzero transition rates are
+\begin{eqnarray}
+\label{model2:mu_SE}
+\mu_{S_{u\vaccCounter}E_{u\vaccCounter}} &=& \vaccineEfficacy_\vaccCounter \, \lambda,
+\\[-3pt]
+\label{model2:mu_EI}
+\mu_{E_{u\vaccCounter}I_{u\vaccCounter}} &=& \symptomFrac\muEI, \quad \mu_{E_{u\vaccCounter}A_{u\vaccCounter}} = (1-\symptomFrac)\muEI,
+\\[-3pt]
+\label{model2:mu_IR}
+\mu_{I_{u\vaccCounter}R_{u\vaccCounter}} &=& \mu_{A_{u\vaccCounter}R^A_{u\vaccCounter}} = \muIR,
+\\[-3pt]
+\label{model2:RS}
+\mu_{R_{u\vaccCounter}S_{u\vaccCounter}} &=& \mu_{R^A_{u\vaccCounter}S_{u\vaccCounter}} = \muRS,
+\\[-3pt]
+\label{model2:transport}
+\mu_{S_{u\vaccCounter}S_{{\varv}\vaccCounter}} &=& \mu_{E_{u\vaccCounter}E_{{\varv}\vaccCounter}} = \mu_{I_{u\vaccCounter} I_{{\varv}\vaccCounter}} = \mu_{A_{u\vaccCounter}A_{{\varv}\vaccCounter}} = \mu_{R_{u\vaccCounter}R_{{\varv}\vaccCounter}} = \mu_{R^A_{u\vaccCounter} R^A_{{\varv}\vaccCounter}} = T_{u\varv},
+\\[-3pt]
+\label{model2:omega1}
+\mu_{S_{u1}S_{u0}} &=& \mu_{S_{u3}S_{u0}} = \omega_1,
+\\[-3pt]
+\label{model2:omega2}
+\mu_{S_{u2}S_{u0}} &=& \mu_{S_{u4}S_{u0}} = \omega_2,
+\\[-3pt]
+\label{model2:to_W}
+\mu_{\demography W_u} &=& \Wshed \left\{ \sum_{\vaccCounter=0}^4 I_{u\vaccCounter}(t) + \asymptomRelativeShed \sum_{\vaccCounter=0}^4 A_{u\vaccCounter}(t) \right\},
+\\[-3pt]
+\label{model2:from_W}
+\mu_{W_u\demography} &=& \Wremoval,
+\\[-3pt]
+\label{model2:water_transport}
+\mu_{W_uW_{\varv}} &=& w_r T^W_{u\varv}.
+\end{eqnarray}
+In \eqref{model2:transport} the spatial coupling is specified by a gravity model,
+\begin{equation}
+\label{model2:gravity}
+T_{u\varv} = v_{\mathrm{rate}} \times \frac{\mathrm{Pop}_u \mathrm{Pop}_{\varv}}{D_{u\varv}^2},
+\end{equation}
+where $\mathrm{Pop}_u$ is the mean population for department $u$,
+$D_{u\varv}$ is a distance measure estimating average road distance between randomly chosen members of each population, and $v_{\mathrm{rate}}= 10^{-12} \,\mbox{km$^2$yr$^{-1}$}$  was treated as a fixed constant.
+In \eqref{model2:water_transport}, $T^W_{u\varv}$ is a measure of river flow between departments.
+The unit of $W_u(t)$ is cells per ml, with dose response modeled via a saturation constant of $\Wsat$ in \eqref{model2:lambda}.
+In \eqref{model2:mu_SE}, $\vaccineEfficacy_\vaccCounter$ denotes the vaccine efficacy for each vaccination campaign $\vaccCounter \in \vaccClass$, with $\vaccineEfficacy_0 = 1$, $\vaccineEfficacy_1 = 1 - 0.429 \childReduce$, $\vaccineEfficacy_2 = 1 - 0.519 \childReduce$, $\vaccineEfficacy_3 = 1 - 0.429$, and $\vaccineEfficacy_4 = 1 - 0.519$
+Here, $\childReduce = 0.4688$ represents the reduced efficacy of the vaccination for children under the age of five years, and the values $0.429$ and $0.519$ are the median effectiveness of one and two doses over their effective period respectively, according to Table S4 in the supplement material of \cite{lee20}.
+Because vaccine efficacy remains constant, individuals in this model transition from a vaccinated compartment to the susceptible compartment at the end of the vaccine coverage period.
+
+The starting value for each element of the latent state vector $\bm{X}(0)$ are set to zero except for $I_{u0}(0) = y_u^*(0)/\reportRate$ and $R_{u0}(0) = \mathrm{Pop}_u - I_{u0}(0)$, where $y_u^*(0)$ is the reported number of cholera cases in department $u$ at time $t = 0$.
+Reported cases are assumed to come from a log-normal distribution, with the log-scale mean equal to the reporting rate $\reportRate$ times the number of newly infected individuals.
+See Sec.~\ref{sec:fit2} and Sec.~S3.2 of the supplement for more details.
+
+%%%%%%% 333333333 %%%%%%%%%%
+
+\subsubsection*{Model~3}
+\label{sec:model3}
+
+The latent state is described as $\bm{X}(t) = \big(S_{u\vaccCounter}(t),\allowbreak I_{u}(t),\allowbreak A_{u}(t),\allowbreak R_{u\vaccCounter k}(t),\allowbreak W_u(t),\allowbreak u \in \seq{0}{U},\allowbreak \vaccCounter \in \seq{0}{4},\allowbreak k \in \seq{1}{3}\big)$.
+Here, $\vaccCounter=0$ corresponds to unvaccinated, $\vaccCounter=2j-1$ corresponds to a single dose on the $j$th vaccination campaign in unit $u$ and $\vaccCounter=2j$ corresponds to receiving two doses on the $j$th vaccination campaign.
+$k\in\seq{1}{3}$ models non-exponential duration in the recovered class before waning of immunity.
+The force of infection is
+\begin{equation}
+\label{eq:model3:foi}
+\lambda_u(t) = \left(\Wbeta{_u} + 1_{(t \geq \tHur)}\Whur{_u} e^{-\hHur{u}\left(t - \tHur\right)}\right) \frac{W_u(t)}{1+W_u(t)} + \transmission_u \sum_{{\varv}\neq u}\big(I_{\varv}(t)+ \asymptomRelativeInfect A_{\varv}(t)\big),
+\end{equation}
+where $\tHur$ is the time Hurricane Matthew struck Haiti \cite{ferreirai16}, and $1_{(A)}$ is the indicator function for event $A$.
+In \cite{lee20}, $\Whur{_u}$ and $\hHur{u}$ were set to zero for all $u$;
+the need to account for the effect Hurricane Matthew had on cholera transmission for this model is explored in Sec.~S5 of the supplement.
+
+Per-capita transition rates are given in Equations~\ref{eq:model3:SI}--\ref{eq:model3:Decay}.
+\begin{eqnarray}
+\label{eq:model3:SI}
+\mu_{S_{u\vaccCounter}I_{u}} &=& \symptomFrac \,  \lambda_u \big(1-\vaccineEfficacy_{u\vaccCounter}(t)\big) \, d\Gamma/dt,
+\\[-3pt]
+\label{eq:model3:SA}
+\mu_{S_{u\vaccCounter}A_{u}} &=& (1-\symptomFrac) \,  \lambda_u \big(1-\vaccineEfficacy_{u\vaccCounter}(t)\big) \,  d\Gamma/dt,
+\\[-3pt]
+\label{eq:model3:IR}
+\mu_{I_{u}R_{u\vaccCounter 1}} &=& \mu_{A_{u}R_{u\vaccCounter 1}} = \muIR,
+\\[-3pt]
+\label{eq:model3:IS}
+\mu_{I_{u}S_{u0}} &=& \muDeath + \choleraDeath, \hspace{2mm} \mu_{A_{u}S_{u0}} = \muDeath
+\\[-3pt]
+\label{eq:model3:RRnext}
+\mu_{R_{u\vaccCounter 1}R_{u\vaccCounter 2}} &=& \mu_{R_{u\vaccCounter 2}R_{u\vaccCounter 3}} = 3\muRS,
+\\[-3pt]
+\label{eq:model3:RS}
+\mu_{R_{u\vaccCounter k}S_{u0}} &=& \muDeath + 3\muRS \, \mathbf{1}_{\{k=3\}},
+\\[-3pt]
+\label{eq:model3:water}
+\mu_{{\demography}W_u} &=& \big[1 + \seasAmplitude \big(J_u(t))^r \big] \mathrm{Den}_u \, \Wshed \big[ I_{u}(t)+ \asymptomRelativeShed A_{u}(t) \big],
+\\[-3pt]
+\label{eq:model3:Decay}
+\mu_{W_u\demography} &=& \Wremoval.
+\end{eqnarray}
+As with Model~1, $d\Gamma_u(t)/dt$ is multiplicative Gamma-distributed white noise in \myeqref{eq:model3:SI} and \myeqref{eq:model3:SA}.
+In \eqref{eq:model3:water}, $J_u(t)$ is a dimensionless measurement of precipitation that has been standardized by dividing the observed rainfall at time $t$ by the maximum recorded rainfall in department $u$ during the epidemic, and $\mathrm{Den}_u$ is the population density.
+Demographic stochasticity is accounted for by modeling non-cholera related death rate $\muDeath$ in each compartment, along with an additional death rate $\choleraDeath$ in \myeqref{eq:model3:IS} to account for cholera induced deaths among infected individuals.
+All deaths are balanced by births into the susceptible compartment in \myeqref{eq:model3:IS} and \myeqref{eq:model3:RS}, thereby maintaining constant population in each department.
+
+Similar to Model~1, there are no distinct compartments for individuals under five years of age, and the vaccination efficacy is taken as a age adjusted weighted average of the efficacy for individuals both over and under five years of age:  $\vaccineEfficacy_{u \vaccCounter}(t) = c\vaccineEfficacy^*(t - \tau_{uz})$, where $\tau_{uz}$ is the vaccination time for unit $u$ and vaccination campaign $z$.
+The value $c$ and the function $\vaccineEfficacy^*$ are equivalent to those described in Sec.~\ref{sec:model1}.
+
+Latent states are initialized using an approximation of the instantaneous number of infected, asymptomatic, and recovered individuals at time $t_0$ by using the first week of cholera incidence data.
+Specifically, we set $I_{u0}(0) = \frac{y^*_{1u}}{\reportRate(\muDeath + \choleraDeath + \muIR)}$, $A_{u0}(0) = \frac{1 - \symptomFrac}{\symptomFrac}I_{u0}(0)$, $R_{u0k} = y^*_{1u} - I_{u0}(0) - A_{u0}(0)$, and we initialize $W_{u}(0)$ by enforcing the rainfall dynamics supposed by the one step transition model;
+all other compartments that represent population counts are set to zero at time $t_0$.
+For each unit $u$ with zero case counts at time $t_1$, this initialization scheme results in having zero individuals in the Infected and Asymptomatic compartments, as well as having no bacteria in the aquatic reservoir.
+In reality, it is plausible that some bacteria or infected individuals were present in unit $u$ but went unreported.
+Therefore, for departments with zero case counts in week 1, we consider estimating the number of infected individuals rather then treating this value as a constant (see supplement Sec.~S5 for more details).
+Finally, reported cholera cases are assumed to come from a negative binomial measurement model with mean equal to a fraction ($\reportRate$) of individuals in each unit who develop symptoms and seek healthcare
+(see Sec.~S3.3 of the supplement).
+
+<<FitModel1, echo=FALSE, message=FALSE, include=FALSE>>=
+
+# This code chunk is used to fit Model 1 using the IF2 algorithm.
+set.seed(636813)
+
+# Check RUN_LEVEL, and set hyper-parameters to IF2 and pfilter accordingly.
+#                      RUN_LEVEL =    1,    2,      3
+NP_H1        <- switch(RUN_LEVEL,   100, 1000,   2000)
+NMIF_H1      <- switch(RUN_LEVEL,    10,   50,    200)
+NUM_TREND    <- switch(RUN_LEVEL,     5,   10,     90)
+NPROF        <- switch(RUN_LEVEL,     4,    4,     24)
+NP_EVAL      <- switch(RUN_LEVEL,   200, 1000,   5000)
+NREPS_EVAL   <- switch(RUN_LEVEL, cores,   20,  cores)
+
+# Create the <RUN_LEVEL> version of the results and save them.
+h1_MIF <- bake(
+  file = paste0("model1/", rl_dir, "haiti1_fit.rds"), {
+    fit_haiti1(  # haitipkg function used to fit Model 1
+      NP = NP_H1,
+      NMIF = NMIF_H1,
+      NUM_TREND = NUM_TREND,
+      NPROF = NPROF,
+      NREPS_EVAL = NREPS_EVAL,
+      NP_EVAL = NP_EVAL,
+      ncores = cores
+    )
+  }
+)
+
+# The result is a data.frame containing many parameter values and their
+# corresponding likelihood evaluation. To perform a likelihood profile,
+# we calculate the maximum likelihood for each value of betat.
+h1_prof_res <- h1_MIF %>%
+  group_by(betat) %>%
+  summarize(logLik = max(ll))
+
+mcap_results <- pomp::mcap(h1_prof_res$logLik, h1_prof_res$betat, span = 1)
+
+# Get the best set of parameters from MIF2 search.
+p1 <- h1_MIF %>%
+  filter(ll == max(ll)) %>%
+  select(-ll, -ll.se) %>%
+  unlist()
+
+# Save the likelihood of the best parameters, for use later.
+mod1_ll <- h1_MIF %>%
+  filter(ll == max(ll)) %>%
+  select(ll) %>%
+  unlist()
+
+# Just a bit of tidying up: removing parameters that we won't use again.
+rm(NP_H1, NMIF_H1, NUM_TREND, NPROF, NREPS_EVAL, NP_EVAL, h1_MIF)
+gc()
+
+@
+
+<<FitModel2, echo=FALSE, include=FALSE, message=FALSE>>=
+
+# This code chunk fits Model 2. This is a quick caclulation compared to models
+# 1 and 3, so no run_level is used.
+
+h2_fit <- bake(
+  file = paste0("model2/model2_fit.rds"), {
+    fit_haiti2()
+  },
+  timing = FALSE
+)
+@
+
+<<FitModel3, echo=FALSE, include=FALSE, message=FALSE>>=
+
+# This code chunk is used to fit Model 3 using the IBPF algorithm.
+set.seed(1859687)
+
+# Create vectors for the unit and shared parameters that are estimated
+unit_specific_names <- c("betaB", "foi_add", "aHur", "hHur", "Iinit")
+shared_param_names <- c(
+  "mu_B", "XthetaA", "thetaI", "lambdaR", "r", "std_W", "epsilon", "k"
+)
+
+est_param_names <- c(unit_specific_names, shared_param_names)
+
+# Add unit numbers to each parameter
+est_param_names_expanded <- paste0(rep(est_param_names, each = 10), 1:10)
+
+# Simple function that is used to set the rw_sd for the first search
+# This function is convenient so that we don't have to type out the rw_sd
+# for each unit parameter.
+set_rw_1 <- function(x) {
+  if (gsub("[[:digit:]]+$", "", x) %in% shared_param_names) {
+    return(0.01)
+  } else if (x %in% paste0(rep(c("aHur", 'hHur'), each = 2), c(3, 9))) {
+    return(expression(ifelse(time >= 2016.754 & time <= 2017, 0.015, 0)))
+  } else if (x %in% c("Iinit3", "Iinit7", "Iinit10")) {
+    return(expression(ivp(0.25)))
+  } else if (grepl('^foi_add[[:digit:]]+$', x)) {
+    return(0.015)
+  } else if (grepl('^betaB[[:digit:]]+$', x)) {
+    return(0.01)
+  } else {
+    return(0)
+  }
+}
+
+# Simple function that is used to set the rw_sd for the second search
+# This function is convenient so that we don't have to type out the rw_sd
+# for each unit parameter.
+set_rw_2 <- function(x) {
+  if (gsub("[[:digit:]]+$", "", x) %in% shared_param_names) {
+    return(0.003)
+  } else if (x %in% paste0(rep(c("aHur", 'hHur'), each = 2), c(3, 9))) {
+    return(expression(ifelse(time >= 2016.754 & time <= 2017, 0.005, 0)))
+  } else if (x %in% c("Iinit3", "Iinit7", "Iinit10")) {
+    return(expression(ivp(0.125)))
+  } else if (grepl('^foi_add[[:digit:]]+$', x)) {
+    return(0.005)
+  } else if (grepl('^betaB[[:digit:]]+$', x)) {
+    return(0.003)
+  } else {
+    return(0)
+  }
+}
+
+# Simple function that is used to set the rw_sd for the third search
+# This function is convenient so that we don't have to type out the rw_sd
+# for each unit parameter.
+set_rw_3 <- function(x) {
+  if (gsub("[[:digit:]]+$", "", x) %in% shared_param_names) {
+    return(0.0025)
+  } else if (x %in% paste0(rep(c("aHur", 'hHur'), each = 2), c(3, 9))) {
+    return(expression(ifelse(time >= 2016.754 & time <= 2017, 0.005, 0)))
+  } else if (x %in% c("Iinit3", "Iinit7", "Iinit10")) {
+    return(expression(ivp(0.125)))
+  } else if (grepl('^foi_add[[:digit:]]+$', x)) {
+    return(0.003)
+  } else if (grepl('^betaB[[:digit:]]+$', x)) {
+    return(0.0025)
+  } else {
+    return(0)
+  }
+}
+
+# First Search RW
+reg_rw_1.sd <- lapply(est_param_names_expanded, set_rw_1)
+names(reg_rw_1.sd) <- est_param_names_expanded
+chol_rw_1.sd <- do.call(rw_sd, reg_rw_1.sd)
+
+# Second Search RW
+reg_rw_2.sd <- lapply(est_param_names_expanded, set_rw_2)
+names(reg_rw_2.sd) <- est_param_names_expanded
+chol_rw_2.sd <- do.call(rw_sd, reg_rw_2.sd)
+
+# Third Search RW
+reg_rw_3.sd <- lapply(est_param_names_expanded, set_rw_3)
+names(reg_rw_3.sd) <- est_param_names_expanded
+chol_rw_3.sd <- do.call(rw_sd, reg_rw_3.sd)
+
+# Search hyper-parameters for each run-level and search. This sets
+# parameters like number of particles, number of BPF iterations, and
+# number of replications for each search.
+h3_fit_parms <- set_h3_fit_parms(
+  RUN_LEVEL = RUN_LEVEL,
+  rw_1.sd = chol_rw_1.sd,
+  rw_2.sd = chol_rw_2.sd,
+  rw_3.sd = chol_rw_3.sd
+)
+
+# Calculate the number of parameters that are estimated:
+# This is calculated by the number of non-zero rw_sd values (including expressions), but then subtracting of repeated shared parameters.
+mod3_n_params <- sum(reg_rw_1.sd != 0, na.rm = TRUE) + sum(sapply(reg_rw_1.sd, is.expression)) - length(shared_param_names) * 9
+
+haiti3_fit <- readRDS("model3/run_level_3/h3_revision.rds")
+
+# Fit Model 3
+# haiti3_fit <- bake(
+#   file = paste0("model3/", rl_dir, "haiti3_coupled_fit.rds"), {
+#     fit_coupled_haiti3(
+#       nsearches = h3_fit_parms$N_SEARCHES,
+#       search1 = h3_fit_parms$SEARCH1,
+#       search2 = h3_fit_parms$SEARCH2,
+#       search3 = h3_fit_parms$SEARCH3,
+#       search_rho = FALSE,
+#       search_gamma = FALSE,
+#       search_Iinit = TRUE,
+#       search_hur = TRUE,
+#       ncores = cores
+#     )
+#   }
+# )
+
+
+# haiti3_fit contains ll estimate for many parameter sets, so we want to find
+# the highest value
+mod3_ll <- max(
+  haiti3_fit[[length(haiti3_fit)]]$logLiks$logLik,
+  na.rm = TRUE
+)
+
+# Just a bit of tidying up: removing parameters that we won't use again.
+rm(
+  SEARCH1, SEARCH2, SEARCH3, N_SEARCHES,
+  est_param_names, est_param_names_expanded,
+  set_rw_1, set_rw_2, set_rw_3, reg_rw_1.sd, reg_rw_2.sd, reg_rw_3.sd,
+  chol_rw_1.sd, chol_rw_2.sd, chol_rw_3.sd
+)
+gc()
+
+@
+
+<<table-input,echo=FALSE,eval=T, include=FALSE, message=FALSE>>=
+
+# Find the index for parameters of model 3 that correspond to the MLE.
+best_m3 <- which.max(haiti3_fit[[length(haiti3_fit)]]$logLiks$logLik)
+
+# Save the parameters that correspond to the MLE of Model 3.
+p3 <- haiti3_fit[[length(haiti3_fit)]]$params[best_m3, ]
+
+p3u <- matrix(nrow = length(unit_specific_names), ncol = 10)
+rownames(p3u) <- unit_specific_names
+p3s <- numeric(length(shared_param_names))
+names(p3s) <- shared_param_names
+
+for (p in shared_param_names) {
+  p3s[p] <- p3[paste0(p, 1)]  # They are the same for 1:10
+}
+
+for (p in unit_specific_names) {
+  pat <- paste0("^", p, "[[:digit:]]+$")
+  p3u[p, ] <- p3[grepl(pat, names(p3))]
+}
+
+rm(unit_specific_names, shared_param_names, p, pat)
+
+stew(file = "models.rda", {
+  h1 <- haiti1_joint()
+  coef(h1) <- p1
+
+  h2_epi <- haiti2(region = 'before', cutoff = 10000, measure = 'log')
+  coef(h2_epi) <- h2_fit$h2_params
+
+  h3Spat <- haiti3_spatPomp()
+  coef(h3Spat) <- p3
+})
+@
+
+\subsection*{Model Fitting}\label{sec:model_fitting}
+
+Each of the three models considered in this study describes cholera dynamics as a partially observed Markov process (POMP), with the understanding that the deterministic Model~2 is a degenerate case of a stochastic model.
+Each model is indexed by a parameter vector, $\paramVec$, and different values of $\paramVec$ can result in qualitative differences in the predicted behavior of the system.
+Therefore, the choice of $\paramVec$ used to make inference about the system can greatly affect model based conclusions.
+Elements of $\paramVec$ can be fixed at a constant value based on scientific understanding of the system, but parameters can also be calibrated to data by maximizing a measure of congruency between the observed data and the assumed mechanistic structure.
+Calibrating model parameters to observed data does not guarantee that the resulting model successfully approximates real-world mechanisms, since model assumptions may be incorrect, and do not change as the model is calibrated to data.
+However, the congruency between the model and observed data serves as a proxy for the congruency between the model and the true underlying dynamic system.
+As such, it is desirable to obtain the best possible fit of the proposed mechanistic structure to the observed data.
+In the following subsections we describe our approach to calibrating the three proposed mechanistic models to observed cholera incidence data.
+
+\subsubsection*{Calibrating Model~1 Parameters}\label{sec:fit1}
+
+One of the most frequently used approaches to calibrate the parameters of a statistical model is maximum likelihood estimation.
+In the case of a POMP model, the likelihood function---as described in Sec.~\ref{sec:models}---is written as $\mathcal{L}(\paramVec) = \int f_{\bm{X}_{0:N}, \bm{Y}_{1:N}}\big(\bm{x}_{0:N}, \bm{y}_{1:N};\paramVec\big) d\bm{x}_{0:N}$.
+The high-dimensional integral in the likelihood, and the potentially non-linear nature of the process model, makes it impossible to obtain a closed form expression of the likelihood function of POMP models, except in the most basic cases.
+For example, the process model that defines Model~1 was developed with the intent of providing a plausible description of cholera dynamics rather than a providing statistically convenient description.
+Because of this, a closed form expression of the likelihood of Model~1 is not readily available.
+
+In order to retain the ability to propose models that are scientifically meaningful rather than only those that are simply statistically convenient, we restrict ourselves to parameter estimation techniques that have the plug-and-play property, which is that the fitting procedure only requires the ability to simulate the latent process instead of evaluating transition densities \cite{breto09,he10}.
+Plug-and-play algorithms include Bayesian approaches like ABC and PMCMC \cite{toni09,andrieu10}, but here we use algorithms that enable maximum likelihood estimation.
+To our knowledge, the only plug-and-play methods that can maximize the likelihood for POMP models of this complexity are iterated filtering algorithms \cite{ionides15}, which modify the well-known \emph{particle filter} \cite{arulampalam02}.
+The particle filter is often used to obtain values of latent states, but can also be used to obtain likelihood estimates of a POMP model.
+Iterated filtering algorithms, like IF2 \cite{ionides15}, extend the particle filter by performing a random walk for each parameter and particle;
+these perturbations are carried out iteratively over multiple filtering operations, using the collection of parameters from the previous filtering pass as the parameter initialization for the next iteration, and decreasing the random walk variance at each step.
+
+The ability to maximize the likelihood allows for likelihood-based inference, such as performing statistical tests for potential model improvements.
+We demonstrate this capability by proposing a linear trend $\transmissionTrend$ in transmission in Eq.~\myeqref{model1:beta}:
+\begin{equation}
+\label{model1:betat}
+\log\transmission(t) = \sum_{j=1}^6 \transmission_s s_j(t) + \transmissionTrend\bar{t},
+\end{equation}
+where $\bar{t} = \frac{t - (t_N + t_0) / 2}{t_N - (t_N + t_0) / 2}$, so that $\bar{t} \in [-1, 1]$.
+The proposal of a linear trend in transmission is a result of observing an apparent decrease in reported cholera infections from 2012-2019 in Fig.~\ref{CholeraData}.
+While several factors may contribute to this decrease, one explanation is that case-area targeted interventions (CATIs), which included education sessions, increased monitoring, household decontamination, soap distribution, and water chlorination in infected areas \cite{rebaudet19CATI}, may have substantially reduced cholera transmission \cite{rebaudet21}.
+
+We perform a statistical test to determine whether or not the data indicate the presence of a linear trend in transmissibility.
+To do this, we perform a profile-likelihood search on the parameter $\transmissionTrend$ and obtain a $95\%$ confidence interval via a Monte Carlo Adjusted Profile (MCAP) \cite{ionides17}.
+\cite{lee20} implemented Model~1 by fitting two distinct phases: an epidemic phase from October 2010 through March 2015, and an endemic phase from March 2015 onward.
+We similarly allow the re-estimation of process and measurement overdispersion parameters ($\sigmaProc^2$ and $\obsOverdispersion$), and require that the latent Markov process $X(t)$ carry over from one phase into the next.
+The resulting confidence interval for $\transmissionTrend$ is $(\Sexpr{myround(mcap_results$ci[1], digits = 3)}, \Sexpr{myround(mcap_results$ci[2], digits = 3)})$, with the full results displayed in Fig.~\ref{fig:betat}.
+These results are suggestive that the inclusion of a trend in transmission rate improves the quantitative ability of Model~1 to describe the observed data.
+The reported results for Model~1 in the remainder of this article were obtained with the inclusion of the parameter $\transmissionTrend$.
+
+\begin{figure}
+\centering
+<<Beta_trend_Figure, fig.height=2.4, fig.width=3.6, fig.align='center'>>=
+ggplot() +
+  geom_point(data = h1_prof_res, aes(x = betat, y = logLik)) +
+  geom_line(data = mcap_results$fit, aes(x = parameter, y = smoothed), col = 'blue') +
+  geom_vline(xintercept = mcap_results$ci[1], linetype = 'dashed') +
+  geom_vline(xintercept = mcap_results$ci[2], linetype = 'dashed') +
+  geom_vline(xintercept = mcap_results$mle, col = 'blue') +
+  labs(x = "Linear Trend in Transmission", y = 'Log Likelihood') +
+  theme(axis.text = element_text(size = 8),
+        axis.title = element_text(size = 10))
+@
+\caption{\label{fig:betat}
+Monte Carlo adjusted profile of $\transmissionTrend$.
+The blue curve is the profile, the blue line indicates the MLE, and the dashed lines indicate the $95\%$ confidence interval.
+}
+\end{figure}
+
+We implemented Model~1 using the \code{pomp} package \cite{king16}, relying heavily on the \code{pomp} source code provided by \cite{lee20}.
+Both analyses used the \code{mif2} implementation of the IF2 algorithm to estimate $\paramVec$ by maximum likelihood.
+One change we made in the statistical analysis that led to larger model likelihoods was increasing the computational effort in the numerical maximization.
+While IF2 enables parameter estimation for a large class of models, the theoretic ability to maximize the likelihood depends on asymptotics in both the number of particles and the number of filtering iterations.
+Many Monte Carlo replications are then required to quantify and further reduce the error.
+The large difference in likelihoods that were obtain by these two approaches (see Table~\ref{tab:likes}) highlights the importance of carefully determining the necessary computational effort needed to maximize model likelihoods and acting accordingly.
+
+\begin{figure}
+\centering
+<<Model_1_Sims_Figure, fig.height=2.35, fig.width=4.6, fig.align='center'>>=
+# This code chunk creates the figure containing simulations from Model 1
+
+# Simulate Model 1 from initial conditions.
+sims <- simulate(h1, nsim = 500, format = 'data.frame', seed = 3448931)
+
+# Calculate 0.025 and 0.975 percentiles of simulations, at each time point.
+quants <- sims %>%
+  mutate(is_data = .id == 'data') %>%
+  filter(!is_data) %>%
+  select(.id, week, cases) %>%
+  group_by(week) %>%
+  summarize(
+    q025 = quantile(cases, probs = 0.025, na.rm = TRUE),
+    q50  = quantile(cases, probs = 0.500, na.rm = TRUE),
+    q975 = quantile(cases, probs = 0.975, na.rm = TRUE)
+  ) %>%
+  ungroup() %>%
+  mutate(date = lubridate::ymd("2010-10-16") + lubridate::weeks(week))
+
+# Plot the data, median value of the simulation, and estimated quantiles.
+ggplot() +
+  geom_line(data = true_agg_cases, aes(x = date, y = ReportedAll + 1)) +
+  geom_line(data = quants, aes(x = date, y = q50 + 1), col = 'blue') +
+  geom_ribbon(  # Plot confidence region
+    data = quants,
+    aes(x = date, ymin = q025 + 1, ymax = q975 + 1),
+    alpha = 0.5
+  ) +
+  theme(
+    axis.title.x = element_blank(),
+    axis.text = element_text(size = 8),
+    axis.title.y = element_text(size = 10)
+  )+
+  ylab('Reported cholera cases') +
+  geom_vline(  # Show change from epidemic -> endemic models.
+    xintercept = lubridate::weeks(232) + lubridate::ymd("2010-10-16"),
+    linetype = 'dashed'
+  ) +
+  scale_y_log10(  # Plot on the log-scale
+    labels = scales::trans_format("log10", scales::math_format(10^.x))
+  ) +
+  scale_x_date(  # Format the date on x-axis.
+    date_labels = "'%y",
+    breaks = seq.Date(
+      from = as.Date("2011-01-01"),
+      as.Date("2019-01-01"),
+      by = '1 year'
+    )
+  )
+@
+\caption{\label{fig:mod1fit}
+Simulations from Model~1 compared to reported cholera cases.
+The black curve is observed data, the blue curve is median of 500 simulations from the fitted model, and the vertical dashed line represents break-point when parameters are refit.
+}
+\end{figure}
+
+<<Clean-up Model 1 Simulations, echo=FALSE, include=FALSE>>=
+rm(sims, quants)
+gc()
+@
+
+\subsubsection*{Calibrating Model~2 Parameters}\label{sec:fit2}
+
+Model~2 is a deterministic compartmental model defined by a set of coupled differential equations.
+The use of deterministic compartment models have a long history in the field of infectious disease epidemiology \cite{kermack1927,brauer2017,giordano20},
+and can be justified by asymptotic considerations in a large-population limit \cite{dadlani2020,ndii17}.
+Because the process model of Model~2 is deterministic, maximum likelihood estimation reduces to a least squares calculation when combined with a Gaussian measurement model (see Sec.~S3.2 of the supplement material for details).
+\cite{lee20} fit two versions of Model~2 based on a presupposed change in cholera transmission from a epidemic phase to endemic phase that occurred in March, 2014.
+The inclusion of a change-point in model states and parameters increases the flexibility of the model and hence the ability to fit the observed data.
+The increase in model flexibility, however, results in hidden states that are inconsistent between model phases.
+The inclusion of a model break-point by \cite{lee20} is perhaps due to a challenging feature of fitting a deterministic model via least squares: discrepancies between model trajectories and observed case counts in highly infectious periods of a disease outbreak will result in greater penalty than the discrepancies between model trajectories and observed case counts in times of relatively low infectiousness, resulting in a bias towards accurately describing periods of high infectiousness.
+This issue is particularly troublesome for modeling cholera dynamics in Haiti: the inability to accurately fit times of low infectiousness may result in poor model forecasts, as few cases of cholera were observed in the last few years of the epidemic.
+
+To combat this issue, we fit the model to log-transformed case counts, since the log scale stabilizes the variation during periods of high and low incidence.
+An alternative solution is to change the measurement model to include overdispersion, as was done in Models~1 and~3.
+This permits the consideration of demographic stochasticity, which is dominant for small infected populations, together with log scale stochasticity (also called multiplicative, or environmental, or extra-demographic) which is dominant at high population counts.
+Here we chose to fit the model to transformed case counts rather than adding overdispersion to the measurement model with the goal of minimizing the changes to the model proposed by \cite{lee20}.
+
+We implemented this model using the \code{spatPomp} \code{R} package \cite{asfaw23arxiv}.
+The model was then fit using the subplex algorithm, implemented in the  \code{subplex} package \cite{king2020Subplex}.
+A comparison of the trajectory of the fitted model to the data is given in Fig~\ref{fig:mod2Traj}.
+
+<<Model 2 Trajectory, echo=FALSE>>=
+
+# This code chunk calculates the "trajectory" of the differential equations
+# for Model 2.
+
+h2_epi_traj <- trajectory(
+  h2_epi,  # Model
+  params = h2_fit$h2_params,  # estimated parameters
+  format = 'data.frame'
+)
+
+# Display the output as nationally aggregated data, as was done in Lee et al (2020)
+h2_epi_traj$Ctotal <- rowSums(
+  h2_epi_traj[, paste0("C", 1:10)]  # Infections in each department
+) * h2_fit$h2_params['Rho']  # multiply by reporting rate, to compare to reported cases.
+
+h2_traj <- h2_epi_traj %>%
+  select(year, Ctotal) %>%
+  mutate(
+    date = as.Date(lubridate::round_date(lubridate::date_decimal(year), unit = 'day'))
+  )
+@
+
+\subsubsection*{Calibrating Model~3 Parameters}\label{sec:fit3}
+Model~3 describes cholera dynamics in Haiti using a metapopulation model, where the hidden states in each administrative department has an effect on the dynamics in other departments.
+The decision to address metapopulation dynamics using a spatially explicit model, rather than to aggregate over space, is double-edged.
+Evidence for the former approach has been provided in previous studies \cite{king15}, including the specific case of heterogeneity between Haitian departments in cholera transmission \cite{collins14}.
+However, a legitimate preference for simplicity \cite{saltelli20,green15} can support a decision to consider nationally aggregated models.
+One issue that arises when fitting spatially explicit models is that parameter estimation techniques based on the particle filter become computationally intractable as the number of spatial units increases.
+This is a result of the approximation error of particle filters growing exponentially in the dimension of the model \cite{rebeschini15,park20}.
+
+To avoid the approximation error present in high-dimensional models, \cite{lee20} simplified the problem of estimating the parameters of Model~3 by creating an approximate version of the model where the units are independent given the observed data.
+Reducing a spatially coupled model to individual units in this fashion requires special treatment of any interactive mechanisms between spatial units, such as found in Eq.~\myeqref{eq:model3:foi}.
+Because the simplified, spatially-decoupled version of Model~3 implemented by \cite{lee20} relies on the observed cholera cases, the calibrated model cannot readily be used to obtain forecasts.
+Therefore, in order to obtain model forecasts, \cite{lee20} used the parameters estimates from the spatially-decoupled approximation of Model~3 to obtain forecasts using the fully coupled version of the model.
+This approach of model calibration and forecasting avoids the issue of particle depletion, but may also be problematic.
+One concern is that cholera dynamics in department $u$ are highly related to the dynamics in the remaining departments;
+calibrating model parameters while conditioning on the observed cases in other departments may therefore lead to an over-dependence on observed cholera cases.
+Another concern is that the two versions of the model are not the same, resulting in sub-optimal parameter estimates for the spatially coupled model,
+as parameters that maximize the likelihood of the decoupled model almost certainly do not maximize the likelihood of the fully coupled model.
+These two concerns may explain the unrealistic forecasts and low likelihood of the model (see Table~\ref{tab:likes}).
+
+For our analysis, we calibrate the parameters of the spatially coupled version of Model~3 using the iterated block particle filter (IBPF) algorithm of \cite{ionides22}.
+This algorithm extends the work of \cite{ning21ibpf}, who provided theoretic justification for the version of the algorithm that only estimates unit-specific parameters.
+The IBPF algorithm enables us to directly estimate the parameters of models describing high-dimensional partially-observed nonlinear dynamic systems via likelihood maximization.
+The ability to directly estimate parameters of Model~3 is responsible for the large increase in model likelihoods reported in Table~\ref{tab:likes}, as no algorithm with similar capabilities existed when \cite{lee20} published their results.
+Simulations from the fitted model are displayed in Fig.~\ref{fig:h3spatsims}.
+
+<<Model 3 SpatPOMP sims, echo=FALSE>>=
+
+# Number of simulations from Model 3. Because it's high-dimensional, we include
+# a run level to avoid time/memory issues when editing. Final results shown
+# with RUN_LEVEL = 3.
+
+h3_nsim <- switch(RUN_LEVEL, 20, 100, 500)
+
+# Get quantiles of simulations from the calibrated Model 3.
+h3_quants <- bake(
+  file = paste0('model3/', rl_dir, 'h3Sims.rds'), {
+
+    coef(h3Spat) <- p3
+    # Simulate from the fitted version of Model 3
+    h3_sims <- simulate(
+      h3Spat, nsim = h3_nsim, format = 'data.frame'
+    )
+
+    # For each department and time-point, calculate percentiles of the
+    # simulations
+    h3_sims %>%
+      rename(dep = unitname) %>%
+      group_by(dep, time) %>%
+      summarise(
+        q05 = quantile(cases, 0.025, na.rm = T),
+        mean = mean(cases, na.rm = T),
+        q50 = quantile(cases, 0.5, na.rm = T),
+        q95 = quantile(cases, 0.975, na.rm = T)
+      ) %>%
+      ungroup() %>%
+      mutate(
+        date = lubridate::date_decimal(time)
+      ) %>%
+      mutate(date = as.Date(lubridate::round_date(date, unit = 'day')))
+  },
+  timing = FALSE
+)
+
+
+@
+
+\begin{figure}
+<<Model3_SpatPOMP_sims_Figure, fig.height=3>>=
+
+# Plot the reported cases and confidence region for each department.
+ggplot() +
+  geom_line(data = h3_quants, aes(x = date, y = q50 + 1), col = 'blue') +
+  geom_line(data = dep_plot_df, aes(x = date, y = cases + 1), col = 'black') +
+  geom_ribbon(  # plot confidence region.
+    data = h3_quants,
+    aes(x = date, ymin = q05 + 1, ymax = q95 + 1),
+    alpha = 0.4
+  ) +
+  facet_wrap(
+    ~factor(dep, levels = plot_order), nrow = 2, labeller = dep_labeller
+  ) +
+  labs(y = 'Log Reported Cholera Cases') +
+  scale_x_date(  # Format the date on the X-axis.
+    date_labels = "'%y",
+    breaks = seq.Date(
+      from = as.Date("2011-01-01"),
+      to = as.Date("2019-01-01"),
+      by = '2 years'
+    )
+  ) +
+  theme(axis.title.x = element_blank()) +
+  scale_y_log10(  # Plot on log-scale
+    labels = scales::trans_format("log10", scales::math_format(10^.x))
+  )
+@
+\caption{\label{fig:h3spatsims}
+Simulations from initial conditions using the spatially coupled version of Model~3.
+The black curve represents true case count, the blue line the median of 500 simulations from the model, and the gray ribbons representing $95\%$ confidence interval.
+}
+\end{figure}
+
+<<Remove Model3 spatSims, cache=FALSE, include=FALSE, message=FALSE, echo=FALSE>>=
+rm(h3_quants, h3_nsim)
+gc()
+@
+
+\subsection*{Model Diagnostics}\label{sec:model_diagnostics}
+
+Parameter calibration (whether Bayesian or frequentist) aims to find the best description of the observed data under the assumptions of the model.
+Obtaining the best fitting set of parameters for a given model does not, however, guarantee that the model provides an accurate representation of the system in question.
+Model misspecification, which may be thought of as the omission of a mechanism in the model that is an important feature of the dynamic system, is inevitable at all levels of model complexity.
+To make progress, while accepting proper limitations, one must bear in mind the much-quoted observation of \cite{box79} that ``all models are wrong but some are useful.''
+Beyond being good practical advice for applied statistics, this assertion is relevant for the philosophical justification of statistical inference as severe testing \cite{mayo18} % \citep[][Sec.~4.8]{mayo18}.
+In this section, we discuss some tools for diagnosing mechanistic models with the goal of making the subjective assessment of model ``usefulness'' more objective.
+To do this, we will rely on the quantitative and statistical ability of the model to match the observed data, which we call the model's {\it goodness-of-fit}, with the guiding principle that a model which cannot adequately describe observed data may not be reliable for useful purposes.
+Goodness-of-fit may provide evidence supporting the causal interpretation of one model versus another, but cannot by itself rule out the possibility of alternative explanations.
+
+One common approach to assess a mechanistic model's goodness-of-fit is to compare simulations from the fitted model to the observed data.
+Visual inspection may indicate defects in the model, or may  suggest that the observed data are a plausible realization of the fitted model.
+While visual comparisons can be informative, they provide only a weak and informal measure of the goodness-of-fit of a model.
+The study by \cite{lee20} provides an example of this: their models and parameter estimates resulted in simulations that visually resembled the observed data, yet resulted in model likelihoods that were---in some cases---considerably smaller than likelihoods that can be achieved via the likelihood based optimization techniques that were used (see Table~\ref{tab:likes}).
+Alternative forms of model validation should therefore be used in conjunction with visual comparisons of simulations to observed data.
+
+Another approach is to compare a quantitative measure of the model fit (such as MSE, predictive accuracy, or model likelihood) among all proposed models.
+These comparisons, which provide insight into how each model performs relative to the others, are quite common \cite{rinaldo12,sallah17}.
+To calibrate relative measures of fit, it is useful to compare against a model that has well-understood statistical ability to fit data, and we call this model a {\it benchmark}.
+Standard statistical models, interpreted as associative models without requiring any mechanistic interpretation of their parameters, provide suitable benchmarks.
+Examples include linear regression, auto-regressive moving average time series models, or even independent and identically distributed measurements.
+The benchmarks enable us to evaluate the goodness of fit that can be expected of a suitable mechanistic model.
+
+Associative models are not constrained to have a causal interpretation, and typically are designed with the sole goal of providing a statistical fit to data.
+Therefore, we should not require a candidate mechanistic model to beat all benchmarks.
+However, a mechanistic model which falls far short against benchmarks is evidently failing to explain some substantial aspect of the data.
+A convenient measure of fit should have interpretable differences that help to operationalize the meaning of far short.
+Ideally, the measure should also have favorable theoretical properties.
+Consequently, we focus on log-likelihood as a measure of goodness of fit, and we adjust for the degrees of freedom of the models to be compared by using the Akaike information criterion (AIC) \cite{aic74}.
+
+In some cases, a possible benchmark model could be a generally accepted mechanistic model, but often no such model is available.
+Because of this, we use a log-linear Gaussian ARMA model as an associative benchmark, as recommended by \cite{he10}.
+The theory and practice of ARMA models is well developed, and these linear models are appropriate on a log scale due to the exponential growth and decay characteristic of biological dynamics.
+Likelihoods of Models~1--3 and their respective ARMA benchmark models are provided in Table~\ref{tab:likes}.
+
+It should be universal practice to present measures of goodness of fit for published models, and mechanistic models should be compared against benchmarks.
+In our literature review of the Haiti cholera epidemic, no non-mechanistic benchmark models were considered in any of the 32 papers that used dynamic models to describe cholera in order to obtain scientific conclusions.
+Including benchmarks would help authors and readers to detect and confront any major statistical limitations of the proposed mechanistic models.
+In addition, the published goodness of fit provides a concrete point of comparison for subsequent scientific investigations.
+When combined with online availability of data and code, objective measures of fit provide a powerful tool to accelerate scientific progress, following the paradigm of the {\it common task framework} \cite{donoho17} % \citep[][Sec.~6]{donoho17}.
+
+The use of benchmarks may also be beneficial when developing models at differing spatial scales, where a direct comparison between model likelihoods is meaningless.
+In such a case, a benchmark model can be fit to each spatial resolution being considered, and each model compared to their respective benchmark.
+Large advantages (or shortcomings) in model likelihood relative to the benchmark for a given spatial scale that are not present in other spatial scales may provide weak evidence for (or against) the statistical fit of models across a range of spatial resolutions.
+
+<<Table 2 Input, echo=FALSE, eval=TRUE>>=
+NREPS_EVAL <- switch(RUN_LEVEL,   3,   8,    36)
+NP_EVAL    <- switch(RUN_LEVEL, 100, 500,  5000)
+
+# Objective function of model 2, epidemic phase
+epi_ofun <- traj_objfun(
+  h2_epi,
+  params = h2_fit$h2_params
+)
+
+mod2_epi_ll <- -epi_ofun(par = h2_fit$h2_params)
+mod2_ll <- mod2_epi_ll - sum(log(h2_epi@data + 1), na.rm = TRUE)
+
+arima_lik2 <- 0
+
+# model 2 AIC
+mod2_n_params <- h2_fit$n_fit_params
+mod2_aic <- 2 * mod2_n_params - 2 * mod2_ll
+
+# model 1 AIC
+mod1_n_params <- length(
+  c('beta1', 'beta2', 'beta3', 'beta4', 'beta5', 'beta6',
+    'rho', 'nu', 'E_0', 'I_0', 'tau_epi',
+    'tau_end', 'sig_sq_epi', 'sig_sq_end', 'betat')
+)
+mod1_aic <- 2 * mod1_n_params - 2 * mod1_ll
+
+# model 3 AIC
+mod3_aic <- 2 * mod3_n_params - 2 * mod3_ll
+
+# Calculate likelihood via block-particle filter
+mod3_eval_res <- bake(
+  file = paste0('model3/', rl_dir, 'mod3_eval_res.rds'), {
+
+    # Create a list to store results
+    results <- list()
+
+    coef(h3Spat) <- p3
+
+    # Perform block-particle filter
+    h3_bpf <- foreach(i = 1:NREPS_EVAL, .combine = c) %dopar% {
+      bpfilter(h3Spat, Np = NP_EVAL, block_size = 1)
+    }
+
+    ll <- logLik(h3_bpf)
+    results$ll <- logmeanexp(ll[!is.na(ll)], se = FALSE)
+
+    ### Get likelihood for subset of the data
+
+    # Find appropriate sub-set
+    in_subset_cols <- h3_bpf[[1]]@times >= as.numeric(lubridate::decimal_date(as.Date("2014-03-01")))
+    in_subset_rows <- h3_bpf[[1]]@unit_names != 'Ouest'
+
+    mod3_coupled_subset_evals <- c()
+    for (i in 1:length(h3_bpf)) {
+      mod3_coupled_subset_evals <- c(
+        mod3_coupled_subset_evals,
+        sum(h3_bpf[[i]]@block.cond.loglik[in_subset_rows, in_subset_cols])
+      )
+    }
+
+    results$subset_ll <- logmeanexp(mod3_coupled_subset_evals)
+    results
+  },
+  timing = FALSE
+)
+
+mod3_eval_res$subset_aic <- 2 * mod3_n_params - 2 * mod3_eval_res$subset_ll
+
+rm(NREPS_EVAL, NP_EVAL)
+@
+
+<<CalculateARMA, echo=FALSE, message=FALSE, include=FALSE, cache=TRUE>>=
+
+ARMA_benchmarks <- list()
+
+###
+### Model 1 ###
+###
+
+# Load aggregated data
+m1_agg_data <- haiti1_agg_data()
+
+# Fit ARMA(2, 1) on log-cases
+m1_log_arma <- arima(log(m1_agg_data$cases + 1), order = c(2, 0, 1))
+
+# Fit ARMA(2, 1) on natural scale of cases
+m1_arma <- arima(m1_agg_data$cases, order = c(2, 0, 1))
+
+# Check which one is better, and save benchmark as the better one
+if (m1_log_arma$loglik - sum(log(m1_agg_data$cases + 1), na.rm = TRUE) >= m1_arma$loglik) {
+  ARMA_benchmarks[['m1']] <- m1_log_arma$loglik - sum(log(m1_agg_data$cases + 1), na.rm = TRUE)
+} else {
+  ARMA_benchmarks[['m1']] <- m1_arma$loglik
+}
+
+rm(m1_agg_data, m1_log_arma, m1_arma)
+gc()
+
+###
+### Model 2 ###
+###
+
+h2_data <- haiti2_data(recreate = FALSE)
+
+# model 2 ARIMA benchmark
+h2_dep_names <- h2_data$department %>% unique()
+m2_benchmark <- 0
+for (i in 1:10){
+  cases <- h2_data[h2_data$department == h2_dep_names[i], ]$cases
+  log_cases <- log(cases + 1)
+
+  m2_arma_dep_ll <- arima(cases, order=c(2, 0, 1))$loglik
+  m2_log_arma_dep_ll <- arima(log_cases, order=c(2, 0, 1))$loglik - sum(log_cases, na.rm = TRUE)
+
+  m2_benchmark <- m2_benchmark + max(m2_arma_dep_ll, m2_log_arma_dep_ll)
+}
+
+ARMA_benchmarks[['m2']] <- m2_benchmark
+
+rm(m2_benchmark, h2_dep_names, cases, log_cases, m2_arma_dep_ll, m2_log_arma_dep_ll, h2_data)
+gc()
+
+###
+### Model 3 ###
+###
+
+mod3_cases <- as.data.frame(t(h3Spat@data))
+
+m3_benchmark <- 0
+for (dep in 1:10) {
+
+  # Get department cases
+  cases <- as.numeric(mod3_cases[, dep])
+
+  # Fit model on natural scale of cases
+  m3_a201 <- arima(cases, order = c(2, 0, 1))
+
+  # Fit model on log-scale of cases
+  m3_log_a201 <- arima(log(cases + 1), order = c(2, 0, 1))
+
+  m3_benchmark <- m3_benchmark + max(
+    m3_log_a201$loglik - sum(log(cases + 1), na.rm = TRUE),
+    m3_a201$loglik
+  )
+}
+
+ARMA_benchmarks[['m3']] <- m3_benchmark
+rm(cases, m3_a201, m3_log_a201, m3_benchmark, dep,
+   mod3_cases, temp, jumps, MODEL3_CASES, i, j)
+gc()
+@
+
+<<Table 2 Lee Input, echo=FALSE, include=FALSE>>=
+mod1_lee_n_params <- 20
+mod1_lee_aic <- 2 * mod1_lee_n_params - 2 * mod1_lee_ll
+
+mod2_lee_aic <- 2 * h2_fit$leeFit_n_params - 2 * h2_fit$leeFit_ll
+@
+
+<<Lee3 Sub Calculations, echo=FALSE, include=FALSE, message=FALSE>>=
+lee3_NP   <- switch(RUN_LEVEL, 50, 250, 5000)
+lee3_NREP <- switch(RUN_LEVEL,  3,   8,   36)
+
+registerDoRNG(49637421)
+
+# Create Lee et al (2020a) version of model 3 on sub-data
+lee3_sub <- lee3_spatPomp()
+
+# This model is only fit for a subset of the data, so we will set data
+# that are not part of this subset as NA. This will allow us to estimate
+# the likelihood for only the values that were considered during the
+# parameter estimation phase.
+# set_as_na <- lee3_sub@times < lubridate::decimal_date(as.Date('2017-06-10'))
+# temp_ouest_cases <- lee3_sub@data['casesOuest', ]
+# temp_ouest_cases[set_as_na] <- NA_real_
+# lee3_sub@data['casesOuest', ] <- temp_ouest_cases
+
+lee3_all <- lee3_spatPomp(start_date = "2010-10-23")
+
+lee3_results <- bake(
+  file = paste0('model3/', rl_dir, 'lee3_results.rds'), {
+
+    # Create lists to save results
+    lee3_results <- list()
+
+    # Save how long it takes for sub-data
+    lee3_results[["sub_bpf_time"]] <- system.time({
+
+      lee3_sub_ll_evals <- foreach(
+        i = 1:lee3_NREP, .combine = rbind
+      ) %dopar% {
+
+        liks <- numeric(10L)
+
+        lee_bpf_out <- bpfilter(lee3_sub, block_size = 1, Np = lee3_NP)
+        Ouest_ind <- which(lee_bpf_out@unit_names == "Ouest")
+
+        for (u in 1:10) {
+          if (u == Ouest_ind) {
+            liks[u] <- sum(lee_bpf_out@block.cond.loglik[u, lee3_sub@times >= lubridate::decimal_date(as.Date('2017-06-10'))])
+          } else {
+            liks[u] <- sum(lee_bpf_out@block.cond.loglik[u, ])
+          }
+        }
+
+        liks
+      }
+    })
+
+    # Save all likelihood evaluations
+    lee3_results[["sub_ll_eval"]] <- logmeanexp(rowSums(lee3_sub_ll_evals)[!is.na(rowSums(lee3_sub_ll_evals))])
+
+    registerDoRNG(2789131)
+
+    # Save how long it takes for all data
+    lee3_results[["all_pf_time"]] <- system.time({
+      # Save all likelihood evaluations
+
+      lee3_all_ll_evals <- foreach(
+        i = 1:lee3_NREP, .combine = c
+      ) %dopar% {
+        logLik(bpfilter(lee3_all, block_size = 1, Np = lee3_NP))  # Get likelihood evaluations
+      }
+
+      lee3_results[["all_ll_eval"]] <- logmeanexp(lee3_all_ll_evals[!is.na(lee3_all_ll_evals)])
+
+    })
+
+    lee3_results[["n_params"]] <- 29
+
+    lee3_results
+  },
+  timing = FALSE
+)
+
+rm(lee3_sub, lee3_all, lee3_NP, lee3_NREP)
+gc()
+
+mod3_lee_coupled_aic <- 2 * lee3_results$n_params - 2 * lee3_results$all_ll_eval
+
+mod3_lee_coupled_partial_aic <- 2 * lee3_results$n_params - 2 * lee3_results$sub_ll_eval
+@
+
+\begin{table}
+\centering
+
+\begin{tabular}{|c|c|c|c|}
+\hline
+ & \thead{Model~1} & \thead{Model~2} & \thead{Model~3}
+\\
+\hline
+\hline
+\multirow{2}{*}{Log-likelihood} &
+  $\Sexpr{myround(mod1_ll, 1)}$ &
+  $\Sexpr{myround(mod2_ll, 1)}$ &
+  $\Sexpr{myround(mod3_ll, 1)}$ \\
+    & ($\Sexpr{myround(mod1_lee_ll, 1)}$)\footnotemark[1] &
+  ($\Sexpr{myround(h2_fit$leeFit_ll, 1)}$) &
+  ($\Sexpr{myround(lee3_results[["all_ll_eval"]], 1)}$)\footnotemark[2]
+\\
+\hline
+Number of &
+  $\Sexpr{as.character(mod1_n_params)}$ &
+  $\Sexpr{as.character(mod2_n_params)}$ &
+  $\Sexpr{as.character(mod3_n_params)}$ \\
+ Fit Parameters &
+ (\Sexpr{as.character(mod1_lee_n_params)}) &
+ ($\Sexpr{as.character(h2_fit$leeFit_n_params)}$) &
+ ($\Sexpr{as.character(lee3_results$n_params, 1)}$)
+\\
+\hline
+\multirow{2}{*}{AIC} &
+  $\Sexpr{myround(mod1_aic, 1)}$ &
+  $\Sexpr{myround(mod2_aic, 1)}$ &
+  $\Sexpr{myround(mod3_aic, 1)}$ \\
+  & ($\Sexpr{myround(mod1_lee_aic, 1)}$)\footnotemark[1] &
+  ($\Sexpr{myround(mod2_lee_aic, 1)}$) &
+  ($\Sexpr{myround(mod3_lee_coupled_aic, 1)}$)\footnotemark[2]
+\\
+\hline
+\thead{Log-ARMA(2,1) \\ AIC} &
+  $\Sexpr{myround(-2 * ARMA_benchmarks$m1 + 2 * 5, 1)}$ &
+  $\Sexpr{myround(-2 * ARMA_benchmarks$m2 + 2 * 5, 1)}$ &
+  $\Sexpr{myround(-2 * ARMA_benchmarks$m3 + 2 * 5, 1)}$
+\\
+\hline
+\end{tabular}
+\caption{\label{tab:likes}AIC values for each model compared to their ARMA benchmark.
+Values in parentheses are corresponding values using \cite{lee20} parameter estimates.  $\textsuperscript{1}$The reported likelihood is an upper bound of the likelihood of the \cite{lee20} model. $\textsuperscript{2}$\cite{lee20} fit Model~3 to a subset of the data (March 2014 onward, excluding data from Ouest in 2015-2016).
+On this subset, their model has a likelihood of $\Sexpr{myround(lee3_results$sub_ll_eval, 1)}$.
+On this same subset, our model has a likelihood of $\Sexpr{myround(mod3_eval_res$subset_ll, 1)}$.
+See Sec.~S6 of the supplement material for more details on estimating the likelihood of the \cite{lee20} models.
+}
+\end{table}
+
+Comparing model log-likelihoods to a suitable benchmark may not be sufficient to identify all the strengths and weaknesses of a given model.
+Additional techniques include the inspection of conditional log-likelihoods of each observation given the previous observations in order to understand how well the model describes each data point (Sec.~S5).
+Other tools include plotting the effective sample size of each observation \cite{liu01}; plotting the values of the hidden states from simulations (supplement Sec.~5.1);
+and comparing summary statistics of the observed data to simulations from the model \cite{wood10,king15}.
+
+\subsection*{Corroborating Fitted Models with Scientific Knowledge}
+
+The resulting mechanisms in a fitted model can be compared to current scientific knowledge about a system.
+Agreement between model based inference and our current understanding of a system may be taken as a confirmation of both model based conclusions and our scientific understanding.
+On the other hand, comparisons may generate unexpected results that have the potential to spark new scientific knowledge \cite{ganusov16}.
+
+In the context of our case study, we demonstrate how the fit of Model~1 corroborates other evidence concerning the role of rainfall in cholera epidemics.
+Specifically, we examine the results of fitting the flexible cubic spline term in Model~1 (Eq.~\myeqref{model1:lambda}--\myeqref{model1:beta}).
+The cubic splines permit flexible estimation of seasonality in the force of infection, $\transmission(t)$.
+Fig.~\ref{fig:h1SeasRain} shows that the estimated seasonal transmission rate $\transmission$ mimics the rainfall dynamics in Haiti, despite Model~1 not having access to rainfall data.
+This is consistent with previous studies finding that rainfall played an important role in cholera transmission in Haiti \cite{lemaitre19,eisenberg13}.
+The estimated seasonality also features an increased transmission rate during the fall, which was noticed at an earlier stage of the epidemic \cite{rinaldo12}; the high transimission rate in the fall may also be a result of the increase transission that occured in the fall of 2016, when hurricane Matthew struck Haiti.
+
+<<Get Model 1 Seasonality>>=
+
+h1_seas_df <- get_h1_seasonality(h1)
+
+df_rain <- haitiRainfall %>%
+  pivot_longer(  # Convert data to "long" format
+    data = .,
+    cols = -date,
+    names_to = 'dep',
+    values_to = 'rainfall'
+  ) %>%
+  mutate(year = lubridate::year(date), week = lubridate::week(date)) %>%
+  group_by(year, week) %>%
+  summarize(nwr = sum(rainfall)) %>%
+  ungroup() %>%  # Not needed, but good practice
+  mutate(
+    date_week_start = lubridate::ymd(paste0(2014, "-01-01")) +
+      lubridate::weeks(week - 1),
+    week_date = as.Date(date_week_start, format = "%m-%d"),
+    std_national_rain = (nwr - min(nwr)) / (max(nwr) - min(nwr))
+  )
+
+# Calculate the average national weekly rainfall.
+mean_rain <- df_rain %>%
+  group_by(week_date) %>%
+  summarize(mean_rain = mean(std_national_rain)) %>%
+  ungroup() %>%
+  mutate(mean_rain = (mean_rain - min(mean_rain)) / ((max(mean_rain) - min(mean_rain))))
+
+# Create a figure showing annual rainfal, scaled from 0-1. This is top figure
+gg_rain <- df_rain %>%
+  filter(week != 1, week != max(week)) %>%
+  ggplot(aes(x = week_date, y = std_national_rain, group = year, col = year)) +
+  geom_line() +
+  theme_bw() +
+  guides(color = 'none') +
+  ylab('Standardized Weekly\nNational Rain') +
+  theme(  # Remove elements that are un-unsed becuase this is top figure
+    axis.title.x = element_blank(),
+    axis.ticks.x = element_blank(),
+    axis.text.x = element_blank(),
+    axis.text.y = element_text(size = 7.5),
+    axis.title.y = element_text(size = 9)
+  )
+
+# Create plot that shows the seasonality of Model 1, alongside the average
+# weekly national rainfall.
+gg_trans <- ggplot() +
+  geom_line(data = h1_seas_df, aes(x = date, y = trans_std), linetype = 'dashed') +
+  geom_line(
+    data = mean_rain,
+    aes(x = week_date + lubridate::years(6), y = mean_rain),
+    col = '#2166ac'
+  ) +
+  scale_x_date(date_labels = "%b", date_breaks = '1 month') +
+  ylab('Standardized Seasonal\nContact Rate') +
+  theme(axis.title.x = element_blank(),
+        axis.text = element_text(size = 7.5),
+        axis.title.y = element_text(size = 9))
+
+@
+
+\begin{figure}
+\centering
+<<Model1_Seasonality_Figure, fig.height=2.9, fig.width=5, fig.align='center'>>=
+cowplot::plot_grid(gg_rain, gg_trans, align = "v", ncol = 1)
+@
+\caption{\label{fig:h1SeasRain}
+(Top) weekly rainfall in Haiti, lighter colors representing more recent years.
+(Bottom) estimated seasonality in the transmission rate (dashed line) plotted alongside mean rainfall (solid line).
+The outsided effect of rainfall in the fall may be due to Hurricane Matthew, which struck Haiti in October of 2016 and resulted in an increase of cholera cases in the nation.
+}
+\end{figure}
+
+For any model-based inference, it is important to recognize and assess the modeling simplifications and assumptions that were used in order to arrive at the conclusions.
+In epidemiological studies, for example, quantitative understanding of individual-level processes may not perfectly match model parameters that were fit to population-level case counts, even when the model provides a strong statistical fit \cite{he10}.
+This makes direct interpretation of estimated parameters delicate.
+
+Our case study provides an example of this in the parameter estimate for the duration of natural immunity due to cholera infection, $\muRS^{-1}$.
+Under the framework of Model~2, the best estimate for this parameter is $\Sexpr{signif(1/h2_fit$h2_params["sigma"],3)} \, \mathrm{yr}$, suggesting that individuals have effectively permanent immunity to cholera once infected.
+To interpret this result, we bear in mind that the data ranged from 2010-2019, and therefore estimates of immunity longer than $10\, \mathrm{yr}$---the upper end of previous estimates of natural immunity \cite{king08}---effectively result in the same model dynamics.
+The depletion of susceptible individuals may also be attributed to confounding mechanisms---such as localized vaccination programs and non-pharmaceutical interventions that reduce cholera transmission \cite{trevisin22, rebaudet21}---that were not accounted for in the model.
+Perhaps the best interpretation of the estimated parameter, then, is that under model assumptions, the model most adequately describes the observed data by having a steady decrease in the number of susceptible individuals.
+The weak statistical fit of Model~2 compared to a log-linear benchmark (see Table~\ref{tab:likes}) cautions us against drawing quantitative conclusions from this model.
+A model that has a poor statistical fit may nevertheless provide a useful conceptual framework for thinking about the system under investigation.
+However, a claim that the model has been validated against data should be reserved for situations where the model provides a statistical fit that is competitive against alternative explanations.
+
+% Place figure captions after the first paragraph in which they are cited.
+\begin{figure}[!h]
+\caption{{\bf Bold the figure title.}
+Figure caption text here, please use this space for the figure panel descriptions instead of using subfigure commands. A: Lorem ipsum dolor sit amet. B: Consectetur adipiscing elit.}
+\label{fig1}
+\end{figure}
+
+% Results and Discussion can be combined.
+\section*{Results}
+
+\subsection*{Forecasts}\label{sec:filter}
+
+Forecasts are an attempt to provide an accurate estimate of the future state of a system based on currently available data, together with an assessment of uncertainty.
+Forecasts from mechanistic models that are compatible with current scientific understanding may also provide estimates of the future effects of potential interventions.
+Further, they may enable real-time testing of new scientific hypotheses \cite{lewis22}.
+
+Recent information about a dynamic system should be more relevant for a forecast than older information.
+This assertion may seem self-evident, but it is not the case for deterministic models, for which the initial conditions together with the parameters are sufficient for forecasting, and so recent data do not have special importance.
+Epidemiological forecasts based on deterministic models are not uncommon in practice, despite their limitations \cite{king15}.
+That may explain why \cite{lee20} chose to obtain forecasts by simulating the calibrated models forward from initial conditions.
+Here, we compare with a forecast projected from the filtering distribution: to obtain a forecast using POMP model $m$ at a collection of times $t_{N+1:N+s}$, where $N$ is the index for the last available data, we simulate forward from a draw from
+$f_{\bm{X}_N|\bm{Y}_{1:N}}(\bm{x}_{N} | \bm{y}^*_{1:N} ; \hat\paramVec)$
+where $\hat\paramVec$ is a vector of calibrated parameters.
+The decision not to do this partially explains the unsuccessful forecasts of \cite{lee20}: their Table~S7 shows that the subset of their simulations which were consistent with observing zero cases in 2019 also accurately predicted the prolonged absence of detected cholera.
+
+Uncertainty in just a single parameter can lead to drastically different forecasts \cite{saltelli20}.
+Therefore, parameter uncertainty should also be considered when obtaining model forecasts to influence policy.
+If a Bayesian technique is used for parameter estimation, a natural way to account for parameter uncertainty is to obtain simulations from the model where each simulation is obtained using parameters drawn from the estimated posterior distribution.
+For frequentist inference, one possible approach is obtaining model forecasts from various values of $\paramVec$, where the values of $\paramVec$ are sampled proportionally according to their corresponding likelihoods \cite{king15}; see Sec.~S7 of the supplement material for more details.
+Both of these approaches share the similarity that parameters are chosen for the forecast approximately in proportion to their corresponding value of the likelihood function, $f_{\bm{Y}_{1:N}}(\bm{y}_{1:N}^*; \paramVec)$.
+In this analysis, we do not construct forecasts accounting for parameter uncertainty as our focus is on the estimation and diagnosis of mechanistic models.
+Furthermore, we use the projections from a single point estimate to highlight the deficiency of deterministic models that the only variability in model projections is a result of parameter uncertainty, which can lead to over-confidence in forecasts \cite{king15}.
+
+The primary forecasting goal of \cite{lee20} was to investigate the potential consequences of vaccination interventions on a system to inform policy.
+One outcome of their study include estimates for the probability of cholera elimination under several possible vaccination scenarios.
+Mimicking their approach, we define cholera elimination as an absence of cholera infections for at least 52 consecutive weeks, and we provide forecasts under the following vaccination scenarios:
+
+\begin{itemize}
+  \item[$V0$:] No additional vaccines are administered.
+  \item[$V1$:] Vaccination limited to the departments of Centre and Artibonite, deployed over a two-year period.
+  \item[$V2$:] Vaccination limited to three departments: Artibonite, Centre, and Ouest deployed over a two-year period.
+  \item[$V3$:] Countrywide vaccination implemented over a five-year period.
+  \item[$V4$:] Countrywide vaccination implemented over a two-year period.
+\end{itemize}
+
+<<Load Model 1 VaccScen Sims, message=FALSE, include=FALSE>>=
+
+# Number of particles and simulations to use for pfilter and project from filter, respectively.
+h1_scen_NP   <- switch(RUN_LEVEL, 50, 500, 5000)
+h1_scen_sims <- switch(RUN_LEVEL, 20, 100, 1000)
+
+# Simulate vaccination scenario from filtering distribution. The code
+# below creates a model, samples from the filtering distribution, and then
+# projects the vaccination scenario, under the specified model.
+h1_S0_results <- bake(
+  file = paste0("model1/", rl_dir, "S0_sims.rds"), {
+
+    # Create the model
+    s0 <- haiti1_joint(vacscen = 'id0')
+
+    # Load coefficients
+    coef(s0) <- p1
+
+    # Get samples from filtering distribution
+    s0_pf <- pfilter(s0, save.state = TRUE, Np = h1_scen_NP)
+    end_states <- saved.states(s0_pf)
+    end_states <- end_states[[length(end_states)]]
+
+    # project vacc scenario, with filtering dist, and model.
+    h1_S0_sims <- project_from_filter(mod = s0, end_states = end_states, nsims = h1_scen_sims)
+
+    results <- list()
+    results$mod1_V0_sims <- agg_mod1_sims(h1_S0_sims)
+    results$mod1_V0_probs <- get_elimProbs(h1_S0_sims, model = 1)
+
+    results
+  },
+  timing = FALSE
+)
+
+# Simulate vaccination scenario from filtering distribution. The code
+# below creates a model, samples from the filtering distribution, and then
+# projects the vaccination scenario, under the specified model.
+h1_S2_results <- bake(
+  file = paste0('model1/', rl_dir, 'S2_sims.rds'), {
+
+    # Create the model
+    s2 <- haiti1_joint(vacscen = "id2")
+
+    # Set model parameters that need to be adjusted
+    depts <- 2
+    h1_par_names <- names(p1)
+    h1_params_temp <- c(p1, rep(0.0, 5 * depts))
+    names(h1_params_temp) <- c(
+      h1_par_names,
+      paste0("S", 1:depts, "_0"),
+      paste0("E", 1:depts, "_0"),
+      paste0("I", 1:depts, "_0"),
+      paste0("A", 1:depts, "_0"),
+      paste0("R", 1:depts, "_0")
+    )
+    coef(s2) <- h1_params_temp  # Set model parameters
+
+    # Get samples from filtering distribution for Scenario 2 model:
+    s2_pf <- pfilter(s2, save.state = TRUE, Np = h1_scen_NP)
+    end_states <- saved.states(s2_pf)
+    end_states <- end_states[[length(end_states)]]
+
+    # project vacc scenario, with filtering dist, and model.
+    h1_S2_sims <- project_from_filter(mod = s2, end_states = end_states, nsims = h1_scen_sims)
+
+    results <- list()
+    results$mod1_V1_sims <- agg_mod1_sims(h1_S2_sims)
+    results$mod1_V1_probs <- get_elimProbs(h1_S2_sims, model = 1)
+
+    results
+  },
+  timing = FALSE
+)
+
+# Simulate vaccination scenario from filtering distribution. The code
+# below creates a model, samples from the filtering distribution, and then
+# projects the vaccination scenario, under the specified model.
+h1_S4_results <- bake(
+  file = paste0('model1/', rl_dir, 'S4_sims.rds'), {
+
+    # Create the model
+    s4 <- haiti1_joint(vacscen = "id4")
+
+    # Set model parameters that need to be adjusted
+    depts <- 3
+    h1_par_names <- names(p1)
+    h1_params_temp <- c(p1, rep(0.0, 5 * depts))
+    names(h1_params_temp) <- c(
+      h1_par_names,
+      paste0("S", 1:depts, "_0"),
+      paste0("E", 1:depts, "_0"),
+      paste0("I", 1:depts, "_0"),
+      paste0("A", 1:depts, "_0"),
+      paste0("R", 1:depts, "_0")
+    )
+    coef(s4) <- h1_params_temp  # Set model parameters
+
+    # Get samples from filtering distribution for Scenario 2 model:
+    s4_pf <- pfilter(s4, save.state = TRUE, Np = h1_scen_NP)
+    end_states <- saved.states(s4_pf)
+    end_states <- end_states[[length(end_states)]]
+
+    # project vacc scenario, with filtering dist, and model.
+    h1_S4_sims <- project_from_filter(mod = s4, end_states = end_states, nsims = h1_scen_sims)
+
+    results <- list()
+    results$mod1_V2_sims <- agg_mod1_sims(h1_S4_sims)
+    results$mod1_V2_probs <- get_elimProbs(h1_S4_sims, model = 1)
+
+    results
+  },
+  timing = FALSE
+)
+
+# Simulate vaccination scenario from filtering distribution. The code
+# below creates a model, samples from the filtering distribution, and then
+# projects the vaccination scenario, under the specified model.
+h1_S3_results <- bake(
+  file = paste0('model1/', rl_dir, 'S3_sims.rds'), {
+
+    # Create the model
+    s3 <- haiti1_joint(vacscen = "id3")
+
+    # Set model parameters that need to be adjusted
+    depts <- 10
+    h1_par_names <- names(p1)
+    h1_params_temp <- c(p1, rep(0.0, 5 * depts))
+    names(h1_params_temp) <- c(
+      h1_par_names,
+      paste0("S", 1:depts, "_0"),
+      paste0("E", 1:depts, "_0"),
+      paste0("I", 1:depts, "_0"),
+      paste0("A", 1:depts, "_0"),
+      paste0("R", 1:depts, "_0")
+    )
+    coef(s3) <- h1_params_temp  # Set model parameters
+
+    # Get samples from filtering distribution for Scenario 2 model:
+    s3_pf <- pfilter(s3, save.state = TRUE, Np = h1_scen_NP)
+    end_states <- saved.states(s3_pf)
+    end_states <- end_states[[length(end_states)]]
+
+    # project vacc scenario, with filtering dist, and model.
+    h1_S3_sims <- project_from_filter(mod = s3, end_states = end_states, nsims = h1_scen_sims)
+
+    results <- list()
+    results$mod1_V3_sims <- agg_mod1_sims(h1_S3_sims)
+    results$mod1_V3_probs <- get_elimProbs(h1_S3_sims, model = 1)
+
+    results
+  },
+  timing = FALSE
+)
+
+# Simulate vaccination scenario from filtering distribution. The code
+# below creates a model, samples from the filtering distribution, and then
+# projects the vaccination scenario, under the specified model.
+h1_S1_results <- bake(
+  file = paste0('model1/', rl_dir, 'S1_sims.rds'), {
+
+    # Create the model
+    s1 <- haiti1_joint(vacscen = "id1")
+
+    # Set model parameters that need to be adjusted
+    depts <- 10
+    h1_par_names <- names(p1)
+    h1_params_temp <- c(p1, rep(0.0, 5 * depts))
+    names(h1_params_temp) <- c(
+      h1_par_names,
+      paste0("S", 1:depts, "_0"),
+      paste0("E", 1:depts, "_0"),
+      paste0("I", 1:depts, "_0"),
+      paste0("A", 1:depts, "_0"),
+      paste0("R", 1:depts, "_0")
+    )
+    coef(s1) <- h1_params_temp  # Set model parameters
+
+    # Get samples from filtering distribution for Scenario 2 model:
+    s1_pf <- pfilter(s1, save.state = TRUE, Np = h1_scen_NP)
+    end_states <- saved.states(s1_pf)
+    end_states <- end_states[[length(end_states)]]
+
+    # project vacc scenario, with filtering dist, and model.
+    h1_S1_sims <- project_from_filter(mod = s1, end_states = end_states, nsims = h1_scen_sims)
+
+    results <- list()
+    results$mod1_V4_sims <- agg_mod1_sims(h1_S1_sims)
+    results$mod1_V4_probs <- get_elimProbs(h1_S1_sims, model = 1)
+
+    results
+  },
+  timing = FALSE
+)
+@
+
+<<Load Model 2 VaccScenarios, message=FALSE, include=FALSE>>=
+
+# Run Vaccination scenarios for Model 2. Note that the code runs the same
+# speed for each run-level.
+mod2_VaccScenarios <- bake(
+  file = paste0("model2/VaccinationScenarios.rds"), {
+    haiti2_vaccScenario(
+      h2_params = h2_fit$h2_params
+    )
+  },
+  timing = FALSE
+)
+@
+
+<<Load Model 3 Vacc Scenarios, message=FALSE, include=FALSE>>=
+NP_BPF <- switch(RUN_LEVEL, 50, 200, 2000)
+NSIM   <- switch(RUN_LEVEL, 10,  50, 1000)
+
+h3_bpf_end_states <- bake(
+  file = paste0("model3/", rl_dir, "h3_bpf_end_states.rds"),
+  expr = {
+    coef(h3Spat) <- p3
+    h3_bpf <- bpfilter(h3Spat, Np = NP_BPF, block_size = 1, save_states = TRUE)
+    ss <- h3_bpf@saved.states
+    ss[[length(ss)]]
+  },
+  timing = FALSE
+)
+
+mod3_V0_res <- bake(
+  file = paste0("model3/", rl_dir, "mod3_V0_res.rds"), {
+
+    # Create a list to store results
+    h3_V0_res <- list()
+
+    # Get "noVacc" scenario parameters
+    h3_S0_par <- get_model3_vacc_scenario_params(scenario = "noVacc")
+    coef(h3Spat) <- p3
+    coef(h3Spat)[names(h3_S0_par)] <- h3_S0_par
+
+    # Using parameters and filtered distribution, project system
+    h3_V0_sims <- project_from_filter(
+      h3Spat, end_states = h3_bpf_end_states, covarGen = project_rain,
+      nsims = NSIM, seed = 6897154
+    )
+
+    # Store nationally aggregated results
+    h3_V0_res$mod3_V0_sims <- agg_mod3_sims(h3_V0_sims)
+    h3_V0_res$mod3_V0_probs <- get_elimProbs(h3_V0_sims, model = 3)
+
+    # For the supplement material, save quantiles of the Susceptible individuals
+    h3_V0_res$SQuants <- h3_V0_sims %>%
+      mutate(
+        date = as.Date(lubridate::round_date(lubridate::date_decimal(time), unit = 'day'))
+      ) %>%
+      group_by(unitname, date) %>%
+      mutate(
+        pop = h3Spat@params[paste0("H", which(first(unitname) == unit_names(h3Spat)))]
+      ) %>%
+      summarize(
+        Q025 = quantile((S + VSd + VSdd + VSdd_alt + VSd_alt) / pop, probs = 0.025),
+        Q50 = quantile((S + VSd + VSdd + VSdd_alt + VSd_alt) / pop, probs = 0.5),
+        Q975 = quantile((S + VSd + VSdd + VSdd_alt + VSd_alt) / pop, probs = 0.975)
+      ) %>%
+      ungroup() %>%
+      rename(dep = unitname)
+
+    # Return results
+    h3_V0_res
+
+  }
+)
+
+mod3_V1_res <- bake(
+  file = paste0("model3/", rl_dir, "mod3_V1_res.rds"), {
+
+    # Create a list to store results
+    h3_V1_res <- list()
+
+    # Get "noVacc" scenario parameters
+    h3_V1_par <- get_model3_vacc_scenario_params(scenario = "2dep")
+    coef(h3Spat) <- p3
+    coef(h3Spat)[names(h3_V1_par)] <- h3_V1_par
+
+    # Using parameters and filtered distribution, project system
+    h3_V1_sims <- project_from_filter(
+      h3Spat, end_states = h3_bpf_end_states, covarGen = project_rain,
+      nsims = NSIM, seed = 6897154
+    )
+
+    # Store nationally aggregated results
+    h3_V1_res$mod3_V1_sims <- agg_mod3_sims(h3_V1_sims)
+    h3_V1_res$mod3_V1_probs <- get_elimProbs(h3_V1_sims, model = 3)
+
+    # Return results
+    h3_V1_res
+
+  }
+)
+
+mod3_V2_res <- bake(
+  file = paste0("model3/", rl_dir, "mod3_V2_res.rds"), {
+
+    # Create a list to store results
+    h3_V2_res <- list()
+
+    # Get "noVacc" scenario parameters
+    h3_V2_par <- get_model3_vacc_scenario_params(scenario = "3dep")
+    coef(h3Spat) <- p3
+    coef(h3Spat)[names(h3_V2_par)] <- h3_V2_par
+
+    # Using parameters and filtered distribution, project system
+    h3_V2_sims <- project_from_filter(
+      h3Spat, end_states = h3_bpf_end_states, covarGen = project_rain,
+      nsims = NSIM, seed = 6897154
+    )
+
+    # Store nationally aggregated results
+    h3_V2_res$mod3_V2_sims <- agg_mod3_sims(h3_V2_sims)
+    h3_V2_res$mod3_V2_probs <- get_elimProbs(h3_V2_sims, model = 3)
+
+    # Return results
+    h3_V2_res
+  }
+)
+
+mod3_V3_res <- bake(
+  file = paste0("model3/", rl_dir, "mod3_V3_res.rds"), {
+
+    # Create a list to store results
+    h3_V3_res <- list()
+
+    # Get "noVacc" scenario parameters
+    h3_V3_par <- get_model3_vacc_scenario_params(scenario = "slowNation")
+    coef(h3Spat) <- p3
+    coef(h3Spat)[names(h3_V3_par)] <- h3_V3_par
+
+    # Using parameters and filtered distribution, project system
+    h3_V3_sims <- project_from_filter(
+      h3Spat, end_states = h3_bpf_end_states, covarGen = project_rain,
+      nsims = NSIM, seed = 6897154
+    )
+
+    # Store nationally aggregated results
+    h3_V3_res$mod3_V3_sims <- agg_mod3_sims(h3_V3_sims)
+    h3_V3_res$mod3_V3_probs <- get_elimProbs(h3_V3_sims, model = 3)
+
+    # Return results
+    h3_V3_res
+
+  }
+)
+
+mod3_V4_res <- bake(
+  file = paste0("model3/", rl_dir, "mod3_V4_res.rds"), {
+
+    # Create a list to store results
+    h3_V4_res <- list()
+
+    # Get "noVacc" scenario parameters
+    h3_V4_par <- get_model3_vacc_scenario_params(scenario = "fastNation")
+    coef(h3Spat) <- p3
+    coef(h3Spat)[names(h3_V4_par)] <- h3_V4_par
+
+    # Using parameters and filtered distribution, project system
+    h3_V4_sims <- project_from_filter(
+      h3Spat, end_states = h3_bpf_end_states, covarGen = project_rain,
+      nsims = NSIM, seed = 6897154
+    )
+
+    # Store nationally aggregated results
+    h3_V4_res$mod3_V4_sims <- agg_mod3_sims(h3_V4_sims)
+    h3_V4_res$mod3_V4_probs <- get_elimProbs(h3_V4_sims, model = 3)
+
+    # Return results
+    h3_V4_res
+
+  }
+)
+@
+
+Simulations from probabilistic models (Models~1 and~3) represent possible trajectories of the dynamic system under the scientific assumptions of the models.
+Estimates of the probability of cholera elimination can therefore be obtained as the proportion of simulations from these models that result in cholera elimination.
+The results of these projections are summarized in Figs.~\ref{fig:Mod1Scenarios}--\ref{fig:elimProbs}.
+
+Probability of elimination estimates of this form are not meaningful for deterministic models, as the trajectory of these models only represent the mean behavior of the system rather than individual potential outcomes.
+We therefore do not provide probability of elimination estimates under Model~2, but show trajectories under the various vaccination scenarios using this model (Fig.~\ref{fig:mod2Traj}).
+
+<<Create Model 1 VaccScen plots>>=
+gg_m1_V0 <- ggplot() +
+  geom_line(data = h1_S0_results$mod1_V0_sims, aes(x = date, y = q50 + 1), col = 'blue') +
+  geom_ribbon(data = h1_S0_results$mod1_V0_sims, aes(x = date, ymin = q05 + 1, ymax = q95 + 1), alpha = 0.5) +
+  geom_line(data = true_agg_cases, aes(x = date, y = ReportedAll + 1)) +
+  ylab("Log reported cases") +
+  theme(axis.title.x = element_blank()) +
+  ggtitle("V0") +
+  scale_x_date(date_labels = "'%y") +
+  scale_y_log10(labels = scales::trans_format("log10", scales::math_format(10^.x)))
+
+gg_m1_V1 <- ggplot() +
+  geom_line(data = h1_S2_results$mod1_V1_sims, aes(x = date, y = q50 + 1), col = 'blue') +
+  geom_ribbon(data = h1_S2_results$mod1_V1_sims, aes(x = date, ymin = q05 + 1, ymax = q95 + 1), alpha = 0.5) +
+  geom_line(data = true_agg_cases, aes(x = date, y = ReportedAll + 1)) +
+  ylab("Log reported cases") +
+  theme(axis.title = element_blank(),
+        axis.ticks.y = element_blank(),
+        axis.text.y = element_blank()) +
+  ggtitle("V1") +
+  scale_x_date(date_labels = "'%y") +
+  scale_y_log10(labels = scales::trans_format("log10", scales::math_format(10^.x)))
+
+gg_m1_V2 <- ggplot() +
+  geom_line(data = h1_S4_results$mod1_V2_sims, aes(x = date, y = q50 + 1), col = 'blue') +
+  geom_ribbon(data = h1_S4_results$mod1_V2_sims, aes(x = date, ymin = q05 + 1, ymax = q95 + 1), alpha = 0.5) +
+  geom_line(data = true_agg_cases, aes(x = date, y = ReportedAll + 1)) +
+  ylab("Log reported cases") +
+    theme(axis.title = element_blank(),
+        axis.ticks.y = element_blank(),
+        axis.text.y = element_blank()) +
+  ggtitle("V2") +
+  scale_x_date(date_labels = "'%y") +
+  scale_y_log10(labels = scales::trans_format("log10", scales::math_format(10^.x)))
+
+gg_m1_V3 <- ggplot() +
+  geom_line(data = h1_S3_results$mod1_V3_sims, aes(x = date, y = q50 + 1), col = 'blue') +
+  geom_ribbon(data = h1_S3_results$mod1_V3_sims, aes(x = date, ymin = q05 + 1, ymax = q95 + 1), alpha = 0.5) +
+  geom_line(data = true_agg_cases, aes(x = date, y = ReportedAll + 1)) +
+  ylab("Log reported cases") +
+    theme(axis.title = element_blank(),
+        axis.ticks.y = element_blank(),
+        axis.text.y = element_blank()) +
+  ggtitle("V3") +
+  scale_x_date(date_labels = "'%y") +
+  scale_y_log10(labels = scales::trans_format("log10", scales::math_format(10^.x)))
+
+gg_m1_V4 <- ggplot() +
+  geom_line(data = h1_S1_results$mod1_V4_sims, aes(x = date, y = q50 + 1), col = 'blue') +
+  geom_ribbon(data = h1_S1_results$mod1_V4_sims, aes(x = date, ymin = q05 + 1, ymax = q95 + 1), alpha = 0.5) +
+  geom_line(data = true_agg_cases, aes(x = date, y = ReportedAll + 1)) +
+  ylab("Log reported cases") +
+    theme(axis.title = element_blank(),
+        axis.ticks.y = element_blank(),
+        axis.text.y = element_blank()) +
+  ggtitle("V4") +
+  scale_x_date(date_labels = "'%y") +
+  scale_y_log10(labels = scales::trans_format("log10", scales::math_format(10^.x)))
+
+@
+
+\begin{figure}
+<<Plot_Model1_Scenarios, fig.height=2>>=
+lay <- rbind(c(1, 1, 1, 1, 2, 2, 2, 3, 3, 3, 4, 4, 4, 5, 5, 5))
+gridExtra::grid.arrange(
+  gg_m1_V0, gg_m1_V1, gg_m1_V2, gg_m1_V3, gg_m1_V4,
+  layout_matrix = lay
+)
+@
+\caption{\label{fig:Mod1Scenarios}
+Simulations of Model~1 under each vaccination scenario.
+Blue line indicates the simulated median of reported cases, and the ribbon represents $95\%$ of simulations.
+% The various vaccination campaigns made no practical difference in the median scenario, but a drastic difference in the extreme cases.
+}
+\end{figure}
+
+\begin{figure}
+<<Mod2Fit_and_Scenarios_Figure, fig.height=1.9, fig.width=4.8, fig.align='center'>>=
+ggplot() +
+  geom_line(data = h2_traj, aes(x = date, y = Ctotal + 1), col = 'blue') +
+  geom_line(data = true_agg_cases, aes(x = date, y = ReportedAll + 1)) +
+  geom_line(data = filter(mod2_VaccScenarios$all_trajs,
+                          year >= max(h2_traj$year)),
+            aes(x = as.Date(date), y = ReportedCases + 1, color = scenario)) +
+  theme(axis.title.x = element_blank(),
+        legend.title = element_blank(),
+        axis.title.y = element_text(size = 9),
+        axis.text = element_text(size = 8)) +
+  ylab("Reported cholera cases") +
+  scale_color_manual(values = c("V0" = '#f4a582',
+                                "V1" = '#d6604d',
+                                "V2" = '#b2182b',
+                                "V3" = '#92c5de',
+                                "V4" = '#4393c3')) +
+  # geom_vline(xintercept = yearsToDate(2014.161), linetype = 'dashed') +
+  scale_y_log10(labels = scales::trans_format("log10", scales::math_format(10^.x))) +
+  scale_x_date(date_labels = "'%y", breaks = seq.Date(from = as.Date("2010-01-01"), as.Date("2030-01-01"), by = '2 years'))
+@
+\caption{\label{fig:mod2Traj}
+Simulated trajectory of Model~2 (blue curve) and projections under the various vaccination scenarios.
+Reported cholera incidence is shown in black.}
+\end{figure}
+
+<<Create Model 3 VaccScen Plots>>=
+gg_m3_V0 <- ggplot() +
+  geom_line(data = mod3_V0_res$mod3_V0_sims, aes(x = date, y = q50 + 1), col = 'blue') +
+  geom_ribbon(data = mod3_V0_res$mod3_V0_sims, aes(x = date, ymin = q05 + 1, ymax = q95 + 1), alpha = 0.5) +
+  geom_line(data = true_agg_cases, aes(x = date, y = ReportedAll + 1)) +
+  ylab("Log reported cases") +
+  theme(axis.title.x = element_blank()) +
+  ggtitle("V0") +
+  scale_x_date(date_labels = "'%y") +
+  scale_y_log10(labels = scales::trans_format("log10", scales::math_format(10^.x)))
+
+gg_m3_V1 <- ggplot() +
+  geom_line(data = mod3_V1_res$mod3_V1_sims, aes(x = date, y = q50 + 1), col = 'blue') +
+  geom_ribbon(data = mod3_V1_res$mod3_V1_sims, aes(x = date, ymin = q05 + 1, ymax = q95 + 1), alpha = 0.5) +
+  geom_line(data = true_agg_cases, aes(x = date, y = ReportedAll + 1)) +
+  ylab("Log reported cases") +
+  theme(axis.title = element_blank(),
+        axis.ticks.y = element_blank(),
+        axis.text.y = element_blank()) +
+  ggtitle("V1") +
+  scale_x_date(date_labels = "'%y") +
+  scale_y_log10(labels = scales::trans_format("log10", scales::math_format(10^.x)))
+
+gg_m3_V2 <- ggplot() +
+  geom_line(data = mod3_V2_res$mod3_V2_sims, aes(x = date, y = q50 + 1), col = 'blue') +
+  geom_ribbon(data = mod3_V2_res$mod3_V2_sims, aes(x = date, ymin = q05 + 1, ymax = q95 + 1), alpha = 0.5) +
+  geom_line(data = true_agg_cases, aes(x = date, y = ReportedAll + 1)) +
+  ylab("Log reported cases") +
+    theme(axis.title = element_blank(),
+        axis.ticks.y = element_blank(),
+        axis.text.y = element_blank()) +
+  ggtitle("V2") +
+  scale_x_date(date_labels = "'%y") +
+  scale_y_log10(labels = scales::trans_format("log10", scales::math_format(10^.x)))
+
+gg_m3_V3 <- ggplot() +
+  geom_line(data = mod3_V3_res$mod3_V3_sims, aes(x = date, y = q50 + 1), col = 'blue') +
+  geom_ribbon(data = mod3_V3_res$mod3_V3_sims, aes(x = date, ymin = q05 + 1, ymax = q95 + 1), alpha = 0.5) +
+  geom_line(data = true_agg_cases, aes(x = date, y = ReportedAll + 1)) +
+  ylab("Log reported cases") +
+    theme(axis.title = element_blank(),
+        axis.ticks.y = element_blank(),
+        axis.text.y = element_blank()) +
+  ggtitle("V3") +
+  scale_x_date(date_labels = "'%y") +
+  scale_y_log10(labels = scales::trans_format("log10", scales::math_format(10^.x)))
+
+gg_m3_V4 <- ggplot() +
+  geom_line(data = mod3_V4_res$mod3_V4_sims, aes(x = date, y = q50 + 1), col = 'blue') +
+  geom_ribbon(data = mod3_V4_res$mod3_V4_sims, aes(x = date, ymin = q05 + 1, ymax = q95 + 1), alpha = 0.5) +
+  geom_line(data = true_agg_cases, aes(x = date, y = ReportedAll + 1)) +
+  ylab("Log reported cases") +
+    theme(axis.title = element_blank(),
+        axis.ticks.y = element_blank(),
+        axis.text.y = element_blank()) +
+  ggtitle("V4") +
+  scale_x_date(date_labels = "'%y") +
+  scale_y_log10(labels = scales::trans_format("log10", scales::math_format(10^.x)))
+@
+
+
+\begin{figure}
+<<Plot_Model3_Scenarios, fig.height=2>>=
+lay <- rbind(c(1, 1, 1, 1, 2, 2, 2, 3, 3, 3, 4, 4, 4, 5, 5, 5))
+gridExtra::grid.arrange(
+  gg_m3_V0, gg_m3_V1, gg_m3_V2, gg_m3_V3, gg_m3_V4,
+  layout_matrix = lay
+)
+@
+\caption{\label{fig:Mod3Scenarios}
+Simulations of Model~3 under each vaccination scenario.
+Blue line indicates the simulated median of reported cases, and ribbon represents $95\%$ of simulations.
+% The various vaccination campaigns made no practical difference in the median scenario, but a drastic difference in the extreme cases.
+}
+\end{figure}
+
+
+<<Compute Elimination Probs, echo=FALSE>>=
+h1_S0_results$mod1_V0_probs$ElimTime$scenario = "V0"
+h1_S2_results$mod1_V1_probs$ElimTime$scenario = "V1"
+h1_S4_results$mod1_V2_probs$ElimTime$scenario = "V2"
+h1_S3_results$mod1_V3_probs$ElimTime$scenario = "V3"
+h1_S1_results$mod1_V4_probs$ElimTime$scenario = "V4"
+
+mod1_probElims <- rbind(
+  h1_S0_results$mod1_V0_probs$ElimTime,
+  h1_S2_results$mod1_V1_probs$ElimTime,
+  h1_S4_results$mod1_V2_probs$ElimTime,
+  h1_S3_results$mod1_V3_probs$ElimTime,
+  h1_S1_results$mod1_V4_probs$ElimTime
+)
+
+mod3_V0_res$mod3_V0_probs$ElimTime$scenario = "V0"
+mod3_V1_res$mod3_V1_probs$ElimTime$scenario = "V1"
+mod3_V2_res$mod3_V2_probs$ElimTime$scenario = "V2"
+mod3_V3_res$mod3_V3_probs$ElimTime$scenario = "V3"
+mod3_V4_res$mod3_V4_probs$ElimTime$scenario = "V4"
+
+mod3_probElims <- rbind(
+  mod3_V0_res$mod3_V0_probs$ElimTime,
+  mod3_V1_res$mod3_V1_probs$ElimTime,
+  mod3_V2_res$mod3_V2_probs$ElimTime,
+  mod3_V3_res$mod3_V3_probs$ElimTime,
+  mod3_V4_res$mod3_V4_probs$ElimTime
+)
+
+mod1_probElims$mod <- "Model 1"
+mod3_probElims$mod <- "Model 3"
+mod3_probElims$time <- as.Date(lubridate::round_date(lubridate::date_decimal(mod3_probElims$time), unit = 'day'))
+
+all_prob_elims <- dplyr::bind_rows(mod1_probElims, mod3_probElims)
+@
+
+\begin{figure}
+<<Elimination_Probs_Figure, fig.height=2.2>>=
+ggplot(tidyr::drop_na(all_prob_elims), aes(x = time, y = elim_prob, col = mod)) +
+  geom_line() +
+  facet_wrap(~scenario, nrow = 1) +
+  scale_color_manual(values = c("Model 1" = "#377eb8", "Model 3" = "#e41a1c")) +
+  ylab("Probability of Elimination (%)") +
+  theme(axis.title.x = element_blank(),
+        legend.position = 'bottom',
+        legend.title = element_blank(),
+        axis.text.x = element_text(angle = 35, hjust = 1),
+        legend.margin=margin(c(-5, 0, -3, 0)),
+        legend.box.margin = margin(c(-5, 0, -3, 0))) +
+  scale_x_date(date_labels = "'%y", breaks = seq.Date(from = as.Date("2010-01-01"), as.Date("2030-01-01"), by = '2 years'))
+@
+\caption{\label{fig:elimProbs}
+Probability of elimination across simulations for a 10 year period.
+Compare to Figure 3A of \cite{lee20}.}
+\end{figure}
+
+%%% table tttttttttt
+
+\begin{table}
+\begin{adjustwidth}{-2.25in}{0in}
+\centering
+% \small
+\begin{tabular}{|l@{}|l@{}t@{}|l@{}t@{}|l@{}t@{}|}
+\hline
+Mechanism & Model 1 && Model 2 && Model 3 &
+\\
+\hline
+\hline
+Infection (day)
+  & {\fixed $\muIR^{-1}=\Sexpr{myround(7/p1["gamma"],1)}$}
+  & \eqref{model1:toR}
+  & {\fixed $\muIR^{-1}=\Sexpr{myround(365/h2_fit$h2_params["gamma"],1)}$}
+  & \eqref{model2:mu_IR}
+  & {\fixed $\muIR^{-1}=\Sexpr{myround(365/p3["gamma1"],1)}$ }
+  & \eqref{eq:model3:IR}
+\\
+Latency (day)
+  & {\fixed $\muEI^{-1}=\Sexpr{myround(7/p1["sigma"],1)}$}
+  & \eqref{model1:EA}
+  & {\fixed $\muEI^{-1}=\Sexpr{myround(365/h2_fit$h2_params["gammaE"],1)}$}
+  & \eqref{model2:mu_EI}
+  & \multicolumn{1}{c}{\hspace{16pt}\missing}
+  &
+\\
+\hline
+\multirow{2}{*}{Seasonality}
+  & $\begin{array}{l}
+    \hspace{-1mm} \transmission_{1:6}=(
+      \Sexpr{myround(p1["beta1"],1)},
+      \Sexpr{myround(p1["beta2"],1)},
+    \\
+      \Sexpr{myround(p1["beta3"],1)},
+      \Sexpr{myround(p1["beta4"],1)},
+      \Sexpr{myround(p1["beta5"],1)},
+      \Sexpr{myround(p1["beta6"],1)})
+    \end{array}$
+  & \eqref{model1:beta}
+  & {\fixed \seasAmplitude=0.4}
+  & \eqref{model2:lambda}
+  & $\seasAmplitude = \Sexpr{myround(p3s["lambdaR"],2)}$
+  & \eqref{eq:model3:water} \\
+  & $\transmissionTrend = \Sexpr{myround(p1["betat"],2)}^*$
+  & \eqref{model1:betat}
+  & $\phaseParm = \Sexpr{myround(h2_fit$h2_params['phase'], 2)}^*$
+  & \eqref{model2:lambda}
+  & $r = \Sexpr{signif(p3s["r"],3)}$
+  & \eqref{eq:model3:water}
+  \\\hline
+  Immunity (yr)
+  & {\fixed $\muRS^{-1}=\Sexpr{myround(1/p1["alpha"]/52,1)}$}
+  & \eqref{model1:RS}
+  &
+    $\begin{array}{l}
+    \muRS^{-1}= \Sexpr{signif(1/h2_fit$h2_params["sigma"],2)} \\
+    {\fixed \omega_1^{-1} = \Sexpr{myround(1/h2_fit$h2_params["Omega1"],1)}} \\
+    {\fixed \omega_2^{-1} = \Sexpr{myround(1/h2_fit$h2_params["Omega2"],1)}}
+    \end{array}$
+  & $\begin{array}{l}
+    \eqref{model2:RS} \\
+    \eqref{model2:omega1} \\
+    \eqref{model2:omega1}
+    \end{array} $
+  & {\fixed $\muRS^{-1}=\Sexpr{myround(1/p3['rho1'],1)}$}
+  & \eqref{eq:model3:RRnext}
+\\
+\hline
+Birth/death (yr)
+  & \fixed{$\begin{array}{l}
+    \muBirth^{-1} = \Sexpr{myround(1/p1["mu"]/52,1)} \\
+    \muDeath^{-1} = \Sexpr{myround(1/p1["delta"]/52,1)}
+    \end{array}$}
+  & \eqref{model1:death}
+  & \multicolumn{1}{c}{\hspace{16pt}\missing}
+  &
+  & {\fixed $\muDeath^{-1} = \Sexpr{myround(1/p3["mu1"],1)}$}
+  & \eqref{eq:model3:IS}
+\\
+Sympt. frac.
+  & {\fixed $\symptomFrac_z(t)=c\vaccineEfficacy^*(t-\tau_d)$}
+  & (\ref{model1:EI}-\ref{model1:EA})
+  & {\fixed $\symptomFrac=\Sexpr{myround(h2_fit$h2_params["k"],1)}$}
+  & \eqref{model2:mu_EI}
+  & {\fixed $\symptomFrac=\Sexpr{myround(p3["sigma1"],2)}$}
+  & \eqref{eq:model3:SA}
+\\
+$\begin{array}{l}
+\text{Asympt.} \\
+\text{infectivity}
+\end{array}$
+  & {\fixed $\asymptomRelativeInfect=0.05$ }
+  & \eqref{model1:lambda}
+  & $\begin{array}{l}
+      {\fixed \asymptomRelativeInfect =0.001 } \\
+      {\fixed \asymptomRelativeShed = \Sexpr{1e-7} }
+    \end{array}$
+  & \begin{tabular}{l}
+      \eqref{model2:lambda} \\
+      \eqref{model2:to_W}
+    \end{tabular}
+  &  $\begin{array}{l}
+      {\fixed \asymptomRelativeInfect =1 } \\
+      \asymptomRelativeShed = \Sexpr{myround(p3s["XthetaA"],3)}
+    \end{array}$
+  & \begin{tabular}{l}
+      \eqref{eq:model3:foi} \\
+      \eqref{eq:model3:water}
+    \end{tabular}
+\\
+\hline
+$\begin{array}{l}
+\text{Human to}\\
+\text{human}\end{array}$
+  & $\transmission_{1:6}$ as above
+  & \eqref{model1:lambda}
+  & $\transmission=$\Sexpr{signif(h2_fit$h2_params["Beta"],3)}
+  & \eqref{model2:lambda}
+  & $\begin{array}{l}
+      \hspace{-1mm} \transmission_{1:10}=(
+        \Sexpr{myround(p3u["foi_add",1]*1e6,2)},
+	\Sexpr{myround(p3u["foi_add",2]*1e6,2)},
+      \\
+	\Sexpr{myround(p3u["foi_add",3]*1e6,2)},
+        \Sexpr{myround(p3u["foi_add",4]*1e6,2)},
+	\Sexpr{myround(p3u["foi_add",5]*1e6,2)},
+	\Sexpr{myround(p3u["foi_add",6]*1e6,2)},
+      \\
+	\Sexpr{myround(p3u["foi_add",7]*1e6,2)},
+	\Sexpr{myround(p3u["foi_add",8]*1e6,2)},
+	\Sexpr{myround(p3u["foi_add",9]*1e6,2)},
+	\Sexpr{myround(p3u["foi_add",10]*1e6,2)}
+	)
+      \\
+      \times 10^{-6}
+    \end{array}$
+  & \eqref{eq:model3:foi}
+\\
+\hline
+$\begin{array}{l}
+\text{Water to}\\ \text{human}
+\end{array}$
+  & \multicolumn{1}{c}{\hspace{16pt}\missing}
+  &
+  & $\begin{array}{l}
+    {\fixed \Wsat = \Sexpr{signif(h2_fit$h2_params["Sat"],2)} }
+    \\
+    \beta_W= \Sexpr{signif(h2_fit$h2_params["BetaW"],3)}
+    \end{array}$
+  & \eqref{model2:lambda}
+  & $\begin{array}{l}
+      \hspace{-1mm} \Wbeta{_{1:10}}= (
+        \Sexpr{myround(p3u["betaB",1],2)}, \Sexpr{myround(p3u["betaB",2],2)},
+       \\
+        \Sexpr{myround(p3u["betaB",3],2)}, \Sexpr{myround(p3u["betaB",4],2)},
+        \Sexpr{myround(p3u["betaB",5],2)}, \Sexpr{myround(p3u["betaB",6],2)},
+       \\
+        \Sexpr{myround(p3u["betaB",7],2)}, \Sexpr{myround(p3u["betaB",8],2)},
+        \Sexpr{myround(p3u["betaB",9],2)}, \Sexpr{myround(p3u["betaB",10],2)}
+      ) \end{array}$
+  & \eqref{eq:model3:foi}
+\\
+\hline
+$\begin{array}{l}
+\text{Human to}\\
+\text{water}\end{array}$
+  & \multicolumn{1}{c}{\hspace{16pt}\missing}
+  &
+  & $\Wshed = $ \Sexpr{signif(h2_fit$h2_params["Mu"],3)}
+  & \eqref{model2:to_W}
+  & $\Wshed= \Sexpr{signif(p3s["thetaI"],3)}$
+  & \eqref{eq:model3:water}
+\\
+$\begin{array}{l}
+\text{Water} \\
+\text{survival (wk)}
+\end{array}$
+  & \multicolumn{1}{c}{\hspace{16pt}\missing}
+  &
+  & {\fixed $\Wremoval^{-1} = $ \Sexpr{signif(52/h2_fit$h2_params["Delta"],3)}}
+  & \eqref{model2:from_W}
+  & $\Wremoval^{-1}=\Sexpr{myround(52/p3s["mu_B"],2)}$
+  & \eqref{eq:model3:Decay}
+\\
+Mixing exponent
+  & $\mixExponent=\Sexpr{myround(p1["nu"],2)}$
+  & \eqref{model1:lambda}
+  & \multicolumn{1}{c}{\hspace{16pt}\missing}
+  &
+  & \multicolumn{1}{c}{\hspace{16pt}\missing}
+  &
+\\
+$\begin{array}{l}
+\text{Process} \\
+\text{noise} (\text{wk}^{1/2})
+\end{array}$
+  & $\sigmaProc=(\Sexpr{myround(sqrt(p1["sig_sq_epi"]),2)}, \Sexpr{myround(sqrt(p1["sig_sq_end"]),2)})^*$
+  & \eqref{model1:lambda}
+  & \multicolumn{1}{c}{\hspace{16pt}\missing}
+  &
+  & $\sigmaProc= \Sexpr{myround(p3s["std_W"],3)}$
+  & \eqref{eq:model3:SA}
+\\
+Reporting rate
+  & $\reportRate=\Sexpr{myround(p1["rho"], 3)}$
+  & (S15)
+  & {\fixed $\reportRate=\Sexpr{myround(h2_fit$h2_params["Rho"],2)}$}
+  & (S16)
+  & $\reportRate=\Sexpr{myround(p3s["epsilon"],2)}$
+  & (S19)
+\\
+$\begin{array}{l}
+\text{Observation} \\
+\text{variance}
+\end{array}$
+  & $\obsOverdispersion = (\Sexpr{myround(p1["tau_epi"],2)}, \Sexpr{round(p1["tau_end"],2)})$
+  & (S15)
+  & $\obsOverdispersion = \Sexpr{signif(h2_fit$h2_params['sigma'], 3)}$
+  & (S16)
+  & $\obsOverdispersion = \Sexpr{myround(p3s["k"],2)}$
+  & (S19)
+\\
+\hline
+\multirow{2}{*}{Initial Values} & $I_{0,0} = \Sexpr{round(prod(p1[c('pop_0', 'I_0')]))}$ & & \multicolumn{1}{c}{\multirow{2}{*}{\hspace{16pt}\missing}} & & \multirow{2}{*}{$I_{3,7,10;0}(0)= (
+        \Sexpr{round(prod(p3[c('H3', 'Iinit3')]))}, \Sexpr{round(prod(p3[c('H7', 'Iinit7')]))}, \Sexpr{round(prod(p3[c('H10', 'Iinit10')]))})^*$} & \\
+& $E_{0,0} = \Sexpr{round(prod(p1[c('pop_0', 'E_0')]))}$ & & \multicolumn{1}{c}{} & & & \\\hline
+Hurricane & \multicolumn{1}{c}{\multirow{2}{*}{\hspace{16pt}\missing}} & & \multicolumn{1}{c}{\multirow{2}{*}{\hspace{16pt}\missing}} & & $\Whur{3, 9} = (\Sexpr{myround(p3['aHur3'], 2)}, \Sexpr{myround(p3['aHur9'], 2)})^*$ & \multirow{2}{*}{\eqref{eq:model3:foi}} \\
+Parameters & \multicolumn{1}{c}{} & & \multicolumn{1}{c}{} & & $\hHur{3, 9} = (\Sexpr{myround(p3['hHur3'], 2)}, \Sexpr{myround(p3['hHur9'], 2)})^*$ & \\\hline
+
+\end{tabular}
+\caption{References to the relevant equation are given in parentheses.
+Parameters in blue were fixed based on scientific reasoning and not fitted to the data.
+$^*$ denotes parameters added during our re-analysis, not considered by Lee et al.
+Translations back into the notation of \cite{lee20} are given in Table~S1.
+}
+\end{adjustwidth}
+\end{table}
+
+% Place tables after the first paragraph in which they are cited.
+\begin{table}[!ht]
+\begin{adjustwidth}{-2.25in}{0in} % Comment out/remove adjustwidth environment if table fits in text column.
+\centering
+\caption{
+{\bf Table caption Nulla mi mi, venenatis sed ipsum varius, volutpat euismod diam.}}
+\begin{tabular}{|l+l|l|l|l|l|l|l|}
+\hline
+\multicolumn{4}{|l|}{\bf Heading1} & \multicolumn{4}{|l|}{\bf Heading2}\\ \thickhline
+$cell1 row1$ & cell2 row 1 & cell3 row 1 & cell4 row 1 & cell5 row 1 & cell6 row 1 & cell7 row 1 & cell8 row 1\\ \hline
+$cell1 row2$ & cell2 row 2 & cell3 row 2 & cell4 row 2 & cell5 row 2 & cell6 row 2 & cell7 row 2 & cell8 row 2\\ \hline
+$cell1 row3$ & cell2 row 3 & cell3 row 3 & cell4 row 3 & cell5 row 3 & cell6 row 3 & cell7 row 3 & cell8 row 3\\ \hline
+\end{tabular}
+\begin{flushleft} Table notes Phasellus venenatis, tortor nec vestibulum mattis, massa tortor interdum felis, nec pellentesque metus tortor nec nisl. Ut ornare mauris tellus, vel dapibus arcu suscipit sed.
+\end{flushleft}
+\label{table1}
+\end{adjustwidth}
+\end{table}
+
+\section*{Discussion}\label{sec:discussion}
+
+The ongoing global COVID-19 pandemic has provided a clear example on how government policy may be affected by the conclusions of scientific models \cite{saltelli20}.
+This article demonstrates that fitting appropriate scientific models to guide policy is a challenging statistical task.
+In our case study, we found that additional attention to statistical details could have resulted in improved statistical fits to the observed incidence data, leading to improvements in the accuracy of the resulting policy guidance.
+We used the same data and models, and even much of the same code, as \cite{lee20}, and yet ended up with drastically different conclusions.
+We acknowledge the benefit of hindsight: our demonstration of a statistically principled route to obtain better-fitting models resulting in more robust insights does not rule out the possibility of discovering other models that fit well yet predict poorly.
+
+Inference for mechanistic time series models offers opportunities for understanding and controlling complex dynamic systems.
+This case study has investigated issues requiring attention when applying powerful new statistical techniques that can enable statistically efficient inference for a general class of partially observed Markov process models.
+Researchers should check that the computationally intensive numerical calculations are carried out adequately.
+Comparison against benchmarks and alternative model specifications should be considered to evaluate the statistical goodness-of-fit.
+Once that is accomplished, care is required to assess what causal conclusions can properly be inferred given the possibility of alternative explanations consistent with the data.
+Studies that combine model development with thoughtful data analysis, supported by a high standard of reproducibility, build knowledge about the system under investigation.
+Cautionary warnings about the difficulties inherent in understanding complex systems \cite{saltelli20,ioannidis20,ganusov16} should motivate us to follow best practices in data analysis, rather than avoiding the challenge.
+
+\subsection*{Robust interpretation of model based conclusions}\label{sec:advice}
+
+A model which aspires to provide quantitative guidance for assessing interventions should provide a quantitative statistical fit for available data.
+However, strong statistical fit does not guarantee a correct causal structure: it does not even necessarily require the model to assert a causal explanation.
+A causal interpretation is strengthened by corroborative evidence.
+For example, reconstructed latent variables (such as numbers of susceptible and recovered individuals) should make sense in the context of alternative measurements of these variables \cite{grad12}.
+In the context of our case study, by reconstructing the latent states of Model~3, we notice that the calibrated model favors higher levels of cholera transmission than what was typically observed in the incidence data (Sec.~S5.1 of the supplement).
+This result hints at the possibility of model mispecification, and should prompt us to be sceptical of the reliability of forecasts from this model.
+Similarly, parameters that have been calibrated to data should make sense in the context of alternative lines of evidence about the phenomena being modeled, while making allowance for the possibility that the interpretations of parameters may vary when modeling across differing spatial scales.
+
+If a mechanistic model including a feature (such as a representation of a mechanism, or the inclusion of a covariate) fits better than mechanistic models without that feature, and also has competitive fit compared to associative benchmarks, this may be taken as evidence supporting the scientific relevance of the feature.
+As for any analysis of observational data, we must be alert to the possibility of confounding.
+For a covariate, this shows up in a similar way to regression analysis: the covariate under investigation could be a proxy for some other unmodeled or unmeasured covariate.
+For a mechanism, the model feature could in principle explain the data by helping to account for some different unmodeled phenomenon.
+In the context of our analysis, the estimated trend in transmission rate could be explained by any trending variable (such as hygiene improvements, or changes in population behavior), resulting in confounding from collinear covariates.
+Alternatively, the trend could be attributed to a decreasing reporting rate rather than decreasing transmission rate, resulting in confounded mechanisms.
+The robust statistical conclusion is that a model which allows for change fits better than one which does not---we argue that a decreasing transmission rate is a plausible way to explain this, but the incidence data themselves do not provide enough information to pin down the mechanism.
+
+\subsection*{Reproducibility and Extendability}
+
+\cite{lee20} published their code and data online, and this reproducibility facilitated our work.
+Robust data analysis requires not only reproducibility but also extendability: if one wishes to try new model variations, or new approaches to fitting the existing models, or plotting the results in a different way, this should not be excessively burdensome.
+Scientific results are only trustworthy so far as they can be critically questioned, and an extendable analysis should facilitate such examination \cite{gentleman07}.
+
+We provide a strong form of reproducibility, as well as extendability, by developing our analysis in the context of a software package, \code{haitipkg}, written in the R language \cite{r}.
+Using a software package mechanism supports documentation, standardization and portability that promote extendability.
+In the terminology of \cite{gentleman07}, the source code for this article is a {\it dynamic document} combining code chunks with text.
+In addition to reproducing the article, the code can be extended to examine alternative analysis to that presented.
+The dynamic document, together with the R packages, form a {\it compendium}, defined by \cite{gentleman07} as a distributable and executable unit which combines data, text and auxiliary software (the latter meaning code written to run in a general-purpose, portable programming environment, which in this case is R).
+
+\section*{Supporting information}
+
+% Include only the SI item label in the paragraph heading. Use the \nameref{label} command to cite SI items in the text.
+\paragraph*{S1 Fig.}
+\label{S1_Fig}
+{\bf Bold the title sentence.} Add descriptive text after the title of the item (optional).
+
+\paragraph*{S2 Fig.}
+\label{S2_Fig}
+{\bf Lorem ipsum.} Maecenas convallis mauris sit amet sem ultrices gravida. Etiam eget sapien nibh. Sed ac ipsum eget enim egestas ullamcorper nec euismod ligula. Curabitur fringilla pulvinar lectus consectetur pellentesque.
+
+\paragraph*{S1 File.}
+\label{S1_File}
+{\bf Lorem ipsum.}  Maecenas convallis mauris sit amet sem ultrices gravida. Etiam eget sapien nibh. Sed ac ipsum eget enim egestas ullamcorper nec euismod ligula. Curabitur fringilla pulvinar lectus consectetur pellentesque.
+
+\paragraph*{S1 Video.}
+\label{S1_Video}
+{\bf Lorem ipsum.}  Maecenas convallis mauris sit amet sem ultrices gravida. Etiam eget sapien nibh. Sed ac ipsum eget enim egestas ullamcorper nec euismod ligula. Curabitur fringilla pulvinar lectus consectetur pellentesque.
+
+\paragraph*{S1 Appendix.}
+\label{S1_Appendix}
+{\bf Lorem ipsum.} Maecenas convallis mauris sit amet sem ultrices gravida. Etiam eget sapien nibh. Sed ac ipsum eget enim egestas ullamcorper nec euismod ligula. Curabitur fringilla pulvinar lectus consectetur pellentesque.
+
+\paragraph*{S1 Table.}
+\label{S1_Table}
+{\bf Lorem ipsum.} Maecenas convallis mauris sit amet sem ultrices gravida. Etiam eget sapien nibh. Sed ac ipsum eget enim egestas ullamcorper nec euismod ligula. Curabitur fringilla pulvinar lectus consectetur pellentesque.
+
+\section*{Acknowledgments}
+Cras egestas velit mauris, eu mollis turpis pellentesque sit amet. Interdum et malesuada fames ac ante ipsum primis in faucibus. Nam id pretium nisi. Sed ac quam id nisi malesuada congue. Sed interdum aliquet augue, at pellentesque quam rhoncus vitae.
+
+\nolinenumbers
+
+% Either type in your references using
+% \begin{thebibliography}{}
+% \bibitem{}
+% Text
+% \end{thebibliography}
+%
+% or
+%
+% Compile your BiBTeX database using our plos2015.bst
+% style file and paste the contents of your .bbl file
+% here. See http://journals.plos.org/plosone/s/latex for
+% step-by-step instructions.
+%
+% \begin{thebibliography}{10}
+%
+% \bibitem{bib1}
+% Conant GC, Wolfe KH.
+% \newblock {{T}urning a hobby into a job: how duplicated genes find new
+%   functions}.
+% \newblock Nat Rev Genet. 2008 Dec;9(12):938--950.
+%
+% \bibitem{bib2}
+% Ohno S.
+% \newblock Evolution by gene duplication.
+% \newblock London: George Alien \& Unwin Ltd. Berlin, Heidelberg and New York:
+%   Springer-Verlag.; 1970.
+%
+% \bibitem{bib3}
+% Magwire MM, Bayer F, Webster CL, Cao C, Jiggins FM.
+% \newblock {{S}uccessive increases in the resistance of {D}rosophila to viral
+%   infection through a transposon insertion followed by a {D}uplication}.
+% \newblock PLoS Genet. 2011 Oct;7(10):e1002337.
+%
+% \end{thebibliography}
+
+\bibliography{bib-haiti}
+
+\end{document}
+
