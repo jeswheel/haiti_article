@@ -1154,7 +1154,7 @@ if (RUN_LEVEL == 1){
     RW_SD = chol_rw_2.sd,
     COOLING = 0.5,
     KEEP_TRACES = FALSE,
-    KEEP_LIK_MAT = FALSE
+    KEEP_LIK_MAT = TRUE
   )
 
   # SEARCH3 = list(  # Not used, but was used for some preliminary results.
