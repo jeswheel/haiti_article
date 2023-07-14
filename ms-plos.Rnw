@@ -1189,7 +1189,7 @@ mod3_n_params <- sum(reg_rw_1.sd != 0, na.rm = TRUE) + sum(sapply(reg_rw_1.sd, i
 
 # Fit Model 3
 haiti3_fit <- bake(
-  file = paste0("model3/", rl_dir, "haiti3_coupled_fit.rds"), {
+  file = paste0("model3/", rl_dir, "haiti3_fit.rds"), {
     fit_haiti3(
       nsearches = 2L,
       search1 = SEARCH1,
