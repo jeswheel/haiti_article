@@ -267,7 +267,7 @@
 % Title must be 250 characters or less.
 \begin{flushleft}
 {\Large
-\textbf\newline{Title of submission to PLOS journals} % Please use "sentence case" for title and headings (capitalize only the first word in a title (or heading), the first word in a subtitle (or subheading), and any proper nouns).
+\textbf\newline{Informing policy via dynamic models: Cholera in Haiti} % Please use "sentence case" for title and headings (capitalize only the first word in a title (or heading), the first word in a subtitle (or subheading), and any proper nouns).
 }
 \newline
 % Insert author names, affiliations and corresponding author email (do not include titles, positions, or degrees).
@@ -764,7 +764,7 @@ The process noise $d\Gamma(t)/dt$ is multiplicative Gamma-distributed white nois
 Lee et al.~\cite{lee20} included process noise in Model~3 but not in Model~1, i.e., they fixed $\sigmaProc^2 = 0$.
 Gamma white noise in the transmission rate gives rise to an over-dispersed latent Markov process \cite{breto11} which has been found to improve the statistical fit of disease transmission models \cite{stocks20,he10}.
 
-For any time point in $t_{1:N}$, the process model describes the movement of individuals from one latent state compartment to another.
+For any time point in $t_{1:N}$, the process model $f_{\bm{X}_n|\bm{X}_{n-1}}\big(\bm{x}_{n}|\bm{x}_{n-1}; \paramVec\big)$ is defined by the describing how individuals move from one latent state compartment to another.
 Per-capita transition rates are given in Eqs.~\myeqref{model1:SE}-\myeqref{model1:birth}:
 \begin{eqnarray}
 \label{model1:SE}
@@ -803,7 +803,7 @@ For $\vaccCounter\in\seq{1}{\vaccClass}$, the vaccination cohort $\vaccCounter$ 
 where $\vaccineEfficacy^*(t)$ is efficacy at time $t$ since vaccination for adults, taken from \cite{lee20}, Table~S4, and $c=\big(1-(1-0.4688)\times 0.11\big)$ is a correction to allow for reduced efficacy in the 11\% of the population aged under 5 years.
 Single and double vaccine doses were modeled by changing the waning of protection; protection was assumed to be equal between single and double dose until 52 weeks after vaccination, at which point the single dose becomes ineffective.
 
-The latent state vector $\bm{X}(t)$ is initialized by setting each compartment count for each vaccination scenario $\vaccCounter \neq 0$ as zero, and introducing initial-value parameters $I_{0,0}$ and $E_{0, 0}$ such that $R_{0}(0) = 0$, $I_{0}(0) = \mathrm{Pop} \times I_{0, 0}$, $E_{0}(0) = \mathrm{Pop} \times E_{0, 0}$ and $S_{0}(0) = \mathrm{Pop} \times (1 - I_{0, 0} - E_{0, 0})$, where $\mathrm{Pop}$ is the total population of Haiti.
+The latent state vector $\bm{X}(t)$ is initialized by setting the counts for each compartment and vaccination scenario $\vaccCounter \neq 0$ as zero, and introducing initial-value parameters $I_{0,0}$ and $E_{0, 0}$ such that $R_{0}(0) = 0$, $I_{0}(0) = \mathrm{Pop} \times I_{0, 0}$, $E_{0}(0) = \mathrm{Pop} \times E_{0, 0}$ and $S_{0}(0) = \mathrm{Pop} \times (1 - I_{0, 0} - E_{0, 0})$, where $\mathrm{Pop}$ is the total population of Haiti.
 The measurement model assumes reported cholera cases at time point $n$ come from a negative binomial distribution, where only a fraction ($\reportRate$) of new weekly cases are reported.
 See Sec.~S3 of the supplement material for more details.
 
@@ -820,6 +820,7 @@ Susceptible individuals are in compartments $S_{u\vaccCounter}(t)$, where $u\in\
   \item[$\vaccCounter=4$:] Two doses at age over five years.
 \end{itemize}
 
+Like Model~1, the process model $f_{\bm{X}_n|\bm{X}_{n-1}}\big(\bm{x}_{n}|\bm{x}_{n-1}; \paramVec\big)$ is primarily defined via the description of movement of individuals between compartments, however Model~2 also includes a dynamic description of a latent bacterial compartment as well.
 Individuals can progress to a latent infection $E_{u\vaccCounter}$ followed by symptomatic infection $I_{u\vaccCounter}$ with recovery to $R_{u\vaccCounter}$ or asymptomatic infection $A_{u\vaccCounter}$ with recovery to $R^A_{u\vaccCounter}$.
 The force of infection depends on both direct transmission and an aquatic reservoir, $W_u(t)$, and is given by
 \begin{equation}
@@ -899,7 +900,7 @@ where $\tHur$ is the time Hurricane Matthew struck Haiti \cite{ferreirai16}, and
 In \cite{lee20}, $\Whur{_u}$ and $\hHur{u}$ were set to zero for all $u$;
 the need to account for the effect Hurricane Matthew had on cholera transmission for this model is explored in Sec.~S5 of the supplement.
 
-Per-capita transition rates are given in Eqs.~\myeqref{eq:model3:SI}--\myeqref{eq:model3:Decay}.
+Per-capita transition rates are used for both compartments representing human counts and the aquatic reservoir of bacteria; these rates  are given in Eqs.~\myeqref{eq:model3:SI}--\myeqref{eq:model3:Decay}.
 \begin{eqnarray}
 \label{eq:model3:SI}
 \mu_{S_{u\vaccCounter}I_{u}} &=& \symptomFrac \,  \lambda_u \big(1-\vaccineEfficacy_{u\vaccCounter}(t)\big) \, d\Gamma/dt,
@@ -1301,7 +1302,7 @@ To do this, we perform a profile-likelihood search on the parameter $\transmissi
 Lee et al.~\cite{lee20} implemented Model~1 by fitting two distinct phases: an epidemic phase from October 2010 through March 2015, and an endemic phase from March 2015 onward.
 We similarly allow the re-estimation of process and measurement overdispersion parameters ($\sigmaProc^2$ and $\obsOverdispersion$), and require that the latent Markov process $X(t)$ carry over from one phase into the next.
 The resulting confidence interval for $\transmissionTrend$ is $(\Sexpr{myround(mcap_results$ci[1], digits = 3)}, \Sexpr{myround(mcap_results$ci[2], digits = 3)})$, with the full results displayed in Fig.~\ref{fig:betat}.
-These results are suggestive that the inclusion of a trend in transmission rate improves the quantitative ability of Model~1 to describe the observed data.
+These results are suggestive that the inclusion of a trend in the transmission rate improves the quantitative ability of Model~1 to describe the observed data.
 The reported results for Model~1 in the remainder of this article were obtained with the inclusion of the parameter $\transmissionTrend$.
 
 \begin{figure}
@@ -1328,7 +1329,7 @@ Both analyses used the \code{mif2} implementation of the IF2 algorithm to estima
 One change we made in the statistical analysis that led to larger model likelihoods was increasing the computational effort in the numerical maximization.
 While IF2 enables parameter estimation for a large class of models, the theoretic ability to maximize the likelihood depends on asymptotics in both the number of particles and the number of filtering iterations.
 Many Monte Carlo replications are then required to quantify and further reduce the error.
-The large difference in likelihoods that were obtain by these two approaches (see Table~\ref{tab:likes}) can primarily be attributed to increasing the computational effort in fitting the model; this result highlights the importance of carefully determining the necessary computational effort needed to maximize model likelihoods and acting accordingly.
+The large increase in the log-likelihood for Model~1 (see Table~\ref{tab:likes}) can primarily be attributed to increasing the computational effort in fitting the model; this result highlights the importance of carefully determining the necessary computational effort needed to maximize model likelihoods and acting accordingly.
 
 \begin{figure}
 \centering
