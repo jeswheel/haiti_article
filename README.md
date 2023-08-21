@@ -7,7 +7,7 @@ This repository contains the necessary code to reproduce the article: "Informing
 - [ ] Fix author affiliations and emails. 
 - [ ] Write an author summary for the paper 
 - [ ] Move all images and tables to the correct spot (directly after referencing them).
-- [ ] Fix the formating of the parameter table. 
+- [ ] Fix the formatting of the parameter table. 
 - [ ] Double check all model equations match the code 
 - [ ] Write more about why model 3 is a poor description of the data, even if this is just added to the supplement. 
 - [ ] Update Model 3 initialization model description. 

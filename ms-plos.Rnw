@@ -615,7 +615,14 @@ Our workflow is reproducible and extendable, facilitating future investigations 
 % Use first person. PLOS ONE authors please skip this step.
 % Author Summary not valid for PLOS ONE submissions.
 \section*{Author summary}
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur eget porta erat. Morbi consectetur est vel gravida pretium. Suspendisse ut dui eu ante cursus gravida non sed sem. Nullam sapien tellus, commodo id velit id, eleifend volutpat quam. Phasellus mauris velit, dapibus finibus elementum vel, pulvinar non tellus. Nunc pellentesque pretium diam, quis maximus dolor faucibus id. Nunc convallis sodales ante, ut ullamcorper est egestas vitae. Nam sit amet enim ultrices, ultrices elit pulvinar, volutpat risus.
+Scientists often use data from an infectious disease outbreak to build statistical models.
+Among other things, these models are often used to guide governmental policy, as the models can provide insight into the dynamics of an outbreak.
+Despite recent computational and methodological advancements, fitting dynamic models to observed incidence data remains a challenging task.
+In this article, we discuss common mistakes that may lead to models that do not adequately describe reality, and make suggestions that can lead to more useful statistical models.
+We do this by conducting a re-analysis of the 2012-2019 cholera outbreak in Haiti.
+We focus on the importance of appropriately diagnosing how well a model describes observed data, correctly interpreting model based results, and stressing the importance of reproducibility.
+An important contribution of this article is demonstrating a use-case of a newly developed computational algorithm to fit spatially coupled meta-population models.
+We assert that raising the currently accepted standards of infectious disease modeling will result in a greater ability of scientists and policy makers to understand and respond to future infectious disease outbreaks.
 
 \linenumbers
 
@@ -1885,7 +1892,7 @@ Number of &
 Values in parentheses are corresponding values using \cite{lee20} parameter estimates.  $\textsuperscript{1}$The reported likelihood is an upper bound of the likelihood of the \cite{lee20} model. $\textsuperscript{2}$\cite{lee20} fit Model~3 to a subset of the data (March 2014 onward, excluding data from Ouest in 2015-2016).
 On this subset, their model has a likelihood of $\Sexpr{myround(lee3_results$sub_ll_eval, 1)}$.
 On this same subset, our model has a likelihood of $\Sexpr{myround(mod3_eval_res$subset_ll, 1)}$.
-See Sec.~S6 of the supplement material for more details on estimating the likelihood of the \cite{lee20} models.
+See Sec.~S6 of the supplement material for more details on estimating the likelihood of the Lee et al.~\cite{lee20} models.
 }
 \end{table}
 
