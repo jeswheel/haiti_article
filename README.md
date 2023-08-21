@@ -12,6 +12,7 @@ This repository contains the necessary code to reproduce the article: "Informing
 - [ ] Write more about why model 3 is a poor description of the data, even if this is just added to the supplement. 
 - [ ] Update Model 3 initialization model description. 
 - [ ] Make sure the supplement is up-to-date, including re-running the results. 
+   - [ ] Add model diagrams to supplement, and mention them in the manuscript. 
 - [ ] Remove parallel back-ends from inside functions in `haitipkg`. 
 - [ ] Final things: 
    - [ ] Check all journal requirements are met
