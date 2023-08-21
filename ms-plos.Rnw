@@ -2689,182 +2689,158 @@ Compare to Fig.~3A of \cite{lee20}.}
 \begin{adjustwidth}{-2.25in}{0in}
 \centering
 % \small
-\begin{tabular}{|l@{}|l@{}t@{}|l@{}t@{}|l@{}t@{}|}
+\begin{tabular}{|p{0.15\linewidth}|p{0.14\linewidth}t|p{0.13\linewidth}t|p{0.17\linewidth}t|}
 \hline
 Mechanism & Model 1 && Model 2 && Model 3 &
 \\
 \hline
 \hline
 Infection (day)
-  & {\fixed $\muIR^{-1}=\Sexpr{myround(7/p1["gamma"],1)}$}
+  & ${\fixed \muIR^{-1}=\Sexpr{myround(7/p1["gamma"],1)}}$
   & \eqref{model1:toR}
-  & {\fixed $\muIR^{-1}=\Sexpr{myround(365/h2_fit$h2_params["gamma"],1)}$}
+  & ${\fixed \muIR^{-1}=\Sexpr{myround(365/h2_fit$h2_params["gamma"],1)}}$
   & \eqref{model2:mu_IR}
-  & {\fixed $\muIR^{-1}=\Sexpr{myround(365/p3["gamma1"],1)}$ }
+  & ${\fixed \muIR^{-1}=\Sexpr{myround(365/p3["gamma1"],1)}}$
   & \eqref{eq:model3:IR}
 \\
 Latency (day)
-  & {\fixed $\muEI^{-1}=\Sexpr{myround(7/p1["sigma"],1)}$}
+  & ${\fixed \muEI^{-1}=\Sexpr{myround(7/p1["sigma"],1)}}$
   & \eqref{model1:EA}
-  & {\fixed $\muEI^{-1}=\Sexpr{myround(365/h2_fit$h2_params["gammaE"],1)}$}
+  & ${\fixed \muEI^{-1}=\Sexpr{myround(365/h2_fit$h2_params["gammaE"],1)}}$
   & \eqref{model2:mu_EI}
   & \multicolumn{1}{c}{\hspace{16pt}\missing}
   &
 \\
 \hline
-\multirow{2}{*}{Seasonality}
-  & $\begin{array}{l}
-    \hspace{-1mm} \transmission_{1:6}=(
-      \Sexpr{myround(p1["beta1"],1)},
-      \Sexpr{myround(p1["beta2"],1)},
-    \\
-      \Sexpr{myround(p1["beta3"],1)},
-      \Sexpr{myround(p1["beta4"],1)},
-      \Sexpr{myround(p1["beta5"],1)},
-      \Sexpr{myround(p1["beta6"],1)})
-    \end{array}$
+\multirow{3}{*}{Seasonality}
+  & $\transmission_{1:6}=(
+      \Sexpr{myround(p1["beta1"],1)},\allowbreak
+      \Sexpr{myround(p1["beta2"],1)},\allowbreak
+      \Sexpr{myround(p1["beta3"],1)},\allowbreak
+      \Sexpr{myround(p1["beta4"],1)},\allowbreak
+      \Sexpr{myround(p1["beta5"],1)},\allowbreak
+      \Sexpr{myround(p1["beta6"],1)})$
   & \eqref{model1:beta}
-  & {\fixed \seasAmplitude=0.4}
-  & \eqref{model2:lambda}
-  & $\seasAmplitude = \Sexpr{myround(p3s["lambdaR"],2)}$
-  & \eqref{eq:model3:water} \\
+  & \multirow{2}{*}{${\fixed \seasAmplitude=0.4}$}
+  & \multirow{2}{*}{\eqref{model2:lambda}}
+  & \multirow{2}{*}{$\seasAmplitude = \Sexpr{myround(p3s["lambdaR"],2)}$}
+  & \multirow{2}{*}{\eqref{eq:model3:water}}
+  \\
   & $\transmissionTrend = \Sexpr{myround(p1["betat"],2)}^*$
   & \eqref{model1:betat}
-  & $\phaseParm = \Sexpr{myround(h2_fit$h2_params['phase'], 2)}^*$
-  & \eqref{model2:lambda}
-  & $r = \Sexpr{signif(p3s["r"],3)}$
-  & \eqref{eq:model3:water}
+  & \multirow{-2}{*}{$\phaseParm = \Sexpr{myround(h2_fit$h2_params['phase'], 2)}^*$}
+  & \multirow{-2}{*}{\eqref{model2:lambda}}
+  & \multirow{-2}{*}{$\rainfallExponent = \Sexpr{signif(p3s["r"],3)}$}
+  & \multirow{-2}{*}{\eqref{eq:model3:water}}
   \\\hline
-  Immunity (yr)
-  & {\fixed $\muRS^{-1}=\Sexpr{myround(1/p1["alpha"]/52,1)}$}
-  & \eqref{model1:RS}
-  &
-    $\begin{array}{l}
-    \muRS^{-1}= \Sexpr{signif(1/h2_fit$h2_params["sigma"],2)} \\
-    {\fixed \omega_1^{-1} = \Sexpr{myround(1/h2_fit$h2_params["Omega1"],1)}} \\
-    {\fixed \omega_2^{-1} = \Sexpr{myround(1/h2_fit$h2_params["Omega2"],1)}}
-    \end{array}$
-  & $\begin{array}{l}
-    \eqref{model2:RS} \\
-    \eqref{model2:omega1} \\
-    \eqref{model2:omega1}
-    \end{array} $
-  & {\fixed $\muRS^{-1}=\Sexpr{myround(1/p3['rho1'],1)}$}
-  & \eqref{eq:model3:RRnext}
+  \multirow{3}{*}{Immunity (yr)}
+  & \multirow{3}{*}{${\fixed \muRS^{-1}=\Sexpr{myround(1/p1["alpha"]/52,1)}}$}
+  & \multirow{3}{*}{\eqref{model1:RS}}
+  & $\muRS^{-1}= \Sexpr{signif(1/h2_fit$h2_params["sigma"],2)}$
+  & \eqref{model2:RS}
+  & \multirow{3}{*}{${\fixed \muRS^{-1}=\Sexpr{myround(1/p3['rho1'],1)}}$}
+  & \multirow{3}{*}{\eqref{eq:model3:RRnext}}
 \\
+& & & ${\fixed \omega_1^{-1} = \Sexpr{myround(1/h2_fit$h2_params["Omega1"],1)}}$ & \eqref{model2:omega1} & &\\
+& & & ${\fixed \omega_2^{-1} = \Sexpr{myround(1/h2_fit$h2_params["Omega2"],1)}}$ & \eqref{model2:omega2} & &\\
 \hline
-Birth/death (yr)
-  & \fixed{$\begin{array}{l}
-    \muBirth^{-1} = \Sexpr{myround(1/p1["mu"]/52,1)} \\
-    \muDeath^{-1} = \Sexpr{myround(1/p1["delta"]/52,1)}
-    \end{array}$}
+\multirow{2}{*}{Birth/death (yr)}
+  & ${\fixed \muBirth^{-1} = \Sexpr{myround(1/p1["mu"]/52,1)}}$
+    %
   & \eqref{model1:death}
-  & \multicolumn{1}{c}{\hspace{16pt}\missing}
+  & \multirow{2}{*}{\missing}
   &
-  & {\fixed $\muDeath^{-1} = \Sexpr{myround(1/p3["mu1"],1)}$}
-  & \eqref{eq:model3:IS}
+  & \multirow{2}{*}{${\fixed \muDeath^{-1} = \Sexpr{myround(1/p3["mu1"],1)}}$}
+  & \multirow{2}{*}{\eqref{eq:model3:IS}}
+\\
+& ${\fixed \muDeath^{-1} = \Sexpr{myround(1/p1["delta"]/52,1)}}$
+& \eqref{model1:death}
+&
+&
+& &
 \\
 Sympt. frac.
-  & {\fixed $\symptomFrac_z(t)=c\vaccineEfficacy^*(t-\tau_d)$}
+  & ${\fixed \symptomFrac_z(t)=c\vaccineEfficacy^*(t-\tau_d)}$
   & (\ref{model1:EI}-\ref{model1:EA})
-  & {\fixed $\symptomFrac=\Sexpr{myround(h2_fit$h2_params["k"],1)}$}
+  & ${\fixed \symptomFrac=\Sexpr{myround(h2_fit$h2_params["k"],1)}}$
   & \eqref{model2:mu_EI}
-  & {\fixed $\symptomFrac=\Sexpr{myround(p3["sigma1"],2)}$}
+  & ${\fixed \symptomFrac=\Sexpr{myround(p3["sigma1"],2)}}$
   & \eqref{eq:model3:SA}
 \\
-$\begin{array}{l}
-\text{Asympt.} \\
-\text{infectivity}
-\end{array}$
-  & {\fixed $\asymptomRelativeInfect=0.05$ }
-  & \eqref{model1:lambda}
-  & $\begin{array}{l}
-      {\fixed \asymptomRelativeInfect =0.001 } \\
-      {\fixed \asymptomRelativeShed = \Sexpr{1e-7} }
-    \end{array}$
-  & \begin{tabular}{l}
-      \eqref{model2:lambda} \\
-      \eqref{model2:to_W}
-    \end{tabular}
-  &  $\begin{array}{l}
-      {\fixed \asymptomRelativeInfect =1 } \\
-      \asymptomRelativeShed = \Sexpr{myround(p3s["XthetaA"],3)}
-    \end{array}$
-  & \begin{tabular}{l}
-      \eqref{eq:model3:foi} \\
-      \eqref{eq:model3:water}
-    \end{tabular}
+Asympt.
+  & \multirow{2}{*}{${\fixed \asymptomRelativeInfect=0.05}$}
+  & \multirow{2}{*}{\eqref{model1:lambda}}
+  & ${\fixed \asymptomRelativeInfect = 0.001}$
+  & \eqref{model2:lambda}
+  &  ${\fixed \asymptomRelativeInfect = 1}$
+  & \eqref{eq:model3:foi}
+\\
+infectivity
+&
+&
+& ${\fixed \asymptomRelativeShed = \Sexpr{1e-7} }$
+& \eqref{model2:to_W}
+& $\asymptomRelativeShed = \Sexpr{myround(p3s["XthetaA"],3)}$
+& \eqref{eq:model3:water}
 \\
 \hline
-$\begin{array}{l}
-\text{Human to}\\
-\text{human}\end{array}$
-  & $\transmission_{1:6}$ as above
-  & \eqref{model1:lambda}
-  & $\transmission=$\Sexpr{signif(h2_fit$h2_params["Beta"],3)}
-  & \eqref{model2:lambda}
-  & $\begin{array}{l}
-      \hspace{-1mm} \transmission_{1:10}=(
-        \Sexpr{myround(p3u["foi_add",1]*1e6,2)},
-	\Sexpr{myround(p3u["foi_add",2]*1e6,2)},
-      \\
-	\Sexpr{myround(p3u["foi_add",3]*1e6,2)},
-        \Sexpr{myround(p3u["foi_add",4]*1e6,2)},
-	\Sexpr{myround(p3u["foi_add",5]*1e6,2)},
-	\Sexpr{myround(p3u["foi_add",6]*1e6,2)},
-      \\
-	\Sexpr{myround(p3u["foi_add",7]*1e6,2)},
-	\Sexpr{myround(p3u["foi_add",8]*1e6,2)},
-	\Sexpr{myround(p3u["foi_add",9]*1e6,2)},
+\multirow{4}{*}{Human to human}
+  & \multirow{4}{*}{$\transmission_{1:6}$ as above}
+  & \multirow{4}{*}{\eqref{model1:lambda}}
+  & \multirow{4}{*}{$\transmission=$\Sexpr{signif(h2_fit$h2_params["Beta"],3)}}
+  & \multirow{4}{*}{\eqref{model2:lambda}}
+  & $\transmission_{1:10}=(
+  \Sexpr{myround(p3u["foi_add",1]*1e6,2)}, \allowbreak
+	\Sexpr{myround(p3u["foi_add",2]*1e6,2)}, \allowbreak
+	\Sexpr{myround(p3u["foi_add",3]*1e6,2)}, \allowbreak
+  \Sexpr{myround(p3u["foi_add",4]*1e6,2)}, \allowbreak
+	\Sexpr{myround(p3u["foi_add",5]*1e6,2)}, \allowbreak
+	\Sexpr{myround(p3u["foi_add",6]*1e6,2)}, \allowbreak
+	\Sexpr{myround(p3u["foi_add",7]*1e6,2)}, \allowbreak
+	\Sexpr{myround(p3u["foi_add",8]*1e6,2)}, \allowbreak
+	\Sexpr{myround(p3u["foi_add",9]*1e6,2)}, \allowbreak
 	\Sexpr{myround(p3u["foi_add",10]*1e6,2)}
-	)
-      \\
-      \times 10^{-6}
-    \end{array}$
-  & \eqref{eq:model3:foi}
+	) \allowbreak \times 10^{-6}$
+  & \multirow{4}{*}{\eqref{eq:model3:foi}}
 \\
 \hline
-$\begin{array}{l}
-\text{Water to}\\ \text{human}
-\end{array}$
-  & \multicolumn{1}{c}{\hspace{16pt}\missing}
+\multirow{5}{*}{Water to human}
+  & \multirow{5}{*}{\missing}
+  % & \multicolumn{1}{c}{\hspace{16pt}\missing}
   &
-  & $\begin{array}{l}
-    {\fixed \Wsat = \Sexpr{signif(h2_fit$h2_params["Sat"],2)} }
-    \\
-    \beta_W= \Sexpr{signif(h2_fit$h2_params["BetaW"],3)}
-    \end{array}$
-  & \eqref{model2:lambda}
-  & $\begin{array}{l}
-      \hspace{-1mm} \Wbeta{_{1:10}}= (
-        \Sexpr{myround(p3u["betaB",1],2)}, \Sexpr{myround(p3u["betaB",2],2)},
-       \\
-        \Sexpr{myround(p3u["betaB",3],2)}, \Sexpr{myround(p3u["betaB",4],2)},
-        \Sexpr{myround(p3u["betaB",5],2)}, \Sexpr{myround(p3u["betaB",6],2)},
-       \\
-        \Sexpr{myround(p3u["betaB",7],2)}, \Sexpr{myround(p3u["betaB",8],2)},
-        \Sexpr{myround(p3u["betaB",9],2)}, \Sexpr{myround(p3u["betaB",10],2)}
-      ) \end{array}$
-  & \eqref{eq:model3:foi}
+  & \multirow{3}{*}{${\fixed \Wsat = \Sexpr{signif(h2_fit$h2_params["Sat"],2)}}$}
+  & \multirow{3}{*}{\eqref{model2:lambda}}
+  % \eqref{model2:lambda}
+  & $\Wbeta{_{1:10}}= (
+        \Sexpr{myround(p3u["betaB",1],2)}, \allowbreak
+        \Sexpr{myround(p3u["betaB",2],2)}, \allowbreak
+        \Sexpr{myround(p3u["betaB",3],2)}, \allowbreak
+        \Sexpr{myround(p3u["betaB",4],2)}, \allowbreak
+        \Sexpr{myround(p3u["betaB",5],2)}, \allowbreak
+        \Sexpr{myround(p3u["betaB",6],2)}, \allowbreak
+        \Sexpr{myround(p3u["betaB",7],2)}, \allowbreak
+        \Sexpr{myround(p3u["betaB",8],2)}, \allowbreak
+        \Sexpr{myround(p3u["betaB",9],2)}, \allowbreak
+        \Sexpr{myround(p3u["betaB",10],2)})$
+  & \multirow{4}{*}{\eqref{eq:model3:foi}}
+\\
+& & & \multirow{-3}{*}{$\beta_W= \Sexpr{signif(h2_fit$h2_params["BetaW"],3)}$} & \multirow{-3}{*}{\eqref{model2:lambda}} & &
 \\
 \hline
-$\begin{array}{l}
-\text{Human to}\\
-\text{water}\end{array}$
-  & \multicolumn{1}{c}{\hspace{16pt}\missing}
+Human to water
+  & \missing
+  % & \multicolumn{1}{c}{\hspace{16pt}\missing}
   &
   & $\Wshed = $ \Sexpr{signif(h2_fit$h2_params["Mu"],3)}
   & \eqref{model2:to_W}
   & $\Wshed= \Sexpr{signif(p3s["thetaI"],3)}$
   & \eqref{eq:model3:water}
 \\
-$\begin{array}{l}
-\text{Water} \\
-\text{survival (wk)}
-\end{array}$
-  & \multicolumn{1}{c}{\hspace{16pt}\missing}
+Water survival \newline (wk)
+  & \missing
+  % & \multicolumn{1}{c}{\hspace{16pt}\missing}
   &
-  & {\fixed $\Wremoval^{-1} = $ \Sexpr{signif(52/h2_fit$h2_params["Delta"],3)}}
+  & ${\fixed \Wremoval^{-1} = \Sexpr{signif(52/h2_fit$h2_params["Delta"],3)}}$
   & \eqref{model2:from_W}
   & $\Wremoval^{-1}=\Sexpr{myround(52/p3s["mu_B"],2)}$
   & \eqref{eq:model3:Decay}
@@ -2872,47 +2848,74 @@ $\begin{array}{l}
 Mixing exponent
   & $\mixExponent=\Sexpr{myround(p1["nu"],2)}$
   & \eqref{model1:lambda}
-  & \multicolumn{1}{c}{\hspace{16pt}\missing}
+  & \missing
+  % & \multicolumn{1}{c}{\hspace{16pt}\missing}
   &
-  & \multicolumn{1}{c}{\hspace{16pt}\missing}
+  & \missing
+  % & \multicolumn{1}{c}{\hspace{16pt}\missing}
   &
 \\
-$\begin{array}{l}
-\text{Process} \\
-\text{noise} (\text{wk}^{1/2})
-\end{array}$
-  & $\sigmaProc=(\Sexpr{myround(sqrt(p1["sig_sq_epi"]),2)}, \Sexpr{myround(sqrt(p1["sig_sq_end"]),2)})^*$
-  & \eqref{model1:lambda}
-  & \multicolumn{1}{c}{\hspace{16pt}\missing}
+\hline
+Process noise \newline ($\text{wk}^{1/2}$)
+  & $\sigmaProc =$ \newline $(\Sexpr{myround(sqrt(p1["sig_sq_epi"]),2)},
+  \Sexpr{myround(sqrt(p1["sig_sq_end"]),2)})^*$
+  & \multirow{2}{*}{\eqref{model1:lambda}}
+  & \multirow{2}{*}{\missing}
+  % & \multicolumn{1}{c}{\hspace{16pt}\missing}
   &
-  & $\sigmaProc= \Sexpr{myround(p3s["std_W"],3)}$
-  & \eqref{eq:model3:SA}
+  & \multirow{2}{*}{$\sigmaProc= \Sexpr{myround(p3s["std_W"],3)}$}
+  & \multirow{2}{*}{\eqref{eq:model3:SA}}
 \\
 Reporting rate
   & $\reportRate=\Sexpr{myround(p1["rho"], 3)}$
-  & (S15)
-  & {\fixed $\reportRate=\Sexpr{myround(h2_fit$h2_params["Rho"],2)}$}
-  & (S16)
+  & (S15) % TODO: Check
+  & ${\fixed \reportRate=\Sexpr{myround(h2_fit$h2_params["Rho"],2)}}$
+  & (S16) % TODO: Check
   & $\reportRate=\Sexpr{myround(p3s["epsilon"],2)}$
-  & (S19)
+  & (S19) % TODO: Check
 \\
-$\begin{array}{l}
-\text{Observation} \\
-\text{variance}
-\end{array}$
-  & $\obsOverdispersion = (\Sexpr{myround(p1["tau_epi"],2)}, \Sexpr{round(p1["tau_end"],2)})$
-  & (S15)
-  & $\obsOverdispersion = \Sexpr{signif(h2_fit$h2_params['sigma'], 3)}$
-  & (S16)
-  & $\obsOverdispersion = \Sexpr{myround(p3s["k"],2)}$
-  & (S19)
+Observation variance
+  & $\obsOverdispersion =$ \newline $(\Sexpr{myround(p1["tau_epi"],2)}, \Sexpr{round(p1["tau_end"],2)})$
+  & \multirow{2}{*}{(S15)} % TODO: Check
+  & \multirow{2}{*}{$\obsOverdispersion = \Sexpr{signif(h2_fit$h2_params['sigma'], 3)}$}
+  & \multirow{2}{*}{(S16)} % TODO: Check
+  & \multirow{2}{*}{$\obsOverdispersion = \Sexpr{myround(p3s["k"],2)}$}
+  & \multirow{2}{*}{(S19)} % TODO: Check
 \\
 \hline
-\multirow{2}{*}{Initial Values} & $I_{0,0} = \Sexpr{round(prod(p1[c('pop_0', 'I_0')]))}$ & & \multicolumn{1}{c}{\multirow{2}{*}{\hspace{16pt}\missing}} & & \multirow{2}{*}{$I_{3,7,10;0}(0)= (
-        \Sexpr{round(prod(p3[c('H3', 'Iinit3')]))}, \Sexpr{round(prod(p3[c('H7', 'Iinit7')]))}, \Sexpr{round(prod(p3[c('H10', 'Iinit10')]))})^*$} & \\
-& $E_{0,0} = \Sexpr{round(prod(p1[c('pop_0', 'E_0')]))}$ & & \multicolumn{1}{c}{} & & & \\\hline
-Hurricane & \multicolumn{1}{c}{\multirow{2}{*}{\hspace{16pt}\missing}} & & \multicolumn{1}{c}{\multirow{2}{*}{\hspace{16pt}\missing}} & & $\Whur{3, 9} = (\Sexpr{myround(p3['aHur3'], 2)}, \Sexpr{myround(p3['aHur9'], 2)})^*$ & \multirow{2}{*}{\eqref{eq:model3:foi}} \\
-Parameters & \multicolumn{1}{c}{} & & \multicolumn{1}{c}{} & & $\hHur{3, 9} = (\Sexpr{myround(p3['hHur3'], 2)}, \Sexpr{myround(p3['hHur9'], 2)})^*$ & \\\hline
+\multirow{2}{*}{Initial Values} & $I_{0,0} = \Sexpr{round(prod(p1[c('pop_0', 'I_0')]))}$
+  &
+  & \multirow{2}{*}{\missing}
+  % & \multicolumn{1}{c}{\multirow{2}{*}{\hspace{16pt}\missing}}
+  &
+  & \multirow{2}{*}{$I_{3,7,10;0}(0)= (
+        \Sexpr{round(prod(p3[c('H3', 'Iinit3')]))}, \Sexpr{round(prod(p3[c('H7', 'Iinit7')]))}, \Sexpr{round(prod(p3[c('H10', 'Iinit10')]))})^*$}
+  &  % TODO: \multirow{2}{*}{EQUATION NUMBER}
+  \\
+  & $E_{0,0} = \Sexpr{round(prod(p1[c('pop_0', 'E_0')]))}$ & & \multicolumn{1}{c}{}
+  &
+  &
+  &
+\\\hline
+\multirow{3}{*}{Hurricane}
+  & \multirow{4}{*}{\missing}
+% & \multicolumn{1}{c}{\multirow{2}{*}{\hspace{16pt}\missing}}
+  &
+  & \multirow{4}{*}{\missing}
+  % & \multicolumn{1}{c}{\multirow{2}{*}{\hspace{16pt}\missing}}
+  &
+  & $\Whur{3, 9} =$\newline $(\Sexpr{myround(p3['aHur3'], 2)}, \Sexpr{myround(p3['aHur9'], 2)})^*$
+  & \multirow{2}{*}{\eqref{eq:model3:foi}}
+\\
+ \multirow{-1}{*}{Parameters} &
+  % & \multicolumn{1}{c}{}
+  &
+  &
+  % & \multicolumn{1}{c}{}
+  &
+  & $\hHur{3, 9} =$\newline $(\Sexpr{myround(p3['hHur3'], 2)}, \Sexpr{myround(p3['hHur9'], 2)})^*$
+  & \multirow{2}{*}{\eqref{eq:model3:foi}}
+\\\hline
 
 \end{tabular}
 \caption{References to the relevant equation are given in parentheses.
