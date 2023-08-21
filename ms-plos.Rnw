@@ -625,7 +625,7 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur eget porta er
 Regulation of biological populations is a fundamental topic in epidemiology, ecology, fisheries and agriculture.
 Population dynamics may be nonlinear and stochastic, with the resulting complexities compounded by incomplete understanding of the underlying biological mechanisms and by partial observability of the system variables.
 Quantitative models for these dynamic systems offer potential for designing effective control measures.
-Developing and testing such models, and assessing their fitness for guiding policy, is a challenging statistical task.
+Developing and testing models for dynamic systems, and assessing their fitness for guiding policy, is a challenging statistical task.
 Questions of interest include: What indications should we look for in the data to assess whether the model-based inferences are trustworthy?
 What diagnostic tests and model variations can and should be considered in the course of the data analysis?
 What are the possible trade-offs of increasing model complexity, such as the inclusion of interactions across spatial units?
@@ -644,7 +644,7 @@ While OCV is accepted as a safe and effective tool for controlling the spread of
 Advances in OCV technology and vaccine availability, however, raised the possibility of planning a national vaccination program \cite{lee20}.
 In the study, certain data were shared between the groups, including demography and vaccination history; vaccine efficacy was also fixed at a shared value between groups.
 Beyond this, the groups made autonomous decisions on what to include and exclude from their models.
-The groups largely adhered to existing guidelines on creating models to inform policy \cite{behrend20,saltelli20} and, despite their autonomy, obtained a consensus that an extensive nationwide vaccination campaign would be necessary to eliminate cholera from Haiti.
+The groups largely adhered to existing guidelines for creating models to inform policy \cite{behrend20,saltelli20} and, despite their autonomy, obtained a consensus that an extensive nationwide vaccination campaign would be necessary to eliminate cholera from Haiti.
 Their forecasts, however, were inconsistent with the prolonged period with no confirmed cholera cases between February, 2019 and September, 2022 \cite{trevisin22}.
 Though cholera has recently reemerged in Haiti \cite{rubin22}, the inability to accurately forecast cholera incidence from 2019-2022---while diligently adhering to existing scientific standards for infectious disease modeling---demonstrates that existing standards of disease modeling and forecasting may be insufficient.
 
@@ -891,6 +891,7 @@ See the section describing how Model~2 is fit to data and Sec.~S3.2 of the suppl
 The latent state is described as $\bm{X}(t) = \big(S_{u\vaccCounter}(t),\allowbreak I_{u}(t),\allowbreak A_{u}(t),\allowbreak R_{u\vaccCounter k}(t),\allowbreak W_u(t),\allowbreak u \in \seq{0}{U},\allowbreak \vaccCounter \in \seq{0}{4},\allowbreak k \in \seq{1}{3}\big)$.
 Here, $\vaccCounter=0$ corresponds to unvaccinated, $\vaccCounter=2j-1$ corresponds to a single dose on the $j$th vaccination campaign in unit $u$ and $\vaccCounter=2j$ corresponds to receiving two doses on the $j$th vaccination campaign.
 $k\in\seq{1}{3}$ models non-exponential duration in the recovered class before waning of immunity.
+The processes model $f_{\bm{X}_n|\bm{X}_{n-1}}\big(\bm{x}_n|\bm{x}_{n-1};\paramVec\big)$ describes the movement of individuals between latent compartments, as well as the birth and death process of local, unobserved bacterial compartments $W_{u}(t)$.
 The force of infection is
 \begin{equation}
 \label{eq:model3:foi}
@@ -1275,8 +1276,8 @@ In the following subsections we describe in detail our approach to calibrating t
 
 One of the most frequently used approaches to calibrate the parameters of a statistical model is maximum likelihood estimation.
 In the case of a POMP model, the likelihood function---as described in Eq.~\myeqref{eq:likedef}---is written as $\mathcal{L}(\paramVec) = \int f_{\bm{X}_{0:N}, \bm{Y}_{1:N}}\big(\bm{x}_{0:N}, \bm{y}_{1:N};\paramVec\big) d\bm{x}_{0:N}$.
-The high-dimensional integral in the likelihood, and the potentially non-linear nature of the process model, makes it impossible to obtain a closed form expression of the likelihood function of POMP models, except in the most basic cases.
-For example, the process model that defines Model~1 was developed with the intent of providing a plausible description of cholera dynamics rather than a providing statistically convenient description.
+The high-dimensional integral in the likelihood, and the potentially non-linear nature of the process model, make it impossible to obtain a closed form expression of the likelihood function of POMP models except in the most basic cases.
+The process model that defines Model~1 was developed with the intent of providing a plausible description of cholera dynamics rather than a providing statistically convenient description.
 Because of this, a closed form expression of the likelihood of Model~1 is not readily available.
 
 In order to retain the ability to propose models that are scientifically meaningful rather than only those that are simply statistically convenient, we restrict ourselves to parameter estimation techniques that have the plug-and-play property, which is that the fitting procedure only requires the ability to simulate the latent process instead of evaluating transition densities \cite{breto09,he10};
@@ -1295,7 +1296,7 @@ We demonstrate this capability by proposing a linear trend $\transmissionTrend$ 
 \end{equation}
 where $\bar{t} = \frac{t - (t_N + t_0) / 2}{t_N - (t_N + t_0) / 2}$, so that $\bar{t} \in [-1, 1]$.
 The proposal of a linear trend in transmission is a result of observing an apparent decrease in reported cholera infections from 2012-2019 in Fig.~\ref{CholeraData}.
-While several factors may contribute to this decrease, one explanation is that case-area targeted interventions (CATIs), which included education sessions, increased monitoring, household decontamination, soap distribution, and water chlorination in infected areas \cite{rebaudet19CATI}, may have substantially reduced cholera transmission \cite{rebaudet21}.
+While several factors may contribute to this decrease, one explanation is that case-area targeted interventions (CATIs), which included education sessions, increased monitoring, household decontamination, soap distribution, and water chlorination in infected areas \cite{rebaudet19CATI}, may have substantially reduced cholera transmission over time \cite{rebaudet21}.
 
 We perform a statistical test to determine whether or not the data indicate the presence of a linear trend in transmissibility.
 To do this, we perform a profile-likelihood search on the parameter $\transmissionTrend$ and obtain a $95\%$ confidence interval via a Monte Carlo Adjusted Profile (MCAP) \cite{ionides17}.
@@ -1456,12 +1457,13 @@ One concern is that cholera dynamics in department $u$ are highly related to the
 calibrating model parameters while conditioning on the observed cases in other departments may therefore lead to an over-dependence on observed cholera cases.
 Another concern is that the two versions of the model are not the same, resulting in sub-optimal parameter estimates for the spatially coupled model,
 as parameters that maximize the likelihood of the decoupled model almost certainly do not maximize the likelihood of the fully coupled model.
-These two concerns may explain the unrealistic forecasts and low likelihood of the model (see Table~\ref{tab:likes}).
+These two concerns may explain the unrealistic forecasts and low likelihood of Model~3 from Lee et al.~\cite{lee20} (see Table~\ref{tab:likes}).
 
+At the time Lee et al.~\ref{lee20} was published, there was no known algorithm that could readily be used to maximize the likelihood of an arbitrary meta-population POMP model with coupled spatial dynamics, which justifies the spatial decoupling approximation that was used to calibrate model parameters.
 For our analysis, we calibrate the parameters of the spatially coupled version of Model~3 using the iterated block particle filter (IBPF) algorithm \cite{ionides22}.
 This algorithm extends the work of Ning and Ionides \cite{ning21ibpf}, who provided theoretic justification for the version of the algorithm that only estimates unit-specific parameters.
 The IBPF algorithm enables us to directly estimate the parameters of models describing high-dimensional partially-observed nonlinear dynamic systems via likelihood maximization.
-The ability to directly estimate parameters of Model~3 is responsible for the large increase in model likelihoods reported in Table~\ref{tab:likes}, as no algorithm with similar capabilities existed when Lee et al.~\cite{lee20} published their results.
+The ability to directly estimate parameters of Model~3 is responsible for the large increase in model likelihoods reported in Table~\ref{tab:likes}.
 Simulations from the fitted model are displayed in Fig.~\ref{fig:h3spatsims}.
 
 <<Model 3 SpatPOMP sims, echo=FALSE>>=
@@ -1548,18 +1550,18 @@ gc()
 \subsection*{Model Diagnostics}\label{sec:model_diagnostics}
 
 The goal of parameter calibration---whether done using Bayesian or frequentist methods---is to find the best description of the observed data under the assumptions of the model.
-Obtaining the best fitting set of parameters for a given model does not, however, guarantee that the model provides an accurate representation of the system in question.
+Obtaining the best fitting set of parameters for a given model does not, however, guarantee that the model provides an accurate representation of the system under investigation.
 Model misspecification, which may be thought of as the omission of a mechanism in the model that is an important feature of the dynamic system, is inevitable at all levels of model complexity.
 To make progress, while accepting proper limitations, one must bear in mind the much-quoted observation of George Box \cite{box79} that ``all models are wrong but some are useful.''
 Beyond being good practical advice for applied statistics, this assertion is relevant for the philosophical justification of statistical inference as severe testing \cite{mayo18}. % \citep[][Sec.~4.8]{mayo18}.
 In this section, we discuss some tools for diagnosing mechanistic models with the goal of making the subjective assessment of model ``usefulness'' more objective.
-To do this, we will rely on the quantitative and statistical ability of the model to match the observed data, which we call the model's {\it goodness-of-fit}, with the guiding principle that a model which cannot adequately describe observed data may not be reliable for useful purposes.
+To do this, we will rely on the quantitative ability of the model to match the observed data, which we call the model's {\it goodness-of-fit}, with the guiding principle that a model which cannot adequately describe observed data may not be reliable for useful purposes.
 Goodness-of-fit may provide evidence supporting the causal interpretation of one model versus another, but cannot by itself rule out the possibility of alternative explanations.
 
 One common approach to assess a mechanistic model's goodness-of-fit is to compare simulations from the fitted model to the observed data.
 Visual inspection may indicate defects in the model, or may  suggest that the observed data are a plausible realization of the fitted model.
 While visual comparisons can be informative, they provide only a weak and informal measure of the goodness-of-fit of a model.
-The study by Lee et al.~\cite{lee20} provides an example of this: their models and parameter estimates resulted in simulations that visually resembled the observed data, yet resulted in model likelihoods that were---in some cases---considerably smaller than likelihoods that can be achieved via the likelihood based optimization techniques that were used (see Table~\ref{tab:likes}).
+The study by Lee et al.~\cite{lee20} provides an example of this: their models and parameter estimates resulted in simulations that visually resembled the observed data, yet resulted in model likelihoods that were considerably smaller than likelihoods that can be achieved via the likelihood based optimization techniques that were used (see Table~\ref{tab:likes}).
 Alternative forms of model validation should therefore be used in conjunction with visual comparisons of simulations to observed data.
 
 Another approach is to compare a quantitative measure of the model fit (such as MSE, predictive accuracy, or model likelihood) among all proposed models.
@@ -1577,7 +1579,7 @@ Ideally, the measure should also have favorable theoretical properties.
 Consequently, we focus on log-likelihood as a measure of goodness of fit, and we adjust for the degrees of freedom of the models to be compared by using the Akaike information criterion (AIC) \cite{aic74}.
 
 In some cases, a possible benchmark model could be a generally accepted mechanistic model, but often no such model is available.
-Because of this, we use a log-linear Gaussian ARMA model as an associative benchmark, as recommended by \cite{he10}.
+Because of this, we use a log-linear Gaussian ARMA model as an associative benchmark, as recommended by He et al.~\cite{he10}.
 The theory and practice of ARMA models is well developed, and these linear models are appropriate on a log scale due to the exponential growth and decay characteristic of biological dynamics.
 Likelihoods of Models~1--3 and their respective ARMA benchmark models are provided in Table~\ref{tab:likes}.
 
@@ -2006,7 +2008,7 @@ If a mechanistic model including a feature (such as a representation of a mechan
 As for any analysis of observational data, we must be alert to the possibility of confounding.
 For a covariate, this shows up in a similar way to regression analysis: the covariate under investigation could be a proxy for some other unmodeled or unmeasured covariate.
 For a mechanism, the model feature could in principle explain the data by helping to account for some different unmodeled phenomenon.
-In the context of our analysis, the estimated trend in transmission rate could be explained by any trending variable (such as hygiene improvements, or changes in population behavior), resulting in confounding from collinear covariates.
+In the context of our analysis, the statistical evidence of a trend in transmission rate in Model~1 could be explained by any trending variable (such as hygiene improvements, or changes in population behavior), resulting in confounding from colinear covariates.
 Alternatively, the trend could be attributed to a decreasing reporting rate rather than decreasing transmission rate, resulting in confounded mechanisms.
 The robust statistical conclusion is that a model which allows for change fits better than one which does not---we argue that a decreasing transmission rate is a plausible way to explain this, but the incidence data themselves do not provide enough information to pin down the mechanism.
 
@@ -2030,10 +2032,9 @@ Recent information about a dynamic system should be more relevant for a forecast
 This assertion may seem self-evident, but it is not the case for deterministic models, for which the initial conditions together with the parameters are sufficient for forecasting, and so recent data do not have special importance.
 Epidemiological forecasts based on deterministic models are not uncommon in practice, despite their limitations \cite{king15}.
 That may explain why Lee et al.~\cite{lee20} chose to obtain forecasts by simulating the calibrated models forward from initial conditions.
-Here, we compare with a forecast projected from the filtering distribution: to obtain a forecast using POMP model $m$ at a collection of times $t_{N+1:N+s}$, where $N$ is the index for the last available data, we simulate forward from a draw from
-$f_{\bm{X}_N|\bm{Y}_{1:N}}(\bm{x}_{N} | \bm{y}^*_{1:N} ; \hat\paramVec)$
+Here, we obtain forecasts by simulating future values using latent states that are consistent with the most recent observations by drawing latent states at time the last observation time $t_N$ from the filtering distribution $f_{\bm{X}_N|\bm{Y}_{1:N}}(\bm{x}_{N} | \bm{y}^*_{1:N} ; \hat\paramVec)$,
 where $\hat\paramVec$ is a vector of calibrated parameters.
-The decision not to do this partially explains the unsuccessful forecasts of \cite{lee20}: their Table~S7 shows that the subset of their simulations which were consistent with observing zero cases in 2019 also accurately predicted the prolonged absence of detected cholera.
+The decision not to do this partially explains the unsuccessful forecasts of Lee et al.~\cite{lee20}: their Table~S7 shows that the subset of their simulations which were consistent with observing zero cases in 2019 also accurately predicted the prolonged absence of detected cholera.
 
 Uncertainty in just a single parameter can lead to drastically different forecasts \cite{saltelli20}.
 Therefore, parameter uncertainty should also be considered when obtaining model forecasts to influence policy.
@@ -2952,13 +2953,13 @@ Cautionary warnings about the difficulties inherent in understanding complex sys
 
 \subsection*{Reproducibility and Extendability}
 
-\cite{lee20} published their code and data online, and this reproducibility facilitated our work.
+Lee et al.~\cite{lee20} published their code and data online, and this reproducibility facilitated our work.
 Robust data analysis requires not only reproducibility but also extendability: if one wishes to try new model variations, or new approaches to fitting the existing models, or plotting the results in a different way, this should not be excessively burdensome.
 Scientific results are only trustworthy so far as they can be critically questioned, and an extendable analysis should facilitate such examination \cite{gentleman07}.
 
 We provide a strong form of reproducibility, as well as extendability, by developing our analysis in the context of a software package, \code{haitipkg}, written in the R language \cite{r}.
 Using a software package mechanism supports documentation, standardization and portability that promote extendability.
-In the terminology of \cite{gentleman07}, the source code for this article is a {\it dynamic document} combining code chunks with text.
+In the terminology of Gentleman and Temple Lang~\cite{gentleman07}, the source code for this article is a {\it dynamic document} combining code chunks with text.
 In addition to reproducing the article, the code can be extended to examine alternative analysis to that presented.
 The dynamic document, together with the R packages, form a {\it compendium}, defined by Gentleman and Temple Lang~\cite{gentleman07} as a distributable and executable unit which combines data, text and auxiliary software (the latter meaning code written to run in a general-purpose, portable programming environment, which in this case is R).
 
