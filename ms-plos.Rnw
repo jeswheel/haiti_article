@@ -211,6 +211,7 @@
 \newcommand\fixed{\color{blue}}
 \newcommand\demography{\bullet}
 \newcommand\code[1]{\texttt{#1}}
+\newcommand\figTitle{\bf}
 \newcommand\paramVec{\theta}
 \newcommand\childReduce{q}
 
@@ -668,8 +669,8 @@ ggplot(dep_plot_df, aes(x = date, y = cases + 1)) +
   )
 @
 \caption{\label{fig:CholeraData}
-\small
-Weekly reported cholera cases in Haiti from October 2010 to January 2019.
+{\figTitle Weekly cholera cases.}
+Weekly reported cholera cases in Haiti from October 2010 to January 2019 for each of the 10 administrative departments.
 }
 \end{figure}
 
@@ -701,6 +702,549 @@ We then use improved model fits to project cholera incidence in Haiti under vari
 Finally, we conclude with a discussion of the results.
 % This is followed by a consideration of the robustness of model based policy recommendations in Sec.~\ref{sec:advice}, and a discussion in Sec.~\ref{sec:discussion}.
 
+<<FitModel1, echo=FALSE, message=FALSE, include=FALSE>>=
+
+# This code chunk is used to fit Model 1 using the IF2 algorithm.
+set.seed(636813)
+
+# Check RUN_LEVEL, and set hyper-parameters to IF2 and pfilter accordingly.
+#                      RUN_LEVEL =    1,    2,      3
+NP_H1        <- switch(RUN_LEVEL,   100, 1000,   2000)
+NMIF_H1      <- switch(RUN_LEVEL,    10,   50,    200)
+NUM_TREND    <- switch(RUN_LEVEL,     5,   10,     90)
+NPROF        <- switch(RUN_LEVEL,     4,    4,     24)
+NP_EVAL      <- switch(RUN_LEVEL,   200, 1000,   5000)
+NREPS_EVAL   <- switch(RUN_LEVEL, cores,   20,  cores)
+
+# Create the <RUN_LEVEL> version of the results and save them.
+h1_MIF <- bake(
+  file = paste0("model1/", rl_dir, "haiti1_fit.rds"), {
+    fit_haiti1(  # haitipkg function used to fit Model 1
+      NP = NP_H1,
+      NMIF = NMIF_H1,
+      NUM_TREND = NUM_TREND,
+      NPROF = NPROF,
+      NREPS_EVAL = NREPS_EVAL,
+      NP_EVAL = NP_EVAL,
+      ncores = cores
+    )
+  }
+)
+
+# The result is a data.frame containing many parameter values and their
+# corresponding likelihood evaluation. To perform a likelihood profile,
+# we calculate the maximum likelihood for each value of betat.
+h1_prof_res <- h1_MIF %>%
+  group_by(betat) %>%
+  summarize(logLik = max(ll))
+
+mcap_results <- pomp::mcap(h1_prof_res$logLik, h1_prof_res$betat, span = 1)
+
+# Get the best set of parameters from MIF2 search.
+p1 <- h1_MIF %>%
+  filter(ll == max(ll)) %>%
+  select(-ll, -ll.se) %>%
+  unlist()
+
+# Save the likelihood of the best parameters, for use later.
+mod1_ll <- h1_MIF %>%
+  filter(ll == max(ll)) %>%
+  select(ll) %>%
+  unlist()
+
+# Just a bit of tidying up: removing parameters that we won't use again.
+rm(NP_H1, NMIF_H1, NUM_TREND, NPROF, NREPS_EVAL, NP_EVAL, h1_MIF)
+gc()
+
+@
+
+<<FitModel2, echo=FALSE, include=FALSE, message=FALSE>>=
+
+# This code chunk fits Model 2. This is a quick caclulation compared to models
+# 1 and 3, so no run_level is used.
+
+h2_fit <- bake(
+  file = paste0("model2/model2_fit.rds"), {
+    fit_haiti2()
+  },
+  timing = FALSE
+)
+@
+
+<<FitModel3, echo=FALSE, include=FALSE, message=FALSE>>=
+
+# This code chunk is used to fit Model 3 using the IBPF algorithm.
+set.seed(8636712)
+
+# Create vectors for the unit and shared parameters
+unit_specific_names <- c("betaB", "foi_add", "aHur", "hHur", "Iinit")
+shared_param_names <- c(
+  "mu_B", "XthetaA", "thetaI", "lambdaR", "r", "std_W",
+  "epsilon", "k"
+)
+est_param_names <- c(
+  unit_specific_names, shared_param_names
+)
+
+# Add unit numbers to each parameter
+est_param_names_expanded <- paste0(rep(est_param_names, each = 10), 1:10)
+
+# Simple function that is used to set the rw_sd for the first search
+# This function is convenient so that we don't have to type out the rw_sd
+# for each unit parameter.
+set_rw_1 <- function(x) {
+  if (gsub("[[:digit:]]+$", "", x) %in% shared_param_names) {
+    return(0.01)
+  } else if (x %in% paste0(rep(c("aHur", 'hHur'), each = 2), c(3, 9))) {
+    return(expression(ifelse(time >= 2016.754 & time <= 2017, 0.015, 0)))
+  } else if (x %in% c("Iinit3", "Iinit4")) {
+    return(expression(ivp(0.25)))
+  } else if (grepl('^foi_add[[:digit:]]+$', x)) {
+    return(0.015)
+  } else if (grepl('^betaB[[:digit:]]+$', x)) {
+    return(0.01)
+  } else {
+    return(0)
+  }
+}
+
+set_rw_2 <- function(x) {
+  if (gsub("[[:digit:]]+$", "", x) %in% shared_param_names) {
+    return(0.003)
+  } else if (x %in% paste0(rep(c("aHur", 'hHur'), each = 2), c(3, 9))) {
+    return(expression(ifelse(time >= 2016.754 & time <= 2017, 0.005, 0)))
+  } else if (x %in% c("Iinit3", "Iinit4")) {
+    return(expression(ivp(0.125)))
+  } else if (grepl('^foi_add[[:digit:]]+$', x)) {
+    return(0.005)
+  } else if (grepl('^betaB[[:digit:]]+$', x)) {
+    return(0.003)
+  } else {
+    return(0)
+  }
+}
+
+# First Search RW
+reg_rw_1.sd <- lapply(est_param_names_expanded, set_rw_1)
+names(reg_rw_1.sd) <- est_param_names_expanded
+chol_rw_1.sd <- do.call(rw_sd, reg_rw_1.sd)
+
+# Second Search RW
+reg_rw_2.sd <- lapply(est_param_names_expanded, set_rw_2)
+names(reg_rw_2.sd) <- est_param_names_expanded
+chol_rw_2.sd <- do.call(rw_sd, reg_rw_2.sd)
+
+if (RUN_LEVEL == 1){
+  SEARCH1 = list(
+    NBPF = 10,
+    NP = 200,
+    SPAT_REGRESSION = 0.05,
+    NREPS = 20,
+    NP_EVAL = 200,
+    NREPS_EVAL = 3,
+    RW_SD = chol_rw_1.sd,
+    COOLING = 0.5,
+    KEEP_TRACES = TRUE
+  )
+
+  SEARCH2 = list(
+    TOP_N = 8,
+    NBPF = 10,
+    NP = 200,
+    SPAT_REGRESSION = 0.05,
+    NREPS = 2,
+    NP_EVAL = 200,
+    NREPS_EVAL = 3,
+    RW_SD = chol_rw_2.sd,
+    COOLING = 0.5,
+    KEEP_TRACES = TRUE
+  )
+
+} else if (RUN_LEVEL == 2) {
+  SEARCH1 = list(
+    NBPF = 100,
+    NP = 1000,
+    SPAT_REGRESSION = 0.05,
+    NREPS = 72,
+    NP_EVAL = 1000,
+    NREPS_EVAL = 8,
+    RW_SD = chol_rw_1.sd,
+    COOLING = 0.5,
+    KEEP_TRACES = TRUE,
+    KEEP_LIK_MAT = TRUE
+  )
+
+  SEARCH2 = list(
+    TOP_N = 9,
+    NBPF = 100,
+    NP = 1000,
+    SPAT_REGRESSION = 0.05,
+    NREPS = 4,
+    NP_EVAL = 1000,
+    NREPS_EVAL = 9,
+    RW_SD = chol_rw_2.sd,
+    COOLING = 0.5,
+    KEEP_TRACES = TRUE,
+    KEEP_LIK_MAT = TRUE
+  )
+
+} else if (RUN_LEVEL == 3) {
+
+  SEARCH1 = list(
+    NBPF = 100,
+    NP = 2500,
+    SPAT_REGRESSION = 0.05,
+    NREPS = 144,
+    NP_EVAL = 2500,
+    NREPS_EVAL = 18,
+    RW_SD = chol_rw_1.sd,
+    COOLING = 0.5,
+    KEEP_TRACES = FALSE,
+    KEEP_LIKE_MAT = FALSE
+  )
+
+  SEARCH2 = list(
+    TOP_N = 12,
+    NBPF = 100,
+    NP = 2500,
+    SPAT_REGRESSION = 0.05,
+    NREPS = 6,
+    NP_EVAL = 2500,
+    NREPS_EVAL = 18,
+    RW_SD = chol_rw_2.sd,
+    COOLING = 0.5,
+    KEEP_TRACES = FALSE,
+    KEEP_LIK_MAT = TRUE
+  )
+}
+
+# Search hyper-parameters for each run-level and search. This sets
+# parameters like number of particles, number of BPF iterations, and
+# number of replications for each search.
+# h3_fit_parms <- set_h3_fit_parms(
+#   RUN_LEVEL = RUN_LEVEL,
+#   rw_1.sd = chol_rw_1.sd,
+#   rw_2.sd = chol_rw_2.sd
+# )
+
+# Calculate the number of parameters that are estimated:
+# This is calculated by the number of non-zero rw_sd values (including expressions), but then subtracting of repeated shared parameters.
+mod3_n_params <- sum(reg_rw_1.sd != 0, na.rm = TRUE) + sum(sapply(reg_rw_1.sd, is.expression)) - length(shared_param_names) * 9
+
+# haiti3_fit <- readRDS("model3/run_level_3/h3_revision.rds")
+
+# Fit Model 3
+haiti3_fit <- bake(
+  file = paste0("model3/", rl_dir, "haiti3_fit.rds"), {
+    fit_haiti3(
+      nsearches = 2L,
+      search1 = SEARCH1,
+      search2 = SEARCH2,
+      search_rho = FALSE,
+      search_gamma = FALSE,
+      search_Iinit = TRUE,
+      search_hur = TRUE,
+      ncores = cores
+    )
+  }
+)
+
+# haiti3_fit contains ll estimate for many parameter sets, so we want to find
+# the highest value
+mod3_ll <- max(
+  haiti3_fit[[length(haiti3_fit)]]$logLiks$logLik,
+  na.rm = TRUE
+)
+
+# Just a bit of tidying up: removing parameters that we won't use again.
+rm(
+  SEARCH1, SEARCH2, SEARCH3, N_SEARCHES,
+  est_param_names, est_param_names_expanded,
+  set_rw_1, set_rw_2, set_rw_3, reg_rw_1.sd, reg_rw_2.sd, reg_rw_3.sd,
+  chol_rw_1.sd, chol_rw_2.sd, chol_rw_3.sd
+)
+gc()
+
+@
+
+<<table-input,echo=FALSE,eval=T, include=FALSE, message=FALSE>>=
+
+# Find the index for parameters of model 3 that correspond to the MLE.
+best_m3 <- which.max(haiti3_fit[[length(haiti3_fit)]]$logLiks$logLik)
+
+# Save the parameters that correspond to the MLE of Model 3.
+p3 <- haiti3_fit[[length(haiti3_fit)]]$params[best_m3, ]
+
+p3u <- matrix(nrow = length(unit_specific_names), ncol = 10)
+rownames(p3u) <- unit_specific_names
+p3s <- numeric(length(shared_param_names))
+names(p3s) <- shared_param_names
+
+for (p in shared_param_names) {
+  p3s[p] <- p3[paste0(p, 1)]  # They are the same for 1:10
+}
+
+for (p in unit_specific_names) {
+  pat <- paste0("^", p, "[[:digit:]]+$")
+  p3u[p, ] <- p3[grepl(pat, names(p3))]
+}
+
+rm(unit_specific_names, shared_param_names, p, pat)
+
+stew(file = "models.rda", {
+  h1 <- haiti1_joint()
+  coef(h1) <- p1
+
+  h2_epi <- haiti2(region = 'before', cutoff = 10000, measure = 'log')
+  coef(h2_epi) <- h2_fit$h2_params
+
+  h3Spat <- haiti3_spatPomp()
+  coef(h3Spat) <- p3
+})
+@
+
+<<AICtableInput, echo=FALSE, eval=TRUE>>=
+NREPS_EVAL <- switch(RUN_LEVEL,   3,   8,    36)
+NP_EVAL    <- switch(RUN_LEVEL, 100, 500,  5000)
+
+# Objective function of model 2, epidemic phase
+epi_ofun <- traj_objfun(
+  h2_epi,
+  params = h2_fit$h2_params
+)
+
+mod2_epi_ll <- -epi_ofun(par = h2_fit$h2_params)
+mod2_ll <- mod2_epi_ll - sum(log(h2_epi@data + 1), na.rm = TRUE)
+
+arima_lik2 <- 0
+
+# model 2 AIC
+mod2_n_params <- h2_fit$n_fit_params
+mod2_aic <- 2 * mod2_n_params - 2 * mod2_ll
+
+# model 1 AIC
+mod1_n_params <- length(
+  c('beta1', 'beta2', 'beta3', 'beta4', 'beta5', 'beta6',
+    'rho', 'nu', 'E_0', 'I_0', 'tau_epi',
+    'tau_end', 'sig_sq_epi', 'sig_sq_end', 'betat')
+)
+mod1_aic <- 2 * mod1_n_params - 2 * mod1_ll
+
+# model 3 AIC
+mod3_aic <- 2 * mod3_n_params - 2 * mod3_ll
+
+# Calculate likelihood via block-particle filter
+mod3_eval_res <- bake(
+  file = paste0('model3/', rl_dir, 'mod3_eval_res.rds'), {
+
+    # Create a list to store results
+    results <- list()
+
+    coef(h3Spat) <- p3
+
+    # Perform block-particle filter
+    h3_bpf <- foreach(i = 1:NREPS_EVAL, .combine = c) %dopar% {
+      bpfilter(h3Spat, Np = NP_EVAL, block_size = 1)
+    }
+
+    ll <- logLik(h3_bpf)
+    results$ll <- logmeanexp(ll[!is.na(ll)], se = FALSE)
+
+    ### Get likelihood for subset of the data
+
+    # Find appropriate sub-set
+    in_subset_cols <- h3_bpf[[1]]@times >= as.numeric(lubridate::decimal_date(as.Date("2014-03-01")))
+    in_subset_rows <- h3_bpf[[1]]@unit_names != 'Ouest'
+
+    mod3_coupled_subset_evals <- c()
+    for (i in 1:length(h3_bpf)) {
+      mod3_coupled_subset_evals <- c(
+        mod3_coupled_subset_evals,
+        sum(h3_bpf[[i]]@block.cond.loglik[in_subset_rows, in_subset_cols])
+      )
+    }
+
+    results$subset_ll <- logmeanexp(mod3_coupled_subset_evals)
+    results
+  },
+  timing = FALSE
+)
+
+mod3_eval_res$subset_aic <- 2 * mod3_n_params - 2 * mod3_eval_res$subset_ll
+
+rm(NREPS_EVAL, NP_EVAL)
+@
+
+<<CalculateARMALikelihood, echo=FALSE, message=FALSE, include=FALSE, cache=TRUE>>=
+
+ARMA_benchmarks <- list()
+
+###
+### Model 1 ###
+###
+
+# Load aggregated data
+m1_agg_data <- haiti1_agg_data()
+
+# Fit ARMA(2, 1) on log-cases
+m1_log_arma <- arima(log(m1_agg_data$cases + 1), order = c(2, 0, 1))
+
+# Fit ARMA(2, 1) on natural scale of cases
+m1_arma <- arima(m1_agg_data$cases, order = c(2, 0, 1))
+
+# Check which one is better, and save benchmark as the better one
+if (m1_log_arma$loglik - sum(log(m1_agg_data$cases + 1), na.rm = TRUE) >= m1_arma$loglik) {
+  ARMA_benchmarks[['m1']] <- m1_log_arma$loglik - sum(log(m1_agg_data$cases + 1), na.rm = TRUE)
+} else {
+  ARMA_benchmarks[['m1']] <- m1_arma$loglik
+}
+
+rm(m1_agg_data, m1_log_arma, m1_arma)
+gc()
+
+###
+### Model 2 ###
+###
+
+h2_data <- haiti2_data(recreate = FALSE)
+
+# model 2 ARIMA benchmark
+h2_dep_names <- h2_data$department %>% unique()
+m2_benchmark <- 0
+for (i in 1:10){
+  cases <- h2_data[h2_data$department == h2_dep_names[i], ]$cases
+  log_cases <- log(cases + 1)
+
+  m2_arma_dep_ll <- arima(cases, order=c(2, 0, 1))$loglik
+  m2_log_arma_dep_ll <- arima(log_cases, order=c(2, 0, 1))$loglik - sum(log_cases, na.rm = TRUE)
+
+  m2_benchmark <- m2_benchmark + max(m2_arma_dep_ll, m2_log_arma_dep_ll)
+}
+
+ARMA_benchmarks[['m2']] <- m2_benchmark
+
+rm(m2_benchmark, h2_dep_names, cases, log_cases, m2_arma_dep_ll, m2_log_arma_dep_ll, h2_data)
+gc()
+
+###
+### Model 3 ###
+###
+
+mod3_cases <- as.data.frame(t(h3Spat@data))
+
+m3_benchmark <- 0
+for (dep in 1:10) {
+
+  # Get department cases
+  cases <- as.numeric(mod3_cases[, dep])
+
+  # Fit model on natural scale of cases
+  m3_a201 <- arima(cases, order = c(2, 0, 1))
+
+  # Fit model on log-scale of cases
+  m3_log_a201 <- arima(log(cases + 1), order = c(2, 0, 1))
+
+  m3_benchmark <- m3_benchmark + max(
+    m3_log_a201$loglik - sum(log(cases + 1), na.rm = TRUE),
+    m3_a201$loglik
+  )
+}
+
+ARMA_benchmarks[['m3']] <- m3_benchmark
+rm(cases, m3_a201, m3_log_a201, m3_benchmark, dep,
+   mod3_cases, temp, jumps, MODEL3_CASES, i, j)
+gc()
+@
+
+<<AIC Lee et al, echo=FALSE, include=FALSE, message=FALSE>>=
+lee3_NP   <- switch(RUN_LEVEL, 50, 250, 5000)
+lee3_NREP <- switch(RUN_LEVEL,  3,   8,   36)
+
+mod1_lee_n_params <- 20
+mod1_lee_aic <- 2 * mod1_lee_n_params - 2 * mod1_lee_ll
+
+mod2_lee_aic <- 2 * h2_fit$leeFit_n_params - 2 * h2_fit$leeFit_ll
+
+registerDoRNG(49637421)
+
+# Create Lee et al (2020a) version of model 3 on sub-data
+lee3_sub <- lee3_spatPomp()
+
+# This model is only fit for a subset of the data, so we will set data
+# that are not part of this subset as NA. This will allow us to estimate
+# the likelihood for only the values that were considered during the
+# parameter estimation phase.
+# set_as_na <- lee3_sub@times < lubridate::decimal_date(as.Date('2017-06-10'))
+# temp_ouest_cases <- lee3_sub@data['casesOuest', ]
+# temp_ouest_cases[set_as_na] <- NA_real_
+# lee3_sub@data['casesOuest', ] <- temp_ouest_cases
+
+lee3_all <- lee3_spatPomp(start_date = "2010-10-23")
+
+lee3_results <- bake(
+  file = paste0('model3/', rl_dir, 'lee3_results.rds'), {
+
+    # Create lists to save results
+    lee3_results <- list()
+
+    # Save how long it takes for sub-data
+    lee3_results[["sub_bpf_time"]] <- system.time({
+
+      lee3_sub_ll_evals <- foreach(
+        i = 1:lee3_NREP, .combine = rbind
+      ) %dopar% {
+
+        liks <- numeric(10L)
+
+        lee_bpf_out <- bpfilter(lee3_sub, block_size = 1, Np = lee3_NP)
+        Ouest_ind <- which(lee_bpf_out@unit_names == "Ouest")
+
+        for (u in 1:10) {
+          if (u == Ouest_ind) {
+            liks[u] <- sum(lee_bpf_out@block.cond.loglik[u, lee3_sub@times >= lubridate::decimal_date(as.Date('2017-06-10'))])
+          } else {
+            liks[u] <- sum(lee_bpf_out@block.cond.loglik[u, ])
+          }
+        }
+
+        liks
+      }
+    })
+
+    # Save all likelihood evaluations
+    lee3_results[["sub_ll_eval"]] <- logmeanexp(rowSums(lee3_sub_ll_evals)[!is.na(rowSums(lee3_sub_ll_evals))])
+
+    registerDoRNG(2789131)
+
+    # Save how long it takes for all data
+    lee3_results[["all_pf_time"]] <- system.time({
+      # Save all likelihood evaluations
+
+      lee3_all_ll_evals <- foreach(
+        i = 1:lee3_NREP, .combine = c
+      ) %dopar% {
+        logLik(bpfilter(lee3_all, block_size = 1, Np = lee3_NP))  # Get likelihood evaluations
+      }
+
+      lee3_results[["all_ll_eval"]] <- logmeanexp(lee3_all_ll_evals[!is.na(lee3_all_ll_evals)])
+
+    })
+
+    lee3_results[["n_params"]] <- 29
+
+    lee3_results
+  },
+  timing = FALSE
+)
+
+rm(lee3_sub, lee3_all, lee3_NP, lee3_NREP)
+gc()
+
+mod3_lee_coupled_aic <- 2 * lee3_results$n_params - 2 * lee3_results$all_ll_eval
+
+mod3_lee_coupled_partial_aic <- 2 * lee3_results$n_params - 2 * lee3_results$sub_ll_eval
+@
+
 \section*{Materials and methods}
 \subsection*{Mechanistic models for disease modeling}
 Models that focus on learning relationships between variables in a dataset are called {\it associative}, whereas models that incorporate a known scientific property of the system are called {\it causal} or {\it mechanistic}.
@@ -712,8 +1256,250 @@ This motivates the development of mechanistic models, which provides a statistic
 The four mechanistic models of Lee et al.~\cite{lee20} were deliberately developed with limited coordination.
 This allows us to treat the models as fairly independently developed expert approaches to understanding cholera transmission.
 However, it led to differences in notation, and in subsets of the data chosen for analysis, that hinder direct comparison.
-Here, we have put all three models into a common notational framework.
-Translations back to the original notation of Lee et al.~\cite{lee20} are given in Table~S-1 of the supplement.
+Here, we have created a common notational framework that facilitates model comparison, and put all comparable model parameters---including parameters that were estimated or held constant---into Table~\ref{tab:params}.
+% Here, we have put all three models into a common notational framework.
+Translations back to the original notation of Lee et al.~\cite{lee20} are given in Table~S-1 of the supplement. % TODO: Check S-1 table matches.
+
+\begin{table}
+\begin{adjustwidth}{-2.25in}{0in}
+\centering
+% \small
+\begin{tabular}{|p{0.15\linewidth}|p{0.14\linewidth}t|p{0.13\linewidth}t|p{0.17\linewidth}t|}
+\hline
+Mechanism & Model 1 && Model 2 && Model 3 &
+\\
+\hline
+\hline
+Infection (day)
+  & ${\fixed \muIR^{-1}=\Sexpr{myround(7/p1["gamma"],1)}}$
+  & \eqref{model1:toR}
+  & ${\fixed \muIR^{-1}=\Sexpr{myround(365/h2_fit$h2_params["gamma"],1)}}$
+  & \eqref{model2:mu_IR}
+  & ${\fixed \muIR^{-1}=\Sexpr{myround(365/p3["gamma1"],1)}}$
+  & \eqref{eq:model3:IR}
+\\
+Latency (day)
+  & ${\fixed \muEI^{-1}=\Sexpr{myround(7/p1["sigma"],1)}}$
+  & \eqref{model1:EA}
+  & ${\fixed \muEI^{-1}=\Sexpr{myround(365/h2_fit$h2_params["gammaE"],1)}}$
+  & \eqref{model2:mu_EI}
+  & \missing
+  % & \multicolumn{1}{c}{\hspace{16pt}\missing}
+  &
+\\
+\hline
+\multirow{3}{*}{Seasonality}
+  & $\transmission_{1:6}=(
+      \Sexpr{myround(p1["beta1"],1)},\allowbreak
+      \Sexpr{myround(p1["beta2"],1)},\allowbreak
+      \Sexpr{myround(p1["beta3"],1)},\allowbreak
+      \Sexpr{myround(p1["beta4"],1)},\allowbreak
+      \Sexpr{myround(p1["beta5"],1)},\allowbreak
+      \Sexpr{myround(p1["beta6"],1)})$
+  & \eqref{model1:beta}
+  & \multirow{2}{*}{${\fixed \seasAmplitude=0.4}$}
+  & \multirow{2}{*}{\eqref{model2:lambda}}
+  & \multirow{2}{*}{$\seasAmplitude = \Sexpr{myround(p3s["lambdaR"],2)}$}
+  & \multirow{2}{*}{\eqref{eq:model3:water}}
+  \\
+  & $\transmissionTrend = \Sexpr{myround(p1["betat"],2)}^*$
+  & \eqref{model1:betat}
+  & \multirow{-2}{*}{$\phaseParm = \Sexpr{myround(h2_fit$h2_params['phase'], 2)}^*$}
+  & \multirow{-2}{*}{\eqref{model2:lambda}}
+  & \multirow{-2}{*}{$\rainfallExponent = \Sexpr{signif(p3s["r"],3)}$}
+  & \multirow{-2}{*}{\eqref{eq:model3:water}}
+  \\\hline
+  \multirow{3}{*}{Immunity (yr)}
+  & \multirow{3}{*}{${\fixed \muRS^{-1}=\Sexpr{myround(1/p1["alpha"]/52,1)}}$}
+  & \multirow{3}{*}{\eqref{model1:RS}}
+  & $\muRS^{-1}= \Sexpr{signif(1/h2_fit$h2_params["sigma"],2)}$
+  & \eqref{model2:RS}
+  & \multirow{3}{*}{${\fixed \muRS^{-1}=\Sexpr{myround(1/p3['rho1'],1)}}$}
+  & \multirow{3}{*}{\eqref{eq:model3:RRnext}}
+\\
+& & & ${\fixed \omega_1^{-1} = \Sexpr{myround(1/h2_fit$h2_params["Omega1"],1)}}$ & \eqref{model2:omega1} & &\\
+& & & ${\fixed \omega_2^{-1} = \Sexpr{myround(1/h2_fit$h2_params["Omega2"],1)}}$ & \eqref{model2:omega2} & &\\
+\hline
+\multirow{2}{*}{Birth/death (yr)}
+  & ${\fixed \muBirth^{-1} = \Sexpr{myround(1/p1["mu"]/52,1)}}$
+    %
+  & \eqref{model1:death}
+  & \multirow{2}{*}{\missing}
+  &
+  & \multirow{2}{*}{${\fixed \muDeath^{-1} = \Sexpr{myround(1/p3["mu1"],1)}}$}
+  & \multirow{2}{*}{\eqref{eq:model3:IS}}
+\\
+& ${\fixed \muDeath^{-1} = \Sexpr{myround(1/p1["delta"]/52,1)}}$
+& \eqref{model1:death}
+&
+&
+& &
+\\
+Sympt. frac.
+  & ${\fixed \symptomFrac_z(t)=c\vaccineEfficacy^*(t-\tau_d)}$
+  & (\ref{model1:EI}-\ref{model1:EA})
+  & ${\fixed \symptomFrac=\Sexpr{myround(h2_fit$h2_params["k"],1)}}$
+  & \eqref{model2:mu_EI}
+  & ${\fixed \symptomFrac=\Sexpr{myround(p3["sigma1"],2)}}$
+  & \eqref{eq:model3:SA}
+\\
+Asympt.
+  & \multirow{2}{*}{${\fixed \asymptomRelativeInfect=0.05}$}
+  & \multirow{2}{*}{\eqref{model1:lambda}}
+  & ${\fixed \asymptomRelativeInfect = 0.001}$
+  & \eqref{model2:lambda}
+  &  ${\fixed \asymptomRelativeInfect = 1}$
+  & \eqref{eq:model3:foi}
+\\
+infectivity
+&
+&
+& ${\fixed \asymptomRelativeShed = \Sexpr{1e-7} }$
+& \eqref{model2:to_W}
+& $\asymptomRelativeShed = \Sexpr{myround(p3s["XthetaA"],3)}$
+& \eqref{eq:model3:water}
+\\
+\hline
+\multirow{4}{*}{Human to human}
+  & \multirow{4}{*}{$\transmission_{1:6}$ as above}
+  & \multirow{4}{*}{\eqref{model1:lambda}}
+  & \multirow{4}{*}{$\transmission=$\Sexpr{signif(h2_fit$h2_params["Beta"],3)}}
+  & \multirow{4}{*}{\eqref{model2:lambda}}
+  & $\transmission_{1:10}=(
+  \Sexpr{myround(p3u["foi_add",1]*1e6,2)}, \allowbreak
+	\Sexpr{myround(p3u["foi_add",2]*1e6,2)}, \allowbreak
+	\Sexpr{myround(p3u["foi_add",3]*1e6,2)}, \allowbreak
+  \Sexpr{myround(p3u["foi_add",4]*1e6,2)}, \allowbreak
+	\Sexpr{myround(p3u["foi_add",5]*1e6,2)}, \allowbreak
+	\Sexpr{myround(p3u["foi_add",6]*1e6,2)}, \allowbreak
+	\Sexpr{myround(p3u["foi_add",7]*1e6,2)}, \allowbreak
+	\Sexpr{myround(p3u["foi_add",8]*1e6,2)}, \allowbreak
+	\Sexpr{myround(p3u["foi_add",9]*1e6,2)}, \allowbreak
+	\Sexpr{myround(p3u["foi_add",10]*1e6,2)}
+	) \allowbreak \times 10^{-6}$
+  & \multirow{4}{*}{\eqref{eq:model3:foi}}
+\\
+\hline
+\multirow{5}{*}{Water to human}
+  & \multirow{5}{*}{\missing}
+  % & \multicolumn{1}{c}{\hspace{16pt}\missing}
+  &
+  & \multirow{3}{*}{${\fixed \Wsat = \Sexpr{signif(h2_fit$h2_params["Sat"],2)}}$}
+  & \multirow{3}{*}{\eqref{model2:lambda}}
+  % \eqref{model2:lambda}
+  & $\Wbeta{_{1:10}}= (
+        \Sexpr{myround(p3u["betaB",1],2)}, \allowbreak
+        \Sexpr{myround(p3u["betaB",2],2)}, \allowbreak
+        \Sexpr{myround(p3u["betaB",3],2)}, \allowbreak
+        \Sexpr{myround(p3u["betaB",4],2)}, \allowbreak
+        \Sexpr{myround(p3u["betaB",5],2)}, \allowbreak
+        \Sexpr{myround(p3u["betaB",6],2)}, \allowbreak
+        \Sexpr{myround(p3u["betaB",7],2)}, \allowbreak
+        \Sexpr{myround(p3u["betaB",8],2)}, \allowbreak
+        \Sexpr{myround(p3u["betaB",9],2)}, \allowbreak
+        \Sexpr{myround(p3u["betaB",10],2)})$
+  & \multirow{4}{*}{\eqref{eq:model3:foi}}
+\\
+& & & \multirow{-3}{*}{$\beta_W= \Sexpr{signif(h2_fit$h2_params["BetaW"],3)}$} & \multirow{-3}{*}{\eqref{model2:lambda}} & &
+\\
+\hline
+Human to water
+  & \missing
+  % & \multicolumn{1}{c}{\hspace{16pt}\missing}
+  &
+  & $\Wshed = $ \Sexpr{signif(h2_fit$h2_params["Mu"],3)}
+  & \eqref{model2:to_W}
+  & $\Wshed= \Sexpr{signif(p3s["thetaI"],3)}$
+  & \eqref{eq:model3:water}
+\\
+Water survival \newline (wk)
+  & \multirow{2}{*}{\missing}
+  % & \multicolumn{1}{c}{\hspace{16pt}\missing}
+  &
+  & \multirow{2}{*}{${\fixed \Wremoval^{-1} = \Sexpr{signif(52/h2_fit$h2_params["Delta"],3)}}$}
+  & \multirow{2}{*}{\eqref{model2:from_W}}
+  & \multirow{2}{*}{$\Wremoval^{-1}=\Sexpr{myround(52/p3s["mu_B"],2)}$}
+  & \multirow{2}{*}{\eqref{eq:model3:Decay}}
+\\
+Mixing exponent
+  & $\mixExponent=\Sexpr{myround(p1["nu"],2)}$
+  & \eqref{model1:lambda}
+  & \missing
+  % & \multicolumn{1}{c}{\hspace{16pt}\missing}
+  &
+  & \missing
+  % & \multicolumn{1}{c}{\hspace{16pt}\missing}
+  &
+\\
+\hline
+Process noise \newline (wk\textsuperscript{1/2})
+  & $\sigmaProc =$ \newline $(\Sexpr{myround(sqrt(p1["sig_sq_epi"]),2)},
+  \Sexpr{myround(sqrt(p1["sig_sq_end"]),2)})^*$
+  & \multirow{2}{*}{\eqref{model1:lambda}}
+  & \multirow{2}{*}{\missing}
+  % & \multicolumn{1}{c}{\hspace{16pt}\missing}
+  &
+  & \multirow{2}{*}{$\sigmaProc= \Sexpr{myround(p3s["std_W"],3)}$}
+  & \multirow{2}{*}{\eqref{eq:model3:SA}}
+\\
+Reporting rate
+  & $\reportRate=\Sexpr{myround(p1["rho"], 3)}$
+  & (S15) % TODO: Check
+  & ${\fixed \reportRate=\Sexpr{myround(h2_fit$h2_params["Rho"],2)}}$
+  & (S16) % TODO: Check
+  & $\reportRate=\Sexpr{myround(p3s["epsilon"],2)}$
+  & (S19) % TODO: Check
+\\
+Observation \newline variance
+  & $\obsOverdispersion =$ \newline $(\Sexpr{myround(p1["tau_epi"],2)}, \Sexpr{round(p1["tau_end"],2)})$
+  & \multirow{2}{*}{(S15)} % TODO: Check
+  & \multirow{2}{*}{$\obsOverdispersion = \Sexpr{signif(h2_fit$h2_params['sigma'], 3)}$}
+  & \multirow{2}{*}{(S16)} % TODO: Check
+  & \multirow{2}{*}{$\obsOverdispersion = \Sexpr{myround(p3s["k"],2)}$}
+  & \multirow{2}{*}{(S19)} % TODO: Check
+\\
+\hline
+\multirow{2}{*}{Initial Values} & $I_{0,0} = \Sexpr{round(prod(p1[c('pop_0', 'I_0')]))}$
+  &
+  & \multirow{2}{*}{\missing}
+  % & \multicolumn{1}{c}{\multirow{2}{*}{\hspace{16pt}\missing}}
+  &
+  & \multirow{2}{*}{$I_{3,7,10;0}(0)= (
+        \Sexpr{round(prod(p3[c('H3', 'Iinit3')]))}, \Sexpr{round(prod(p3[c('H7', 'Iinit7')]))}, \Sexpr{round(prod(p3[c('H10', 'Iinit10')]))})^*$}
+  &  % TODO: \multirow{2}{*}{EQUATION NUMBER}
+  \\
+  & $E_{0,0} = \Sexpr{round(prod(p1[c('pop_0', 'E_0')]))}$ & & \multicolumn{1}{c}{}
+  &
+  &
+  &
+\\\hline
+\multirow{3}{*}{Hurricane}
+  & \multirow{4}{*}{\missing}
+% & \multicolumn{1}{c}{\multirow{2}{*}{\hspace{16pt}\missing}}
+  &
+  & \multirow{4}{*}{\missing}
+  % & \multicolumn{1}{c}{\multirow{2}{*}{\hspace{16pt}\missing}}
+  &
+  & $\Whur{3, 9} =$\newline $(\Sexpr{myround(p3['aHur3'], 2)}, \Sexpr{myround(p3['aHur9'], 2)})^*$
+  & \multirow{2}{*}{\eqref{eq:model3:foi}}
+\\
+ \multirow{-1}{*}{Parameters} &
+  % & \multicolumn{1}{c}{}
+  &
+  &
+  % & \multicolumn{1}{c}{}
+  &
+  & $\hHur{3, 9} =$\newline $(\Sexpr{myround(p3['hHur3'], 2)}, \Sexpr{myround(p3['hHur9'], 2)})^*$
+  & \multirow{2}{*}{\eqref{eq:model3:foi}}
+\\\hline
+\end{tabular}
+\caption{\label{tab:params}References to the relevant equation are given in parentheses.
+Parameters in blue were fixed based on scientific reasoning and not fitted to the data.
+$^*$ denotes parameters added during our re-analysis, not considered by Lee et al.
+Translations back into the notation of \cite{lee20} are given in Table~S1.
+}
+\end{adjustwidth}
+\end{table}
 
 Each model describes the cholera dynamics as a partially observed Markov process (POMP) with a latent state vector $\bm{X}(t)$ for each continuous time point $t$.
 $N$ observations on the system are collected at time points $t_1,\dots,t_N$, written as $t_{1:N}$.
@@ -952,321 +1738,6 @@ Therefore, for departments with zero case counts in week 1, we consider estimati
 Finally, reported cholera cases are assumed to come from a negative binomial measurement model with mean equal to a fraction ($\reportRate$) of individuals in each unit who develop symptoms and seek healthcare
 (see Sec.~S3.3 of the supplement).
 
-<<FitModel1, echo=FALSE, message=FALSE, include=FALSE>>=
-
-# This code chunk is used to fit Model 1 using the IF2 algorithm.
-set.seed(636813)
-
-# Check RUN_LEVEL, and set hyper-parameters to IF2 and pfilter accordingly.
-#                      RUN_LEVEL =    1,    2,      3
-NP_H1        <- switch(RUN_LEVEL,   100, 1000,   2000)
-NMIF_H1      <- switch(RUN_LEVEL,    10,   50,    200)
-NUM_TREND    <- switch(RUN_LEVEL,     5,   10,     90)
-NPROF        <- switch(RUN_LEVEL,     4,    4,     24)
-NP_EVAL      <- switch(RUN_LEVEL,   200, 1000,   5000)
-NREPS_EVAL   <- switch(RUN_LEVEL, cores,   20,  cores)
-
-# Create the <RUN_LEVEL> version of the results and save them.
-h1_MIF <- bake(
-  file = paste0("model1/", rl_dir, "haiti1_fit.rds"), {
-    fit_haiti1(  # haitipkg function used to fit Model 1
-      NP = NP_H1,
-      NMIF = NMIF_H1,
-      NUM_TREND = NUM_TREND,
-      NPROF = NPROF,
-      NREPS_EVAL = NREPS_EVAL,
-      NP_EVAL = NP_EVAL,
-      ncores = cores
-    )
-  }
-)
-
-# The result is a data.frame containing many parameter values and their
-# corresponding likelihood evaluation. To perform a likelihood profile,
-# we calculate the maximum likelihood for each value of betat.
-h1_prof_res <- h1_MIF %>%
-  group_by(betat) %>%
-  summarize(logLik = max(ll))
-
-mcap_results <- pomp::mcap(h1_prof_res$logLik, h1_prof_res$betat, span = 1)
-
-# Get the best set of parameters from MIF2 search.
-p1 <- h1_MIF %>%
-  filter(ll == max(ll)) %>%
-  select(-ll, -ll.se) %>%
-  unlist()
-
-# Save the likelihood of the best parameters, for use later.
-mod1_ll <- h1_MIF %>%
-  filter(ll == max(ll)) %>%
-  select(ll) %>%
-  unlist()
-
-# Just a bit of tidying up: removing parameters that we won't use again.
-rm(NP_H1, NMIF_H1, NUM_TREND, NPROF, NREPS_EVAL, NP_EVAL, h1_MIF)
-gc()
-
-@
-
-<<FitModel2, echo=FALSE, include=FALSE, message=FALSE>>=
-
-# This code chunk fits Model 2. This is a quick caclulation compared to models
-# 1 and 3, so no run_level is used.
-
-h2_fit <- bake(
-  file = paste0("model2/model2_fit.rds"), {
-    fit_haiti2()
-  },
-  timing = FALSE
-)
-@
-
-<<FitModel3, echo=FALSE, include=FALSE, message=FALSE>>=
-
-# This code chunk is used to fit Model 3 using the IBPF algorithm.
-set.seed(8636712)
-
-# Create vectors for the unit and shared parameters
-unit_specific_names <- c("betaB", "foi_add", "aHur", "hHur", "Iinit")
-shared_param_names <- c(
-  "mu_B", "XthetaA", "thetaI", "lambdaR", "r", "std_W",
-  "epsilon", "k"
-)
-est_param_names <- c(
-  unit_specific_names, shared_param_names
-)
-
-# Add unit numbers to each parameter
-est_param_names_expanded <- paste0(rep(est_param_names, each = 10), 1:10)
-
-# Simple function that is used to set the rw_sd for the first search
-# This function is convenient so that we don't have to type out the rw_sd
-# for each unit parameter.
-set_rw_1 <- function(x) {
-  if (gsub("[[:digit:]]+$", "", x) %in% shared_param_names) {
-    return(0.01)
-  } else if (x %in% paste0(rep(c("aHur", 'hHur'), each = 2), c(3, 9))) {
-    return(expression(ifelse(time >= 2016.754 & time <= 2017, 0.015, 0)))
-  } else if (x %in% c("Iinit3", "Iinit4")) {
-    return(expression(ivp(0.25)))
-  } else if (grepl('^foi_add[[:digit:]]+$', x)) {
-    return(0.015)
-  } else if (grepl('^betaB[[:digit:]]+$', x)) {
-    return(0.01)
-  } else {
-    return(0)
-  }
-}
-
-set_rw_2 <- function(x) {
-  if (gsub("[[:digit:]]+$", "", x) %in% shared_param_names) {
-    return(0.003)
-  } else if (x %in% paste0(rep(c("aHur", 'hHur'), each = 2), c(3, 9))) {
-    return(expression(ifelse(time >= 2016.754 & time <= 2017, 0.005, 0)))
-  } else if (x %in% c("Iinit3", "Iinit4")) {
-    return(expression(ivp(0.125)))
-  } else if (grepl('^foi_add[[:digit:]]+$', x)) {
-    return(0.005)
-  } else if (grepl('^betaB[[:digit:]]+$', x)) {
-    return(0.003)
-  } else {
-    return(0)
-  }
-}
-
-# First Search RW
-reg_rw_1.sd <- lapply(est_param_names_expanded, set_rw_1)
-names(reg_rw_1.sd) <- est_param_names_expanded
-chol_rw_1.sd <- do.call(rw_sd, reg_rw_1.sd)
-
-# Second Search RW
-reg_rw_2.sd <- lapply(est_param_names_expanded, set_rw_2)
-names(reg_rw_2.sd) <- est_param_names_expanded
-chol_rw_2.sd <- do.call(rw_sd, reg_rw_2.sd)
-
-if (RUN_LEVEL == 1){
-  SEARCH1 = list(
-    NBPF = 10,
-    NP = 200,
-    SPAT_REGRESSION = 0.05,
-    NREPS = 20,
-    NP_EVAL = 200,
-    NREPS_EVAL = 3,
-    RW_SD = chol_rw_1.sd,
-    COOLING = 0.5,
-    KEEP_TRACES = TRUE
-  )
-
-  SEARCH2 = list(
-    TOP_N = 8,
-    NBPF = 10,
-    NP = 200,
-    SPAT_REGRESSION = 0.05,
-    NREPS = 2,
-    NP_EVAL = 200,
-    NREPS_EVAL = 3,
-    RW_SD = chol_rw_2.sd,
-    COOLING = 0.5,
-    KEEP_TRACES = TRUE
-  )
-
-} else if (RUN_LEVEL == 2) {
-  SEARCH1 = list(
-    NBPF = 100,
-    NP = 1000,
-    SPAT_REGRESSION = 0.05,
-    NREPS = 72,
-    NP_EVAL = 1000,
-    NREPS_EVAL = 8,
-    RW_SD = chol_rw_1.sd,
-    COOLING = 0.5,
-    KEEP_TRACES = TRUE,
-    KEEP_LIK_MAT = TRUE
-  )
-
-  SEARCH2 = list(
-    TOP_N = 9,
-    NBPF = 100,
-    NP = 1000,
-    SPAT_REGRESSION = 0.05,
-    NREPS = 4,
-    NP_EVAL = 1000,
-    NREPS_EVAL = 9,
-    RW_SD = chol_rw_2.sd,
-    COOLING = 0.5,
-    KEEP_TRACES = TRUE,
-    KEEP_LIK_MAT = TRUE
-  )
-
-} else if (RUN_LEVEL == 3) {
-
-  SEARCH1 = list(
-    NBPF = 100,
-    NP = 2500,
-    SPAT_REGRESSION = 0.05,
-    NREPS = 144,
-    NP_EVAL = 2500,
-    NREPS_EVAL = 18,
-    RW_SD = chol_rw_1.sd,
-    COOLING = 0.5,
-    KEEP_TRACES = FALSE,
-    KEEP_LIKE_MAT = FALSE
-  )
-
-  SEARCH2 = list(
-    TOP_N = 12,
-    NBPF = 100,
-    NP = 2500,
-    SPAT_REGRESSION = 0.05,
-    NREPS = 6,
-    NP_EVAL = 2500,
-    NREPS_EVAL = 18,
-    RW_SD = chol_rw_2.sd,
-    COOLING = 0.5,
-    KEEP_TRACES = FALSE,
-    KEEP_LIK_MAT = TRUE
-  )
-
-  # SEARCH3 = list(  # Not used, but was used for some preliminary results.
-  #   TOP_N = 9,
-  #   NBPF = 100,
-  #   NP = 2000,
-  #   SPAT_REGRESSION = 0.05,
-  #   NREPS = 8,
-  #   NP_EVAL = 2000,
-  #   NREPS_EVAL = 18,
-  #   RW_SD = rw_3.sd,
-  #   COOLING = 0.5,
-  #   KEEP_TRACES = FALSE,
-  #   KEEP_LIK_MAT = TRUE
-  # )
-}
-
-# Search hyper-parameters for each run-level and search. This sets
-# parameters like number of particles, number of BPF iterations, and
-# number of replications for each search.
-# h3_fit_parms <- set_h3_fit_parms(
-#   RUN_LEVEL = RUN_LEVEL,
-#   rw_1.sd = chol_rw_1.sd,
-#   rw_2.sd = chol_rw_2.sd
-# )
-
-# Calculate the number of parameters that are estimated:
-# This is calculated by the number of non-zero rw_sd values (including expressions), but then subtracting of repeated shared parameters.
-mod3_n_params <- sum(reg_rw_1.sd != 0, na.rm = TRUE) + sum(sapply(reg_rw_1.sd, is.expression)) - length(shared_param_names) * 9
-
-# haiti3_fit <- readRDS("model3/run_level_3/h3_revision.rds")
-
-# Fit Model 3
-haiti3_fit <- bake(
-  file = paste0("model3/", rl_dir, "haiti3_fit.rds"), {
-    fit_haiti3(
-      nsearches = 2L,
-      search1 = SEARCH1,
-      search2 = SEARCH2,
-      search_rho = FALSE,
-      search_gamma = FALSE,
-      search_Iinit = TRUE,
-      search_hur = TRUE,
-      ncores = cores
-    )
-  }
-)
-
-# haiti3_fit contains ll estimate for many parameter sets, so we want to find
-# the highest value
-mod3_ll <- max(
-  haiti3_fit[[length(haiti3_fit)]]$logLiks$logLik,
-  na.rm = TRUE
-)
-
-# Just a bit of tidying up: removing parameters that we won't use again.
-rm(
-  SEARCH1, SEARCH2, SEARCH3, N_SEARCHES,
-  est_param_names, est_param_names_expanded,
-  set_rw_1, set_rw_2, set_rw_3, reg_rw_1.sd, reg_rw_2.sd, reg_rw_3.sd,
-  chol_rw_1.sd, chol_rw_2.sd, chol_rw_3.sd
-)
-gc()
-
-@
-
-<<table-input,echo=FALSE,eval=T, include=FALSE, message=FALSE>>=
-
-# Find the index for parameters of model 3 that correspond to the MLE.
-best_m3 <- which.max(haiti3_fit[[length(haiti3_fit)]]$logLiks$logLik)
-
-# Save the parameters that correspond to the MLE of Model 3.
-p3 <- haiti3_fit[[length(haiti3_fit)]]$params[best_m3, ]
-
-p3u <- matrix(nrow = length(unit_specific_names), ncol = 10)
-rownames(p3u) <- unit_specific_names
-p3s <- numeric(length(shared_param_names))
-names(p3s) <- shared_param_names
-
-for (p in shared_param_names) {
-  p3s[p] <- p3[paste0(p, 1)]  # They are the same for 1:10
-}
-
-for (p in unit_specific_names) {
-  pat <- paste0("^", p, "[[:digit:]]+$")
-  p3u[p, ] <- p3[grepl(pat, names(p3))]
-}
-
-rm(unit_specific_names, shared_param_names, p, pat)
-
-stew(file = "models.rda", {
-  h1 <- haiti1_joint()
-  coef(h1) <- p1
-
-  h2_epi <- haiti2(region = 'before', cutoff = 10000, measure = 'log')
-  coef(h2_epi) <- h2_fit$h2_params
-
-  h3Spat <- haiti3_spatPomp()
-  coef(h3Spat) <- p3
-})
-@
-
 \subsection*{Model Fitting}\label{sec:model_fitting}
 
 Each of the three models considered in this study describes cholera dynamics as a partially observed Markov process (POMP), with the understanding that the deterministic Model~2 is a degenerate case of a stochastic model.
@@ -1278,7 +1749,60 @@ However, the congruency between the model and observed data serves as a proxy fo
 As such, it is desirable to obtain the best possible fit of the proposed mechanistic structure to the observed data.
 
 In this article we calibrate the parameters of each of our models by maximizing the likelihood, as described in Eq.~\myeqref{eq:likedef}.
+The likelihood for each of the fitted models---and the corresponding AIC values for model comparisons that include an adjustment for the number of calibrated parameters---is provided in Table~\ref{tab:likes}
 In the following subsections we describe in detail our approach to calibrating the three proposed mechanistic models to observed cholera incidence data.
+
+\begin{table}[!h]
+\centering
+
+\begin{tabular}{|c|c|c|c|}
+\hline
+ & \thead{Model~1} & \thead{Model~2} & \thead{Model~3}
+\\
+\hline
+\hline
+\multirow{2}{*}{Log-likelihood} &
+  $\Sexpr{myround(mod1_ll, 1)}$ &
+  $\Sexpr{myround(mod2_ll, 1)}$ &
+  $\Sexpr{myround(mod3_ll, 1)}$ \\
+    & ($\Sexpr{myround(mod1_lee_ll, 1)}$)\footnotemark[1] &
+  ($\Sexpr{myround(h2_fit$leeFit_ll, 1)}$) &
+  ($\Sexpr{myround(lee3_results[["all_ll_eval"]], 1)}$)\footnotemark[2]
+\\
+\hline
+Number of &
+  $\Sexpr{as.character(mod1_n_params)}$ &
+  $\Sexpr{as.character(mod2_n_params)}$ &
+  $\Sexpr{as.character(mod3_n_params)}$ \\
+ Fit Parameters &
+ (\Sexpr{as.character(mod1_lee_n_params)}) &
+ ($\Sexpr{as.character(h2_fit$leeFit_n_params)}$) &
+ ($\Sexpr{as.character(lee3_results$n_params, 1)}$)
+\\
+\hline
+\multirow{2}{*}{AIC} &
+  $\Sexpr{myround(mod1_aic, 1)}$ &
+  $\Sexpr{myround(mod2_aic, 1)}$ &
+  $\Sexpr{myround(mod3_aic, 1)}$ \\
+  & ($\Sexpr{myround(mod1_lee_aic, 1)}$)\footnotemark[1] &
+  ($\Sexpr{myround(mod2_lee_aic, 1)}$) &
+  ($\Sexpr{myround(mod3_lee_coupled_aic, 1)}$)\footnotemark[2]
+\\
+\hline
+\thead{Log-ARMA(2,1) \\ AIC} &
+  $\Sexpr{myround(-2 * ARMA_benchmarks$m1 + 2 * 5, 1)}$ &
+  $\Sexpr{myround(-2 * ARMA_benchmarks$m2 + 2 * 5, 1)}$ &
+  $\Sexpr{myround(-2 * ARMA_benchmarks$m3 + 2 * 5, 1)}$
+\\
+\hline
+\end{tabular}
+\caption{\label{tab:likes}AIC values for each model compared to their ARMA benchmark.
+Values in parentheses are corresponding values using Lee et al.~\cite{lee20} parameter estimates.  $\textsuperscript{1}$The reported likelihood is an upper bound of the likelihood of the Lee et al.~\cite{lee20} model. $\textsuperscript{2}$ Lee et al.~\cite{lee20} fit Model~3 to a subset of the data (March 2014 onward, excluding data from Ouest in 2015-2016).
+On this subset, their model has a likelihood of $\Sexpr{myround(lee3_results$sub_ll_eval, 1)}$.
+On this same subset, our model has a likelihood of $\Sexpr{myround(mod3_eval_res$subset_ll, 1)}$.
+See Sec.~S6 of the supplement material for more details on estimating the likelihood of the Lee et al.~\cite{lee20} models.
+}
+\end{table}
 
 \subsubsection*{Calibrating Model~1 Parameters}\label{sec:fit1}
 
@@ -1328,7 +1852,8 @@ ggplot() +
         axis.title = element_text(size = 10))
 @
 \caption{\label{fig:betat}
-Monte Carlo adjusted profile of $\transmissionTrend$.
+{\figTitle Confidence inverval for linear trend in transmission.}
+Monte Carlo adjusted profile of $\transmissionTrend$ for Model~1.
 The blue curve is the profile, the blue line indicates the MLE, and the dashed lines indicate the $95\%$ confidence interval.
 }
 \end{figure}
@@ -1395,7 +1920,7 @@ ggplot() +
   )
 @
 \caption{\label{fig:mod1fit}
-Simulations from Model~1 compared to reported cholera cases.
+{\figTitle Simulations from Model~1 compared to reported cholera cases.}
 The black curve is observed data, the blue curve is median of 500 simulations from the fitted model, and the vertical dashed line represents break-point when parameters are refit.
 }
 \end{figure}
@@ -1486,8 +2011,10 @@ ggplot() +
   scale_x_date(date_labels = "'%y", breaks = seq.Date(from = as.Date("2010-01-01"), as.Date("2030-01-01"), by = '2 years'))
 @
 \caption{\label{fig:mod2Traj}
-Simulated trajectory of Model~2 (blue curve) and projections under the various vaccination scenarios.
-Reported cholera incidence is shown in black.}
+{\figTitle Simulated trajectory of Model~2.}
+The black line shows the nationally aggregated weekly cholera incidence data.
+The blue curve from 2012-2019 is the trajectory of the calibrated version of Model~2.
+Projections under the various vaccination scenarios, which are discussed in the \bf{Forecasts} subsection are also included.}
 \end{figure}
 
 \subsubsection*{Calibrating Model~3 Parameters}\label{sec:fit3}
@@ -1587,6 +2114,7 @@ ggplot() +
   )
 @
 \caption{\label{fig:h3spatsims}
+{\figTitle Simulations from Model~3 compared to reported cholera cases.}
 Simulations from initial conditions using the spatially coupled version of Model~3.
 The black curve represents true case count, the blue line the median of 500 simulations from the model, and the gray ribbons representing $95\%$ confidence interval.
 }
@@ -1642,302 +2170,6 @@ When combined with online availability of data and code, objective measures of f
 The use of benchmarks may also be beneficial when developing models at differing spatial scales, where a direct comparison between model likelihoods is meaningless.
 In such a case, a benchmark model can be fit to each spatial resolution being considered, and each model compared to their respective benchmark.
 Large advantages (or shortcomings) in model likelihood relative to the benchmark for a given spatial scale that are not present in other spatial scales may provide weak evidence for (or against) the statistical fit of models across a range of spatial resolutions.
-
-<<Table 2 Input, echo=FALSE, eval=TRUE>>=
-NREPS_EVAL <- switch(RUN_LEVEL,   3,   8,    36)
-NP_EVAL    <- switch(RUN_LEVEL, 100, 500,  5000)
-
-# Objective function of model 2, epidemic phase
-epi_ofun <- traj_objfun(
-  h2_epi,
-  params = h2_fit$h2_params
-)
-
-mod2_epi_ll <- -epi_ofun(par = h2_fit$h2_params)
-mod2_ll <- mod2_epi_ll - sum(log(h2_epi@data + 1), na.rm = TRUE)
-
-arima_lik2 <- 0
-
-# model 2 AIC
-mod2_n_params <- h2_fit$n_fit_params
-mod2_aic <- 2 * mod2_n_params - 2 * mod2_ll
-
-# model 1 AIC
-mod1_n_params <- length(
-  c('beta1', 'beta2', 'beta3', 'beta4', 'beta5', 'beta6',
-    'rho', 'nu', 'E_0', 'I_0', 'tau_epi',
-    'tau_end', 'sig_sq_epi', 'sig_sq_end', 'betat')
-)
-mod1_aic <- 2 * mod1_n_params - 2 * mod1_ll
-
-# model 3 AIC
-mod3_aic <- 2 * mod3_n_params - 2 * mod3_ll
-
-# Calculate likelihood via block-particle filter
-mod3_eval_res <- bake(
-  file = paste0('model3/', rl_dir, 'mod3_eval_res.rds'), {
-
-    # Create a list to store results
-    results <- list()
-
-    coef(h3Spat) <- p3
-
-    # Perform block-particle filter
-    h3_bpf <- foreach(i = 1:NREPS_EVAL, .combine = c) %dopar% {
-      bpfilter(h3Spat, Np = NP_EVAL, block_size = 1)
-    }
-
-    ll <- logLik(h3_bpf)
-    results$ll <- logmeanexp(ll[!is.na(ll)], se = FALSE)
-
-    ### Get likelihood for subset of the data
-
-    # Find appropriate sub-set
-    in_subset_cols <- h3_bpf[[1]]@times >= as.numeric(lubridate::decimal_date(as.Date("2014-03-01")))
-    in_subset_rows <- h3_bpf[[1]]@unit_names != 'Ouest'
-
-    mod3_coupled_subset_evals <- c()
-    for (i in 1:length(h3_bpf)) {
-      mod3_coupled_subset_evals <- c(
-        mod3_coupled_subset_evals,
-        sum(h3_bpf[[i]]@block.cond.loglik[in_subset_rows, in_subset_cols])
-      )
-    }
-
-    results$subset_ll <- logmeanexp(mod3_coupled_subset_evals)
-    results
-  },
-  timing = FALSE
-)
-
-mod3_eval_res$subset_aic <- 2 * mod3_n_params - 2 * mod3_eval_res$subset_ll
-
-rm(NREPS_EVAL, NP_EVAL)
-@
-
-<<CalculateARMA, echo=FALSE, message=FALSE, include=FALSE, cache=TRUE>>=
-
-ARMA_benchmarks <- list()
-
-###
-### Model 1 ###
-###
-
-# Load aggregated data
-m1_agg_data <- haiti1_agg_data()
-
-# Fit ARMA(2, 1) on log-cases
-m1_log_arma <- arima(log(m1_agg_data$cases + 1), order = c(2, 0, 1))
-
-# Fit ARMA(2, 1) on natural scale of cases
-m1_arma <- arima(m1_agg_data$cases, order = c(2, 0, 1))
-
-# Check which one is better, and save benchmark as the better one
-if (m1_log_arma$loglik - sum(log(m1_agg_data$cases + 1), na.rm = TRUE) >= m1_arma$loglik) {
-  ARMA_benchmarks[['m1']] <- m1_log_arma$loglik - sum(log(m1_agg_data$cases + 1), na.rm = TRUE)
-} else {
-  ARMA_benchmarks[['m1']] <- m1_arma$loglik
-}
-
-rm(m1_agg_data, m1_log_arma, m1_arma)
-gc()
-
-###
-### Model 2 ###
-###
-
-h2_data <- haiti2_data(recreate = FALSE)
-
-# model 2 ARIMA benchmark
-h2_dep_names <- h2_data$department %>% unique()
-m2_benchmark <- 0
-for (i in 1:10){
-  cases <- h2_data[h2_data$department == h2_dep_names[i], ]$cases
-  log_cases <- log(cases + 1)
-
-  m2_arma_dep_ll <- arima(cases, order=c(2, 0, 1))$loglik
-  m2_log_arma_dep_ll <- arima(log_cases, order=c(2, 0, 1))$loglik - sum(log_cases, na.rm = TRUE)
-
-  m2_benchmark <- m2_benchmark + max(m2_arma_dep_ll, m2_log_arma_dep_ll)
-}
-
-ARMA_benchmarks[['m2']] <- m2_benchmark
-
-rm(m2_benchmark, h2_dep_names, cases, log_cases, m2_arma_dep_ll, m2_log_arma_dep_ll, h2_data)
-gc()
-
-###
-### Model 3 ###
-###
-
-mod3_cases <- as.data.frame(t(h3Spat@data))
-
-m3_benchmark <- 0
-for (dep in 1:10) {
-
-  # Get department cases
-  cases <- as.numeric(mod3_cases[, dep])
-
-  # Fit model on natural scale of cases
-  m3_a201 <- arima(cases, order = c(2, 0, 1))
-
-  # Fit model on log-scale of cases
-  m3_log_a201 <- arima(log(cases + 1), order = c(2, 0, 1))
-
-  m3_benchmark <- m3_benchmark + max(
-    m3_log_a201$loglik - sum(log(cases + 1), na.rm = TRUE),
-    m3_a201$loglik
-  )
-}
-
-ARMA_benchmarks[['m3']] <- m3_benchmark
-rm(cases, m3_a201, m3_log_a201, m3_benchmark, dep,
-   mod3_cases, temp, jumps, MODEL3_CASES, i, j)
-gc()
-@
-
-<<Table 2 Lee Input, echo=FALSE, include=FALSE>>=
-mod1_lee_n_params <- 20
-mod1_lee_aic <- 2 * mod1_lee_n_params - 2 * mod1_lee_ll
-
-mod2_lee_aic <- 2 * h2_fit$leeFit_n_params - 2 * h2_fit$leeFit_ll
-@
-
-<<Lee3 Sub Calculations, echo=FALSE, include=FALSE, message=FALSE>>=
-lee3_NP   <- switch(RUN_LEVEL, 50, 250, 5000)
-lee3_NREP <- switch(RUN_LEVEL,  3,   8,   36)
-
-registerDoRNG(49637421)
-
-# Create Lee et al (2020a) version of model 3 on sub-data
-lee3_sub <- lee3_spatPomp()
-
-# This model is only fit for a subset of the data, so we will set data
-# that are not part of this subset as NA. This will allow us to estimate
-# the likelihood for only the values that were considered during the
-# parameter estimation phase.
-# set_as_na <- lee3_sub@times < lubridate::decimal_date(as.Date('2017-06-10'))
-# temp_ouest_cases <- lee3_sub@data['casesOuest', ]
-# temp_ouest_cases[set_as_na] <- NA_real_
-# lee3_sub@data['casesOuest', ] <- temp_ouest_cases
-
-lee3_all <- lee3_spatPomp(start_date = "2010-10-23")
-
-lee3_results <- bake(
-  file = paste0('model3/', rl_dir, 'lee3_results.rds'), {
-
-    # Create lists to save results
-    lee3_results <- list()
-
-    # Save how long it takes for sub-data
-    lee3_results[["sub_bpf_time"]] <- system.time({
-
-      lee3_sub_ll_evals <- foreach(
-        i = 1:lee3_NREP, .combine = rbind
-      ) %dopar% {
-
-        liks <- numeric(10L)
-
-        lee_bpf_out <- bpfilter(lee3_sub, block_size = 1, Np = lee3_NP)
-        Ouest_ind <- which(lee_bpf_out@unit_names == "Ouest")
-
-        for (u in 1:10) {
-          if (u == Ouest_ind) {
-            liks[u] <- sum(lee_bpf_out@block.cond.loglik[u, lee3_sub@times >= lubridate::decimal_date(as.Date('2017-06-10'))])
-          } else {
-            liks[u] <- sum(lee_bpf_out@block.cond.loglik[u, ])
-          }
-        }
-
-        liks
-      }
-    })
-
-    # Save all likelihood evaluations
-    lee3_results[["sub_ll_eval"]] <- logmeanexp(rowSums(lee3_sub_ll_evals)[!is.na(rowSums(lee3_sub_ll_evals))])
-
-    registerDoRNG(2789131)
-
-    # Save how long it takes for all data
-    lee3_results[["all_pf_time"]] <- system.time({
-      # Save all likelihood evaluations
-
-      lee3_all_ll_evals <- foreach(
-        i = 1:lee3_NREP, .combine = c
-      ) %dopar% {
-        logLik(bpfilter(lee3_all, block_size = 1, Np = lee3_NP))  # Get likelihood evaluations
-      }
-
-      lee3_results[["all_ll_eval"]] <- logmeanexp(lee3_all_ll_evals[!is.na(lee3_all_ll_evals)])
-
-    })
-
-    lee3_results[["n_params"]] <- 29
-
-    lee3_results
-  },
-  timing = FALSE
-)
-
-rm(lee3_sub, lee3_all, lee3_NP, lee3_NREP)
-gc()
-
-mod3_lee_coupled_aic <- 2 * lee3_results$n_params - 2 * lee3_results$all_ll_eval
-
-mod3_lee_coupled_partial_aic <- 2 * lee3_results$n_params - 2 * lee3_results$sub_ll_eval
-@
-
-\begin{table}
-\centering
-
-\begin{tabular}{|c|c|c|c|}
-\hline
- & \thead{Model~1} & \thead{Model~2} & \thead{Model~3}
-\\
-\hline
-\hline
-\multirow{2}{*}{Log-likelihood} &
-  $\Sexpr{myround(mod1_ll, 1)}$ &
-  $\Sexpr{myround(mod2_ll, 1)}$ &
-  $\Sexpr{myround(mod3_ll, 1)}$ \\
-    & ($\Sexpr{myround(mod1_lee_ll, 1)}$)\footnotemark[1] &
-  ($\Sexpr{myround(h2_fit$leeFit_ll, 1)}$) &
-  ($\Sexpr{myround(lee3_results[["all_ll_eval"]], 1)}$)\footnotemark[2]
-\\
-\hline
-Number of &
-  $\Sexpr{as.character(mod1_n_params)}$ &
-  $\Sexpr{as.character(mod2_n_params)}$ &
-  $\Sexpr{as.character(mod3_n_params)}$ \\
- Fit Parameters &
- (\Sexpr{as.character(mod1_lee_n_params)}) &
- ($\Sexpr{as.character(h2_fit$leeFit_n_params)}$) &
- ($\Sexpr{as.character(lee3_results$n_params, 1)}$)
-\\
-\hline
-\multirow{2}{*}{AIC} &
-  $\Sexpr{myround(mod1_aic, 1)}$ &
-  $\Sexpr{myround(mod2_aic, 1)}$ &
-  $\Sexpr{myround(mod3_aic, 1)}$ \\
-  & ($\Sexpr{myround(mod1_lee_aic, 1)}$)\footnotemark[1] &
-  ($\Sexpr{myround(mod2_lee_aic, 1)}$) &
-  ($\Sexpr{myround(mod3_lee_coupled_aic, 1)}$)\footnotemark[2]
-\\
-\hline
-\thead{Log-ARMA(2,1) \\ AIC} &
-  $\Sexpr{myround(-2 * ARMA_benchmarks$m1 + 2 * 5, 1)}$ &
-  $\Sexpr{myround(-2 * ARMA_benchmarks$m2 + 2 * 5, 1)}$ &
-  $\Sexpr{myround(-2 * ARMA_benchmarks$m3 + 2 * 5, 1)}$
-\\
-\hline
-\end{tabular}
-\caption{\label{tab:likes}AIC values for each model compared to their ARMA benchmark.
-Values in parentheses are corresponding values using \cite{lee20} parameter estimates.  $\textsuperscript{1}$The reported likelihood is an upper bound of the likelihood of the \cite{lee20} model. $\textsuperscript{2}$\cite{lee20} fit Model~3 to a subset of the data (March 2014 onward, excluding data from Ouest in 2015-2016).
-On this subset, their model has a likelihood of $\Sexpr{myround(lee3_results$sub_ll_eval, 1)}$.
-On this same subset, our model has a likelihood of $\Sexpr{myround(mod3_eval_res$subset_ll, 1)}$.
-See Sec.~S6 of the supplement material for more details on estimating the likelihood of the Lee et al.~\cite{lee20} models.
-}
-\end{table}
 
 Comparing model log-likelihoods to a suitable benchmark may not be sufficient to identify all the strengths and weaknesses of a given model.
 Additional techniques include the inspection of conditional log-likelihoods of each observation given the previous observations in order to understand how well the model describes each data point (Sec.~S5).
@@ -2024,6 +2256,7 @@ gg_trans <- ggplot() +
 cowplot::plot_grid(gg_rain, gg_trans, align = "v", ncol = 1)
 @
 \caption{\label{fig:h1SeasRain}
+{\figTitle Seasonality of Model~1 transmission compared to rainfall data.}
 (Top) weekly rainfall in Haiti, lighter colors representing more recent years.
 (Bottom) estimated seasonality in the transmission rate (dashed line) plotted alongside mean rainfall (solid line).
 The outsided effect of rainfall in the fall may be due to Hurricane Matthew, which struck Haiti in October of 2016 and resulted in an increase of cholera cases in the nation.
@@ -2060,13 +2293,6 @@ For a mechanism, the model feature could in principle explain the data by helpin
 In the context of our analysis, the statistical evidence of a trend in transmission rate in Model~1 could be explained by any trending variable (such as hygiene improvements, or changes in population behavior), resulting in confounding from colinear covariates.
 Alternatively, the trend could be attributed to a decreasing reporting rate rather than decreasing transmission rate, resulting in confounded mechanisms.
 The robust statistical conclusion is that a model which allows for change fits better than one which does not---we argue that a decreasing transmission rate is a plausible way to explain this, but the incidence data themselves do not provide enough information to pin down the mechanism.
-
-% Place figure captions after the first paragraph in which they are cited.
-\begin{figure}[!h]
-\caption{{\bf Bold the figure title.}
-Figure caption text here, please use this space for the figure panel descriptions instead of using subfigure commands. A: Lorem ipsum dolor sit amet. B: Consectetur adipiscing elit.}
-\label{fig1}
-\end{figure}
 
 % Results and Discussion can be combined.
 \section*{Results}
@@ -2525,255 +2751,13 @@ ggplot(tidyr::drop_na(all_prob_elims), aes(x = time, y = elim_prob, col = mod)) 
   scale_x_date(date_labels = "'%y", breaks = seq.Date(from = as.Date("2010-01-01"), as.Date("2030-01-01"), by = '2 years'))
 @
 \caption{\label{fig:elimProbs}
-Probability of elimination across simulations for a 10 year period.
+{\figTitle Simulated probability of elimination using Models~1 and 3.}
+Probability of cholera elimination, defined as having zero cholera infectious for at least 52 consecutive weeks, based on 10 year simulations from calibrated versions of Models~1 and 3.
 Compare to Fig.~3A of Lee et al.~\cite{lee20}.}
 \end{figure}
 
 Probability of elimination estimates of this form are not meaningful for deterministic models, as the trajectory of these models only represent the mean behavior of the system rather than individual potential outcomes.
 We therefore do not provide probability of elimination estimates under Model~2, but show trajectories under the various vaccination scenarios using this model (Fig.~\ref{fig:mod2Traj}).
-
-%%% table tttttttttt
-
-\begin{table}
-\begin{adjustwidth}{-2.25in}{0in}
-\centering
-% \small
-\begin{tabular}{|p{0.15\linewidth}|p{0.14\linewidth}t|p{0.13\linewidth}t|p{0.17\linewidth}t|}
-\hline
-Mechanism & Model 1 && Model 2 && Model 3 &
-\\
-\hline
-\hline
-Infection (day)
-  & ${\fixed \muIR^{-1}=\Sexpr{myround(7/p1["gamma"],1)}}$
-  & \eqref{model1:toR}
-  & ${\fixed \muIR^{-1}=\Sexpr{myround(365/h2_fit$h2_params["gamma"],1)}}$
-  & \eqref{model2:mu_IR}
-  & ${\fixed \muIR^{-1}=\Sexpr{myround(365/p3["gamma1"],1)}}$
-  & \eqref{eq:model3:IR}
-\\
-Latency (day)
-  & ${\fixed \muEI^{-1}=\Sexpr{myround(7/p1["sigma"],1)}}$
-  & \eqref{model1:EA}
-  & ${\fixed \muEI^{-1}=\Sexpr{myround(365/h2_fit$h2_params["gammaE"],1)}}$
-  & \eqref{model2:mu_EI}
-  & \missing
-  % & \multicolumn{1}{c}{\hspace{16pt}\missing}
-  &
-\\
-\hline
-\multirow{3}{*}{Seasonality}
-  & $\transmission_{1:6}=(
-      \Sexpr{myround(p1["beta1"],1)},\allowbreak
-      \Sexpr{myround(p1["beta2"],1)},\allowbreak
-      \Sexpr{myround(p1["beta3"],1)},\allowbreak
-      \Sexpr{myround(p1["beta4"],1)},\allowbreak
-      \Sexpr{myround(p1["beta5"],1)},\allowbreak
-      \Sexpr{myround(p1["beta6"],1)})$
-  & \eqref{model1:beta}
-  & \multirow{2}{*}{${\fixed \seasAmplitude=0.4}$}
-  & \multirow{2}{*}{\eqref{model2:lambda}}
-  & \multirow{2}{*}{$\seasAmplitude = \Sexpr{myround(p3s["lambdaR"],2)}$}
-  & \multirow{2}{*}{\eqref{eq:model3:water}}
-  \\
-  & $\transmissionTrend = \Sexpr{myround(p1["betat"],2)}^*$
-  & \eqref{model1:betat}
-  & \multirow{-2}{*}{$\phaseParm = \Sexpr{myround(h2_fit$h2_params['phase'], 2)}^*$}
-  & \multirow{-2}{*}{\eqref{model2:lambda}}
-  & \multirow{-2}{*}{$\rainfallExponent = \Sexpr{signif(p3s["r"],3)}$}
-  & \multirow{-2}{*}{\eqref{eq:model3:water}}
-  \\\hline
-  \multirow{3}{*}{Immunity (yr)}
-  & \multirow{3}{*}{${\fixed \muRS^{-1}=\Sexpr{myround(1/p1["alpha"]/52,1)}}$}
-  & \multirow{3}{*}{\eqref{model1:RS}}
-  & $\muRS^{-1}= \Sexpr{signif(1/h2_fit$h2_params["sigma"],2)}$
-  & \eqref{model2:RS}
-  & \multirow{3}{*}{${\fixed \muRS^{-1}=\Sexpr{myround(1/p3['rho1'],1)}}$}
-  & \multirow{3}{*}{\eqref{eq:model3:RRnext}}
-\\
-& & & ${\fixed \omega_1^{-1} = \Sexpr{myround(1/h2_fit$h2_params["Omega1"],1)}}$ & \eqref{model2:omega1} & &\\
-& & & ${\fixed \omega_2^{-1} = \Sexpr{myround(1/h2_fit$h2_params["Omega2"],1)}}$ & \eqref{model2:omega2} & &\\
-\hline
-\multirow{2}{*}{Birth/death (yr)}
-  & ${\fixed \muBirth^{-1} = \Sexpr{myround(1/p1["mu"]/52,1)}}$
-    %
-  & \eqref{model1:death}
-  & \multirow{2}{*}{\missing}
-  &
-  & \multirow{2}{*}{${\fixed \muDeath^{-1} = \Sexpr{myround(1/p3["mu1"],1)}}$}
-  & \multirow{2}{*}{\eqref{eq:model3:IS}}
-\\
-& ${\fixed \muDeath^{-1} = \Sexpr{myround(1/p1["delta"]/52,1)}}$
-& \eqref{model1:death}
-&
-&
-& &
-\\
-Sympt. frac.
-  & ${\fixed \symptomFrac_z(t)=c\vaccineEfficacy^*(t-\tau_d)}$
-  & (\ref{model1:EI}-\ref{model1:EA})
-  & ${\fixed \symptomFrac=\Sexpr{myround(h2_fit$h2_params["k"],1)}}$
-  & \eqref{model2:mu_EI}
-  & ${\fixed \symptomFrac=\Sexpr{myround(p3["sigma1"],2)}}$
-  & \eqref{eq:model3:SA}
-\\
-Asympt.
-  & \multirow{2}{*}{${\fixed \asymptomRelativeInfect=0.05}$}
-  & \multirow{2}{*}{\eqref{model1:lambda}}
-  & ${\fixed \asymptomRelativeInfect = 0.001}$
-  & \eqref{model2:lambda}
-  &  ${\fixed \asymptomRelativeInfect = 1}$
-  & \eqref{eq:model3:foi}
-\\
-infectivity
-&
-&
-& ${\fixed \asymptomRelativeShed = \Sexpr{1e-7} }$
-& \eqref{model2:to_W}
-& $\asymptomRelativeShed = \Sexpr{myround(p3s["XthetaA"],3)}$
-& \eqref{eq:model3:water}
-\\
-\hline
-\multirow{4}{*}{Human to human}
-  & \multirow{4}{*}{$\transmission_{1:6}$ as above}
-  & \multirow{4}{*}{\eqref{model1:lambda}}
-  & \multirow{4}{*}{$\transmission=$\Sexpr{signif(h2_fit$h2_params["Beta"],3)}}
-  & \multirow{4}{*}{\eqref{model2:lambda}}
-  & $\transmission_{1:10}=(
-  \Sexpr{myround(p3u["foi_add",1]*1e6,2)}, \allowbreak
-	\Sexpr{myround(p3u["foi_add",2]*1e6,2)}, \allowbreak
-	\Sexpr{myround(p3u["foi_add",3]*1e6,2)}, \allowbreak
-  \Sexpr{myround(p3u["foi_add",4]*1e6,2)}, \allowbreak
-	\Sexpr{myround(p3u["foi_add",5]*1e6,2)}, \allowbreak
-	\Sexpr{myround(p3u["foi_add",6]*1e6,2)}, \allowbreak
-	\Sexpr{myround(p3u["foi_add",7]*1e6,2)}, \allowbreak
-	\Sexpr{myround(p3u["foi_add",8]*1e6,2)}, \allowbreak
-	\Sexpr{myround(p3u["foi_add",9]*1e6,2)}, \allowbreak
-	\Sexpr{myround(p3u["foi_add",10]*1e6,2)}
-	) \allowbreak \times 10^{-6}$
-  & \multirow{4}{*}{\eqref{eq:model3:foi}}
-\\
-\hline
-\multirow{5}{*}{Water to human}
-  & \multirow{5}{*}{\missing}
-  % & \multicolumn{1}{c}{\hspace{16pt}\missing}
-  &
-  & \multirow{3}{*}{${\fixed \Wsat = \Sexpr{signif(h2_fit$h2_params["Sat"],2)}}$}
-  & \multirow{3}{*}{\eqref{model2:lambda}}
-  % \eqref{model2:lambda}
-  & $\Wbeta{_{1:10}}= (
-        \Sexpr{myround(p3u["betaB",1],2)}, \allowbreak
-        \Sexpr{myround(p3u["betaB",2],2)}, \allowbreak
-        \Sexpr{myround(p3u["betaB",3],2)}, \allowbreak
-        \Sexpr{myround(p3u["betaB",4],2)}, \allowbreak
-        \Sexpr{myround(p3u["betaB",5],2)}, \allowbreak
-        \Sexpr{myround(p3u["betaB",6],2)}, \allowbreak
-        \Sexpr{myround(p3u["betaB",7],2)}, \allowbreak
-        \Sexpr{myround(p3u["betaB",8],2)}, \allowbreak
-        \Sexpr{myround(p3u["betaB",9],2)}, \allowbreak
-        \Sexpr{myround(p3u["betaB",10],2)})$
-  & \multirow{4}{*}{\eqref{eq:model3:foi}}
-\\
-& & & \multirow{-3}{*}{$\beta_W= \Sexpr{signif(h2_fit$h2_params["BetaW"],3)}$} & \multirow{-3}{*}{\eqref{model2:lambda}} & &
-\\
-\hline
-Human to water
-  & \missing
-  % & \multicolumn{1}{c}{\hspace{16pt}\missing}
-  &
-  & $\Wshed = $ \Sexpr{signif(h2_fit$h2_params["Mu"],3)}
-  & \eqref{model2:to_W}
-  & $\Wshed= \Sexpr{signif(p3s["thetaI"],3)}$
-  & \eqref{eq:model3:water}
-\\
-Water survival \newline (wk)
-  & \multirow{2}{*}{\missing}
-  % & \multicolumn{1}{c}{\hspace{16pt}\missing}
-  &
-  & \multirow{2}{*}{${\fixed \Wremoval^{-1} = \Sexpr{signif(52/h2_fit$h2_params["Delta"],3)}}$}
-  & \multirow{2}{*}{\eqref{model2:from_W}}
-  & \multirow{2}{*}{$\Wremoval^{-1}=\Sexpr{myround(52/p3s["mu_B"],2)}$}
-  & \multirow{2}{*}{\eqref{eq:model3:Decay}}
-\\
-Mixing exponent
-  & $\mixExponent=\Sexpr{myround(p1["nu"],2)}$
-  & \eqref{model1:lambda}
-  & \missing
-  % & \multicolumn{1}{c}{\hspace{16pt}\missing}
-  &
-  & \missing
-  % & \multicolumn{1}{c}{\hspace{16pt}\missing}
-  &
-\\
-\hline
-Process noise \newline (wk\textsuperscript{1/2})
-  & $\sigmaProc =$ \newline $(\Sexpr{myround(sqrt(p1["sig_sq_epi"]),2)},
-  \Sexpr{myround(sqrt(p1["sig_sq_end"]),2)})^*$
-  & \multirow{2}{*}{\eqref{model1:lambda}}
-  & \multirow{2}{*}{\missing}
-  % & \multicolumn{1}{c}{\hspace{16pt}\missing}
-  &
-  & \multirow{2}{*}{$\sigmaProc= \Sexpr{myround(p3s["std_W"],3)}$}
-  & \multirow{2}{*}{\eqref{eq:model3:SA}}
-\\
-Reporting rate
-  & $\reportRate=\Sexpr{myround(p1["rho"], 3)}$
-  & (S15) % TODO: Check
-  & ${\fixed \reportRate=\Sexpr{myround(h2_fit$h2_params["Rho"],2)}}$
-  & (S16) % TODO: Check
-  & $\reportRate=\Sexpr{myround(p3s["epsilon"],2)}$
-  & (S19) % TODO: Check
-\\
-Observation \newline variance
-  & $\obsOverdispersion =$ \newline $(\Sexpr{myround(p1["tau_epi"],2)}, \Sexpr{round(p1["tau_end"],2)})$
-  & \multirow{2}{*}{(S15)} % TODO: Check
-  & \multirow{2}{*}{$\obsOverdispersion = \Sexpr{signif(h2_fit$h2_params['sigma'], 3)}$}
-  & \multirow{2}{*}{(S16)} % TODO: Check
-  & \multirow{2}{*}{$\obsOverdispersion = \Sexpr{myround(p3s["k"],2)}$}
-  & \multirow{2}{*}{(S19)} % TODO: Check
-\\
-\hline
-\multirow{2}{*}{Initial Values} & $I_{0,0} = \Sexpr{round(prod(p1[c('pop_0', 'I_0')]))}$
-  &
-  & \multirow{2}{*}{\missing}
-  % & \multicolumn{1}{c}{\multirow{2}{*}{\hspace{16pt}\missing}}
-  &
-  & \multirow{2}{*}{$I_{3,7,10;0}(0)= (
-        \Sexpr{round(prod(p3[c('H3', 'Iinit3')]))}, \Sexpr{round(prod(p3[c('H7', 'Iinit7')]))}, \Sexpr{round(prod(p3[c('H10', 'Iinit10')]))})^*$}
-  &  % TODO: \multirow{2}{*}{EQUATION NUMBER}
-  \\
-  & $E_{0,0} = \Sexpr{round(prod(p1[c('pop_0', 'E_0')]))}$ & & \multicolumn{1}{c}{}
-  &
-  &
-  &
-\\\hline
-\multirow{3}{*}{Hurricane}
-  & \multirow{4}{*}{\missing}
-% & \multicolumn{1}{c}{\multirow{2}{*}{\hspace{16pt}\missing}}
-  &
-  & \multirow{4}{*}{\missing}
-  % & \multicolumn{1}{c}{\multirow{2}{*}{\hspace{16pt}\missing}}
-  &
-  & $\Whur{3, 9} =$\newline $(\Sexpr{myround(p3['aHur3'], 2)}, \Sexpr{myround(p3['aHur9'], 2)})^*$
-  & \multirow{2}{*}{\eqref{eq:model3:foi}}
-\\
- \multirow{-1}{*}{Parameters} &
-  % & \multicolumn{1}{c}{}
-  &
-  &
-  % & \multicolumn{1}{c}{}
-  &
-  & $\hHur{3, 9} =$\newline $(\Sexpr{myround(p3['hHur3'], 2)}, \Sexpr{myround(p3['hHur9'], 2)})^*$
-  & \multirow{2}{*}{\eqref{eq:model3:foi}}
-\\\hline
-\end{tabular}
-\caption{\label{tab:params}References to the relevant equation are given in parentheses.
-Parameters in blue were fixed based on scientific reasoning and not fitted to the data.
-$^*$ denotes parameters added during our re-analysis, not considered by Lee et al.
-Translations back into the notation of \cite{lee20} are given in Table~S1.
-}
-\end{adjustwidth}
-\end{table}
 
 % TODO: Remove the unused code below.
 % % Place tables after the first paragraph in which they are cited.

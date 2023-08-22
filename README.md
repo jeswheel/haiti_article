@@ -4,21 +4,24 @@ This repository contains the necessary code to reproduce the article: "Informing
 
 ### TODO: 
 
-- [ ] Have to reference all tables. When should we reference Table 2 (parameter table). How about the table of likelihoods? 
+- [ ] Make sure supplement is up to date 
+   - [ ] Fix the supporting-information section in manuscript 
+   - [ ] write an acknowledgement section 
+   - [ ] Add model diagrams to supplement, and mention them in the manuscript. 
 - [ ] Fix author affiliations and emails. 
-- [ ] Move all images and tables to the correct spot (directly after referencing them).
 - [ ] Double check all model equations match the code 
 - [ ] Write more about why model 3 is a poor description of the data, even if this is just added to the supplement. 
 - [ ] Update Model 3 initialization model description. 
-- [ ] Make sure the supplement is up-to-date, including re-running the results. 
-   - [ ] Add model diagrams to supplement, and mention them in the manuscript. 
 - [ ] Remove parallel back-ends from inside functions in `haitipkg`. 
 - [ ] Final things: 
    - [ ] Check all journal requirements are met
    - [ ] Final proof-read.
+   - [ ] Delete all commented out text and code 
    - [ ] Re-run everything and submit. 
 
 
+- [x] Move all images and tables to the correct spot (directly after referencing them).
+- [x] Have to reference all tables. When should we reference Table 2 (parameter table). How about the table of likelihoods? 
 - [x] Remove vaccination scenario projection figures (maybe move into the supplement later).
 - [x] Check we meet following requirement: "Please refrain from using math mode for non-math content, such as chemical formulas. For example, please use "CO\textsubscript{2}" instead of "$\mathrm{CO}_2$"
 - [x] Fix the formatting of the parameter table. 
