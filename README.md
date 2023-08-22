@@ -4,6 +4,7 @@ This repository contains the necessary code to reproduce the article: "Informing
 
 ### TODO: 
 
+- [ ] Have to reference all tables. When should we reference Table 2 (parameter table). How about the table of likelihoods? 
 - [ ] Fix author affiliations and emails. 
 - [ ] Move all images and tables to the correct spot (directly after referencing them).
 - [ ] Double check all model equations match the code 
@@ -18,6 +19,8 @@ This repository contains the necessary code to reproduce the article: "Informing
    - [ ] Re-run everything and submit. 
 
 
+- [x] Remove vaccination scenario projection figures (maybe move into the supplement later).
+- [x] Check we meet following requirement: "Please refrain from using math mode for non-math content, such as chemical formulas. For example, please use "CO\textsubscript{2}" instead of "$\mathrm{CO}_2$"
 - [x] Fix the formatting of the parameter table. 
 - [x] Write an author summary for the paper 
 - [x] Description of theta (vaccine efficacy) in model 2 is missing. It's only in the equation, not even in the table. Make a mention of where this can be found.

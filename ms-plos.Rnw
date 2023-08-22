@@ -639,11 +639,39 @@ What are the possible trade-offs of increasing model complexity, such as the inc
 
 This case study investigates the use of dynamic models and spatiotemporal data to inform a policy decision in the context of the cholera outbreak in Haiti, which started in 2010.
 We build on a multi-group modeling exercise by Lee et al.~\cite{lee20} in which four expert modeling teams developed models to the same dataset with the goal of comparing conclusions on the feasibility of eliminating cholera by a vaccination campaign.
+The data that was used for this study, and that is the subject of our reanalysis, is displayed in Fig.~\ref{fig:CholeraData}.
 Model~1 is stochastic and describes cholera at the national level;
 Model~2 is deterministic with spatial structure, and includes transmission via contaminated water;
 Model~3 is stochastic with spatial structure, and accounts for measured rainfall.
 Model~4 has an agent-based construction, featuring considerable mechanistic detail but limited ability to calibrate these details to data.
 We focus on Models~1--3, as the strengths and weaknesses of the agent-based modeling approach \cite{tracy18} are outside the scope of this article.
+
+\begin{figure}[!h]
+<<Plot_Reported_Cases, echo=FALSE, fig.height=3.5>>=
+
+# Plot reported cholera cases, by department. Creates Figure 1.
+ggplot(dep_plot_df, aes(x = date, y = cases + 1)) +
+  facet_wrap(~dep, nrow = 2, labeller = dep_labeller) +
+  geom_line() +
+  theme(axis.title.x = element_blank()) +
+  ylab('Reported Cases') +
+  scale_y_log10(
+    labels = scales::trans_format("log10", scales::math_format(10^.x))
+  ) +
+  scale_x_date(
+    date_labels = "'%y",
+    breaks = seq.Date(
+      from = as.Date("2011-01-01"),
+      to = as.Date("2019-01-01"),
+      by = '2 years'
+    )
+  )
+@
+\caption{\label{fig:CholeraData}
+\small
+Weekly reported cholera cases in Haiti from October 2010 to January 2019.
+}
+\end{figure}
 
 The four independent teams were given the task of estimating the
 potential effect of prospective oral cholera vaccine (OCV) programs.
@@ -672,33 +700,6 @@ we then describe how each model is calibrated to data, and present a systematic 
 We then use improved model fits to project cholera incidence in Haiti under various vaccination scenarios considered by Lee et al.~\cite{lee20}.
 Finally, we conclude with a discussion of the results.
 % This is followed by a consideration of the robustness of model based policy recommendations in Sec.~\ref{sec:advice}, and a discussion in Sec.~\ref{sec:discussion}.
-
-\begin{figure}
-<<Plot_Reported_Cases, echo=FALSE, fig.height=3.5>>=
-
-# Plot reported cholera cases, by department. Creates Figure 1.
-ggplot(dep_plot_df, aes(x = date, y = cases + 1)) +
-  facet_wrap(~dep, nrow = 2, labeller = dep_labeller) +
-  geom_line() +
-  theme(axis.title.x = element_blank()) +
-  ylab('Reported Cases') +
-  scale_y_log10(
-    labels = scales::trans_format("log10", scales::math_format(10^.x))
-  ) +
-  scale_x_date(
-    date_labels = "'%y",
-    breaks = seq.Date(
-      from = as.Date("2011-01-01"),
-      to = as.Date("2019-01-01"),
-      by = '2 years'
-    )
-  )
-@
-\caption{\label{CholeraData}
-\small
-Weekly reported cholera cases in Haiti from October 2010 to January 2019.
-}
-\end{figure}
 
 \section*{Materials and methods}
 \subsection*{Mechanistic models for disease modeling}
@@ -1283,7 +1284,7 @@ In the following subsections we describe in detail our approach to calibrating t
 
 One of the most frequently used approaches to calibrate the parameters of a statistical model is maximum likelihood estimation.
 In the case of a POMP model, the likelihood function---as described in Eq.~\myeqref{eq:likedef}---is written as $\mathcal{L}(\paramVec) = \int f_{\bm{X}_{0:N}, \bm{Y}_{1:N}}\big(\bm{x}_{0:N}, \bm{y}_{1:N};\paramVec\big) d\bm{x}_{0:N}$.
-The high-dimensional integral in the likelihood, and the potentially non-linear nature of the process model, make it impossible to obtain a closed form expression of the likelihood function of POMP models except in the most basic cases.
+The high-dimensional integral in the likelihood, and the potentially non-linear nature of the process model, make it impossible to obtain a closed form expression of the likelihood function of POMP models except in the most simple cases.
 The process model that defines Model~1 was developed with the intent of providing a plausible description of cholera dynamics rather than a providing statistically convenient description.
 Because of this, a closed form expression of the likelihood of Model~1 is not readily available.
 
@@ -1302,7 +1303,7 @@ We demonstrate this capability by proposing a linear trend $\transmissionTrend$ 
 \log\transmission(t) = \sum_{j=1}^6 \transmission_s s_j(t) + \transmissionTrend\bar{t},
 \end{equation}
 where $\bar{t} = \frac{t - (t_N + t_0) / 2}{t_N - (t_N + t_0) / 2}$, so that $\bar{t} \in [-1, 1]$.
-The proposal of a linear trend in transmission is a result of observing an apparent decrease in reported cholera infections from 2012-2019 in Fig.~\ref{CholeraData}.
+The proposal of a linear trend in transmission is a result of observing an apparent decrease in reported cholera infections from 2012-2019 in Fig.~\ref{fig:CholeraData}.
 While several factors may contribute to this decrease, one explanation is that case-area targeted interventions (CATIs), which included education sessions, increased monitoring, household decontamination, soap distribution, and water chlorination in infected areas \cite{rebaudet19CATI}, may have substantially reduced cholera transmission over time \cite{rebaudet21}.
 
 We perform a statistical test to determine whether or not the data indicate the presence of a linear trend in transmissibility.
@@ -1313,7 +1314,7 @@ The resulting confidence interval for $\transmissionTrend$ is $(\Sexpr{myround(m
 These results are suggestive that the inclusion of a trend in the transmission rate improves the quantitative ability of Model~1 to describe the observed data.
 The reported results for Model~1 in the remainder of this article were obtained with the inclusion of the parameter $\transmissionTrend$.
 
-\begin{figure}
+\begin{figure}[!h]
 \centering
 <<Beta_trend_Figure, fig.height=2.4, fig.width=3.6, fig.align='center'>>=
 ggplot() +
@@ -1338,8 +1339,9 @@ One change we made in the statistical analysis that led to larger model likeliho
 While IF2 enables parameter estimation for a large class of models, the theoretic ability to maximize the likelihood depends on asymptotics in both the number of particles and the number of filtering iterations.
 Many Monte Carlo replications are then required to quantify and further reduce the error.
 The large increase in the log-likelihood for Model~1 (see Table~\ref{tab:likes}) can primarily be attributed to increasing the computational effort in fitting the model; this result highlights the importance of carefully determining the necessary computational effort needed to maximize model likelihoods and acting accordingly.
+Simulations from the initial conditions of our fitted model are plotted against the observed incidence data in Fig.~\ref{fig:mod1fit}.
 
-\begin{figure}
+\begin{figure}[!h]
 \centering
 <<Model_1_Sims_Figure, fig.height=2.35, fig.width=4.6, fig.align='center'>>=
 # This code chunk creates the figure containing simulations from Model 1
@@ -1447,6 +1449,47 @@ h2_traj <- h2_epi_traj %>%
   )
 @
 
+<<Load Model 2 VaccScenarios, message=FALSE, include=FALSE>>=
+
+# Run Vaccination scenarios for Model 2. Note that the code runs the same
+# speed for each run-level.
+mod2_VaccScenarios <- bake(
+  file = paste0("model2/VaccinationScenarios.rds"), {
+    haiti2_vaccScenario(
+      h2_params = h2_fit$h2_params
+    )
+  },
+  timing = FALSE
+)
+@
+
+\begin{figure}[!h]
+<<Mod2Fit_and_Scenarios_Figure, fig.height=1.9, fig.width=4.8, fig.align='center'>>=
+ggplot() +
+  geom_line(data = h2_traj, aes(x = date, y = Ctotal + 1), col = 'blue') +
+  geom_line(data = true_agg_cases, aes(x = date, y = ReportedAll + 1)) +
+  geom_line(data = filter(mod2_VaccScenarios$all_trajs,
+                          year >= max(h2_traj$year)),
+            aes(x = as.Date(date), y = ReportedCases + 1, color = scenario)) +
+  theme(axis.title.x = element_blank(),
+        legend.title = element_blank(),
+        axis.title.y = element_text(size = 9),
+        axis.text = element_text(size = 8)) +
+  ylab("Reported cholera cases") +
+  scale_color_manual(values = c("V0" = '#f4a582',
+                                "V1" = '#d6604d',
+                                "V2" = '#b2182b',
+                                "V3" = '#92c5de',
+                                "V4" = '#4393c3')) +
+  # geom_vline(xintercept = yearsToDate(2014.161), linetype = 'dashed') +
+  scale_y_log10(labels = scales::trans_format("log10", scales::math_format(10^.x))) +
+  scale_x_date(date_labels = "'%y", breaks = seq.Date(from = as.Date("2010-01-01"), as.Date("2030-01-01"), by = '2 years'))
+@
+\caption{\label{fig:mod2Traj}
+Simulated trajectory of Model~2 (blue curve) and projections under the various vaccination scenarios.
+Reported cholera incidence is shown in black.}
+\end{figure}
+
 \subsubsection*{Calibrating Model~3 Parameters}\label{sec:fit3}
 Model~3 describes cholera dynamics in Haiti using a metapopulation model, where the hidden states in each administrative department has an effect on the dynamics in other departments.
 The decision to address metapopulation dynamics using a spatially explicit model, rather than to aggregate over space, is double-edged.
@@ -1466,7 +1509,7 @@ Another concern is that the two versions of the model are not the same, resultin
 as parameters that maximize the likelihood of the decoupled model almost certainly do not maximize the likelihood of the fully coupled model.
 These two concerns may explain the unrealistic forecasts and low likelihood of Model~3 from Lee et al.~\cite{lee20} (see Table~\ref{tab:likes}).
 
-At the time Lee et al.~\ref{lee20} was published, there was no known algorithm that could readily be used to maximize the likelihood of an arbitrary meta-population POMP model with coupled spatial dynamics, which justifies the spatial decoupling approximation that was used to calibrate model parameters.
+At the time Lee et al.~\cite{lee20} was published, there was no known algorithm that could readily be used to maximize the likelihood of an arbitrary meta-population POMP model with coupled spatial dynamics, which justifies the spatial decoupling approximation that was used to calibrate model parameters.
 For our analysis, we calibrate the parameters of the spatially coupled version of Model~3 using the iterated block particle filter (IBPF) algorithm \cite{ionides22}.
 This algorithm extends the work of Ning and Ionides \cite{ning21ibpf}, who provided theoretic justification for the version of the algorithm that only estimates unit-specific parameters.
 The IBPF algorithm enables us to directly estimate the parameters of models describing high-dimensional partially-observed nonlinear dynamic systems via likelihood maximization.
@@ -1514,7 +1557,7 @@ h3_quants <- bake(
 
 @
 
-\begin{figure}
+\begin{figure}[!h]
 <<Model3_SpatPOMP_sims_Figure, fig.height=3>>=
 
 # Plot the reported cases and confidence region for each department.
@@ -1915,7 +1958,6 @@ This is consistent with previous studies finding that rainfall played an importa
 The estimated seasonality also features an increased transmission rate during the fall, which was noticed at an earlier stage of the epidemic \cite{rinaldo12}; the high transmission rate in the fall may also be a result of the increase transmission that occurred in the fall of 2016, when hurricane Matthew struck Haiti \cite{ferreirai16}.
 
 <<Get Model 1 Seasonality>>=
-
 h1_seas_df <- get_h1_seasonality(h1)
 
 df_rain <- haitiRainfall %>%
@@ -1976,7 +2018,7 @@ gg_trans <- ggplot() +
 
 @
 
-\begin{figure}
+\begin{figure}[!h]
 \centering
 <<Model1_Seasonality_Figure, fig.height=2.9, fig.width=5, fig.align='center'>>=
 cowplot::plot_grid(gg_rain, gg_trans, align = "v", ncol = 1)
@@ -2259,20 +2301,6 @@ h1_S1_results <- bake(
 )
 @
 
-<<Load Model 2 VaccScenarios, message=FALSE, include=FALSE>>=
-
-# Run Vaccination scenarios for Model 2. Note that the code runs the same
-# speed for each run-level.
-mod2_VaccScenarios <- bake(
-  file = paste0("model2/VaccinationScenarios.rds"), {
-    haiti2_vaccScenario(
-      h2_params = h2_fit$h2_params
-    )
-  },
-  timing = FALSE
-)
-@
-
 <<Load Model 3 Vacc Scenarios, message=FALSE, include=FALSE>>=
 NP_BPF <- switch(RUN_LEVEL, 50, 200, 2000)
 NSIM   <- switch(RUN_LEVEL, 10,  50, 1000)
@@ -2442,189 +2470,7 @@ mod3_V4_res <- bake(
 
 Simulations from probabilistic models (Models~1 and~3) represent possible trajectories of the dynamic system under the scientific assumptions of the models.
 Estimates of the probability of cholera elimination can therefore be obtained as the proportion of simulations from these models that result in cholera elimination.
-The results of these projections are summarized in Figs.~\ref{fig:Mod1Scenarios}--\ref{fig:elimProbs}.
-
-Probability of elimination estimates of this form are not meaningful for deterministic models, as the trajectory of these models only represent the mean behavior of the system rather than individual potential outcomes.
-We therefore do not provide probability of elimination estimates under Model~2, but show trajectories under the various vaccination scenarios using this model (Fig.~\ref{fig:mod2Traj}).
-
-<<Create Model 1 VaccScen plots>>=
-gg_m1_V0 <- ggplot() +
-  geom_line(data = h1_S0_results$mod1_V0_sims, aes(x = date, y = q50 + 1), col = 'blue') +
-  geom_ribbon(data = h1_S0_results$mod1_V0_sims, aes(x = date, ymin = q05 + 1, ymax = q95 + 1), alpha = 0.5) +
-  geom_line(data = true_agg_cases, aes(x = date, y = ReportedAll + 1)) +
-  ylab("Log reported cases") +
-  theme(axis.title.x = element_blank()) +
-  ggtitle("V0") +
-  scale_x_date(date_labels = "'%y") +
-  scale_y_log10(labels = scales::trans_format("log10", scales::math_format(10^.x)))
-
-gg_m1_V1 <- ggplot() +
-  geom_line(data = h1_S2_results$mod1_V1_sims, aes(x = date, y = q50 + 1), col = 'blue') +
-  geom_ribbon(data = h1_S2_results$mod1_V1_sims, aes(x = date, ymin = q05 + 1, ymax = q95 + 1), alpha = 0.5) +
-  geom_line(data = true_agg_cases, aes(x = date, y = ReportedAll + 1)) +
-  ylab("Log reported cases") +
-  theme(axis.title = element_blank(),
-        axis.ticks.y = element_blank(),
-        axis.text.y = element_blank()) +
-  ggtitle("V1") +
-  scale_x_date(date_labels = "'%y") +
-  scale_y_log10(labels = scales::trans_format("log10", scales::math_format(10^.x)))
-
-gg_m1_V2 <- ggplot() +
-  geom_line(data = h1_S4_results$mod1_V2_sims, aes(x = date, y = q50 + 1), col = 'blue') +
-  geom_ribbon(data = h1_S4_results$mod1_V2_sims, aes(x = date, ymin = q05 + 1, ymax = q95 + 1), alpha = 0.5) +
-  geom_line(data = true_agg_cases, aes(x = date, y = ReportedAll + 1)) +
-  ylab("Log reported cases") +
-    theme(axis.title = element_blank(),
-        axis.ticks.y = element_blank(),
-        axis.text.y = element_blank()) +
-  ggtitle("V2") +
-  scale_x_date(date_labels = "'%y") +
-  scale_y_log10(labels = scales::trans_format("log10", scales::math_format(10^.x)))
-
-gg_m1_V3 <- ggplot() +
-  geom_line(data = h1_S3_results$mod1_V3_sims, aes(x = date, y = q50 + 1), col = 'blue') +
-  geom_ribbon(data = h1_S3_results$mod1_V3_sims, aes(x = date, ymin = q05 + 1, ymax = q95 + 1), alpha = 0.5) +
-  geom_line(data = true_agg_cases, aes(x = date, y = ReportedAll + 1)) +
-  ylab("Log reported cases") +
-    theme(axis.title = element_blank(),
-        axis.ticks.y = element_blank(),
-        axis.text.y = element_blank()) +
-  ggtitle("V3") +
-  scale_x_date(date_labels = "'%y") +
-  scale_y_log10(labels = scales::trans_format("log10", scales::math_format(10^.x)))
-
-gg_m1_V4 <- ggplot() +
-  geom_line(data = h1_S1_results$mod1_V4_sims, aes(x = date, y = q50 + 1), col = 'blue') +
-  geom_ribbon(data = h1_S1_results$mod1_V4_sims, aes(x = date, ymin = q05 + 1, ymax = q95 + 1), alpha = 0.5) +
-  geom_line(data = true_agg_cases, aes(x = date, y = ReportedAll + 1)) +
-  ylab("Log reported cases") +
-    theme(axis.title = element_blank(),
-        axis.ticks.y = element_blank(),
-        axis.text.y = element_blank()) +
-  ggtitle("V4") +
-  scale_x_date(date_labels = "'%y") +
-  scale_y_log10(labels = scales::trans_format("log10", scales::math_format(10^.x)))
-
-@
-
-\begin{figure}
-<<Plot_Model1_Scenarios, fig.height=2>>=
-lay <- rbind(c(1, 1, 1, 1, 2, 2, 2, 3, 3, 3, 4, 4, 4, 5, 5, 5))
-gridExtra::grid.arrange(
-  gg_m1_V0, gg_m1_V1, gg_m1_V2, gg_m1_V3, gg_m1_V4,
-  layout_matrix = lay
-)
-@
-\caption{\label{fig:Mod1Scenarios}
-Simulations of Model~1 under each vaccination scenario.
-Blue line indicates the simulated median of reported cases, and the ribbon represents $95\%$ of simulations.
-% The various vaccination campaigns made no practical difference in the median scenario, but a drastic difference in the extreme cases.
-}
-\end{figure}
-
-\begin{figure}
-<<Mod2Fit_and_Scenarios_Figure, fig.height=1.9, fig.width=4.8, fig.align='center'>>=
-ggplot() +
-  geom_line(data = h2_traj, aes(x = date, y = Ctotal + 1), col = 'blue') +
-  geom_line(data = true_agg_cases, aes(x = date, y = ReportedAll + 1)) +
-  geom_line(data = filter(mod2_VaccScenarios$all_trajs,
-                          year >= max(h2_traj$year)),
-            aes(x = as.Date(date), y = ReportedCases + 1, color = scenario)) +
-  theme(axis.title.x = element_blank(),
-        legend.title = element_blank(),
-        axis.title.y = element_text(size = 9),
-        axis.text = element_text(size = 8)) +
-  ylab("Reported cholera cases") +
-  scale_color_manual(values = c("V0" = '#f4a582',
-                                "V1" = '#d6604d',
-                                "V2" = '#b2182b',
-                                "V3" = '#92c5de',
-                                "V4" = '#4393c3')) +
-  # geom_vline(xintercept = yearsToDate(2014.161), linetype = 'dashed') +
-  scale_y_log10(labels = scales::trans_format("log10", scales::math_format(10^.x))) +
-  scale_x_date(date_labels = "'%y", breaks = seq.Date(from = as.Date("2010-01-01"), as.Date("2030-01-01"), by = '2 years'))
-@
-\caption{\label{fig:mod2Traj}
-Simulated trajectory of Model~2 (blue curve) and projections under the various vaccination scenarios.
-Reported cholera incidence is shown in black.}
-\end{figure}
-
-<<Create Model 3 VaccScen Plots>>=
-gg_m3_V0 <- ggplot() +
-  geom_line(data = mod3_V0_res$mod3_V0_sims, aes(x = date, y = q50 + 1), col = 'blue') +
-  geom_ribbon(data = mod3_V0_res$mod3_V0_sims, aes(x = date, ymin = q05 + 1, ymax = q95 + 1), alpha = 0.5) +
-  geom_line(data = true_agg_cases, aes(x = date, y = ReportedAll + 1)) +
-  ylab("Log reported cases") +
-  theme(axis.title.x = element_blank()) +
-  ggtitle("V0") +
-  scale_x_date(date_labels = "'%y") +
-  scale_y_log10(labels = scales::trans_format("log10", scales::math_format(10^.x)))
-
-gg_m3_V1 <- ggplot() +
-  geom_line(data = mod3_V1_res$mod3_V1_sims, aes(x = date, y = q50 + 1), col = 'blue') +
-  geom_ribbon(data = mod3_V1_res$mod3_V1_sims, aes(x = date, ymin = q05 + 1, ymax = q95 + 1), alpha = 0.5) +
-  geom_line(data = true_agg_cases, aes(x = date, y = ReportedAll + 1)) +
-  ylab("Log reported cases") +
-  theme(axis.title = element_blank(),
-        axis.ticks.y = element_blank(),
-        axis.text.y = element_blank()) +
-  ggtitle("V1") +
-  scale_x_date(date_labels = "'%y") +
-  scale_y_log10(labels = scales::trans_format("log10", scales::math_format(10^.x)))
-
-gg_m3_V2 <- ggplot() +
-  geom_line(data = mod3_V2_res$mod3_V2_sims, aes(x = date, y = q50 + 1), col = 'blue') +
-  geom_ribbon(data = mod3_V2_res$mod3_V2_sims, aes(x = date, ymin = q05 + 1, ymax = q95 + 1), alpha = 0.5) +
-  geom_line(data = true_agg_cases, aes(x = date, y = ReportedAll + 1)) +
-  ylab("Log reported cases") +
-    theme(axis.title = element_blank(),
-        axis.ticks.y = element_blank(),
-        axis.text.y = element_blank()) +
-  ggtitle("V2") +
-  scale_x_date(date_labels = "'%y") +
-  scale_y_log10(labels = scales::trans_format("log10", scales::math_format(10^.x)))
-
-gg_m3_V3 <- ggplot() +
-  geom_line(data = mod3_V3_res$mod3_V3_sims, aes(x = date, y = q50 + 1), col = 'blue') +
-  geom_ribbon(data = mod3_V3_res$mod3_V3_sims, aes(x = date, ymin = q05 + 1, ymax = q95 + 1), alpha = 0.5) +
-  geom_line(data = true_agg_cases, aes(x = date, y = ReportedAll + 1)) +
-  ylab("Log reported cases") +
-    theme(axis.title = element_blank(),
-        axis.ticks.y = element_blank(),
-        axis.text.y = element_blank()) +
-  ggtitle("V3") +
-  scale_x_date(date_labels = "'%y") +
-  scale_y_log10(labels = scales::trans_format("log10", scales::math_format(10^.x)))
-
-gg_m3_V4 <- ggplot() +
-  geom_line(data = mod3_V4_res$mod3_V4_sims, aes(x = date, y = q50 + 1), col = 'blue') +
-  geom_ribbon(data = mod3_V4_res$mod3_V4_sims, aes(x = date, ymin = q05 + 1, ymax = q95 + 1), alpha = 0.5) +
-  geom_line(data = true_agg_cases, aes(x = date, y = ReportedAll + 1)) +
-  ylab("Log reported cases") +
-    theme(axis.title = element_blank(),
-        axis.ticks.y = element_blank(),
-        axis.text.y = element_blank()) +
-  ggtitle("V4") +
-  scale_x_date(date_labels = "'%y") +
-  scale_y_log10(labels = scales::trans_format("log10", scales::math_format(10^.x)))
-@
-
-
-\begin{figure}
-<<Plot_Model3_Scenarios, fig.height=2>>=
-lay <- rbind(c(1, 1, 1, 1, 2, 2, 2, 3, 3, 3, 4, 4, 4, 5, 5, 5))
-gridExtra::grid.arrange(
-  gg_m3_V0, gg_m3_V1, gg_m3_V2, gg_m3_V3, gg_m3_V4,
-  layout_matrix = lay
-)
-@
-\caption{\label{fig:Mod3Scenarios}
-Simulations of Model~3 under each vaccination scenario.
-Blue line indicates the simulated median of reported cases, and ribbon represents $95\%$ of simulations.
-% The various vaccination campaigns made no practical difference in the median scenario, but a drastic difference in the extreme cases.
-}
-\end{figure}
+The results of these projections are summarized in Figs. \ref{fig:elimProbs}.
 
 
 <<Compute Elimination Probs, echo=FALSE>>=
@@ -2663,7 +2509,7 @@ mod3_probElims$time <- as.Date(lubridate::round_date(lubridate::date_decimal(mod
 all_prob_elims <- dplyr::bind_rows(mod1_probElims, mod3_probElims)
 @
 
-\begin{figure}
+\begin{figure}[!h]
 <<Elimination_Probs_Figure, fig.height=2.2>>=
 ggplot(tidyr::drop_na(all_prob_elims), aes(x = time, y = elim_prob, col = mod)) +
   geom_line() +
@@ -2680,8 +2526,11 @@ ggplot(tidyr::drop_na(all_prob_elims), aes(x = time, y = elim_prob, col = mod)) 
 @
 \caption{\label{fig:elimProbs}
 Probability of elimination across simulations for a 10 year period.
-Compare to Fig.~3A of \cite{lee20}.}
+Compare to Fig.~3A of Lee et al.~\cite{lee20}.}
 \end{figure}
+
+Probability of elimination estimates of this form are not meaningful for deterministic models, as the trajectory of these models only represent the mean behavior of the system rather than individual potential outcomes.
+We therefore do not provide probability of elimination estimates under Model~2, but show trajectories under the various vaccination scenarios using this model (Fig.~\ref{fig:mod2Traj}).
 
 %%% table tttttttttt
 
@@ -2708,7 +2557,8 @@ Latency (day)
   & \eqref{model1:EA}
   & ${\fixed \muEI^{-1}=\Sexpr{myround(365/h2_fit$h2_params["gammaE"],1)}}$
   & \eqref{model2:mu_EI}
-  & \multicolumn{1}{c}{\hspace{16pt}\missing}
+  & \missing
+  % & \multicolumn{1}{c}{\hspace{16pt}\missing}
   &
 \\
 \hline
@@ -2837,13 +2687,13 @@ Human to water
   & \eqref{eq:model3:water}
 \\
 Water survival \newline (wk)
-  & \missing
+  & \multirow{2}{*}{\missing}
   % & \multicolumn{1}{c}{\hspace{16pt}\missing}
   &
-  & ${\fixed \Wremoval^{-1} = \Sexpr{signif(52/h2_fit$h2_params["Delta"],3)}}$
-  & \eqref{model2:from_W}
-  & $\Wremoval^{-1}=\Sexpr{myround(52/p3s["mu_B"],2)}$
-  & \eqref{eq:model3:Decay}
+  & \multirow{2}{*}{${\fixed \Wremoval^{-1} = \Sexpr{signif(52/h2_fit$h2_params["Delta"],3)}}$}
+  & \multirow{2}{*}{\eqref{model2:from_W}}
+  & \multirow{2}{*}{$\Wremoval^{-1}=\Sexpr{myround(52/p3s["mu_B"],2)}$}
+  & \multirow{2}{*}{\eqref{eq:model3:Decay}}
 \\
 Mixing exponent
   & $\mixExponent=\Sexpr{myround(p1["nu"],2)}$
@@ -2856,7 +2706,7 @@ Mixing exponent
   &
 \\
 \hline
-Process noise \newline ($\text{wk}^{1/2}$)
+Process noise \newline (wk\textsuperscript{1/2})
   & $\sigmaProc =$ \newline $(\Sexpr{myround(sqrt(p1["sig_sq_epi"]),2)},
   \Sexpr{myround(sqrt(p1["sig_sq_end"]),2)})^*$
   & \multirow{2}{*}{\eqref{model1:lambda}}
@@ -2874,7 +2724,7 @@ Reporting rate
   & $\reportRate=\Sexpr{myround(p3s["epsilon"],2)}$
   & (S19) % TODO: Check
 \\
-Observation variance
+Observation \newline variance
   & $\obsOverdispersion =$ \newline $(\Sexpr{myround(p1["tau_epi"],2)}, \Sexpr{round(p1["tau_end"],2)})$
   & \multirow{2}{*}{(S15)} % TODO: Check
   & \multirow{2}{*}{$\obsOverdispersion = \Sexpr{signif(h2_fit$h2_params['sigma'], 3)}$}
@@ -2916,9 +2766,8 @@ Observation variance
   & $\hHur{3, 9} =$\newline $(\Sexpr{myround(p3['hHur3'], 2)}, \Sexpr{myround(p3['hHur9'], 2)})^*$
   & \multirow{2}{*}{\eqref{eq:model3:foi}}
 \\\hline
-
 \end{tabular}
-\caption{References to the relevant equation are given in parentheses.
+\caption{\label{tab:params}References to the relevant equation are given in parentheses.
 Parameters in blue were fixed based on scientific reasoning and not fitted to the data.
 $^*$ denotes parameters added during our re-analysis, not considered by Lee et al.
 Translations back into the notation of \cite{lee20} are given in Table~S1.
@@ -2926,24 +2775,25 @@ Translations back into the notation of \cite{lee20} are given in Table~S1.
 \end{adjustwidth}
 \end{table}
 
-% Place tables after the first paragraph in which they are cited.
-\begin{table}[!ht]
-\begin{adjustwidth}{-2.25in}{0in} % Comment out/remove adjustwidth environment if table fits in text column.
-\centering
-\caption{
-{\bf Table caption Nulla mi mi, venenatis sed ipsum varius, volutpat euismod diam.}}
-\begin{tabular}{|l+l|l|l|l|l|l|l|}
-\hline
-\multicolumn{4}{|l|}{\bf Heading1} & \multicolumn{4}{|l|}{\bf Heading2}\\ \thickhline
-$cell1 row1$ & cell2 row 1 & cell3 row 1 & cell4 row 1 & cell5 row 1 & cell6 row 1 & cell7 row 1 & cell8 row 1\\ \hline
-$cell1 row2$ & cell2 row 2 & cell3 row 2 & cell4 row 2 & cell5 row 2 & cell6 row 2 & cell7 row 2 & cell8 row 2\\ \hline
-$cell1 row3$ & cell2 row 3 & cell3 row 3 & cell4 row 3 & cell5 row 3 & cell6 row 3 & cell7 row 3 & cell8 row 3\\ \hline
-\end{tabular}
-\begin{flushleft} Table notes Phasellus venenatis, tortor nec vestibulum mattis, massa tortor interdum felis, nec pellentesque metus tortor nec nisl. Ut ornare mauris tellus, vel dapibus arcu suscipit sed.
-\end{flushleft}
-\label{table1}
-\end{adjustwidth}
-\end{table}
+% TODO: Remove the unused code below.
+% % Place tables after the first paragraph in which they are cited.
+% \begin{table}[!ht]
+% \begin{adjustwidth}{-2.25in}{0in} % Comment out/remove adjustwidth environment if table fits in text column.
+% \centering
+% \caption{
+% {\bf Table caption Nulla mi mi, venenatis sed ipsum varius, volutpat euismod diam.}}
+% \begin{tabular}{|l+l|l|l|l|l|l|l|}
+% \hline
+% \multicolumn{4}{|l|}{\bf Heading1} & \multicolumn{4}{|l|}{\bf Heading2}\\ \thickhline
+% $cell1 row1$ & cell2 row 1 & cell3 row 1 & cell4 row 1 & cell5 row 1 & cell6 row 1 & cell7 row 1 & cell8 row 1\\ \hline
+% $cell1 row2$ & cell2 row 2 & cell3 row 2 & cell4 row 2 & cell5 row 2 & cell6 row 2 & cell7 row 2 & cell8 row 2\\ \hline
+% $cell1 row3$ & cell2 row 3 & cell3 row 3 & cell4 row 3 & cell5 row 3 & cell6 row 3 & cell7 row 3 & cell8 row 3\\ \hline
+% \end{tabular}
+% \begin{flushleft} Table notes Phasellus venenatis, tortor nec vestibulum mattis, massa tortor interdum felis, nec pellentesque metus tortor nec nisl. Ut ornare mauris tellus, vel dapibus arcu suscipit sed.
+% \end{flushleft}
+% \label{table1}
+% \end{adjustwidth}
+% \end{table}
 
 \section*{Discussion}\label{sec:discussion}
 
