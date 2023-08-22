@@ -4,6 +4,7 @@ This repository contains the necessary code to reproduce the article: "Informing
 
 ### TODO: 
 
+- [ ] **DON'T FORGET**: Before re-running everything, remove `ncores` argument from `fit_haiti3` and `fit_haiti1`. This argument doesn't do anything, but was left in so as to not trigger the `bake` recalculation of the file, which would be inconvinient when working on the manuscript. 
 - [ ] Make sure supplement is up to date 
    - [ ] Fix the supporting-information section in manuscript 
    - [ ] write an acknowledgement section 
@@ -12,7 +13,6 @@ This repository contains the necessary code to reproduce the article: "Informing
 - [ ] Double check all model equations match the code 
 - [ ] Write more about why model 3 is a poor description of the data, even if this is just added to the supplement. 
 - [ ] Update Model 3 initialization model description. 
-- [ ] Remove parallel back-ends from inside functions in `haitipkg`. 
 - [ ] Final things: 
    - [ ] Check all journal requirements are met
    - [ ] Final proof-read.
@@ -20,6 +20,7 @@ This repository contains the necessary code to reproduce the article: "Informing
    - [ ] Re-run everything and submit. 
 
 
+- [x] Remove parallel back-ends from inside functions in `haitipkg`. 
 - [x] Move all images and tables to the correct spot (directly after referencing them).
 - [x] Have to reference all tables. When should we reference Table 2 (parameter table). How about the table of likelihoods? 
 - [x] Remove vaccination scenario projection figures (maybe move into the supplement later).

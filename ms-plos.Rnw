@@ -398,6 +398,12 @@ theme_set(theme_bw() + theme(plot.title = element_text(hjust = 0.5)))
 # used has 36 cores.
 cores <-  as.numeric(Sys.getenv('SLURM_NTASKS_PER_NODE', unset=NA))
 if(is.na(cores)) cores <- detectCores()
+
+# Register parallel back-end. This code below creates a fork cluster, so we are assuming
+# that the code is run on a mac or linux machine; this doesn't matter if you
+# plan on simply loading the results, but if you would like to redo the expensive
+# calculations (e.g., test minor changes to the code), you need to make sure you
+# register the correct parallel back-end.
 registerDoParallel(cores)
 
 # Create a mapping between department names and what should be shown in figures
