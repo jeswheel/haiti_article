@@ -376,7 +376,7 @@ opts_chunk$set(
         bg = "transparent",
         pointsize = 9
     ),
-    fig.path = "testFigs/"
+    fig.path = "figure/"
 )
 
 myround <- function(x, digits = 1) {
