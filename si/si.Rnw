@@ -113,6 +113,9 @@ myround <- function (x, digits = 1) {
 \newcommand\modelCounter{m}
 \newcommand\Whur[1]{\beta_{W#1}^{hm}}
 \newcommand\hHur[1]{h_{#1}^{hm}}
+\newcommand\Iinit{I_{0,0}}
+\newcommand\Einit{E_{0, 0}}
+\newcommand\reportChange{\delta}
 
 \newcommand\missing{\hspace{6mm} ---}
 \newcommand\fixed{\color{blue}}
@@ -415,7 +418,7 @@ The Markov chain defined by the limit of this Euler scheme as the step size decr
 Models may be fitted and their implications assessed via numerical solutions (i.e., simulations) from the model equations.
 All the analyses we consider have this simulation-based property, known as plug-and-play or equation-free or likelihood-free.
 The numerical solutions to the model are arguably of more direct scientific interest than the exact solutions to the postulated equations.
-For ODE models, numerical methods are well studied and a standard numerical solution package such as \code{deSolve} in \code{R} is adequate for our purposes.
+For ODE models, numerical methods are well studied and a standard numerical solution package such as \code{deSolve} in \code{R} is adequate for many purposes.
 For SMCS and ODMCS models, exact schemes are feasible when the number of events is small, which may be the case for small populations.
 However, for applicability to larger populations, we use instead the following Euler scheme.
 Write $\delta$ for an Euler time step, and $\Delta N_{ij}$ for the numerical approximation to $N_{ij}(t+\delta)-N_{ij}(t)$ given $X(t)$.
@@ -457,7 +460,8 @@ In this case, we formally model the death rate as a rate of returning to the sus
 \section{Measurement Models}
 
 Each POMP requires specification of a measurement model, which is a statistical description of how observations on the system are obtained.
-In general, we used the same measurement models that were reported by \cite{lee20}.
+In general, we used the same measurement models that were reported by \cite{lee20} unless specifically noted in the following subsections.
+
 
 \subsection{Model~1}
 
@@ -465,9 +469,9 @@ In this model, the advantage afforded by vaccination is an increased probability
 Therefore, under the assumptions of this model, all reported cases are assumed to be a fraction of individuals that transition from the exposed to the infected compartment, as noted in Eq.~\myeqref{model1:meas}:
 \begin{equation}
   \label{model1:meas}
-  Y_{n} \mid \Delta N_{EI}(n) = z(n) \sim \text{NB}\left(\reportRate z(n), \obsOverdispersion \right),
+  Y_{n} \mid \Delta N_{EI}(n) = \reportChange \sim \text{NB}\left(\reportRate \reportChange, \obsOverdispersion \right),
 \end{equation}
-where $Y_n$ is the reported cholera cases at time $n \in 1:N$ and $\Delta N_{EI}(n)$ is the sum total of individuals across vaccination compartment $\vaccCounter$ who moved from compartment $E_\vaccCounter$ to $I_\vaccCounter$ since observation $n-1 \in 0:N-1$, and $\text{NB}\left(\reportRate z, \obsOverdispersion \right)$ is the negative binomial distribution with mean $\reportRate z$ and variance $\reportRate z \big(1 + \frac{\reportRate z}{\obsOverdispersion}\big)$.
+where $Y_n$ is the reported cholera cases at time $t_n \in t_1:t_N$ and $\Delta N_{EI}(n)$ is the sum total of individuals across each vaccination compartment $\vaccCounter \in 1:\vaccClass$ who moved from compartment $E_\vaccCounter$ to $I_\vaccCounter$ since observation $t_{n-1}$, and $\text{NB}\left(\reportRate \reportChange, \obsOverdispersion \right)$ is the negative binomial distribution with mean $\reportRate \reportChange$ and variance $\reportRate \reportChange \big(1 + \frac{\reportRate \reportChange}{\obsOverdispersion}\big)$.
 
 \subsection{Model~2}\label{sec:mod2Meas}
 
@@ -476,27 +480,28 @@ We fit Model~2 using the subplex algorithm in the \code{subplex} package, using
 a Gaussian measurement model (Eq.~\myeqref{model2:meas}) on the log transformed cases as the loss function.
 \begin{equation}
   \label{model2:meas}
-  \log\big(Y_{u, n} + 1\big) \mid \Delta N_{EI}(n) = z(n) \sim \text{N}\left(\log \big(\reportRate z(n) + 1\big), \obsOverdispersion^2 \right),
+  \log\big(Y_{u, n} + 1\big) \mid \Delta N_{EI}(n) = \reportChange \sim \text{N}\left(\log \big(\reportRate \reportChange + 1\big), \obsOverdispersion^2 \right),
 \end{equation}
-where $\Delta N_{EI}(n)$ is the sum total of individuals across vaccination compartment $\vaccCounter$ and unit $u$ who moved from compartment $E_{u\vaccCounter}$ to $I_{u\vaccCounter}$ since observation $n-1 \in 0:N-1$.
+where $\Delta N_{EI}(n)$ is the sum total of individuals across vaccination compartment $\vaccCounter \in 0:4$ and unit $u$ who moved from compartment $E_{u\vaccCounter}$ to $I_{u\vaccCounter}$ since observation $t_{n-1}$.
 Therefore, because the natural logarithm of observed case counts (plus one, to avoid taking the logarithm of zero) has a normal distribution, $Y_{u, n} + 1$ is assumed to follow a log-normal distribution with log-mean parameter $\mu = \log\big(\Delta N_{EI}(n) + 1\big)$ and log-variance $\obsOverdispersion^2$.
 We note that fitting a model with this measurement model is equivalent to fitting using least squares, with $\log(Y_{u, n} + 1)$ as the response variable.
 
 This measurement model differs from that used by \citet{lee20}, who fit the model in two stages: epidemic and endemic phases.
 Although their text and supplement material do not explicitly describe the measurement model used, inspection of the code provided with their submission suggests a change in measurement model between the epidemic and endemic phases.
-In the file \code{choleraEqsPublic.py}, \citet{lee20} create several functions, where each function represents a set of coupled differential equations that could potentially be used to model cholera incidence data.
-Each function returns a vector (or \code{numpy} array) that represents the change in each state variable for a single time step, including the variable \code{dC}, which tracks the number of new infections and is used to obtain the reported case counts.
-Following their comments and code, it appears that the function \code{choleraEqs10WithoutVaccinationNetwork} was used to describe the dynamics of the epidemic phase, and \code{choleraEqs11WithoutVaccinationNetwork} was used for the endemic stage (see Sec~\ref{sec:mod2rep} for more details).
-Because their models were fit using least squares, the code in these functions suggest that the measurement model for the epidemic phase is
+% In the file \code{choleraEqsPublic.py}, \citet{lee20} create several functions, where each function represents a set of coupled differential equations that could potentially be used to model cholera incidence data.
+% Each function returns a vector (or \code{numpy} array) that represents the change in each state variable for a single time step, including the variable \code{dC}, which tracks the number of new infections and is used to obtain the reported case counts.
+% Following their comments and code, it appears that the function \code{choleraEqs10WithoutVaccinationNetwork} was used to describe the dynamics of the epidemic phase, and \code{choleraEqs11WithoutVaccinationNetwork} was used for the endemic stage (see Sec~\ref{sec:mod2rep} for more details).
+% Because their models were fit using least squares, the code in these functions suggest that the measurement model for the epidemic phase is
+The measurement model they used for the epidemic phase is
 \begin{equation}
   \label{model2:measEpi}
-  Y_{u, n} \mid \Delta N_{EI}(n) = z(n) \sim \text{N}\left(\reportRate z(n), \obsOverdispersion^2 \right),
+  Y_{u, n} \mid \Delta N_{EI}(n) = \reportChange \sim \text{N}\left(\reportRate \reportChange, \obsOverdispersion^2 \right),
 \end{equation}
-which is similar to our measurement model, the primary difference being that the measurement model is applied to raw case counts rather than log-transformed case counts.
-The measurement model for the endemic phase modifies the epidemic model by counting both asymptomatically infected (A) and symptomatically infected (I) individuals in the case counts:
+% which is similar to our measurement model, the primary difference being that the measurement model is applied to raw case counts rather than log-transformed case counts.
+The measurement model they used for the endemic phase modifies the epidemic model by counting both asymptomatically infected (A) and symptomatically infected (I) individuals in the case counts:
 \begin{equation}
   \label{model2:measEnd}
-  Y_{u, n} \mid \Delta N_{EI}(n) = z_1(n), \Delta N_{EA}(n) = z_2(n) \sim \text{N}\left(\reportRate \big(z_1(n) + z_2(n)\big), \obsOverdispersion^2 \right),
+  Y_{u, n} \mid \Delta N_{EI}(n) = \reportChange_1, \Delta N_{EA}(n) = \reportChange_2 \sim \text{N}\left(\reportRate \big(\reportChange_1 + \reportChange_2\big), \obsOverdispersion^2 \right),
 \end{equation}
 where the notation for $\Delta N_{EA}(n)$ is similar to $\Delta N_{EI}(n)$, described above.
 
@@ -506,9 +511,9 @@ In this model, reported cholera cases are assumed to stem from individuals who d
 Therefore reported cases are assumed to come from an over-dispersed negative binomial model, given the increase in infected individuals:
 \begin{equation}
   \label{model3:meas}
-  Y_{u, n} \mid \Delta N_{S_{u \vaccCounter}I_{u \vaccCounter}}(t) = z_{u}(n) \sim \text{NB}\left(\reportRate z_{u}(n), \obsOverdispersion \right),
+  Y_{u, n} \mid \Delta N_{S_{u \vaccCounter}I_{u \vaccCounter}}(t) = \reportChange_u \sim \text{NB}\left(\reportRate \reportChange_{u}, \obsOverdispersion \right),
 \end{equation}
-where $\Delta N_{S_{u \vaccCounter}I_{u \vaccCounter}}(n)$ is the number of individuals who moved from compartment $S_{u \vaccCounter}$ to $I_{u \vaccCounter}$ since observation $n-1 \in 0:N-1$.
+where $\Delta N_{S_{u \vaccCounter}I_{u \vaccCounter}}(n)$ is the number of individuals who moved from compartment $S_{u \vaccCounter}$ to $I_{u \vaccCounter}$ since observation $t_{n-1}$.
 
 This measurement model is a minor change from that used by \cite{lee20}, which allowed for a change in the reporting rate on January 1st, 2018.
 The fitted values of the reporting rate---before and after January 2018---were $0.97$ and $0.097$, respectively.
@@ -519,7 +524,7 @@ We therefore do not allow a change in reporting rate when fitting Model~3.
 
 \section{Initial Values}
 
-To perform inference on POMP models, it is necessary to propose an initial probability density for the latent process $f_{X_0}(x_0;\theta)$, including the possibility that the initial values could be known, or could be a non-random function of the unknown parameter vector, $\theta$.
+To perform inference on POMP models, it is necessary to propose an initial probability density for the latent process $f_{X_0}(x_0;\theta)$, including the possibility that the initial values of the latent states are known, or are a non-random function of the unknown parameter vector, $\theta$.
 This density is used to obtain initial values of the latent state when fitting and evaluating the model.
 For each of the models considered in this analysis, the initial conditions are derived by enforcing the model dynamics on reported cholera cases.
 It is also sometimes necessary to fit some initial value parameters in order to help determine initial values for weakly identifiable compartments.
@@ -527,77 +532,24 @@ In the following subsections, we mention initial value parameters that were fit 
 
 \subsection{Model~1}
 
-For this model, the number of individuals in the Recovered and Asymptomatic compartments are set to zero, but the initial proportion of Infected and Exposed individuals is estimated as initial value parameters ($I(0)$ and $E(0)$, respectively) using the IF2 algorithm, implemented as \texttt{mif2} in the \texttt{pomp} package.
-Finally, the initial proportion of Susceptible individuals $S_0$ is calculated as $S(0) = 1 - I(0) - E(0)$.
+For this model, the number of individuals in the Recovered and Asymptomatic compartments are set to zero, but the initial proportion of Infected and Exposed individuals is estimated as initial value parameters ($\Iinit$ and $\Einit$, respectively) using the IF2 algorithm, implemented as \texttt{mif2} in the \texttt{pomp} package.
+Finally, the initial proportion of Susceptible individuals $S_{0, 0}$ is calculated as $S_{0, 0} = 1 - \Iinit - \Einit$.
+This model for the initial values of the latent states matches that which was used by \citet{lee20}.
 
 \subsection{Model~2}
 
 Model~2 assumes that the initial values are a deterministic function of the reporting rate and the initial case reports, and so no initial value parameters need to be estimated.
 Initial values for latent state compartments are chosen so as to enforce the model dynamics on the observed number of cases.
 Specifically, the model sets $I_{u0}(0) = y^*_{1u} / \reportRate$ for each unit $u \in 1:10$, where $I_{u0}(t)$ is the number of infected individuals in unit $u$ at time $t$, vaccination scenario $z = 0$, $y^*_{tu}$ is the reported number of cases, and $\reportRate$ is the reporting rate.
+This model for the initial values of the latent states matches that which was used by \citet{lee20}.
 
 \subsection{Model~3}
 
-As described in the main test, the latent states are initialized by estimating of the number of infected, asymptomatic, and recovered individuals at time $t_0$ by using observed case counts at time $t_1$.
+The latent states of this model are initialized by estimating of the number of infected, asymptomatic, and recovered individuals at time $t_0$ by using observed case counts at time $t_1$.
 The initial value for the bacteria compartment is then determined using the rainfall dynamics of Eq.~23.
 For the departments of Grande'Anse, Nord-Ouest, and Sud-Est, estimating the latent states at time $t_0$ using the observed data at time $t_1$ is problematic (see Sec.~\ref{sec:mod3Cal}), so we instead estimate initial value of the latent state $I_{u0}(t_0)$ for the integers $u \in \{3, 7, 9\}$, which correspond to the aforementioned departments.
 The remaining hidden states are estimated by enforcing model dynamics using this result.
-
-% \section{Block Panel Iterated Filter}
-%
-% The panel iterated filter (PIF) algorithm of \citet{breto20} has been used to fit parameters of panelPOMP models in several studies \citep{domeyer22,wale2019,ranjeva17,ranjeva19}.
-% Like other iterated filtering algorithms, PIF iteratively combines particle filter calculations with parameter perturbations.
-% Theoretical results show that, as the perturbations are reduced over successive iterations, the perturbed parameters converge to the MLE.
-%
-% In the case of a panelPOMP, the parameter vector $\theta$ may be composed of a set of shared parameters $\phi$, and a set of unit-specific parameters $\psi_{u}$, for units $u \in \seq{1}{U}$.
-% Here, we say that a parameter $\psi_{u}$ for $u \in \seq{1}{U}$ is unit-specific if it is not involved in the one-step transition density or the measurement model of any other unit $k \neq u \in \seq{1}{U}$, and shared parameters are those that are not unit-specific.
-% The PIF algorithm treats the parameter vector $\theta = (\phi, \psi_{1:U})$ as a complete entity and gives no distinction between shared and unit-specific parameters.
-% Even though the random walk standard deviation is set to zero for unit-specific parameters when considering data from other units, this lack of distinction may result in particle depletion for unit-specific parameters as the number of units $U$ grows large.
-% This is because it is likely that, when updating the parameters for a given unit, several parameter vector $\theta$ particles will not be resampled due to having low weights.
-% When the number of units is large, this will lead to a decreasing number of ancestral particles to sample unit-specific parameters $\psi_k$ as $k$ increases.
-%
-% As a solution to this issue, we propose the block panel iterated filter (BPIF), described in Algorithm~\ref{alg:bpif}.
-% In this algorithm, shared $\phi$ and unit-specific parameters $\psi_{u}$ are handled differently when updating the parameter vector $\theta = (\phi, \psi_{1:U})$.
-% The BPIF updates $\theta$ by updating the shared vector $\phi$ in the same way that is done with PIF, but index resampling for unit-specific parameters $\psi_{1:U}$ only occurs when data from the corresponding
-% unit are being considered.
-% We have found that this modification leads to improved likelihood maximization performance, especially as the number of units increases.
-% No theoretical properties of this algorithm have yet been derived, but the approach has similarities to the block particle filter of \citet{rebeschini15} and its extension to parameter estimation \citep{ionides22,ning21ibpf}.
-%
-% \begin{algorithm}[ht]
-%    \caption[BPIF]{\textbf{BPIF}. \\
-%     {\bf Inputs}:\\\hspace{\textwidth}
-%     Simulator of initial density, $f_{X_{u, 0}}(x_{u, 0}; \theta)$ for $u$ in $\seq{1}{U}$.\\\hspace{\textwidth}
-%     Simulator of transition density, $f_{X_{u, n}|X_{u, n-1}}(x_{u, n}|x_{u, n-1}; \theta)$ for $u$ in $\seq{1}{U}$, $n$ in $\seq{1}{N_u}$.\\\hspace{\textwidth}
-%     Evaluator of measurement density, $f_{Y_{u, n}|X_{u, n}}(y_{u, n}|x_{u, n} ; \theta)$ for $u$ in $\seq{1}{U}$, $n$ in $\seq{1}{N_u}$.\\\hspace{\textwidth}
-%     Data $y_{u, n}^*$,for $u$ in $\seq{1}{U}$, $n$ in $\seq{1}{N_u}$.\\\hspace{\textwidth}
-%     Number of iterations, $M$.\\\hspace{\textwidth}
-%     Number of particles, $J$.\\\hspace{\textwidth}
-%     Starting parameter swarm, $\Theta_j^0 = \big(\Phi_j^0, \Psi_{1:U, j}^0\big)$ for $j \in \seq{1}{J}$, $u \in \seq{1}{U}$.\\\hspace{\textwidth}
-%     Simulator of perturbation density, $h_{u, n}(\theta | \phi; \sigma)$ for $u \in \seq{1}{U}$, $n \in 0:N_u$.\\\hspace{\textwidth}
-%     Perturbation sequence, $\sigma_m$ for $m \in 1:M$.\\\hspace{\textwidth}
-%     {\bf Output:} \\\hspace{\textwidth}
-%     Final parameter swarm, $\Theta_{j}^{m} = \big(\Phi_j^m, \Psi_{\seq{1}{U}, j}^m\big)$ for $j \in \seq{1}{J}$, $u \in \seq{1}{U}$.
-%     \label{alg:bpif}}
-% %\BlankLine
-% \For{$m \in 1:M$}{
-%   Set $\Phi_{0, j}^m = \Phi_j^{m-1}$ for $j \in \seq{1}{J}$\;
-%     \For{$u \in \seq{1}{U}$}{
-%       Set $\Phi_{u, 0, j}^{F, m} \sim h_{u, 0}(\phi | \Phi_{0, j}^m; \sigma_m)$ for $j \in \seq{1}{J}$\;
-%       Set $\Psi_{u, 0, j}^{F, m} \sim h_{u, 0}(\psi | \Psi_{u, j}^{m - 1}; \sigma_m)$ for $j \in \seq{1}{J}$\;
-%       Set $\Theta_{u, 0, j}^{F, m} = \big(\Phi_{u, 0, j}^{F, m}, \Psi_{u, 0, j}^{F, m}\big)$ for $j \in \seq{1}{J}$\;
-%       Initialize $X_{u, 0, j}^{F, m} \sim f_{X_{u, 0}}(x_{u, 0}; \Theta_{u, 0, j}^{F, m})$ for $j \in \seq{1}{J}$\;
-%         \For{$n \in \seq{1}{N_u}$} {
-%           Set $\Theta_{u, n, j}^{P, m} \sim h_{u, n}(\theta|\Theta_{u, n-1, j}^{F, m}, \sigma_m)$ for $j \in \seq{1}{J}$\;
-%           $X_{u, n, j}^{P, m} \sim f_{X_{u, n}|X_{u, n-1}}(x_{u, n}|X_{u, n-1, j}^{F, m}; \Theta_{u, n, j}^{P, m})$ for $j \in \seq{1}{J}$\;
-%           $w_{u, n, j}^m = f_{Y_{u, n}|X_{u, n}}(y_{u, n}^*|X_{u, n, j}^{P, m})$ for $j \in \seq{1}{J}$\;
-%           Draw $k_{\seq{1}{j}}$ with $P(k_j = i) = w_{u, n, i}^m / \sum_{v = 1}^J w_{u, n, v}^m$ for $i, j \in \seq{1}{J}$\;
-%           Set $\Theta_{u, n, j}^{F, m} = \Theta_{u, n, k_j}^{P, m} = \big(\Phi_{u, n, k_j}^{P, m}, \Psi_{u, n, k_j}^{P, m}\big)$ and $X_{u, n, j}^{F, m} = X_{u, n, k_j}^{P, m}$ for $j \in \seq{1}{J}$\;
-%         }
-%       Set $\Theta_{u, j}^m = \big(\Phi_{u, N_u, j}^{F, m}, \Psi_{u, N_u, j}^{F, m}\big)$ for $j \in \seq{1}{J}$\;
-%     }
-%   Set $\Theta_j^m = \big(\Phi_{U, j}^m, \Psi_{1:U, j}^m\big)$ for $j \in \seq{1}{J}$\;
-% }
-% \end{algorithm}
+% TODO: Check this section.
 
 \section{Calibrating Model~3 to observed cases}\label{sec:mod3Cal}
 
@@ -619,7 +571,7 @@ est_param_names <- c(
 # Add unit numbers to each parameter
 est_param_names_expanded <- paste0(rep(est_param_names, each = 10), 1:10)
 
-# This function sets the rw.sd for named parameters, first search.
+# This function sets the rw_sd for named parameters, first search.
 set_rw_1 <- function(x) {
   if (gsub("[[:digit:]]+$", "", x) %in% shared_param_names) {
     return(0.01)
@@ -632,7 +584,7 @@ set_rw_1 <- function(x) {
   }
 }
 
-# This function sets the rw.sd for named parameters, second search.
+# This function sets the rw_sd for named parameters, second search.
 set_rw_2 <- function(x) {
   if (gsub("[[:digit:]]+$", "", x) %in% shared_param_names) {
     return(0.003)
@@ -645,7 +597,7 @@ set_rw_2 <- function(x) {
   }
 }
 
-# This function sets the rw.sd for named parameters, final search.
+# This function sets the rw_sd for named parameters, final search.
 set_rw_3 <- function(x) {
   if (gsub("[[:digit:]]+$", "", x) %in% shared_param_names) {
     return(0.0025)
@@ -661,17 +613,17 @@ set_rw_3 <- function(x) {
 # First Search RW
 reg_rw_1.sd <- lapply(est_param_names_expanded, set_rw_1)
 names(reg_rw_1.sd) <- est_param_names_expanded
-chol_rw_1.sd <- do.call(rw.sd, reg_rw_1.sd)
+chol_rw_1.sd <- do.call(rw_sd, reg_rw_1.sd)
 
 # Second Search RW
 reg_rw_2.sd <- lapply(est_param_names_expanded, set_rw_2)
 names(reg_rw_2.sd) <- est_param_names_expanded
-chol_rw_2.sd <- do.call(rw.sd, reg_rw_2.sd)
+chol_rw_2.sd <- do.call(rw_sd, reg_rw_2.sd)
 
 # Third Search RW
 reg_rw_3.sd <- lapply(est_param_names_expanded, set_rw_3)
 names(reg_rw_3.sd) <- est_param_names_expanded
-chol_rw_3.sd <- do.call(rw.sd, reg_rw_3.sd)
+chol_rw_3.sd <- do.call(rw_sd, reg_rw_3.sd)
 
 # Search1 hyper-parameters
 SEARCH1 = list(
@@ -722,6 +674,7 @@ N_SEARCHES <- 3L
 save_file <- "../model3/si/fit_orig_model.rds"
 
 # Fit the model and save the results
+# TODO: Remove SEARCH3 when re-running everything.
 haiti3_orig_fit <- bake(
   file = save_file, {
     fit_coupled_haiti3(
@@ -769,18 +722,28 @@ unitLikesM3 <- best_mod %>%
 
 <<M3_bench, echo=FALSE, message=FALSE, include=FALSE, cache=TRUE>>=
 
-# Create dataset that will be used to fit ARMA models. To do this, we
-# need to make sure that missing values are marked as NA, so we check
-# for any jumps in time.
-MODEL3_CASES <- haitiCholera %>%
+MODEL3_CASES <- haitiCholera |>
   dplyr::rename(
     date = date_saturday, Grande_Anse = Grand.Anse,
     Nord_Est = Nord.Est, Nord_Ouest = Nord.Ouest,
     Sud_Est = Sud.Est
-  ) %>%
-  dplyr::mutate(date = as.Date(date)) %>%
-  dplyr::select(-report) %>%
-  dplyr::mutate(time_diff = date - lag(date))
+  ) |>
+  dplyr::mutate(date = as.Date(date)) |>
+  dplyr::select(-report) |>
+  dplyr::mutate(time_diff = date - lag(date)) |>
+  dplyr::filter(date >= "2010-11-20")
+
+# Create dataset that will be used to fit ARMA models. To do this, we
+# need to make sure that missing values are marked as NA, so we check
+# for any jumps in time.
+# MODEL3_CASES <- haitiCholera %>%
+#   dplyr::rename(
+#     date = date_saturday, Grande_Anse = Grand.Anse,
+#     Nord_Est = Nord.Est, Nord_Ouest = Nord.Ouest,
+#     Sud_Est = Sud.Est
+#   ) %>%
+#   dplyr::mutate(date = as.Date(date)) %>%
+#   dplyr::select(-report) %>%
 
 # Find jumps
 jumps <- which(MODEL3_CASES$time_diff > lubridate::make_difftime(day = 7))
@@ -890,19 +853,19 @@ bpf_orig3_out <- bake(
 @
 
 In this section, we provide more detail on the process that was used to estimate the coefficients used in Model~3.
-In particular, we discuss why we decided to include additional model parameters that were not considered by \cite{lee20} (parameters related to initial conditions and Hurricane Matthew).
+In particular, we discuss why we decided to include additional model parameters---those that are associated with the initial conditions of the model and the behavior of the system during Hurricane Matthew---that were not considered by \cite{lee20}.
 To calibrate this model, we used the iterated block particle filter (IBPF) method of \cite{ionides22}.
-Due to the novelty of this algorithm, there does not exist published examples the IBPF algorithm used for data analysis outside of the papers in which the algorithm was introduced \citep{ning21ibpf,ionides22}, which at least partially motivates the creation of this section.
+Due to the novelty of this algorithm, there does not exist published examples the IBPF algorithm used for data analysis outside of the papers in which the algorithm was introduced \citep{ning21ibpf,ionides22}, which at least partially motivates the inclusion additional details in this section.
 
 \cite{lee20} were only able to estimate model parameters to a simplified version of Model~3 on a subset of the available data, as no method existed at the time of their publication to fit a fully coupled meta-population model to disease incidence data.
 Building on their results, we fit the fully coupled version of Model~3 to all available data.
 In order to properly maximize the model likelihood, we found that it was necessary to use multiple searches for the MLE, periodically pruning away less successful searches.
 The first collection of searches was performed by obtaining initial values for the parameters by uniformly sampling values from a predefined hypercube.
-Two subsequent refinement searches used starting values corresponding to the largest model likelihoods obtained in the previous round.
+A subsequent refinement search used starting values corresponding to the largest model likelihoods obtained in the previous round.
 This is similar to the approach used by \cite{ionides22}.
 
 We use the technique described above to fit the fully coupled version of Model~3 proposed by \cite{lee20} to all observed cholera data.
-The maximum likelihood we obtained with the model was $\Sexpr{round(max(haiti3_orig_fit$search3$logLiks$logLik))}$, which is higher than the log-ARMA benchmark ($\Sexpr{round(sum(unitLikesARMA$ll))}$).
+The maximum likelihood we obtained with the model was $\Sexpr{round(max(haiti3_orig_fit$search2$logLiks$logLik))}$, which is higher than the log-ARMA benchmark ($\Sexpr{round(sum(unitLikesARMA$ll))}$). % TODO: Check this, numbers don't match up.
 For meta-population models, it is worth considering how well the model fits the data to each spatial unit.
 This can be done by looking at conditional log-likelihoods, which is part of the output of the \texttt{bpfilter} algorithm in the \texttt{spatPomp} package.
 The likelihoods for each department, compared to the corresponding log-ARMA benchmark, are displayed in Fig.~\ref{fig:h3UnitLikes}.
@@ -977,13 +940,13 @@ each of these departments have both low starting case counts followed by rapid g
 <<loadFinalModel3, echo=FALSE, include=FALSE, message=FALSE>>=
 
 # This result was used in the manuscript, so it doesn't need to be recalculated.
-h3_final_results <- readRDS("../model3/run_level_3/haiti3_coupled_fit.rds")
+h3_final_results <- readRDS("../model3/run_level_3/haiti3_fit.rds")
 
 # Save best_m as index for the model parameters with the best likelihood.
 # Then, save the model parameter values and the likelihood evaluations
-best_m <- which.max(h3_final_results$search3$logLiks$logLik)
-best_params <- h3_final_results$search3$params[best_m, ]
-all_liks <- as.data.frame(h3_final_results$search3$likMat)
+best_m <- which.max(h3_final_results$search2$logLiks$logLik)
+best_params <- h3_final_results$search2$params[best_m, ]
+all_liks <- as.data.frame(h3_final_results$search2$likMat)
 all_liks$which <- rep(1:72, each = 18)
 best_mod <- dplyr::filter(all_liks, which == best_m)
 
@@ -1022,7 +985,7 @@ ARMA_M3_joined <- dplyr::left_join(
 @
 
 We refit Model~3 after introducing these seven parameters---three initial value parameters and four parameters related to Hurricane Matthew---using the same successive search scheme described above.
-The resulting model has a log-likelihood value of $\Sexpr{round(max(h3_final_results$search3$logLiks$logLik), 1)}$.
+The resulting model has a log-likelihood value of $\Sexpr{round(max(h3_final_results$search2$logLiks$logLik), 1)}$.
 We also provide figures for department specific log-likelihoods and conditional log-likelihoods in Figs.~\ref{fig:finalUnitLL} and \ref{fig:finalCondLL}.
 
 \begin{figure}[ht]
@@ -1097,7 +1060,7 @@ t(bpf_final3_out$block.cond.loglik) %>%
 
 While the addition of the Hurricane parameters seems to have resulted in a dramatic increase of conditional likelihoods around and after October 2016, the inclusion of the initial value parameters does not appear to have fixed the low conditional log-likelihood values in Sud-Est and Nord-Ouest.
 This could be due to many factors, including the possibility that the coupling between units forces low initial value parameters in a given department in order for the model to fit the data in the remaining departments.
-Whatever the case may be, the inclusion of the seven parameters resulted in a $\Sexpr{round(max(h3_final_results$search3$logLiks$logLik) - max(haiti3_orig_fit$search3$logLiks$logLik), 1)}$ increase in log-likelihood, which is a highly statistically significant difference.
+Whatever the case may be, the inclusion of the seven parameters resulted in a $\Sexpr{round(max(h3_final_results$search2$logLiks$logLik) - max(haiti3_orig_fit$search2$logLiks$logLik), 1)}$ increase in log-likelihood, which is a highly statistically significant difference.
 One could similarly test whether the inclusion of the initial value parameters resulted in a significantly better fit to the observed data, but we do not do this here due to the large computational effort that would be required.
 
 \subsection{Examining the Hidden States of the Calibrated Model}
@@ -1335,11 +1298,11 @@ The dashed line represents the end of the observed data.}
 \section{Replication of \cite{lee20}}
 
 In this article we claimed that we were able to obtain better fits to the observed data using the same models that were proposed by \cite{lee20}.
-Along with visual comparisons to the data, this claim was supported by comparing likelihoods and AIC values in Table~1.
+Along with visual comparisons to the data, this claim was supported by comparing likelihoods and AIC values in Table~2 in the manuscript. % TODO: Double check the table number matches
 Because model likelihoods were not provided by \cite{lee20}, it is necessary to replicate these models in order to obtain likelihood estimates.
 Here we would like to thank the authors of \cite{lee20}, who provided detailed descriptions of their models, which enabled us to build on their work.
 In the following subsections, we use our \code{R} package \code{haitipkg} to reproduce some of the results of \cite{lee20}.
-This reproduction allows us to estimate the likelihoods of the \cite{lee20} version of Models~1--3, and also provides a demonstration of reproducibility.
+This reproduction allows us to estimate the likelihoods of the \cite{lee20} version of Models~1--3, and also provides a demonstration of the importance and usefulness of reproducible research.
 
 \subsection{Model~1 Replication}
 
@@ -1347,15 +1310,15 @@ The model was implemented by a team at Johns Hopkins Bloomberg School of Public 
 Original source code is publicly available with DOI: 10.5281/zenodo.3360991.
 The final results reported by the Model~1 authors were obtained by using several different parameter sets rather than a single point estimate.
 According to the supplement materials, this was because model realizations from a single parameter set retained substantial variability, but multiple realizations from a collection of parameter sets resulted in a reasonable visual fit to the data.
-We are also inclined to believe that the use of multiple parameter values was in part intended to account for parameter uncertainty (as mentioned in our main text), an effort by the Model~1 authors that we applaud.
+We are also inclined to believe that the use of multiple parameter values was in part intended to account for parameter uncertainty---the importance of which was discussed in the main text---an effort by the Model~1 authors that we applaud.
 Simulations from each of the parameter sets, however, were treated with equal importance when being used to diagnose the model fit and make inference on the system.
-This is problematic given Figures S8 and S9 of the supplement material, which suggest that some parameter sets that were used for inference were several hundred log-likelihood units lower than other parameter sets.
-Such a large difference in log-likelihoods is well beyond the threshold of statistical uncertainty determined by Wilks' theorem.
+This is problematic given Figures S8 and S9 of the supplement material, which suggest that some parameter sets that were used for inference may have been several hundred units of log-likelihood lower than other parameter sets that were simultaneously used to make forecasts.
+Such a large difference in log-likelihoods is well beyond the threshold of statistical uncertainty determined by Wilks' theorem, resulting in the equal use of statistically inferior parameter sets in order to make forecasts and conduct inference on the system.
 
-To fully reproduce the results of the Model~1 authors, it is necessary to use the exact same set of model parameters.
-Because the parameters used to obtain the result given by \cite{lee20} are not publicly available, we relied on the source code provided by the Model~1 authors to approximately recreate the parameter set.
+To fully reproduce the results of the Model~1 authors, it is necessary to use the exact same set of model parameters that were originally used to obtain the results presented by \cite{lee20}.
+Because these parameter sets were not made publicly available, we relied on the source code provided by the Model~1 authors to approximately recreate the parameter set.
 Due to software updates since the publication of the source code, we were unable to produce the exact same set of parameters.
-Still, running the publicly available source code resulted in a set of parameters that are visually similar to those used by the Model~1 authors (See Figures~\ref{fig:PlotEpiDist} and \ref{fig:plotEndParams}).
+Running the publicly available source code, however, resulted in a set of parameters that are visually similar to those used by the Model~1 authors (See Figures~\ref{fig:PlotEpiDist} and \ref{fig:plotEndParams}).
 Furthermore, simulations using the set of parameters produced by the source code appear practically equivalent to those displayed by \cite{lee20} (See Figure~\ref{fig:plotMod1Sims}).
 
 <<Simulate Lee Model 1, echo=FALSE, cache=TRUE>>=
@@ -1620,7 +1583,7 @@ Model 2 trajectories using the \code{haitipkg}. Compare to Figure S15 of \cite{l
 
 There are minor differences between Figure~\ref{fig:mod2rep} and Figure~S15 of \cite{lee20sup}.
 While the discrepancy appears minor, the deterministic nature of Model~2 implies that an exact replication of model trajectories should be possible.
-In this case, these discrepancies may be attributed to implementing the model in two different programing languages.
+In this case, these discrepancies may possibly be attributed to implementing the model and plotting the model trajectory in two different programming languages.
 Another potential explanation for the discrepancy is that the parameters that we used are only approximately the same as those used by \citet{lee20sup}.
 For example, the parameters $\transmission$, $\Wbeta{}$ (See Table~\ref{tab:translate}) had reported values of $9.9 \times 10^{-7}$ and $4.03 \times 10^{-2}$, respectively (Table~S13 of \cite{lee20sup}), but were actually fit to data and therefore likely these values have been rounded.
 Additionally, our implementation of Model~2 used a time scale of years and many of the parameters were reported on a weekly scale, so small differences may result due to unit conversions.
@@ -1639,8 +1602,9 @@ Model~3 was developed by a team of researchers at the Laboratory of the Swiss Fe
 The code that was originally used to implement Model~3 is archived with the DOI: \url{10.5281/zenodo.3360723}, and also available in the public GitHub repository: \code{jcblemai/haiti-mass-ocv-campaign}.
 Because the code was made publicly available, and final model parameters were reported in the supplementary material of \cite{lee20}, we were able to reproduce Model~3 by directly using the source code.
 In Fig.~\ref{fig:mod3rep}, we plot simulations from this model.
-This figure should be compared to Figure S18 of \cite{lee20}.
+This figure can be compared to Figure S18 of \cite{lee20}.
 We note that slight differences may be accounted for due to variance in the model simulations and the difference in programming language used to produce the figure.
+Overall, the high standard of reproducibility that was achieved by the Model~3 authors facilitated the ability to readily replicate their model and results.
 
 <<Model3Replication, echo=FALSE, cache=TRUE>>=
 NSIM <- 500
@@ -1794,7 +1758,7 @@ $P\big(\Theta = \Theta_k | Y_{1:N} = y_{1:N}^*\big) = \frac{f_{Y_{1:N}}(y_{1:N}^
 In a standard empirical Bayes analysis, the values $\Theta_1, \ldots, \Theta_k$ of the prior distribution would be chosen using the observed data, resulting in a posterior distribution that weighs the prior parameter vectors proportional to their corresponding likelihoods.
 Instead, we choose $\Theta_i$ to be the output of a stochastic routine applied to the observed data by setting $\Theta_i$ to be the output of an iterated filtering algorithm.
 In practice, because the likelihood maximization routines of iterated filtering methods are stochastic, it is common to run the iterated filtering method multiple times for each model in order to obtain a maximum likelihood estimate for model parameters.
-This results in a natural set of parameters near the MLE that could be used in in the discrete prior distribution.
+This results in a natural set of parameters near the MLE that could be used as the discrete prior distribution.
 
 \section{Translating to \citet{lee20} notation}
 

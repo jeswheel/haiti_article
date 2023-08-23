@@ -195,6 +195,8 @@
 \newcommand\Whur[1]{\beta_{W#1}^{hm}}
 \newcommand\hHur[1]{h_{#1}^{hm}}
 \newcommand\tHur{t_{hm}}
+\newcommand\Iinit{I_{0,0}}
+\newcommand\Einit{E_{0, 0}}
 \newcommand\Wremoval{\delta_W}
 \newcommand\Wshed{\mu_W}
 \newcommand\mixExponent{\nu}
@@ -964,7 +966,7 @@ mod3_ll <- max(
 
 # Just a bit of tidying up: removing parameters that we won't use again.
 rm(
-  SEARCH1, SEARCH2, SEARCH3, N_SEARCHES,
+  SEARCH1, SEARCH2, N_SEARCHES,
   est_param_names, est_param_names_expanded,
   set_rw_1, set_rw_2, set_rw_3, reg_rw_1.sd, reg_rw_2.sd, reg_rw_3.sd,
   chol_rw_1.sd, chol_rw_2.sd, chol_rw_3.sd
@@ -1465,13 +1467,13 @@ Observation \newline variance
   & \multirow{2}{*}{(S19)} % TODO: Check
 \\
 \hline
-\multirow{2}{*}{Initial Values} & $I_{0,0} = \Sexpr{round(prod(p1[c('pop_0', 'I_0')]))}$
+\multirow{2}{*}{Initial Values} & $\Iinit = \Sexpr{round(prod(p1[c('pop_0', 'I_0')]))}$
   &
   & \multirow{2}{*}{\missing}
   % & \multicolumn{1}{c}{\multirow{2}{*}{\hspace{16pt}\missing}}
   &
-  & \multirow{2}{*}{$I_{3,7,10;0}(0)= (
-        \Sexpr{round(prod(p3[c('H3', 'Iinit3')]))}, \Sexpr{round(prod(p3[c('H7', 'Iinit7')]))}, \Sexpr{round(prod(p3[c('H10', 'Iinit10')]))})^*$}
+  & \multirow{2}{*}{$\Iinit^{3,7,10} = (
+        \Sexpr{round(prod(p3[c('H3', 'Iinit3')]))}, \Sexpr{round(prod(p3[c('H7', 'Iinit7')]))}, \Sexpr{round(prod(p3[c('H10', 'Iinit10')]))})^*$} % TODO: Check the unit numbers
   &  % TODO: \multirow{2}{*}{EQUATION NUMBER}
   \\
   & $E_{0,0} = \Sexpr{round(prod(p1[c('pop_0', 'E_0')]))}$ & & \multicolumn{1}{c}{}
