@@ -5,6 +5,9 @@ This repository contains the necessary code to reproduce the article: "Informing
 ### TODO: 
 
 - [ ] **DON'T FORGET**: Before re-running everything, remove `ncores` argument from `fit_haiti3` and `fit_haiti1`. This argument doesn't do anything, but was left in so as to not trigger the `bake` recalculation of the file, which would be inconvinient when working on the manuscript. 
+- [ ] The measurement models for Models 2 and 3 in the supplement need notation fixed
+   - [ ] In Model 2, change NEI -> NEIu, as we don't sum across units and this is more clear. 
+   - [ ] In Model 3, there is no Iuz compartment, just Iu, so notation should suggest any Suz -> Iu.
 - [ ] Make sure supplement is up to date 
    - [ ] Fix the supporting-information section in manuscript 
    - [ ] write an acknowledgement section 

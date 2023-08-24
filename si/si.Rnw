@@ -469,21 +469,24 @@ In this model, the advantage afforded by vaccination is an increased probability
 Therefore, under the assumptions of this model, all reported cases are assumed to be a fraction of individuals that transition from the exposed to the infected compartment, as noted in Eq.~\myeqref{model1:meas}:
 \begin{equation}
   \label{model1:meas}
-  Y_{n} \mid \Delta N_{EI}(n) = \reportChange \sim \text{NB}\left(\reportRate \reportChange, \obsOverdispersion \right),
+  Y_{n} \mid \Delta N_{E_{\cdot}I_{\cdot}}(n) = \reportChange \sim \text{NB}\left(\reportRate \reportChange, \obsOverdispersion \right),
 \end{equation}
-where $Y_n$ is the reported cholera cases at time $t_n \in t_1:t_N$ and $\Delta N_{EI}(n)$ is the sum total of individuals across each vaccination compartment $\vaccCounter \in 1:\vaccClass$ who moved from compartment $E_\vaccCounter$ to $I_\vaccCounter$ since observation $t_{n-1}$, and $\text{NB}\left(\reportRate \reportChange, \obsOverdispersion \right)$ is the negative binomial distribution with mean $\reportRate \reportChange$ and variance $\reportRate \reportChange \big(1 + \frac{\reportRate \reportChange}{\obsOverdispersion}\big)$.
+where $Y_n$ is the reported cholera cases at time $t_n \in t_1:t_N$ and $\Delta N_{E_{\cdot}I_{\cdot}}(n)$ is the sum total of individuals across each vaccination compartment $\vaccCounter \in 1:\vaccClass$ who moved from compartment $E_\vaccCounter$ to $I_\vaccCounter$ since observation $t_{n-1}$.
+Here, $\text{NB}\left(\reportRate \reportChange, \obsOverdispersion \right)$ denotes a negative binomial distribution with mean $\reportRate \reportChange$ and variance $\reportRate \reportChange \big(1 + \frac{\reportRate \reportChange}{\obsOverdispersion}\big)$.
 
 \subsection{Model~2}\label{sec:mod2Meas}
 
-As mentioned in the main text, Model~2 was fit using reported case counts that were transformed using the natural logarithm.
+Model~2 was fit using reported case counts that were transformed using the natural logarithm.
 We fit Model~2 using the subplex algorithm in the \code{subplex} package, using
-a Gaussian measurement model (Eq.~\myeqref{model2:meas}) on the log transformed cases as the loss function.
+a Gaussian measurement model (Eq.~\myeqref{model2:meas}) on the log transformed cases within each unit.
+The final loss function that is maximized is the product of the likelihoods of the individual units, or the sum of the log-likelihood of the individual units.
+The measurement model for individual units is given in Eq.~\myeqref{model2:meas}.
 \begin{equation}
   \label{model2:meas}
-  \log\big(Y_{u, n} + 1\big) \mid \Delta N_{EI}(n) = \reportChange \sim \text{N}\left(\log \big(\reportRate \reportChange + 1\big), \obsOverdispersion^2 \right),
+  \log\big(Y_{u, n} + 1\big) \mid \Delta N_{E_{u\cdot}I_{u\cdot}}(n) = \reportChange_u \sim \text{N}\left(\log \big(\reportRate \reportChange_u + 1\big), \obsOverdispersion^2 \right),
 \end{equation}
-where $\Delta N_{EI}(n)$ is the sum total of individuals across vaccination compartment $\vaccCounter \in 0:4$ and unit $u$ who moved from compartment $E_{u\vaccCounter}$ to $I_{u\vaccCounter}$ since observation $t_{n-1}$.
-Therefore, because the natural logarithm of observed case counts (plus one, to avoid taking the logarithm of zero) has a normal distribution, $Y_{u, n} + 1$ is assumed to follow a log-normal distribution with log-mean parameter $\mu = \log\big(\Delta N_{EI}(n) + 1\big)$ and log-variance $\obsOverdispersion^2$.
+where $\Delta N_{E_{u\cdot}I_{u\cdot}}(n)$ is the sum total of individuals across vaccination compartment $\vaccCounter \in 0:4$ within unit $u$ who moved from compartment $E_{u\vaccCounter}$ to $I_{u\vaccCounter}$ since observation $t_{n-1}$.
+Therefore, because the natural logarithm of observed case counts (plus one, to avoid taking the logarithm of zero) has a normal distribution, $Y_{u, n} + 1$ is assumed to follow a log-normal distribution with log-mean parameter $\log\big(\reportRate \Delta N_{E_{u\cdot}I_{u\cdot}}(n) + 1\big)$ and log-variance $\obsOverdispersion^2$.
 We note that fitting a model with this measurement model is equivalent to fitting using least squares, with $\log(Y_{u, n} + 1)$ as the response variable.
 
 This measurement model differs from that used by \citet{lee20}, who fit the model in two stages: epidemic and endemic phases.
@@ -495,15 +498,15 @@ Although their text and supplement material do not explicitly describe the measu
 The measurement model they used for the epidemic phase is
 \begin{equation}
   \label{model2:measEpi}
-  Y_{u, n} \mid \Delta N_{EI}(n) = \reportChange \sim \text{N}\left(\reportRate \reportChange, \obsOverdispersion^2 \right),
+  Y_{u, n} \mid \Delta N_{E_{u\cdot}I_{u\cdot}}(n) = \reportChange_u \sim \text{N}\left(\reportRate \reportChange_u, \obsOverdispersion^2 \right),
 \end{equation}
 % which is similar to our measurement model, the primary difference being that the measurement model is applied to raw case counts rather than log-transformed case counts.
 The measurement model they used for the endemic phase modifies the epidemic model by counting both asymptomatically infected (A) and symptomatically infected (I) individuals in the case counts:
 \begin{equation}
   \label{model2:measEnd}
-  Y_{u, n} \mid \Delta N_{EI}(n) = \reportChange_1, \Delta N_{EA}(n) = \reportChange_2 \sim \text{N}\left(\reportRate \big(\reportChange_1 + \reportChange_2\big), \obsOverdispersion^2 \right),
+  Y_{u, n} \mid \Delta N_{E_{u\cdot}I_{u\cdot}}(n) = \reportChange_{u1}, \Delta N_{E_{u\cdot}A_{u\cdot}}(n) = \reportChange_{u2} \sim \text{N}\left(\reportRate \big(\reportChange_{u1} + \reportChange_{u2}\big), \obsOverdispersion^2 \right),
 \end{equation}
-where the notation for $\Delta N_{EA}(n)$ is similar to $\Delta N_{EI}(n)$, described above.
+where the notation for $\Delta N_{E_{u\cdot}A_{u\cdot}}(n)$ is similar to $\Delta N_{E_{u\cdot}I_{u\cdot}}(n)$, described above.
 
 \subsection{Model~3}
 
@@ -511,9 +514,9 @@ In this model, reported cholera cases are assumed to stem from individuals who d
 Therefore reported cases are assumed to come from an over-dispersed negative binomial model, given the increase in infected individuals:
 \begin{equation}
   \label{model3:meas}
-  Y_{u, n} \mid \Delta N_{S_{u \vaccCounter}I_{u \vaccCounter}}(t) = \reportChange_u \sim \text{NB}\left(\reportRate \reportChange_{u}, \obsOverdispersion \right),
+  Y_{u, n} \mid \Delta N_{S_{u \cdot}I_{u}}(t) = \reportChange_u \sim \text{NB}\left(\reportRate \reportChange_{u}, \obsOverdispersion \right),
 \end{equation}
-where $\Delta N_{S_{u \vaccCounter}I_{u \vaccCounter}}(n)$ is the number of individuals who moved from compartment $S_{u \vaccCounter}$ to $I_{u \vaccCounter}$ since observation $t_{n-1}$.
+where $\Delta N_{S_{u \cdot}I_{u \vaccCounter}}(n)$ is the number of individuals who moved from compartment $S_{u \vaccCounter}$ to $I_{u}$ since observation $t_{n-1}$.
 
 This measurement model is a minor change from that used by \cite{lee20}, which allowed for a change in the reporting rate on January 1st, 2018.
 The fitted values of the reporting rate---before and after January 2018---were $0.97$ and $0.097$, respectively.
