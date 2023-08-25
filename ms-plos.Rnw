@@ -216,6 +216,9 @@
 \newcommand\figTitle{\bf}
 \newcommand\paramVec{\theta}
 \newcommand\childReduce{q}
+\newcommand\NBintercept{\alpha}
+\newcommand\NBar{\beta}
+\newcommand\NBsize{\varphi}
 
 \DeclareSymbolFont{matha}{OML}{txmi}{m}{it}% txfonts
 \DeclareMathSymbol{\varv}{\mathord}{matha}{118}
@@ -1083,9 +1086,9 @@ mod3_eval_res$subset_aic <- 2 * mod3_n_params - 2 * mod3_eval_res$subset_ll
 rm(NREPS_EVAL, NP_EVAL)
 @
 
-<<CalculateARMALikelihood, echo=FALSE, message=FALSE, include=FALSE, cache=TRUE>>=
+<<CalculateBenchLikelihood, echo=FALSE, message=FALSE, include=FALSE, cache=TRUE>>=
 
-ARMA_benchmarks <- list()
+benchmarks <- list()
 
 ###
 ### Model 1 ###
@@ -1094,20 +1097,11 @@ ARMA_benchmarks <- list()
 # Load aggregated data
 m1_agg_data <- haiti1_agg_data()
 
-# Fit ARMA(2, 1) on log-cases
-m1_log_arma <- arima(log(m1_agg_data$cases + 1), order = c(2, 0, 1))
+# Fit Model 1 bechmark:
+m1_bench <- ar1_NegBinom(m1_agg_data$cases, init = 7364)
+benchmarks[['m1']] <- m1_bench$ll
 
-# Fit ARMA(2, 1) on natural scale of cases
-m1_arma <- arima(m1_agg_data$cases, order = c(2, 0, 1))
-
-# Check which one is better, and save benchmark as the better one
-if (m1_log_arma$loglik - sum(log(m1_agg_data$cases + 1), na.rm = TRUE) >= m1_arma$loglik) {
-  ARMA_benchmarks[['m1']] <- m1_log_arma$loglik - sum(log(m1_agg_data$cases + 1), na.rm = TRUE)
-} else {
-  ARMA_benchmarks[['m1']] <- m1_arma$loglik
-}
-
-rm(m1_agg_data, m1_log_arma, m1_arma)
+rm(m1_agg_data, m1_bench)
 gc()
 
 ###
@@ -1116,22 +1110,24 @@ gc()
 
 h2_data <- haiti2_data(recreate = FALSE)
 
+# This are initial values for Y_u(0). They were estimated, but because they are
+# integers, close to the value of the first observation, it was easiest to fit these
+# by hand.
+m2_inits <- c(6449, 542, 0, 0, 16, 0, 0, 522, 0, 0)  # TODO: These were for the original initialization model, may need to fit these again by hand (just for-loop through possible inits.)
+
 # model 2 ARIMA benchmark
 h2_dep_names <- h2_data$department %>% unique()
 m2_benchmark <- 0
 for (i in 1:10){
   cases <- h2_data[h2_data$department == h2_dep_names[i], ]$cases
-  log_cases <- log(cases + 1)
+  m2_bench <- ar1_NegBinom(data = cases, init = m2_inits[i])
 
-  m2_arma_dep_ll <- arima(cases, order=c(2, 0, 1))$loglik
-  m2_log_arma_dep_ll <- arima(log_cases, order=c(2, 0, 1))$loglik - sum(log_cases, na.rm = TRUE)
-
-  m2_benchmark <- m2_benchmark + max(m2_arma_dep_ll, m2_log_arma_dep_ll)
+  m2_benchmark <- m2_benchmark + m2_bench$ll
 }
 
-ARMA_benchmarks[['m2']] <- m2_benchmark
+benchmarks[['m2']] <- m2_benchmark
 
-rm(m2_benchmark, h2_dep_names, cases, log_cases, m2_arma_dep_ll, m2_log_arma_dep_ll, h2_data)
+rm(m2_benchmark, h2_dep_names, cases, h2_data, m2_bench, i)
 gc()
 
 ###
@@ -1139,6 +1135,7 @@ gc()
 ###
 
 mod3_cases <- as.data.frame(t(h3Spat@data))
+m3_inits <- c(7362, 1914, 22, 8, 2818, 82, 2499, 6953, 44, 7) # TODO: Also fit by hand, but could be changed to initializing to the observation before.
 
 m3_benchmark <- 0
 for (dep in 1:10) {
@@ -1146,21 +1143,11 @@ for (dep in 1:10) {
   # Get department cases
   cases <- as.numeric(mod3_cases[, dep])
 
-  # Fit model on natural scale of cases
-  m3_a201 <- arima(cases, order = c(2, 0, 1))
-
-  # Fit model on log-scale of cases
-  m3_log_a201 <- arima(log(cases + 1), order = c(2, 0, 1))
-
-  m3_benchmark <- m3_benchmark + max(
-    m3_log_a201$loglik - sum(log(cases + 1), na.rm = TRUE),
-    m3_a201$loglik
-  )
+  m3_benchmark <- m3_benchmark + ar1_NegBinom(data = cases, init = m3_inits[dep])$ll
 }
 
-ARMA_benchmarks[['m3']] <- m3_benchmark
-rm(cases, m3_a201, m3_log_a201, m3_benchmark, dep,
-   mod3_cases, temp, jumps, MODEL3_CASES, i, j)
+benchmarks[['m3']] <- m3_benchmark
+rm(cases, m3_benchmark, m3_bench, dep, mod3_cases)
 gc()
 @
 
@@ -1797,14 +1784,14 @@ Number of &
   ($\Sexpr{myround(mod3_lee_coupled_aic, 1)}$)\footnotemark[2]
 \\
 \hline
-\thead{Log-ARMA(2,1) \\ AIC} &
-  $\Sexpr{myround(-2 * ARMA_benchmarks$m1 + 2 * 5, 1)}$ &
-  $\Sexpr{myround(-2 * ARMA_benchmarks$m2 + 2 * 5, 1)}$ &
-  $\Sexpr{myround(-2 * ARMA_benchmarks$m3 + 2 * 5, 1)}$
+\thead{Benchmark \\ AIC} &
+  $\Sexpr{myround(-2 * benchmarks$m1 + 2 * 4, 1)}$ &
+  $\Sexpr{myround(-2 * benchmarks$m2 + 2 * 40, 1)}$ &
+  $\Sexpr{myround(-2 * benchmarks$m3 + 2 * 40, 1)}$
 \\
 \hline
 \end{tabular}
-\caption{\label{tab:likes}AIC values for each model compared to their ARMA benchmark.
+\caption{\label{tab:likes}AIC values for each model compared to their respective benchmarks.
 Values in parentheses are corresponding values using Lee et al.~\cite{lee20} parameter estimates.  $\textsuperscript{1}$The reported likelihood is an upper bound of the likelihood of the Lee et al.~\cite{lee20} model. $\textsuperscript{2}$ Lee et al.~\cite{lee20} fit Model~3 to a subset of the data (March 2014 onward, excluding data from Ouest in 2015-2016).
 On this subset, their model has a likelihood of $\Sexpr{myround(lee3_results$sub_ll_eval, 1)}$.
 On this same subset, our model has a likelihood of $\Sexpr{myround(mod3_eval_res$subset_ll, 1)}$.
@@ -2165,8 +2152,15 @@ Ideally, the measure should also have favorable theoretical properties.
 Consequently, we focus on log-likelihood as a measure of goodness of fit, and we adjust for the degrees of freedom of the models to be compared by using the Akaike information criterion (AIC) \cite{aic74}.
 
 In some cases, a possible benchmark model could be a generally accepted mechanistic model, but often no such model is available.
-Because of this, we use a log-linear Gaussian ARMA model as an associative benchmark, as recommended by He et al.~\cite{he10}.
-The theory and practice of ARMA models is well developed, and these linear models are appropriate on a log scale due to the exponential growth and decay characteristic of biological dynamics.
+Because of this, we use a simple negative binomial model with an auto regressive mean as our associative benchmark; this model is described in \myeqref{eq:AR_NB}.
+\begin{eqnarray}
+\label{eq:AR_NB}
+Y_n|Y_{n - 1} \sim \text{NB}\big(\NBintercept + \NBar Y_{n-1}, \NBsize \big),
+\end{eqnarray}
+where $\mathrm{E}\big(Y_n|Y_{n - 1}\big) = \NBintercept + \NBar Y_{n-1}$, and $\Var\big(Y_n|Y_{n - 1}\big) = \mathrm{E}\big(Y_n|Y_{n - 1}\big) + \mathrm{E}\big(Y_n|Y_{n - 1}\big)^2 / \NBsize$.
+In the case where the case counts are large, an alternative benchmark recommended by He et al.~\cite{he10} is a log-linear Gaussian ARMA model;
+the theory and practice of ARMA models is well developed, and these linear models are appropriate on a log scale due to the exponential growth and decay characteristic of biological dynamics.
+We chose to use the auto-regressive negative binomial model, however, because the large number of weeks with zero recorded cholera cases in department level data makes a benchmark based on a continuous distribution problematic.
 Likelihoods of Models~1--3 and their respective ARMA benchmark models are provided in Table~\ref{tab:likes}.
 
 It should be universal practice to present measures of goodness of fit for published models, and mechanistic models should be compared against benchmarks.
