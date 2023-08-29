@@ -554,15 +554,12 @@ This is the same approach that was taken by \citet{lee20}, who used the value $t
 We do not see any immediate reason that this model could not be extended to cover a larger range of the data, and chose the value $t_0 = \text{2010-11-13}$.
 This choice of $t_0$ corresponds to using approximately $1\%$ of the available data to determine initial values of the latent states.
 In addition to modeling a larger portion of the available data, this choice of $t_0$ corresponds to an important real-world event, as daily reports from each of the departments were not being sent to the health ministry until November 10, 2010; % TODO: Cite
-this choice of $t_0$ therefore makes $\bm{Y}\big(t_1\big)$ the first week of complete data.
+this choice of $t_0$ therefore makes $\bm{Y}\big(t_1\big)$ the first week of data once daily reports are being sent to the health ministry.
 
 % TODO: Talk about IVPs for 0 counts at t_0
 % Give more details on the initial model
 % Argue why we didn't need to do this for Model 2.
 % TODO: Change the benchmark model from ARMA -> NB
-
-While
-In order to retain a similar model for the initial values of the latent state, it was necessary to pick a value of $t_0$ that was greater than 2010-10-23 (the first available data points).
 
 For the departments of Grande'Anse, Nord-Ouest, and Sud-Est, estimating the latent states at time $t_0$ using the observed data at time $t_1$ is problematic (see Sec.~\ref{sec:mod3Cal}), so we instead estimate initial value of the latent state $I_{u0}(t_0)$ for the integers $u \in \{3, 7, 9\}$, which correspond to the aforementioned departments.
 The remaining hidden states are estimated by enforcing model dynamics using this result.
