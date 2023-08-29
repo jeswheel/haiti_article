@@ -555,14 +555,37 @@ We do not see any immediate reason that this model could not be extended to cove
 This choice of $t_0$ corresponds to using approximately $1\%$ of the available data to determine initial values of the latent states.
 In addition to modeling a larger portion of the available data, this choice of $t_0$ corresponds to an important real-world event, as daily reports from each of the departments were not being sent to the health ministry until November 10, 2010; % TODO: Cite
 this choice of $t_0$ therefore makes $\bm{Y}\big(t_1\big)$ the first week of data once daily reports are being sent to the health ministry.
+The few observation times that exist before $t_0$ are used to initialize the model by enforcing model dynamics on these preliminary observations.
+For convenience, we denote these observations as $t_{-3}, t_{-2}$ and $t_{-1}$; as before, we let $y_{u,-k} = Y_{u}\big(t_{-k}\big)$ denote the observed case count for unit $u$ at time point $t_{-k}$, where $k \in 1:3$.
+Equations for the initial values of non-zero latent states are provided in Eqs.~\myeqref{eq:model3:I0}--\myeqref{eq:model3:B0}.
 
-% TODO: Talk about IVPs for 0 counts at t_0
-% Give more details on the initial model
+\begin{eqnarray}
+\label{eq:model3:I0}
+I_{u}\big(t_0\big) &=& \frac{y^*_{u, -1}}{7\reportRate\left(\muIR + \left(\muDeath + \choleraDeath\right)/365\right)},
+\\%[-3pt]
+\label{eq:model3:A0}
+A_{u}\big(t_0\big) &=& \frac{I_{u0}\big(t_0\big)\left(1 - \symptomFrac\right)}{\symptomFrac},
+\\
+\label{eq:model3:R0}
+R_{u01}\big(t_0\big) &=& R_{u02}\big(t_0\big) = R_{u03}\big(t_0\big) = \left(\frac{\sum_{k = -3}^0 y^*_{u, k}}{\reportRate \symptomFrac} - \left(I_{u0}\big(t_0\big) + A_{u0}\big(t_0\big)\right)\right) / 3
+\\
+\label{eq:model3:S0}
+S_{u0}\big(t_0\big) &=& \mathrm{Pop}_u - I_{u}\big(t_0\big) - A_{u}\big(t_0\big) - \sum_{k=1}^3 R_{u0k}\big(t_0\big)
+\\
+\label{eq:model3:B0}
+B_{u}\big(t_0\big) &=& \big[1 + \seasAmplitude \tilde{J}^r \big] \mathrm{Den}_u \, \Wshed \big[ I_{u}(t_0)+ \asymptomRelativeShed A_{u_0}(t) \big]/\Wshed.
+\end{eqnarray}
+
+In Eq.~\myeqref{eq:model3:B0}, $\tilde{J} = 0.002376$ is the median adjusted rainfall over the observation period.
+One important consideration to make with this parameter initialization model is when $y_{u, -1}^* = 0$, which occurs for units $u \in \{3, 4\}$, which correspond to the Grand'Anse and Nippes departments, respectively.
+When this is the case, each of the infectious $I_u(t_0)$, asymptomatic $A_u(t_0)$, and bacterial reservoir $W_u(t_0)$ compartments have a value of zero.
+Because Model~3 models cholera transmission primarily by means of the bacterial reservoir, this makes it nearly impossible for an outbreak to occur.
+Therefore for units $u \in \{3, 4\}$, we introduce initial value parameters $I_{0,0}^3$ and $I_{0,0}^4$, and calibrate these parameter values using the data.
+The resulting parameter estimates are used to obtain the remaining non-zero initial values of the latent states using Eqs.~\myeqref{eq:model3:A0}--\myeqref{eq:model3:B0}.
+
 % Argue why we didn't need to do this for Model 2.
 % TODO: Change the benchmark model from ARMA -> NB
 
-For the departments of Grande'Anse, Nord-Ouest, and Sud-Est, estimating the latent states at time $t_0$ using the observed data at time $t_1$ is problematic (see Sec.~\ref{sec:mod3Cal}), so we instead estimate initial value of the latent state $I_{u0}(t_0)$ for the integers $u \in \{3, 7, 9\}$, which correspond to the aforementioned departments.
-The remaining hidden states are estimated by enforcing model dynamics using this result.
 % TODO: Check this section.
 
 \section{Calibrating Model~3 to observed cases}\label{sec:mod3Cal}

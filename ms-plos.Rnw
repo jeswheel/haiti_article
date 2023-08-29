@@ -1321,14 +1321,15 @@ Latency (day)
   & \eqref{model1:death}
   & \multirow{2}{*}{\missing}
   &
-  & \multirow{2}{*}{${\fixed \muDeath^{-1} = \Sexpr{myround(1/p3["mu1"],1)}}$}
+  & ${\fixed \muDeath^{-1} = \Sexpr{myround(1/p3["mu1"],1)}}$
   & \multirow{2}{*}{\eqref{eq:model3:IS}}
 \\
 & ${\fixed \muDeath^{-1} = \Sexpr{myround(1/p1["delta"]/52,1)}}$
 & \eqref{model1:death}
 &
 &
-& &
+& ${\fixed \choleraDeath^{-1} = \Sexpr{myround(1/p3["alpha1"],2)}}$
+&
 \\
 Sympt. frac.
   & ${\fixed \symptomFrac_z(t)=c\vaccineEfficacy^*(t-\tau_d)}$
@@ -1459,9 +1460,9 @@ Observation \newline variance
   & \multirow{2}{*}{\missing}
   % & \multicolumn{1}{c}{\multirow{2}{*}{\hspace{16pt}\missing}}
   &
-  & \multirow{2}{*}{$\Iinit^{3,7,10} = (
-        \Sexpr{round(prod(p3[c('H3', 'Iinit3')]))}, \Sexpr{round(prod(p3[c('H7', 'Iinit7')]))}, \Sexpr{round(prod(p3[c('H10', 'Iinit10')]))})^*$} % TODO: Check the unit numbers
-  &  % TODO: \multirow{2}{*}{EQUATION NUMBER}
+  & \multirow{2}{*}{$\Iinit^{3,4} = (
+        \Sexpr{round(prod(p3[c('H3', 'Iinit3')]))}, \Sexpr{round(prod(p3[c('H4', 'Iinit4')]))})^*$}
+  &  \multirow{2}{*}{(S20)}
   \\
   & $E_{0,0} = \Sexpr{round(prod(p1[c('pop_0', 'E_0')]))}$ & & \multicolumn{1}{c}{}
   &
@@ -1711,7 +1712,7 @@ Per-capita transition rates are used for both compartments representing human co
 \mu_{R_{u\vaccCounter k}S_{u0}} &=& \muDeath + 3\muRS \, \mathbf{1}_{\{k=3\}},
 \\%[-3pt]
 \label{eq:model3:water}
-\mu_{{\demography}W_u} &=& \big[1 + \seasAmplitude \big(J_u(t))^r \big] \mathrm{Den}_u \, \Wshed \big[ I_{u}(t)+ \asymptomRelativeShed A_{u}(t) \big],
+\mu_{{\demography}W_u} &=& \big[1 + \seasAmplitude \big(J_u(t)\big)^r \big] \mathrm{Den}_u \, \Wshed \big[ I_{u}(t)+ \asymptomRelativeShed A_{u}(t) \big],
 \\%[-3pt]
 \label{eq:model3:Decay}
 \mu_{W_u\demography} &=& \Wremoval.
@@ -2760,26 +2761,6 @@ Compare to Fig.~3A of Lee et al.~\cite{lee20}.}
 
 Probability of elimination estimates of this form are not meaningful for deterministic models, as the trajectory of these models only represent the mean behavior of the system rather than individual potential outcomes.
 We therefore do not provide probability of elimination estimates under Model~2, but show trajectories under the various vaccination scenarios using this model (Fig.~\ref{fig:mod2Traj}).
-
-% TODO: Remove the unused code below.
-% % Place tables after the first paragraph in which they are cited.
-% \begin{table}[!ht]
-% \begin{adjustwidth}{-2.25in}{0in} % Comment out/remove adjustwidth environment if table fits in text column.
-% \centering
-% \caption{
-% {\bf Table caption Nulla mi mi, venenatis sed ipsum varius, volutpat euismod diam.}}
-% \begin{tabular}{|l+l|l|l|l|l|l|l|}
-% \hline
-% \multicolumn{4}{|l|}{\bf Heading1} & \multicolumn{4}{|l|}{\bf Heading2}\\ \thickhline
-% $cell1 row1$ & cell2 row 1 & cell3 row 1 & cell4 row 1 & cell5 row 1 & cell6 row 1 & cell7 row 1 & cell8 row 1\\ \hline
-% $cell1 row2$ & cell2 row 2 & cell3 row 2 & cell4 row 2 & cell5 row 2 & cell6 row 2 & cell7 row 2 & cell8 row 2\\ \hline
-% $cell1 row3$ & cell2 row 3 & cell3 row 3 & cell4 row 3 & cell5 row 3 & cell6 row 3 & cell7 row 3 & cell8 row 3\\ \hline
-% \end{tabular}
-% \begin{flushleft} Table notes Phasellus venenatis, tortor nec vestibulum mattis, massa tortor interdum felis, nec pellentesque metus tortor nec nisl. Ut ornare mauris tellus, vel dapibus arcu suscipit sed.
-% \end{flushleft}
-% \label{table1}
-% \end{adjustwidth}
-% \end{table}
 
 \section*{Discussion}\label{sec:discussion}
 
