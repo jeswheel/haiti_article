@@ -584,23 +584,18 @@ Therefore for units $u \in \{3, 4\}$, we introduce initial value parameters $I_{
 The resulting parameter estimates are used to obtain the remaining non-zero initial values of the latent states using Eqs.~\myeqref{eq:model3:A0}--\myeqref{eq:model3:B0}.
 
 % Argue why we didn't need to do this for Model 2.
-% TODO: Change the benchmark model from ARMA -> NB
 
 % TODO: Check this section.
 
 \section{Calibrating Model~3 to observed cases}\label{sec:mod3Cal}
 
 <<CalibrateOrig3>>=
-set.seed(8636712)
-
 # Create vectors for the unit and shared parameters
 unit_specific_names <- c("betaB", "foi_add")
 shared_param_names <- c(
   "mu_B", "XthetaA", "thetaI", "lambdaR", "r", "std_W",
   "epsilon", "k"
 )
-
-# Vector containing all of the estimate parameter names.
 est_param_names <- c(
   unit_specific_names, shared_param_names
 )
@@ -608,40 +603,36 @@ est_param_names <- c(
 # Add unit numbers to each parameter
 est_param_names_expanded <- paste0(rep(est_param_names, each = 10), 1:10)
 
-# This function sets the rw_sd for named parameters, first search.
+# Simple function that is used to set the rw_sd for the first search
+# This function is convenient so that we don't have to type out the rw_sd
+# for each unit parameter.
 set_rw_1 <- function(x) {
   if (gsub("[[:digit:]]+$", "", x) %in% shared_param_names) {
     return(0.01)
-  } else if (x %in% paste0("k", 1:10)) {
-    return(0.01)
-  } else if (grepl('^foi_add[[:digit:]]+$', x) || grepl('^betaB[[:digit:]]+$', x)) {
+  # } else if (x %in% paste0(rep(c("aHur", 'hHur'), each = 2), c(3, 9))) {
+  #   return(expression(ifelse(time >= 2016.754 & time <= 2017, 0.015, 0)))
+  # } else if (x %in% c("Iinit3", "Iinit4")) {
+  #   return(expression(ivp(0.25)))
+  } else if (grepl('^foi_add[[:digit:]]+$', x)) {
+    return(0.015)
+  } else if (grepl('^betaB[[:digit:]]+$', x)) {
     return(0.01)
   } else {
     return(0)
   }
 }
 
-# This function sets the rw_sd for named parameters, second search.
 set_rw_2 <- function(x) {
   if (gsub("[[:digit:]]+$", "", x) %in% shared_param_names) {
     return(0.003)
-  } else if (x %in% paste0("k", 1:10)) {
+  # } else if (x %in% paste0(rep(c("aHur", 'hHur'), each = 2), c(3, 9))) {
+  #   return(expression(ifelse(time >= 2016.754 & time <= 2017, 0.005, 0)))
+  # } else if (x %in% c("Iinit3", "Iinit4")) {
+  #   return(expression(ivp(0.125)))
+  } else if (grepl('^foi_add[[:digit:]]+$', x)) {
+    return(0.005)
+  } else if (grepl('^betaB[[:digit:]]+$', x)) {
     return(0.003)
-  } else if (grepl('^foi_add[[:digit:]]+$', x) || grepl('^betaB[[:digit:]]+$', x)) {
-    return(0.003)
-  } else {
-    return(0)
-  }
-}
-
-# This function sets the rw_sd for named parameters, final search.
-set_rw_3 <- function(x) {
-  if (gsub("[[:digit:]]+$", "", x) %in% shared_param_names) {
-    return(0.0025)
-  } else if (x %in% paste0("k", 1:10)) {
-    return(0.0025)
-  } else if (grepl('^foi_add[[:digit:]]+$', x) || grepl('^betaB[[:digit:]]+$', x)) {
-    return(0.0025)
   } else {
     return(0)
   }
@@ -657,84 +648,58 @@ reg_rw_2.sd <- lapply(est_param_names_expanded, set_rw_2)
 names(reg_rw_2.sd) <- est_param_names_expanded
 chol_rw_2.sd <- do.call(rw_sd, reg_rw_2.sd)
 
-# Third Search RW
-reg_rw_3.sd <- lapply(est_param_names_expanded, set_rw_3)
-names(reg_rw_3.sd) <- est_param_names_expanded
-chol_rw_3.sd <- do.call(rw_sd, reg_rw_3.sd)
-
-# Search1 hyper-parameters
 SEARCH1 = list(
   NBPF = 100,
-  NP = 1000,
+  NP = 2500,
   SPAT_REGRESSION = 0.05,
-  NREPS = 72,
-  NP_EVAL = 1000,
-  NREPS_EVAL = 8,
+  NREPS = 144,
+  NP_EVAL = 2500,
+  NREPS_EVAL = 18,
   RW_SD = chol_rw_1.sd,
   COOLING = 0.5,
   KEEP_TRACES = FALSE,
-  KEEP_LIK_MAT = FALSE
+  KEEP_LIKE_MAT = FALSE
 )
 
-# Search2 hyper-parameters
 SEARCH2 = list(
-  TOP_N = 9,
+  TOP_N = 12,
   NBPF = 100,
-  NP = 1000,
-  SPAT_REGRESSION = 0.05,
-  NREPS = 4,
-  NP_EVAL = 1000,
-  NREPS_EVAL = 9,
-  RW_SD = chol_rw_2.sd,
-  COOLING = 0.5,
-  KEEP_TRACES = FALSE,
-  KEEP_LIK_MAT = FALSE
-)
-
-# Search3 hyper-parameters
-SEARCH3 = list(
-  TOP_N = 6,
-  NBPF = 100,
-  NP = 1000,
+  NP = 2500,
   SPAT_REGRESSION = 0.05,
   NREPS = 6,
-  NP_EVAL = 1000,
-  NREPS_EVAL = 9,
-  RW_SD = chol_rw_3.sd,
+  NP_EVAL = 2500,
+  NREPS_EVAL = 18,
+  RW_SD = chol_rw_2.sd,
   COOLING = 0.5,
   KEEP_TRACES = FALSE,
   KEEP_LIK_MAT = TRUE
 )
 
-N_SEARCHES <- 3L
-
-save_file <- "../model3/si/fit_orig_model.rds"
-
-# Fit the model and save the results
-# TODO: Remove SEARCH3 when re-running everything.
-haiti3_orig_fit <- bake(
-  file = save_file, {
-    fit_coupled_haiti3(
-      nsearches = N_SEARCHES,
+haiti3_sub_fit <- bake(
+  file = "../model3/si/subset_noparams.rds", {
+    fit_haiti3(
+      nsearches = 2L,
       search1 = SEARCH1,
       search2 = SEARCH2,
-      search3 = SEARCH3,
       search_rho = FALSE,
       search_gamma = FALSE,
+      search_Iinit = FALSE,
+      search_hur = FALSE,
       ncores = cores
     )
   }
 )
 
 # Find model index with best log-likelihood
-best_m <- which.max(haiti3_orig_fit$search3$logLiks$logLik)
+best_m <- which.max(haiti3_sub_fit$search2$logLiks$logLik)
 
 # Find parameters using best_m index
-best_params <- haiti3_orig_fit$search3$params[best_m, ]
+sub_params <- haiti3_sub_fit$search2$params[best_m, ]
 
 # Get unit log-likelihoods for the best model.
-all_liks <- as.data.frame(haiti3_orig_fit$search3$likMat)
-all_liks$which <- rep(1:(SEARCH3$TOP_N * SEARCH3$NREPS), each = SEARCH3$NREPS_EVAL)
+all_liks <- as.data.frame(haiti3_sub_fit$search2$likMat)
+# all_liks$which <- rep(1:(SEARCH3$TOP_N * SEARCH3$NREPS), each = SEARCH3$NREPS_EVAL)
+all_liks$which <- rep(1:(12 * 6), each = 18)
 best_mod <- filter(all_liks, which == best_m)
 
 # Pivot longer to get estimate of log-likelihood for each unit.
@@ -758,96 +723,46 @@ unitLikesM3 <- best_mod %>%
 
 
 <<M3_bench, echo=FALSE, message=FALSE, include=FALSE, cache=TRUE>>=
-
-MODEL3_CASES <- haitiCholera |>
-  dplyr::rename(
-    date = date_saturday, Grande_Anse = Grand.Anse,
-    Nord_Est = Nord.Est, Nord_Ouest = Nord.Ouest,
-    Sud_Est = Sud.Est
-  ) |>
-  dplyr::mutate(date = as.Date(date)) |>
-  dplyr::select(-report) |>
-  dplyr::mutate(time_diff = date - lag(date)) |>
-  dplyr::filter(date >= "2010-11-20")
-
-# Create dataset that will be used to fit ARMA models. To do this, we
-# need to make sure that missing values are marked as NA, so we check
-# for any jumps in time.
-# MODEL3_CASES <- haitiCholera %>%
-#   dplyr::rename(
-#     date = date_saturday, Grande_Anse = Grand.Anse,
-#     Nord_Est = Nord.Est, Nord_Ouest = Nord.Ouest,
-#     Sud_Est = Sud.Est
-#   ) %>%
-#   dplyr::mutate(date = as.Date(date)) %>%
-#   dplyr::select(-report) %>%
-
-# Find jumps
-jumps <- which(MODEL3_CASES$time_diff > lubridate::make_difftime(day = 7))
-
-# If there is a jump, insert NA between observations
-temp <- MODEL3_CASES
-for (j in 1:length(jumps)) {
-  temp <- rbind(
-    temp[1:(jumps[j] + j - 2), ],
-    rep(NA, ncol(temp)),
-    temp[(jumps[j] + j - 1):nrow(temp), ]
-  )
-}
-
-mod3_cases <- temp %>% dplyr::select(-time_diff)
-
-mod3_departements <-
-  c(
-    'Artibonite',
-    'Centre',
-    'Grande_Anse',
-    'Nippes',
-    'Nord',
-    'Nord-Est',
-    'Nord-Ouest',
-    'Ouest',
-    'Sud',
-    'Sud-Est'
-  )
-
-m3_benchmark <- c()
-for (dep in mod3_departements) {
-
-  # Get department cases
-  cases <- as.numeric(mod3_cases[, gsub("-", "_", dep)])
-
-  # Fit model on natural scale of cases
-  m3_a201 <- arima(cases, order = c(2, 0, 1))
-
-  # Fit model on log-scale of cases
-  m3_log_a201 <- arima(log(cases + 1), order = c(2, 0, 1))
-
-  m3_benchmark <- c(m3_benchmark, max(
-    m3_log_a201$loglik - sum(log(cases + 1), na.rm = TRUE),
-    m3_a201$loglik
-  )
-  )
-}
-
-rm(cases, m3_a201, m3_log_a201, mod3_departements, dep,
-   mod3_cases, temp, jumps, MODEL3_CASES, j)
-
-unitLikesARMA <- data.frame(
-  unit = 1:10,
-  ll = m3_benchmark
-) %>%
-  as_tibble()
-@
-
-<<combineARMA_M3, echo=FALSE>>=
 h3 <- haiti3_spatPomp()
 deps <- h3@unit_names
 
+mod3_cases <- as.data.frame(t(h3@data))
+colnames(mod3_cases) <- deps
+m3_inits <- c(7362, 1914, 22, 8, 2818, 82, 2499, 6953, 44, 7) # TODO: Also fit by hand, but could be changed to initializing to the observation before.
+names(m3_inits) <- deps
+
+bench_cond_lls <- list()
+for (dep in deps) {
+
+  # Get department cases
+  cases <- as.numeric(mod3_cases[, dep])
+  mod <- ar1_NegBinom(data = cases, init = m3_inits[dep])
+
+  bench_cond_lls[[dep]] <- haitipkg:::.ar1_NegBinom_cond_ll(
+    theta = mod$theta, init = m3_inits[dep], data = cases, transform = FALSE
+  )
+}
+
+bench_cond_lls <- as.data.frame(bench_cond_lls)
+
+bench_lls <- apply(bench_cond_lls, 2, sum)
+
+unitLikes_bench <- data.frame(
+  unit = 1:10,
+  # dep = names(bench_lls),
+  ll = bench_lls
+) %>%
+  as_tibble()
+
+bench_cond_lls$date <- lubridate::round_date(lubridate::date_decimal(h3@times), unit = 'day')
+@
+
+<<combine_bench_M3, echo=FALSE>>=
+
 # Combine tables with model 3 and benchmark likelihoods.
-ARMA_M3_joined <- dplyr::left_join(
+bench_M3_joined <- dplyr::left_join(
   x = unitLikesM3,
-  y = unitLikesARMA,
+  y = unitLikes_bench,
   by = "unit"
 ) %>%
   select(-ll_se) %>%
@@ -864,19 +779,19 @@ ARMA_M3_joined <- dplyr::left_join(
 
 # Change model parameters to the best set of parameters from previous
 # search
-coef(h3)[names(best_params)] <- best_params
+coef(h3)[names(sub_params)] <- sub_params
 
 registerDoRNG(40765101)  # for modular, reproducible results
 
 # Perform block partical filter with fitted model, to get conditional
 # log-likelihoods.
-bpf_orig3_out <- bake(
-  file = "../model3/si/bpf_orig3_cond_LL.rds", {
+bpf_sub3_out <- bake(
+  file = "../model3/si/bpf_sub_cond_LL.rds", {
 
     results <- list()
 
     bpf_out <- h3 %>% bpfilter(
-      Np = 2000,
+      Np = 5000,
       block_size = 1,
       save_states = TRUE
     )
@@ -890,42 +805,45 @@ bpf_orig3_out <- bake(
 @
 
 In this section, we provide more detail on the process that was used to estimate the coefficients used in Model~3.
-In particular, we discuss why we decided to include additional model parameters---those that are associated with the initial conditions of the model and the behavior of the system during Hurricane Matthew---that were not considered by \cite{lee20}.
+In particular, we discuss why we decided to include additional model parameters---those that are associated with the behavior of the system during Hurricane Matthew---that were not considered by \cite{lee20}.
 To calibrate this model, we used the iterated block particle filter (IBPF) method of \cite{ionides22}.
 Due to the novelty of this algorithm, there does not exist published examples the IBPF algorithm used for data analysis outside of the papers in which the algorithm was introduced \citep{ning21ibpf,ionides22}, which at least partially motivates the inclusion additional details in this section.
 
 \cite{lee20} were only able to estimate model parameters to a simplified version of Model~3 on a subset of the available data, as no method existed at the time of their publication to fit a fully coupled meta-population model to disease incidence data.
-Building on their results, we fit the fully coupled version of Model~3 to all available data.
+Building on their results, we fit the fully coupled version of Model~3 to nearly all available data, reserving only a few observations to use to calibrate the initial conditions of the model (see the previous section for more details).
 In order to properly maximize the model likelihood, we found that it was necessary to use multiple searches for the MLE, periodically pruning away less successful searches.
 The first collection of searches was performed by obtaining initial values for the parameters by uniformly sampling values from a predefined hypercube.
 A subsequent refinement search used starting values corresponding to the largest model likelihoods obtained in the previous round.
 This is similar to the approach used by \cite{ionides22}.
 
-We use the technique described above to fit the fully coupled version of Model~3 proposed by \cite{lee20} to all observed cholera data.
-The maximum likelihood we obtained with the model was $\Sexpr{round(max(haiti3_orig_fit$search2$logLiks$logLik))}$, which is higher than the log-ARMA benchmark ($\Sexpr{round(sum(unitLikesARMA$ll))}$). % TODO: Check this, numbers don't match up.
+We use the technique described above to fit the fully coupled version of Model~3 proposed by \cite{lee20}.
+The maximum likelihood we obtained with the model was $\Sexpr{round(max(haiti3_sub_fit$search2$logLiks$logLik))}$, which is higher than the benchmark model ($\Sexpr{round(sum(unitLikes_bench$ll))}$).
+While beating a simple associative benchmark is promising, this does not immediately rule out the possibility that the model is a poor description of the system.
+Additional investigation of parameters estimates and their corresponding implications on model based conclusions should always be conducted.
 For meta-population models, it is worth considering how well the model fits the data to each spatial unit.
 This can be done by looking at conditional log-likelihoods, which is part of the output of the \texttt{bpfilter} algorithm in the \texttt{spatPomp} package.
-The likelihoods for each department, compared to the corresponding log-ARMA benchmark, are displayed in Fig.~\ref{fig:h3UnitLikes}.
-The figure demonstrates that while the log-likelihood of the fitted model outperforms the log-ARMA benchmark, the model has lower likelihoods than the benchmark for some departments.
-This result warrants further investigation of the model fit.
+The likelihoods for each department, compared to the corresponding benchmark model, are displayed in Fig.~\ref{fig:h3UnitLikes}.
+The figure demonstrates that while the log-likelihood of the fitted model outperforms the auto-regressive negative binomial benchmark model, Model~3 has lower likelihoods than the benchmark for some departments.
 
 \begin{figure}[ht]
 <<h3UnitLikes, fig.height=3, fig.width=5.5, echo=FALSE>>=
-ggplot(ARMA_M3_joined, aes(x = ll, y = reorder(unit, ll))) +
+ggplot(bench_M3_joined, aes(x = ll, y = reorder(unit, ll))) +
   geom_point(aes(col = type)) +
   ylab("Unit") +
   xlab("Log Likelihood") +
   scale_color_manual(
-    labels = c("ll" = "ARMA", "ll_est" = "Model 3"),
+    labels = c("ll" = "Benchmark", "ll_est" = "Model 3"),
     values = c("ll" = "#1b9e77", "ll_est" = "#d95f02")
   ) +
   theme(legend.title = element_blank(),
         axis.title.y = element_blank())
 @
-\caption{\label{fig:h3UnitLikes}Log-likelihoods of Model~3 for each department compared to the corresponding log-ARMA benchmark prior to the inclusion of parameters for initial values and Hurricane Matthew.}
+\caption{\label{fig:h3UnitLikes}Log-likelihoods of Model~3 for each department compared to the corresponding benchmark model prior to the inclusion of parameters for initial values and Hurricane Matthew.}
 \end{figure}
 
-In an attempt to determine why the model is underperforming in some departments, we plot the conditional log likelihoods of each observation given the previous observations for each department in Fig.~\ref{fig:condLL}.
+In addition to considering the conditional log-likelihoods of each unit, one can consider conditional log-likelihoods of each observation.
+When compared to a benchmark, this level of detail can provide useful information about which observations are well described by the model and which are poorly described.
+In Fig.~\ref{fig:condLL}, we plot the conditional log-likelihoods of each observation.
 This figure reveals that the fitted model has difficult time explaining certain features of the data.
 For example, many departments (in particular Sud) have observations with lower conditional log-likelihoods near October 2016 than at other time points.
 Further investigation of the model output reveals that the model is struggling to explain the sudden surge in cholera cases that occurred at this time, which coincides with the time that Hurricane Matthew struck Haiti.
@@ -943,9 +861,9 @@ names(deps) <- as.character(1:10)
 myLabeller <- as_labeller(deps)
 
 # Plot conditional log-likelihoods for each unit
-t(bpf_orig3_out$block.cond.loglik) %>%
+t(bpf_sub3_out$block.cond.loglik) %>%
   as.data.frame() %>%
-  mutate(t = bpf_orig3_out$times) %>%
+  mutate(t = bpf_sub3_out$times) %>%
   pivot_longer(
     cols = -t,
     values_to = 'likelihood',
@@ -1006,9 +924,9 @@ unitLikesM3 <- best_mod %>%
   arrange(unit)
 
 # Combine model likelihood table to benchmarks
-ARMA_M3_joined <- dplyr::left_join(
+bench_M3_joined <- dplyr::left_join(
   x = unitLikesM3,
-  y = unitLikesARMA,
+  y = unitLikes_bench,
   by = "unit"
 ) %>%
   select(-ll_se) %>%
@@ -1027,18 +945,18 @@ We also provide figures for department specific log-likelihoods and conditional 
 
 \begin{figure}[ht]
 <<finalUnitLLFig, fig.height=3, fig.width=5.5, echo=FALSE>>=
-ggplot(ARMA_M3_joined, aes(x = ll, y = reorder(unit, ll))) +
+ggplot(bench_M3_joined, aes(x = ll, y = reorder(unit, ll))) +
   geom_point(aes(col = type)) +
   ylab("Unit") +
   xlab("Log Likelihood") +
   scale_color_manual(
-    labels = c("ll" = "ARMA", "ll_est" = "Model 3"),
+    labels = c("ll" = "Benchmark", "ll_est" = "Model 3"),
     values = c("ll" = "#1b9e77", "ll_est" = "#d95f02")
   ) +
   theme(legend.title = element_blank(),
         axis.title.y = element_blank())
 @
-\caption{\label{fig:finalUnitLL}Log-likelihoods of Model~3 for each department compared to the corresponding log-ARMA benchmark after adding and estimating parameters related to initial values and Hurricane Matthew.}
+\caption{\label{fig:finalUnitLL}Log-likelihoods of Model~3 for each department compared to the corresponding benchmark model after adding and estimating parameters related to initial values and Hurricane Matthew.}
 \end{figure}
 
 <<finalModel3BPF, echo=FALSE, message=FALSE, include=FALSE>>=
@@ -1053,7 +971,7 @@ bpf_final3_out <- bake(
     results <- list()
 
     bpf_out <- h3 %>% bpfilter(
-      Np = 2000,
+      Np = 5000,
       block_size = 1,
       save_states = TRUE
     )
@@ -1097,7 +1015,7 @@ t(bpf_final3_out$block.cond.loglik) %>%
 
 While the addition of the Hurricane parameters seems to have resulted in a dramatic increase of conditional likelihoods around and after October 2016, the inclusion of the initial value parameters does not appear to have fixed the low conditional log-likelihood values in Sud-Est and Nord-Ouest.
 This could be due to many factors, including the possibility that the coupling between units forces low initial value parameters in a given department in order for the model to fit the data in the remaining departments.
-Whatever the case may be, the inclusion of the seven parameters resulted in a $\Sexpr{round(max(h3_final_results$search2$logLiks$logLik) - max(haiti3_orig_fit$search2$logLiks$logLik), 1)}$ increase in log-likelihood, which is a highly statistically significant difference.
+Whatever the case may be, the inclusion of the seven parameters resulted in a $\Sexpr{round(max(h3_final_results$search2$logLiks$logLik) - max(haiti3_sub_fit$search2$logLiks$logLik), 1)}$ increase in log-likelihood, which is a highly statistically significant difference.
 One could similarly test whether the inclusion of the initial value parameters resulted in a significantly better fit to the observed data, but we do not do this here due to the large computational effort that would be required.
 
 \subsection{Examining the Hidden States of the Calibrated Model}
