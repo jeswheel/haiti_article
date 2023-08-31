@@ -1113,7 +1113,7 @@ h2_data <- haiti2_data(recreate = FALSE)
 # This are initial values for Y_u(0). They were estimated, but because they are
 # integers, close to the value of the first observation, it was easiest to fit these
 # by hand.
-m2_inits <- c(6449, 542, 0, 0, 16, 0, 0, 522, 0, 0)  # TODO: These were for the original initialization model, may need to fit these again by hand (just for-loop through possible inits.)
+m2_inits <- c(6449, 542, 0, 0, 16, 0, 0, 522, 0, 0)  # fit by hand
 
 # model 2 ARIMA benchmark
 h2_dep_names <- h2_data$department %>% unique()
@@ -1135,7 +1135,7 @@ gc()
 ###
 
 mod3_cases <- as.data.frame(t(h3Spat@data))
-m3_inits <- c(7362, 1914, 22, 8, 2818, 82, 2499, 6953, 44, 7) # TODO: Also fit by hand, but could be changed to initializing to the observation before.
+m3_inits <- c(7362, 1914, 22, 8, 2818, 82, 2499, 6953, 44, 7) # fit by hand
 
 m3_benchmark <- 0
 for (dep in 1:10) {
@@ -1253,11 +1253,12 @@ This allows us to treat the models as fairly independently developed expert appr
 However, it led to differences in notation, and in subsets of the data chosen for analysis, that hinder direct comparison.
 Here, we have created a common notational framework that facilitates model comparison, and put all comparable model parameters---including parameters that were estimated or held constant---into Table~\ref{tab:params}.
 % Here, we have put all three models into a common notational framework.
-Translations back to the original notation of Lee et al.~\cite{lee20} are given in Table~S-1 of the supplement. % TODO: Check S-1 table matches.
+Translations back to the original notation of Lee et al.~\cite{lee20} are given in the supplement (\nameref{S1_Table}).
 
 \begin{table}
 \begin{adjustwidth}{-2.25in}{0in}
 \centering
+\caption{\label{tab:params} {\bf Model parameters.}}
 % \small
 \begin{tabular}{|p{0.15\linewidth}|p{0.14\linewidth}t|p{0.13\linewidth}t|p{0.17\linewidth}t|}
 \hline
@@ -1440,19 +1441,19 @@ Process noise \newline (wk\textsuperscript{1/2})
 \\
 Reporting rate
   & $\reportRate=\Sexpr{myround(p1["rho"], 3)}$
-  & (S15) % TODO: Check
+  & (S15)
   & ${\fixed \reportRate=\Sexpr{myround(h2_fit$h2_params["Rho"],2)}}$
-  & (S16) % TODO: Check
+  & (S16)
   & $\reportRate=\Sexpr{myround(p3s["epsilon"],2)}$
-  & (S19) % TODO: Check
+  & (S19)
 \\
 Observation \newline variance
   & $\obsOverdispersion =$ \newline $(\Sexpr{myround(p1["tau_epi"],2)}, \Sexpr{round(p1["tau_end"],2)})$
-  & \multirow{2}{*}{(S15)} % TODO: Check
+  & \multirow{2}{*}{(S15)}
   & \multirow{2}{*}{$\obsOverdispersion = \Sexpr{signif(h2_fit$h2_params['sigma'], 3)}$}
-  & \multirow{2}{*}{(S16)} % TODO: Check
+  & \multirow{2}{*}{(S16)}
   & \multirow{2}{*}{$\obsOverdispersion = \Sexpr{myround(p3s["k"],2)}$}
-  & \multirow{2}{*}{(S19)} % TODO: Check
+  & \multirow{2}{*}{(S19)}
 \\
 \hline
 \multirow{2}{*}{Initial Values} & $\Iinit = \Sexpr{round(prod(p1[c('pop_0', 'I_0')]))}$
@@ -1489,11 +1490,11 @@ Observation \newline variance
   & \multirow{2}{*}{\eqref{eq:model3:foi}}
 \\\hline
 \end{tabular}
-\caption{\label{tab:params}References to the relevant equation are given in parentheses.
+\begin{flushleft} References to the relevant equation are given in parentheses.
 Parameters in blue were fixed based on scientific reasoning and not fitted to the data.
 $^*$ denotes parameters added during our re-analysis, not considered by Lee et al.
 Translations back into the notation of \cite{lee20} are given in Table~S1.
-}
+\end{flushleft}
 \end{adjustwidth}
 \end{table}
 
@@ -1532,7 +1533,7 @@ Here, the spatial units are the $U=10$ Haitian administrative d\'{e}partements (
 
 While the complete model description is scientifically critical, as well as necessary for transparency and reproducibility, the model details are not essential to our methodological discussions of how to diagnose and address model misspecification with the purpose of informing policy.
 A first-time reader may choose to skim through the rest of this section, and return later.
-Additional details about the numeric implementation of these models are provided in Sec.~S1 and S2 of the supplement.
+Additional details about the numeric implementation of these models are provided in Sec.~S1 and S2 of the supplemental text (\nameref{S1_Text}).
 
 %%%%%%%%% 11111111111 %%%%%%%%%%
 
@@ -1750,7 +1751,7 @@ In the following subsections we describe in detail our approach to calibrating t
 
 \begin{table}[!h]
 \centering
-
+\caption{\label{tab:likes}{\bf AIC values for Models~1--3 and their benchmarks.}}
 \begin{tabular}{|c|c|c|c|}
 \hline
  & \thead{Model~1} & \thead{Model~2} & \thead{Model~3}
@@ -1792,12 +1793,12 @@ Number of &
 \\
 \hline
 \end{tabular}
-\caption{\label{tab:likes}AIC values for each model compared to their respective benchmarks.
-Values in parentheses are corresponding values using Lee et al.~\cite{lee20} parameter estimates.  $\textsuperscript{1}$The reported likelihood is an upper bound of the likelihood of the Lee et al.~\cite{lee20} model. $\textsuperscript{2}$ Lee et al.~\cite{lee20} fit Model~3 to a subset of the data (March 2014 onward, excluding data from Ouest in 2015-2016).
+\begin{flushleft}
+Values in parentheses are corresponding values using Lee et al.~\cite{lee20} parameter estimates.  \textsuperscript{1}The reported likelihood is an upper bound of the likelihood of the Lee et al.~\cite{lee20} model. \textsuperscript{2}Lee et al.~\cite{lee20} fit Model~3 to a subset of the data (March 2014 onward, excluding data from Ouest in 2015-2016).
 On this subset, their model has a likelihood of $\Sexpr{myround(lee3_results$sub_ll_eval, 1)}$.
 On this same subset, our model has a likelihood of $\Sexpr{myround(mod3_eval_res$subset_ll, 1)}$.
 See Sec.~S6 of the supplement material for more details on estimating the likelihood of the Lee et al.~\cite{lee20} models.
-}
+\end{flushleft}
 \end{table}
 
 \subsubsection*{Calibrating Model~1 Parameters}\label{sec:fit1}
@@ -2793,9 +2794,13 @@ The dynamic document, together with the R packages, form a {\it compendium}, def
 \section*{Supporting information}
 
 % Include only the SI item label in the paragraph heading. Use the \nameref{label} command to cite SI items in the text.
-\paragraph*{S1 Fig.}
-\label{S1_Fig}
-{\bf Bold the title sentence.} Add descriptive text after the title of the item (optional).
+\paragraph*{S1 Table}
+\label{S1_Table}
+{\bf Notation conversion table.} Conversions between the notation used here and the notation of Lee et al. (2020) \cite{lee20}.
+
+\paragraph*{S1 Text}
+\label{S1_Text}
+{\bf Supplemental Material.} In depth description of the numeric implementation of models.
 
 \paragraph*{S2 Fig.}
 \label{S2_Fig}
@@ -2813,9 +2818,9 @@ The dynamic document, together with the R packages, form a {\it compendium}, def
 \label{S1_Appendix}
 {\bf Lorem ipsum.} Maecenas convallis mauris sit amet sem ultrices gravida. Etiam eget sapien nibh. Sed ac ipsum eget enim egestas ullamcorper nec euismod ligula. Curabitur fringilla pulvinar lectus consectetur pellentesque.
 
-\paragraph*{S1 Table.}
-\label{S1_Table}
-{\bf Lorem ipsum.} Maecenas convallis mauris sit amet sem ultrices gravida. Etiam eget sapien nibh. Sed ac ipsum eget enim egestas ullamcorper nec euismod ligula. Curabitur fringilla pulvinar lectus consectetur pellentesque.
+% \paragraph*{S1 Table.}
+% \label{S1_Table}
+% {\bf Lorem ipsum.} Maecenas convallis mauris sit amet sem ultrices gravida. Etiam eget sapien nibh. Sed ac ipsum eget enim egestas ullamcorper nec euismod ligula. Curabitur fringilla pulvinar lectus consectetur pellentesque.
 
 \section*{Acknowledgments}
 Cras egestas velit mauris, eu mollis turpis pellentesque sit amet. Interdum et malesuada fames ac ante ipsum primis in faucibus. Nam id pretium nisi. Sed ac quam id nisi malesuada congue. Sed interdum aliquet augue, at pellentesque quam rhoncus vitae.

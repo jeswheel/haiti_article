@@ -5,17 +5,11 @@ This repository contains the necessary code to reproduce the article: "Informing
 ### TODO: 
 
 - [ ] **DON'T FORGET**: Before re-running everything, remove `ncores` argument from `fit_haiti3` and `fit_haiti1`. This argument doesn't do anything, but was left in so as to not trigger the `bake` recalculation of the file, which would be inconvinient when working on the manuscript. 
-- [ ] The measurement models for Models 2 and 3 in the supplement need notation fixed
-   - [ ] In Model 2, change NEI -> NEIu, as we don't sum across units and this is more clear. 
-   - [ ] In Model 3, there is no Iuz compartment, just Iu, so notation should suggest any Suz -> Iu.
-- [ ] Make sure supplement is up to date 
+- [x] Make sure supplement is up to date 
    - [ ] Fix the supporting-information section in manuscript 
    - [ ] write an acknowledgement section 
-   - [ ] Add model diagrams to supplement, and mention them in the manuscript. 
+   - [x] Add model diagrams to supplement, and mention them in the manuscript. 
 - [ ] Fix author affiliations and emails. 
-- [ ] Double check all model equations match the code 
-- [ ] Write more about why model 3 is a poor description of the data, even if this is just added to the supplement. 
-- [ ] Update Model 3 initialization model description. 
 - [ ] Final things: 
    - [ ] Check all journal requirements are met
    - [ ] Final proof-read.
@@ -23,6 +17,12 @@ This repository contains the necessary code to reproduce the article: "Informing
    - [ ] Re-run everything and submit. 
 
 
+- [x] Write more about why model 3 is a poor description of the data, even if this is just added to the supplement. 
+- [x] Update Model 3 initialization model description. 
+- [x] Double check all model equations match the code 
+- [x] The measurement models for Models 2 and 3 in the supplement need notation fixed
+   - [x] In Model 2, change NEI -> NEIu, as we don't sum across units and this is more clear. 
+   - [x] In Model 3, there is no Iuz compartment, just Iu, so notation should suggest any Suz -> Iu.
 - [x] Remove parallel back-ends from inside functions in `haitipkg`. 
 - [x] Move all images and tables to the correct spot (directly after referencing them).
 - [x] Have to reference all tables. When should we reference Table 2 (parameter table). How about the table of likelihoods? 
