@@ -557,7 +557,7 @@ In addition to modeling a larger portion of the available data, this choice of $
 this choice of $t_0$ therefore makes $\bm{Y}\big(t_1\big)$ the first week of data once daily reports are being sent to the health ministry.
 The few observation times that exist before $t_0$ are used to initialize the model by enforcing model dynamics on these preliminary observations.
 For convenience, we denote these observations as $t_{-3}, t_{-2}$ and $t_{-1}$; as before, we let $y_{u,-k} = Y_{u}\big(t_{-k}\big)$ denote the observed case count for unit $u$ at time point $t_{-k}$, where $k \in 1:3$.
-Equations for the initial values of non-zero latent states are provided in Eqs.~\myeqref{eq:model3:I0}--\myeqref{eq:model3:B0}.
+Equations for the initial values of non-zero latent states are provided in Eqs.~\myeqref{eq:model3:I0}--\myeqref{eq:model3:B0}; these equations match those that were used by \citet{lee20}, the primary change being a change to the value of $t_0$.
 
 \begin{eqnarray}
 \label{eq:model3:I0}
