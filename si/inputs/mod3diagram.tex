@@ -1,0 +1,122 @@
+\begin{figure}[!h]
+%%%%% SEAIR diagram
+\begin{center}
+  \resizebox{\textwidth}{!}{
+    \Large
+    \setlength{\unitlength}{5pt}
+    \begin{picture}(100,85)(0,15)
+
+    % COMPARTMENTS
+    \put(39, 50){\circle{6}}
+    \put(37, 49){$\mathrm{W}_{u}$}
+
+    \put(8, 55){\framebox(6, 6){$\mathrm{S_{u0}}$}}
+    \put(8, 39){\framebox(6, 6){$\mathrm{S_{u\vaccCounter}}$}}
+    \put(36, 62.5){\framebox(6, 6){$\mathrm{A_{u}}$}}
+    \put(36, 31.5){\framebox(6, 6){$\mathrm{I_{u}}$}}
+    \put(56, 55){\framebox(6, 6){$\mathrm{R^1_{u0}}$}}
+    \put(71, 55){\framebox(6, 6){$\mathrm{R^2_{u0}}$}}
+    \put(86, 55){\framebox(6, 6){$\mathrm{R^3_{u0}}$}}
+    \put(56, 39){\framebox(6, 6){$\mathrm{R^1_{u\vaccCounter}}$}}
+    \put(71, 39){\framebox(6, 6){$\mathrm{R^2_{u\vaccCounter}}$}}
+    \put(86, 39){\framebox(6, 6){$\mathrm{R^3_{u\vaccCounter}}$}}
+
+    % INDIVIDUAL MOVEMENT
+    % S_u0 -> A_u
+    \put(15, 58.5){\vector(3, 1.2){20}}
+
+    % S_u0 -> I_u
+    \put(15, 57.5){\vector(1, -1.1){20}}
+
+    % S_uz -> I_u
+    \put(15, 41.5){\vector(3, -1.2){20}}
+
+    % S_uz -> A_u
+    \put(15, 42.5){\vector(1, 1.1){20}}
+
+    % I_u -> R_u0
+    \put(43, 66){\vector(2, -1){12}}
+
+    % A_u -> R_uz
+    \multiput(43, 64)(1.25, -1.6){12}{\line(1, -1.3){0.7}}
+    \put(57, 46){\vector(1, -1.3){0.2}}
+
+    \put(43, 36){\vector(1.7, 2){15}}
+
+    \multiput(60, 54)(0, -2){4}{\line(0, -1){1}}
+    \put(60, 46){\vector(0, -1){0.5}}
+
+    \multiput(74, 54)(0, -2){4}{\line(0, -1){1}}
+    \put(74, 46){\vector(0, -1){0.5}}
+
+    \multiput(89, 54)(0, -2){4}{\line(0, -1){1}}
+    \put(89, 46){\vector(0, -1){0.5}}
+
+    \put(63, 58){\vector(1, 0){7}}
+    \put(78, 58){\vector(1, 0){7}}
+
+    \put(63, 42){\vector(1, 0){7}}
+    \put(78, 42){\vector(1, 0){7}}
+
+    \multiput(39, 61.5)(0, -1){8}{\line(0, -1){0.3}}
+    \put(39,54){\vector(0, -1){0.5}}
+
+    \multiput(39, 38.5)(0, 1){8}{\line(0, 1){0.3}}
+    \put(39,46){\vector(0, 1){0.5}}
+
+    \cbezier(89,62)(80, 85)(20, 85)(12,62)
+    \put(12.2,62.5){\vector(-1, -3.5){0.3}}
+
+    \cbezier(89,38)(80, 15)(20, 15)(12,38)
+    \put(12.2,37.5){\vector(-1, 3.5){0.3}}
+
+    \multiput(11, 54)(0, -2){4}{\line(0, -1){1}}
+    \put(11, 46){\vector(0, -1){0.5}}
+
+    % DEMOGRAPHY
+    % -> S
+    \put(0, 58){\vector(1, 0){7}}
+    \put(1, 59){$\mathrm{\mu_{\demography S_{u0}}}$}
+
+    % S Death
+    \put(10, 62){\vector(0, 1){7}}
+    \put(8, 64){$\mathrm{\muDeath}$}
+    \put(10, 38){\vector(0, -1){7}}
+    \put(8, 34){$\mathrm{\muDeath}$}
+
+    % A + I death
+    \put(39, 69.5){\vector(0, 1){7}}
+    \put(37, 71.5){$\mathrm{\muDeath}$}
+
+    \put(39, 31.5){\vector(0, -1){7}}
+    \put(30, 27.5){$\mathrm{\muDeath + \choleraDeath}$}
+
+    % R Death
+    \put(59, 62){\vector(0, 1){7}}
+    \put(57, 64){$\mathrm{\muDeath}$}
+
+    \put(74, 62){\vector(0, 1){7}}
+    \put(72, 64){$\mathrm{\muDeath}$}
+
+    \put(59, 38){\vector(0, -1){7}}
+    \put(57, 34){$\mathrm{\muDeath}$}
+
+    \put(74, 38){\vector(0, -1){7}}
+    \put(72, 34){$\mathrm{\muDeath}$}
+
+    \put(93, 42){\vector(1, 0){7}}
+    \put(95.5, 43){$\mathrm{\muDeath}$}
+
+    \put(93, 58){\vector(1, 0){7}}
+    \put(95.5, 59){$\mathrm{\muDeath}$}
+
+    % W death
+    \multiput(43, 50)(1, 0){7}{\line(1, 0){0.2}}
+    \put(50.2, 50){\vector(1, 0){0.5}}
+    \put(44, 51){$\mathrm{\Wremoval}$}
+
+    \end{picture}
+  }
+\end{center}
+\caption{A flow diagram for the SAIR model 3. This model assumes a constant population while also including a mechanism for births/deaths; all deaths are balanced by births into the unvaccinated susceptible compartment, so the birth rate $\mu_{\demography S_{u0}}$ corresponds to the sum total deaths from the remaining compartments. The model assumes that symptomatic individuals will not be vaccinated, hence no vaccination arrow exiting the $I_u0$ compartment.}\label{fig:flow_diagram3}
+\end{figure}

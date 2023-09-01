@@ -1,0 +1,136 @@
+\section{Markov chain and differential equation interpretations of compartment flow rates}
+
+In Sections 2.1, 2.2 and 2.3 of the main article, we define compartment models in terms of their flow rates.
+For a discrete population model, these rates define a Markov chain.
+For a continuous and deterministic model, the rates define a system of ordinary differential equations.
+Here, we add additional details to clarify the mapping from a collection of rate functions to a fully specified process.
+Our treatment follows \citet{breto09}.
+
+A general compartment model is a vector-valued process $X(t)=(X_1(t),\dots,X_c(t))$ denoting the (integer or real-valued) counts in each of $c$ compartments, where $t$ is any continuous value in the interval  $\left[t_0, \infty\right)$ for some real valued starting time $t_0$.
+The compartments may also have names, but to set up general notation we simply refer to them by their numerical index.
+The basic characteristic of a compartment model is that $X(t)$ can be written in terms of the flows $N_{ij}(t)$ from $i$ to $j$.
+A flow into compartment $i$ from outside the system is denoted by $N_{\demography i}$, and a flow out of the system from compartment $i$ is denoted by $N_{i\demography}$.
+We call $\demography$ a source/sink compartment, though it is an irregular compartment since $X_{\demography}(t)$ is not defined.
+These flows are required to satisfy a ``conservation of mass'' identity:
+\begin{equation}
+X_i(t)=X_i(t_0)+N_{\demography i}(t) - N_{i\demography}(t) + \sum_{j\neq
+i}N_{ji}(t)-\sum_{j\neq i}N_{ij}(t). \label{eq:conservation}
+\end{equation}
+Each {\em flow} $N_{ij}(t)$ is associated with a {\em rate} function
+$\mu_{ij}=\mu_{ij}(t,X(t))$, where we include the possibility that $i$ or $j$ takes value $\demography$.
+
+There are different ways to use a collection of rate functions to build a fully specified model.
+We proceed to describe the ones we use in this paper: via a system of ordinary differential equations (Sec.~\ref{subsec:ode}), a simple Markov counting system (Sec.~\ref{subsec:smcs}), and an overdispersed Markov counting system (Sec.~\ref{subsec:odmcs}). Other representations include stochastic differential equations driven by Gaussian noise or Gamma noise \citep{bhadra11}.
+
+\subsection{Ordinary differential equation (ODE) interpretation}
+\label{subsec:ode}
+
+A basic deterministic specification is
+\begin{equation}
+\label{eq:ode1}
+dN_{ij}/dt = \mu_{ij}\big(t,X(t) \big) X_i(t), \hspace{3mm} i\in \seq{1}{c}, \hspace{3mm} j\in \seq{1}{c} \cup\{\demography\}, \hspace{3mm} i\neq j,
+\end{equation}
+where $\mu_{ij}\big(t,X(t)\big)$ is called a per-capita rate or a unit rate.
+Flows into the system require special treatment since $X_i(t)$ in \myeqref{eq:ode1} is not defined for $i=\demography$.
+Instead, we specify
+\begin{equation}
+\label{eq:ode2}
+dN_{\demography i}/dt = \mu_{\demography i}\big(t,X(t) \big).
+\end{equation}
+This is the the interpretation and implementation used for Model~2 in our study.
+
+\subsection{Simple Markov counting system interpretation}
+\label{subsec:smcs}
+A continuous time Markov chain can be specified via its infinitesimal transition probabilities.
+A basic approach to this is to define
+\begin{eqnarray}
+\label{eq:smcs1}
+\prob\big[ N_{ij}(t+\delta)-N_{ij}(t)=0 \given X(t)\big]
+ &=& 1-\delta \mu_{ij}\big(t,X(t)\big)X_i(t) + o(\delta),
+\\
+\label{eq:smcs2}
+\prob\big[ N_{ij}(t+\delta)-N_{ij}(t)=1 \given X(t)\big]
+ &=& \delta \mu_{ij}\big(t,X(t)\big)X_i(t) + o(\delta),
+\end{eqnarray}
+for $i\in \seq{1}{c}$ and $j\in\seq{1}{c}\cup\{\demography\}$ with $i\neq j$.
+As with the ODE case, we need special attention for flows into the system, and we define
+\begin{eqnarray}
+\label{eq:smcs3}
+\prob\big[ N_{\demography i}(t+\delta)-N_{\demography i}(t)=0 \given X(t)\big]
+ &=& 1-\delta \mu_{\demography i}\big(t,X(t)\big) + o(\delta),
+\\
+\label{eq:smcs4}
+\prob\big[ N_{\demography i}(t+\delta)-N_{\demography i}(t)=1 \given X(t)\big]
+ &=& \delta \mu_{\demography i}\big(t,X(t)\big) + o(\delta).
+\end{eqnarray}
+Together with the initial conditions $X(0)$, equations \myeqref{eq:smcs1}--\myeqref{eq:smcs4} define a Markov chain.
+Each flow is a simple counting process, meaning a non-decreasing integer-valued process that only has jumps of size one.
+We therefore call the Markov chain a simple Markov counting system (SMCS).
+The infinitesimal mean of every flow is equal to its infinitesimal variance \citep{breto11} and so an SMCS is called equidispersed.
+We note that the special case of Model~1 used by \cite{lee20} (with $\sigmaProc = 0$) is an SMCS.
+To permit more general mean-variance relationships for a Markov counting system, we must permit jumps of size greater than one.
+The utility of overdispersed models, where the infinitesimal variance of the flow exceeds the infinitesimal mean, has become widely recognized \citep{stocks20,he10}.
+
+\subsection{Overdispersed Markov counting system interpretation}
+\label{subsec:odmcs}
+
+Including white noise in the rate function enables the possibility of an overdispersed Markov counting system \citep{breto11,breto09,he10}.
+Since rates should be non-negative, Gaussian noise is not appropriate and gamma noise is a convenient option that has found various applications \citep{romero-severson15, subramanian20}.
+Specifically, we consider a model given by
+\begin{equation}
+\label{eq:odmcs1}
+\mu_{ij}\big(t,X(t)\big) = \bar\mu_{ij}\big(t,X(t)\big) \, d\Gamma_{ij}(t)/dt,
+\end{equation}
+where $\Gamma_{ij}(t)$ is a stochastic process having independent gamma distributed increments, with
+\begin{equation}
+\label{eq:odmcs2}
+\E\big[\Gamma_{ij}(t)\big] = t, \quad \var\big[\Gamma_{ij}(t)\big] = \sigma_{ij}^2 t.
+\end{equation}
+Formally interpreting the meaning of \myeqref{eq:odmcs1} is not trivial, and we do so by constructing a Markov process $X(t)$ as the limit of the Euler scheme descrived in Section~\ref{sec:numerics}, below.
+Therefore, the numerical scheme in Sec.~\ref{sec:numerics} can be taken as a definition of the meaning of \myeqref{eq:odmcs1}.
+The Markov chain defined by the limit of this Euler scheme as the step size decreases is an overdispersed Markov counting system, with the possibility of instantaneous jumps of size greater than one \citep{breto11}.
+
+\section{Numerical solutions to compartment models}
+\label{sec:numerics}
+
+Models may be fitted and their implications assessed via numerical solutions (i.e., simulations) from the model equations.
+All the analyses we consider have this simulation-based property, known as plug-and-play or equation-free or likelihood-free.
+The numerical solutions to the model are arguably of more direct scientific interest than the exact solutions to the postulated equations.
+For ODE models, numerical methods are well studied and a standard numerical solution package such as \code{deSolve} in \code{R} is adequate for many purposes.
+For SMCS and ODMCS models, exact schemes are feasible when the number of events is small, which may be the case for small populations.
+However, for applicability to larger populations, we use instead the following Euler scheme.
+Write $\delta$ for an Euler time step, and $\Delta N_{ij}$ for the numerical approximation to $N_{ij}(t+\delta)-N_{ij}(t)$ given $X(t)$.
+For each $i$ and $j$ in $\seq{1}{c} \cup \{\demography\}$ with $i \neq j$, we draw independent Gamma distributed noise increments with mean $\delta$ and variance $\sigma_{ij}^2 \delta$, denoted using a mean-variance parameterization of the gamma distribution as
+\begin{equation}
+\label{eq:numerics1}
+\Delta\Gamma_{ij} \sim \mathrm{gamma}(\delta, \sigma_{ij}^2 \delta).
+\end{equation}
+In the case of an SMCS model, $\sigma_{ij}=0$ for all $i$ and $j$, so we have $\Delta\Gamma_{ij}=\delta$.
+Then, for $i\neq \demography$ and $j\neq i$, and writing
+\begin{equation}
+\label{eq:numerics2}
+\mu_{ij}=\bar\mu_{ij}\big(t,X(t)\big) \Delta\Gamma_{ij} / \delta,
+\end{equation}
+we calculate transition probabilities
+\begin{eqnarray}
+\label{eq:numerics3}
+p_{ij} &=& \exp\left\{-\sum_{k\in 1:c \, \cup \{\demography\}} \mu_{ik} \, \delta \right\}
+\frac{\mu_{ij}}{\sum_{k\in 1:c\cup \{\demography\}} \mu_{ik}},
+\\
+\label{eq:numerics4}
+p_{ii} &=& 1 - \sum_{j\neq i} p_{ij}.
+\end{eqnarray}
+These probabilities correspond to competing hazards for every individual in compartment $i$ to transition to some compartment $j$, interpreting $j=i$ to mean that the individual remains in $i$.
+Then, $\big(\Delta N_{i1},\dots,\Delta N_{ic},\Delta N_{i\demography}\big)$ has the multinomial distribution where $X_i(t)$ individuals are allocated independently to $\seq{1}{c}\cup\{\demography\}$ with probabilities given by \eqref{eq:numerics3} and \eqref{eq:numerics4}.
+We use the \code{reulermultinom} function in the \code{pomp} package to draw from this multionomial distribution.
+
+Different treatments of demographic flows---such as birth, death, immigration and emigration---are possible.
+For the case $i=\demography$, the treatment used by Model~1 is to set
+\begin{equation}
+\label{eq:numerics6}
+\Delta N_{\demography j} \sim \mathrm{poisson}( \mu_{\demography j} \delta),
+\end{equation}
+an independent Poisson random variable with mean $\mu_{\demography j} \delta$.
+
+Models~2 and 3 used an alternative approach, balancing the total number of flows in and out of the compartment, i.e., $\sum_{i}N_{\demography i}(t) = \sum_{i}N_{i \demography}(t)$, in order to make the model consistent with the known total population.
+In this case, we formally model the death rate as a rate of returning to the susceptible class $S$, and use external transitions from $\demography$ into $S$ to describe only net population increase.

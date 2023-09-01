@@ -1,0 +1,67 @@
+\section{Measurement Models}
+
+Each POMP requires specification of a measurement model, which is a statistical description of how observations on the system are obtained.
+In general, we used the same measurement models that were reported by \cite{lee20} unless specifically noted in the following subsections.
+
+
+\subsection{Model~1}
+
+In this model, the advantage afforded by vaccination is an increased probability that an infection is asymptomatic.
+Therefore, under the assumptions of this model, all reported cases are assumed to be a fraction of individuals that transition from the exposed to the infected compartment, as noted in Eq.~\myeqref{model1:meas}:
+\begin{equation}
+  \label{model1:meas}
+  Y_{n} \mid \Delta N_{E_{\cdot}I_{\cdot}}(n) = \reportChange \sim \text{NB}\left(\reportRate \reportChange, \obsOverdispersion \right),
+\end{equation}
+where $Y_n$ is the reported cholera cases at time $t_n \in t_1:t_N$ and $\Delta N_{E_{\cdot}I_{\cdot}}(n)$ is the sum total of individuals across each vaccination compartment $\vaccCounter \in 1:\vaccClass$ who moved from compartment $E_\vaccCounter$ to $I_\vaccCounter$ since observation $t_{n-1}$.
+Here, $\text{NB}\left(\reportRate \reportChange, \obsOverdispersion \right)$ denotes a negative binomial distribution with mean $\reportRate \reportChange$ and variance $\reportRate \reportChange \big(1 + \frac{\reportRate \reportChange}{\obsOverdispersion}\big)$.
+
+\subsection{Model~2}\label{sec:mod2Meas}
+
+Model~2 was fit using reported case counts that were transformed using the natural logarithm.
+We fit Model~2 using the subplex algorithm in the \code{subplex} package, using
+a Gaussian measurement model (Eq.~\myeqref{model2:meas}) on the log transformed cases within each unit.
+The final loss function that is maximized is the product of the likelihoods of the individual units, or the sum of the log-likelihood of the individual units.
+The measurement model for individual units is given in Eq.~\myeqref{model2:meas}.
+\begin{equation}
+  \label{model2:meas}
+  \log\big(Y_{u, n} + 1\big) \mid \Delta N_{E_{u\cdot}I_{u\cdot}}(n) = \reportChange_u \sim \text{N}\left(\log \big(\reportRate \reportChange_u + 1\big), \obsOverdispersion^2 \right),
+\end{equation}
+where $\Delta N_{E_{u\cdot}I_{u\cdot}}(n)$ is the sum total of individuals across vaccination compartment $\vaccCounter \in 0:4$ within unit $u$ who moved from compartment $E_{u\vaccCounter}$ to $I_{u\vaccCounter}$ since observation $t_{n-1}$.
+Therefore, because the natural logarithm of observed case counts (plus one, to avoid taking the logarithm of zero) has a normal distribution, $Y_{u, n} + 1$ is assumed to follow a log-normal distribution with log-mean parameter $\log\big(\reportRate \Delta N_{E_{u\cdot}I_{u\cdot}}(n) + 1\big)$ and log-variance $\obsOverdispersion^2$.
+We note that fitting a model with this measurement model is equivalent to fitting using least squares, with $\log(Y_{u, n} + 1)$ as the response variable.
+
+This measurement model differs from that used by \citet{lee20}, who fit the model in two stages: epidemic and endemic phases.
+Although their text and supplement material do not explicitly describe the measurement model used, inspection of the code provided with their submission suggests a change in measurement model between the epidemic and endemic phases.
+% In the file \code{choleraEqsPublic.py}, \citet{lee20} create several functions, where each function represents a set of coupled differential equations that could potentially be used to model cholera incidence data.
+% Each function returns a vector (or \code{numpy} array) that represents the change in each state variable for a single time step, including the variable \code{dC}, which tracks the number of new infections and is used to obtain the reported case counts.
+% Following their comments and code, it appears that the function \code{choleraEqs10WithoutVaccinationNetwork} was used to describe the dynamics of the epidemic phase, and \code{choleraEqs11WithoutVaccinationNetwork} was used for the endemic stage (see Sec~\ref{sec:mod2rep} for more details).
+% Because their models were fit using least squares, the code in these functions suggest that the measurement model for the epidemic phase is
+The measurement model they used for the epidemic phase is
+\begin{equation}
+  \label{model2:measEpi}
+  Y_{u, n} \mid \Delta N_{E_{u\cdot}I_{u\cdot}}(n) = \reportChange_u \sim \text{N}\left(\reportRate \reportChange_u, \obsOverdispersion^2 \right),
+\end{equation}
+% which is similar to our measurement model, the primary difference being that the measurement model is applied to raw case counts rather than log-transformed case counts.
+The measurement model they used for the endemic phase modifies the epidemic model by counting both asymptomatically infected (A) and symptomatically infected (I) individuals in the case counts:
+\begin{equation}
+  \label{model2:measEnd}
+  Y_{u, n} \mid \Delta N_{E_{u\cdot}I_{u\cdot}}(n) = \reportChange_{u1}, \Delta N_{E_{u\cdot}A_{u\cdot}}(n) = \reportChange_{u2} \sim \text{N}\left(\reportRate \big(\reportChange_{u1} + \reportChange_{u2}\big), \obsOverdispersion^2 \right),
+\end{equation}
+where the notation for $\Delta N_{E_{u\cdot}A_{u\cdot}}(n)$ is similar to $\Delta N_{E_{u\cdot}I_{u\cdot}}(n)$, described above.
+
+\subsection{Model~3}
+
+In this model, reported cholera cases are assumed to stem from individuals who develop symptoms and seek healthcare.
+Therefore reported cases are assumed to come from an over-dispersed negative binomial model, given the increase in infected individuals:
+\begin{equation}
+  \label{model3:meas}
+  Y_{u, n} \mid \Delta N_{S_{u \cdot}I_{u}}(t) = \reportChange_u \sim \text{NB}\left(\reportRate \reportChange_{u}, \obsOverdispersion \right),
+\end{equation}
+where $\Delta N_{S_{u \cdot}I_{u \vaccCounter}}(n)$ is the number of individuals who moved from compartment $S_{u \vaccCounter}$ to $I_{u}$ since observation $t_{n-1}$.
+
+This measurement model is a minor change from that used by \cite{lee20}, which allowed for a change in the reporting rate on January 1st, 2018.
+The fitted values of the reporting rate---before and after January 2018---were $0.97$ and $0.097$, respectively.
+An instantaneous change from near perfect to almost non-existent reporting can be problematic, as it forces the model to explain the observed reduction in reported cases as a decrease in the reporting of cases, rather than a decrease in the prevalence of cholera.
+This shift was justified by a ``change of the case definition that occurred on January 1st, 2018";
+this claim was not cited, and we could find no evidence that such a drastic change in the reporting rate would be warranted.
+We therefore do not allow a change in reporting rate when fitting Model~3.

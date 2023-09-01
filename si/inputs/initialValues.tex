@@ -1,0 +1,57 @@
+\section{Initial Values}
+
+To perform inference on POMP models, it is necessary to propose an initial probability density for the latent process $f_{X_0}(x_0;\theta)$, including the possibility that the initial values of the latent states are known, or are a non-random function of the unknown parameter vector, $\theta$.
+This density is used to obtain initial values of the latent state when fitting and evaluating the model.
+For each of the models considered in this analysis, the initial conditions are derived by enforcing the model dynamics on reported cholera cases.
+It is also sometimes necessary to fit some initial value parameters in order to help determine initial values for weakly identifiable compartments.
+In the following subsections, we mention initial value parameters that were fit for each model.
+
+\subsection{Model~1}
+
+For this model, the number of individuals in the Recovered and Asymptomatic compartments are set to zero, but the initial proportion of Infected and Exposed individuals is estimated as initial value parameters ($\Iinit$ and $\Einit$, respectively) using the IF2 algorithm, implemented as \texttt{mif2} in the \texttt{pomp} package.
+Finally, the initial proportion of Susceptible individuals $S_{0, 0}$ is calculated as $S_{0, 0} = 1 - \Iinit - \Einit$.
+This model for the initial values of the latent states matches that which was used by \citet{lee20}.
+
+\subsection{Model~2}
+
+Model~2 assumes that the initial values are a deterministic function of the reporting rate and the initial case reports, and so no initial value parameters need to be estimated.
+Initial values for latent state compartments are chosen so as to enforce the model dynamics on the observed number of cases.
+Specifically, the model sets $I_{u0}(0) = y^*_{1u} / \reportRate$ for each unit $u \in 1:10$, where $I_{u0}(t)$ is the number of infected individuals in unit $u$ at time $t$, vaccination scenario $z = 0$, $y^*_{tu}$ is the reported number of cases, and $\reportRate$ is the reporting rate.
+This model for the initial values of the latent states matches that which was used by \citet{lee20}.
+
+\subsection{Model~3}
+
+The latent states of this model are initialized by enforcing the model dynamics on the incidence data from the start of the recorded cases until time $t_0$, requiring that some of the available data be used to determine the initial values of the latent states.
+This is the same approach that was taken by \citet{lee20}, who used the value $t_0 = \text{2014-02-22}$; this choice of $t_0$ results in modeling roughly only $60\%$ of the available data, some of which is later discarded for alternative reasons \citep{lee20sup}.
+
+We do not see any immediate reason that this model could not be extended to cover a larger range of the data, and chose the value $t_0 = \text{2010-11-13}$.
+This choice of $t_0$ corresponds to using approximately $1\%$ of the available data to determine initial values of the latent states.
+In addition to modeling a larger portion of the available data, this choice of $t_0$ corresponds to an important real-world event, as daily reports from each of the departments were not being sent to the health ministry until November 10, 2010 \citep{barzilay13};
+this choice of $t_0$ therefore makes $\bm{Y}\big(t_1\big)$ the first week of data once daily reports are being sent to the health ministry.
+The few observation times that exist before $t_0$ are used to initialize the model by enforcing model dynamics on these preliminary observations.
+For convenience, we denote these observations as $t_{-3}, t_{-2}$ and $t_{-1}$; as before, we let $y_{u,-k} = Y_{u}\big(t_{-k}\big)$ denote the observed case count for unit $u$ at time point $t_{-k}$, where $k \in 1:3$.
+Equations for the initial values of non-zero latent states are provided in Eqs.~\myeqref{eq:model3:I0}--\myeqref{eq:model3:B0}; these equations match those that were used by \citet{lee20}, the primary change being a change to the value of $t_0$.
+
+\begin{eqnarray}
+\label{eq:model3:I0}
+I_{u}\big(t_0\big) &=& \frac{y^*_{u, -1}}{7\reportRate\left(\muIR + \left(\muDeath + \choleraDeath\right)/365\right)},
+\\%[-3pt]
+\label{eq:model3:A0}
+A_{u}\big(t_0\big) &=& \frac{I_{u0}\big(t_0\big)\left(1 - \symptomFrac\right)}{\symptomFrac},
+\\
+\label{eq:model3:R0}
+R_{u01}\big(t_0\big) &=& R_{u02}\big(t_0\big) = R_{u03}\big(t_0\big) = \left(\frac{\sum_{k = -3}^0 y^*_{u, k}}{\reportRate \symptomFrac} - \left(I_{u0}\big(t_0\big) + A_{u0}\big(t_0\big)\right)\right) / 3
+\\
+\label{eq:model3:S0}
+S_{u0}\big(t_0\big) &=& \mathrm{Pop}_u - I_{u}\big(t_0\big) - A_{u}\big(t_0\big) - \sum_{k=1}^3 R_{u0k}\big(t_0\big)
+\\
+\label{eq:model3:B0}
+B_{u}\big(t_0\big) &=& \big[1 + \seasAmplitude \tilde{J}^r \big] \mathrm{Den}_u \, \Wshed \big[ I_{u}(t_0)+ \asymptomRelativeShed A_{u_0}(t) \big]/\Wshed.
+\end{eqnarray}
+
+In Eq.~\myeqref{eq:model3:B0}, $\tilde{J} = 0.002376$ is the median adjusted rainfall over the observation period.
+One important consideration to make with this parameter initialization model is when $y_{u, -1}^* = 0$, which occurs for units $u \in \{3, 4\}$, which correspond to the Grand'Anse and Nippes departments, respectively.
+When this is the case, each of the infectious $I_u(t_0)$, asymptomatic $A_u(t_0)$, and bacterial reservoir $W_u(t_0)$ compartments have a value of zero.
+Because Model~3 models cholera transmission primarily by means of the bacterial reservoir, this makes it nearly impossible for an outbreak to occur.
+Therefore for units $u \in \{3, 4\}$, we introduce initial value parameters $I_{0,0}^3$ and $I_{0,0}^4$, and calibrate these parameter values using the data.
+The resulting parameter estimates are used to obtain the remaining non-zero initial values of the latent states using Eqs.~\myeqref{eq:model3:A0}--\myeqref{eq:model3:B0}.
