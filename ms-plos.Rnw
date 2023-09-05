@@ -627,14 +627,18 @@ Our workflow is reproducible and extendable, facilitating future investigations 
 % Use first person. PLOS ONE authors please skip this step.
 % Author Summary not valid for PLOS ONE submissions.
 \section*{Author summary}
-Scientists often use data from an infectious disease outbreak to build statistical models.
-Among other things, these models are often used to guide governmental policy, as the models can provide insight into the dynamics of an outbreak.
-Despite recent computational and methodological advancements, fitting dynamic models to observed incidence data remains a challenging task.
-In this article, we discuss common mistakes that may lead to models that do not adequately describe reality, and make suggestions that can lead to more useful statistical models.
+Quantitative understanding of infectious disease transmission dynamics relies upon mathematical models informed by scientific knowledge and relevant data.
+The models aim to provide a statistical description of the trajectory of an epidemic and its uncertainty, together with a representation of the underlying biological mechanisms.
+Evaluation of success at these goals is necessary in order for a model to provide a reliable tool for guiding evidence-based public policy interventions.
+In this article, we discuss common modeling decisions that may not provide an adequate statistical explanation of the data, and we show that attention to statistical fit can lead to more accurate policy evaluations.
 We do this by conducting a re-analysis of the 2012-2019 cholera outbreak in Haiti.
-We focus on the importance of appropriately diagnosing how well a model describes observed data, correctly interpreting model based results, and stressing the importance of reproducibility.
-An important contribution of this article is demonstrating a use-case of a newly developed computational algorithm to fit spatially coupled meta-population models.
-We assert that raising the currently accepted standards of infectious disease modeling will result in a greater ability of scientists and policy makers to understand and respond to future infectious disease outbreaks.
+Our analysis presents methodology for diagnosing how well a model describes observed data, and provides careful justification of valid conclusions from the fitted model.
+Objective measures are used to benchmark model fit; when these are combined with reproducibility, a framework emerges for continual improvment when revisiting the data and models.
+Our data analysis workflow is supported by recent advances in algorithms, software and hardware, which facilitate statistical fitting of nonlinear stochastic dynamic models to observed incidence data.
+However, inference for high-dimensional systems remains a methodological challenge. 
+One of the models under consideration involves spatially coupled stochastic meta-populations, and we demonstrate how a recently developed algorithm permits likelihood-based inference and model diagnostics in this setting.
+We contend that raising the currently accepted standards of infectious disease modeling will result in a greater ability of scientists and policy makers to understand and respond to future infectious disease outbreaks.
+
 
 \linenumbers
 
