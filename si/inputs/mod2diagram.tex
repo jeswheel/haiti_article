@@ -1,0 +1,109 @@
+\begin{figure}[!h]
+%%%%% SEAIR diagram
+\begin{center}
+  \resizebox{\textwidth}{!}{
+    \Large
+    \setlength{\unitlength}{5pt}
+    \begin{picture}(100,95)(0,15)
+      \thicklines
+
+      % Unvaccinated Compartments
+      \put(10,63){\framebox(6,6){$\mathrm{S}_{u0}$}}
+      \put(34,69){\framebox(6,6){$\mathrm{E}_{u0}$}}
+      \put(58,77){\framebox(6,6){$\mathrm{A}_{u0}$}}
+      \put(82,77){\framebox(6,6){$\mathrm{R^A}_{u0}$}}
+      \put(82,61){\framebox(6,6){$\mathrm{R^I}_{u0}$}}
+      \put(58,61){\framebox(6,6){$\mathrm{I}_{u0}$}}
+
+      % % S_0 -> E_0
+      \put(17,66){\vector(3,1.1){16}}
+
+      % % E_0 -> A_0
+      \put(41,72.5){\vector(2.1,1){16}}
+
+      % % E_0 -> I_0
+      \put(41,71.5){\vector(2.1,-1){16}}
+
+      % % A_0 -> R_0
+      \put(65,80.5){\vector(1,0){16}}
+
+      % A_uz -> W_u
+      \put(58,39){\framebox(6,6){$\mathrm{A}_{u\vaccCounter}$}}
+      \qbezier[25](60.5, 46)(51, 52)(42, 53)
+      \put(42, 53){\vector(-1, 0.1){0.5}}
+
+      % A_uz -> W_u
+      \qbezier[25](60.5, 60)(51, 54)(42, 54)
+      \put(42, 54){\vector(-1, -0.1){0.5}}
+
+      % I_uz -> W_u
+      \qbezier[30](60.5,30)(48, 45)(40, 50)
+      \put(40, 50){\vector(-1, 0.8){0.5}}
+
+      % A_u0 -> W_u
+      \qbezier[29](60.5,76)(48, 61)(40.6, 57)
+      \put(40.8, 57.1){\vector(-1, -0.7){0.5}}
+
+      % % I_0 -> R_0
+      \put(65,63.5){\vector(1,0){16}}
+
+      % % Vaccinated Compartments
+      \put(10,37){\framebox(6,6){$\mathrm{S}_{u\vaccCounter}$}}
+      \put(34,31){\framebox(6,6){$\mathrm{E}_{u\vaccCounter}$}}
+      \put(58,39){\framebox(6,6){$\mathrm{A}_{u\vaccCounter}$}}
+      \put(82,39){\framebox(6,6){$\mathrm{R^A}_{u\vaccCounter}$}}
+      \put(58,23){\framebox(6,6){$\mathrm{I}_{u\vaccCounter}$}}
+      \put(82,23){\framebox(6,6){$\mathrm{R^I}_{u\vaccCounter}$}}
+
+      % R_0 -> S_0
+      \cbezier(85,22)(80, 8)(18,8)(12,36)
+      \put(12.1,35.5){\vector(-1, 3.5){0.3}}
+
+      \cbezier(85,38)(80, 12)(18,15)(14,36)
+      \put(14.1,35.5){\vector(-1, 3.5){0.3}}
+
+
+      % R_0 -> S_0
+      \cbezier(85,84)(80, 100)(18,100)(12,70)
+      \put(12.1,70.5){\vector(-1, -3.5){0.3}}
+
+      \cbezier(85,68)(80, 95)(18, 92)(14,70)
+      \put(14.1,70.5){\vector(-1, -3.5){0.3}}
+
+      % % S -> E
+      \put(17,40){\vector(3,-1.1){16}}
+
+      % % E -> A
+      \put(41,34.5){\vector(2.1,1){16}}
+
+      % % E -> I
+      \put(41,33.5){\vector(2.1,-1){16}}
+
+      % % A -> R
+      \put(65,42.5){\vector(1,0){16}}
+
+      % % I -> R
+      \put(65,25.5){\vector(1,0){16}}
+
+      % S_0 -> S_\vaccCounter
+      \multiput(12,62)(0,-2){9}{\line(0,-1){1}}
+      \put(12, 44){\vector(0, -1){0}}
+
+      % S_0 -> S_\vaccCounter
+      % Wanning vaccine efficacy
+      \multiput(14,44)(0,2){9}{\line(0,1){1}}
+      \put(14, 62){\vector(0, 1){0}}
+
+
+      \put(37, 54){\circle{7}}
+      \put(35, 53){$\mathrm{W_u}$}
+
+      \qbezier[10](32.5, 54)(29.5, 54)(26.5, 54)
+      \put(26, 54){\vector(-1, 0){0.1}}
+      \put(28, 55){$\Wremoval$}
+
+    \end{picture}
+  }
+\end{center}
+\caption{A flow diagram for the SEAIR model 2. This is a constant population model, there are no births/deaths. Vaccinations are assumed to only be given to susceptible individuals, and vaccine immunity wanes only with susceptible vaccinated individuals.}\label{fig:flow_diagram2}
+\end{figure}

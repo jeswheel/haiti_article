@@ -1,44 +1,29 @@
+create: ReplicateLee20.Rnw calibrateMod3.Rnw inputs/header.tex inputs/mod1diagram.tex inputs/mod2diagram.tex inputs/mod3diagram.tex inputs/modelDetails.tex inputs/measurementModels.tex inputs/initialValues.tex calibrateMod3Out.tex ReplicateLee20Out.tex inputs/paramUncertainty.tex inputs/translateTab.tex
+	if ! [ -d "si_files" ]; then mkdir si_files; fi
+	$(MAKE) si.Rnw
+	$(MAKE) clean
 
-SHELL:= /bin/bash
+fresh: ReplicateLee20.Rnw calibrateMod3.Rnw inputs/header.tex inputs/mod1diagram.tex inputs/mod2diagram.tex inputs/mod3diagram.tex inputs/modelDetails.tex inputs/measurementModels.tex inputs/initialValues.tex inputs/paramUncertainty.tex inputs/translateTab.tex
+	rm si.tex calibrateMod3*.tex ReplicateLee20*.tex
+	$(MAKE) si.Rnw
+	$(MAKE) clean
 
-# BEGIN: FINE TUNE
-FILES:= si
-DUST_EXT:= {aux,bbl,blg,dvi,log,nav,out,Rout,snm,synctex.gz,toc,vrb}
-# to keep .tex & .log files from 'knitr::knit()', uncomment next line
-#.PRECIOUS: %.tex 
-SHAREDCOMM:= awk '/begin{shared-comm.tex/ {p=1}; p; /end{shared-comm.tex/ {p=0}' ms.Rnw > shared-comm.tex
-PREP:=$(SHAREDCOMM)
-# END: FINE TUNE 
+si.Rnw: ReplicateLee20.Rnw calibrateMod3.Rnw inputs/header.tex inputs/mod1diagram.tex inputs/mod2diagram.tex inputs/mod3diagram.tex inputs/modelDetails.tex inputs/measurementModels.tex inputs/initialValues.tex inputs/paramUncertainty.tex inputs/translateTab.tex | calibrateMod3Out.tex ReplicateLee20Out.tex
+	Rscript -e "library(knitr); knit2pdf('si.Rnw')"
 
-PDFL_OPTS:= -output-format pdf
+calibrateMod3Out.tex: calibrateMod3.Rnw
+	Rscript -e "library(knitr); knit2pdf('calibrateMod3.Rnw')"
+	mv calibrateMod3.pdf si_files/calibrateMod3.pdf
+	sed -i "0,/%* START/d" calibrateMod3.tex
+	sed '/%* END/,$$d' calibrateMod3.tex > $@
+	rm calibrateMod3.tex
 
-RSCRIPT = Rscript --vanilla
+ReplicateLee20Out.tex: ReplicateLee20.Rnw
+	Rscript -e "library(knitr); knit2pdf('ReplicateLee20.Rnw')"
+	mv ReplicateLee20.pdf si_files/ReplicateLee20.pdf
+	sed -i "0,/%* START/d" ReplicateLee20.tex
+	sed '/%* END/,$$d' ReplicateLee20.tex > $@
+	rm ReplicateLee20.tex
 
-.PHONY: default
-default:
-	for f in $(FILES); do (make $$f.pdf); done
-
-.PHONY: help
-help:
-	@echo "Type 'make' for the default recipe (see steps below), i.e.: (i) clean, (ii) make all pdf files, and (iii) dust"
-	@echo "Type 'make clean' to remove files named after tex or Rnw files and with extension pdf or of DUST_EXT (see 'make dust' below)"
-	@echo "Type 'make filename.pdf' to make a pdf from filename.tex or filename.Rnw (by knitting it into filename.tex)"
-	@echo "Type 'make dust' to remove files named after tex or Rnw files and with extension one of (DUST_EXT, i.e.):" $(DUST_EXT)
-
-%.pdf: %.tex
-	pdflatex $(PDFL_OPTS) $*; bibtex $*; pdflatex $(PDFL_OPTS) $*; pdflatex $(PDFL_OPTS) $*
-
-%.tex: %.Rnw
-	Rscript --no-save --no-restore --no-init-file -e "knitr::knit(\"$*.Rnw\",quiet=TRUE)" > $*.Rout 2>&1
-
-%.R: %.Rnw
-	$(RSCRIPT) -e "library(knitr); purl(\"$*.Rnw\")"
-
-.PHONY:clean dust
-clean: dust
-	for f in $(FILES); do (rm -f $(basename $$f).pdf $(basename $$f).dvi $(basename $$f).html); done;\
-	$(foreach f, $(wildcard *.Rnw), rm -f $(basename $f).tex $(basename $f).R)
-	rm -f cache/figs/*.*
-
-dust:
-	for f in $(FILES); do (rm -f $(basename $$f).$(DUST_EXT)); done
+clean:
+	rm -f *.bbl *.log *-concordance.tex *.gz *.toc
