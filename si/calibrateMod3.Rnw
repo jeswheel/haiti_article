@@ -293,7 +293,7 @@ For meta-population models, it is worth considering how well the model fits the 
 The likelihoods for each department, compared to the corresponding benchmark model, are displayed in Fig.~\ref{fig:h3UnitLikes}.
 The figure demonstrates that while the log-likelihood of the fitted model outperforms the auto-regressive negative binomial benchmark model, Model~3 has lower likelihoods than the benchmark for some departments.
 
-\begin{figure}[!h]
+\begin{figure}[!ht]
 <<h3UnitLikes, fig.height=3, fig.width=5.5, echo=FALSE>>=
 ggplot(bench_M3_joined, aes(x = ll, y = reorder(unit, ll))) +
   geom_point(aes(col = type)) +
@@ -315,7 +315,7 @@ In Fig.~\ref{fig:condLL}, we plot the conditional log-likelihoods of Model~3 for
 Typically it is most useful to compare the conditional log-likelihoods of the model under consideration to a benchmark, as plotting only conditional log-likelihoods without a comparison may not be helpful.
 In this case, however, the same insight can be drawn using a figure without a benchmark comparison, so we do not include the benchmark in order to avoid the issue of over-plotting.
 
-\begin{figure}[!h]
+\begin{figure}[!ht]
 <<CondLLFig, echo=FALSE, message=FALSE, fig.height=3>>=
 
 # Changing labels to human-readable labels.
@@ -448,7 +448,7 @@ bpf_final3_out <- bake(
 )
 @
 
-\begin{figure}[!h]
+\begin{figure}[!ht]
 <<finalCondLLFig, echo=FALSE, message=FALSE, fig.height=3>>=
 t(bpf_final3_out$block.cond.loglik) %>%
   as.data.frame() %>%
@@ -481,7 +481,7 @@ This result suggests that the quantitative advantage Model~3 has over its respec
 This result may be unsurprising in the context of the models that we are comparing.
 Because the cholera transmission in individual departments likely depends on the national prevalence of cholera and the Vibrio cholerae bacteria, our benchmark model that relies exclusively on the previous number of case within any given unit has a difficult time predicting a resurgence of cases.
 
-\begin{figure}[!h]
+\begin{figure}[!ht]
 <<finalUnitLLFig, fig.height=3, fig.width=5.5, echo=FALSE>>=
 ggplot(bench_M3_joined, aes(x = ll, y = reorder(unit, ll))) +
   geom_point(aes(col = type)) +
@@ -684,7 +684,7 @@ mod3_V0_initcond_res <- bake(
 mod3_V0_res <- readRDS("../model3/run_level_3/mod3_V0_res.rds")
 @
 
-\begin{figure}[!h]
+\begin{figure}[!ht]
 <<h3SusFig, echo=FALSE, message=FALSE, fig.height=3>>=
 ggplot() +
   # Sims from initial condition
