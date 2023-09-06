@@ -14,15 +14,13 @@ si.Rnw: ReplicateLee20.Rnw calibrateMod3.Rnw inputs/header.tex inputs/mod1diagra
 calibrateMod3Out.tex: calibrateMod3.Rnw
 	Rscript -e "library(knitr); knit2pdf('calibrateMod3.Rnw')"
 	mv calibrateMod3.pdf si_files/calibrateMod3.pdf
-	sed -i "0,/%* START/d" calibrateMod3.tex
-	sed '/%* END/,$$d' calibrateMod3.tex > $@
+	Rscript --vanilla clean_tex.R calibrateMod3.tex
 	rm calibrateMod3.tex
 
 ReplicateLee20Out.tex: ReplicateLee20.Rnw
 	Rscript -e "library(knitr); knit2pdf('ReplicateLee20.Rnw')"
 	mv ReplicateLee20.pdf si_files/ReplicateLee20.pdf
-	sed -i "0,/%* START/d" ReplicateLee20.tex
-	sed '/%* END/,$$d' ReplicateLee20.tex > $@
+	Rscript --vanilla clean_tex.R ReplicateLee20.tex
 	rm ReplicateLee20.tex
 
 clean:

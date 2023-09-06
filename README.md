@@ -4,6 +4,10 @@ This repository contains the necessary code to reproduce the article: "Informing
 
 ### TODO: 
 
+- [ ] In the `si`-makefile, need to create command to create all sub-results and save the in the folder `si_files`. 
+- [ ] In the primary makefile, need to write code to move `.bbl` documents into the `.tex` file for article submission. 
+- [ ] All images need to be `.tif` files... easiest would be to convert them via command line and makefile. 
+- [ ] Fix undefined references in `si`-sub `.Rnw` documents. 
 - [ ] **DON'T FORGET**: Before re-running everything, remove `ncores` argument from `fit_haiti3` and `fit_haiti1`. This argument doesn't do anything, but was left in so as to not trigger the `bake` recalculation of the file, which would be inconvinient when working on the manuscript. 
 - [x] Make sure supplement is up to date 
    - [ ] Fix the supporting-information section in manuscript 

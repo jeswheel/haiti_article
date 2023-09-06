@@ -318,7 +318,7 @@ gg_epi <- projections %>%
   filter(date < as.Date("03-01-2014", format = '%m-%d-%Y')) %>%
   ggplot(aes(x = date)) +
   geom_line(aes(y = ReportedAll), col = 'black', linetype = 'dashed') +
-  geom_line(aes(y = Ctotal), col = 'red', size = 1) +
+  geom_line(aes(y = Ctotal), col = 'red', linewidth = 1) +
   theme_bw() +
   scale_y_continuous(limits = c(0, 30000), breaks = seq(0, 30000, 5000)) +
   theme(axis.title.x = element_blank()) +
@@ -328,7 +328,7 @@ gg_end <- projections %>%
   filter(date >= as.Date("03-01-2014", format = '%m-%d-%Y')) %>%
   ggplot(aes(x = date)) +
   geom_line(aes(y = ReportedAll), col = 'black', linetype = 'dashed') +
-  geom_line(aes(y = Ctotal), col = 'red', size = 1) +
+  geom_line(aes(y = Ctotal), col = 'red', linewidth = 1) +
   theme_bw() +
   scale_y_continuous(limits = c(0, 7000), breaks = seq(0, 7000, 1000)) +
   theme(axis.title.x = element_blank()) +
