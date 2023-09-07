@@ -1,29 +1,5 @@
-% Template for PLoS
-% Version 3.6 Aug 2022
-%
-% % % % % % % % % % % % % % % % % % % % % %
-%
-% -- IMPORTANT NOTE
-%
-% This template contains comments intended
-% to minimize problems and delays during our production
-% process. Please follow the template instructions
-% whenever possible.
-%
-% % % % % % % % % % % % % % % % % % % % % % %
-%
-% Once your paper is accepted for publication,
-% PLEASE REMOVE ALL TRACKED CHANGES in this file
-% and leave only the final text of your manuscript.
-% PLOS recommends the use of latexdiff to track changes during review, as this will help to maintain a clean tex file.
-% Visit https://www.ctan.org/pkg/latexdiff?lang=en for info or contact us at latex@plos.org.
-%
-%
-% There are no restrictions on package use within the LaTeX files except that no packages listed in the template may be deleted.
-%
+% TODO: Remove colored text from table, instead, create a new symbol.
 % Please do not include colors or graphics in the text.
-%
-% The manuscript LaTeX source should be contained within a single file (do not use \input, \externaldocument, or similar commands).
 %
 % % % % % % % % % % % % % % % % % % % % % % %
 %
@@ -635,7 +611,7 @@ We do this by conducting a re-analysis of the 2012-2019 cholera outbreak in Hait
 Our analysis presents methodology for diagnosing how well a model describes observed data, and provides careful justification of valid conclusions from the fitted model.
 Objective measures are used to benchmark model fit; when these are combined with reproducibility, a framework emerges for continual improvment when revisiting the data and models.
 Our data analysis workflow is supported by recent advances in algorithms, software and hardware, which facilitate statistical fitting of nonlinear stochastic dynamic models to observed incidence data.
-However, inference for high-dimensional systems remains a methodological challenge. 
+However, inference for high-dimensional systems remains a methodological challenge.
 One of the models under consideration involves spatially coupled stochastic meta-populations, and we demonstrate how a recently developed algorithm permits likelihood-based inference and model diagnostics in this setting.
 We contend that raising the currently accepted standards of infectious disease modeling will result in a greater ability of scientists and policy makers to understand and respond to future infectious disease outbreaks.
 
@@ -2259,7 +2235,6 @@ gg_trans <- ggplot() +
 @
 
 \begin{figure}[!h]
-\centering
 <<Model1_Seasonality_Figure, fig.height=2.9, fig.width=5, fig.align='center'>>=
 cowplot::plot_grid(gg_rain, gg_trans, align = "v", ncol = 1)
 @

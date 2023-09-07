@@ -5,12 +5,15 @@ SHELL:= /bin/bash
 FILES:= ms
 DUST_EXT:= {aux,bbl,blg,dvi,log,nav,out,Rout,snm,synctex.gz,toc,vrb}
 # to keep .tex & .log files from 'knitr::knit()', uncomment next line
-#.PRECIOUS: %.tex 
+#.PRECIOUS: %.tex
 SHAREDCOMM:= awk '/begin{shared-comm.tex/ {p=1}; p; /end{shared-comm.tex/ {p=0}' ms.Rnw > shared-comm.tex
 PREP:=$(SHAREDCOMM)
-# END: FINE TUNE 
+# END: FINE TUNE
 
 PDFL_OPTS:= -output-format pdf
+
+PDF_FILES:= $(wildcard figure/*.pdf)
+TIF_FILES:= $(patsubst %.pdf,%.tif,$(PDF_FILES))
 
 RSCRIPT = Rscript --vanilla
 
@@ -42,3 +45,11 @@ clean: dust
 
 dust:
 	for f in $(FILES); do (rm -f $(basename $$f).$(DUST_EXT)); done
+
+%.tif: %.pdf
+	pdftoppm -tiff $*.pdf $*
+	Rscript --vanilla removeTrailingNums.R $*-1.tif
+
+tifs: $(TIF_FILES)
+
+
