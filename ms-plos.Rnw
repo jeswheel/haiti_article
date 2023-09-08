@@ -3,49 +3,26 @@
 %
 % % % % % % % % % % % % % % % % % % % % % % %
 %
-% -- FIGURES AND TABLES
-%
-% Please include tables/figure captions directly after the paragraph where they are first cited in the text.
-%
-% DO NOT INCLUDE GRAPHICS IN YOUR MANUSCRIPT
-% - Figures should be uploaded separately from your manuscript file.
-% - Figures generated using LaTeX should be extracted and removed from the PDF before submission.
-% - Figures containing multiple panels/subfigures must be combined into one image file before submission.
-% For figure citations, please use "Fig" instead of "Figure".
-% See http://journals.plos.org/plosone/s/figures for PLOS figure guidelines.
-%
 % Tables should be cell-based and may not contain:
 % - spacing/line breaks within cells to alter layout or alignment
 % - do not nest tabular environments (no tabular environments within tabular environments)
 % - no graphics or colored text (cell background color/shading OK)
 % See http://journals.plos.org/plosone/s/tables for table guidelines.
 %
-% For tables that exceed the width of the text column, use the adjustwidth environment as illustrated in the example table in text below.
-%
-% % % % % % % % % % % % % % % % % % % % % % % %
-%
 % -- EQUATIONS, MATH SYMBOLS, SUBSCRIPTS, AND SUPERSCRIPTS
 %
 % IMPORTANT
 % Below are a few tips to help format your equations and other special characters according to our specifications. For more tips to help reduce the possibility of formatting errors during conversion, please see our LaTeX guidelines at http://journals.plos.org/plosone/s/latex
 %
-% For inline equations, please be sure to include all portions of an equation in the math environment.  For example, x$^2$ is incorrect; this should be formatted as $x^2$ (or $\mathrm{x}^2$ if the romanized font is desired).
-%
+% TODO: See below
 % Do not include text that is not math in the math environment. For example, CO2 should be written as CO\textsubscript{2} instead of CO$_2$.
 %
-% Please add line breaks to long display equations when possible in order to fit size of the column.
-%
+% TODO: see below.
 % For inline equations, please do not include punctuation (commas, etc) within the math environment unless this is part of the equation.
 %
+% TODO: see below
 % When adding superscript or subscripts outside of brackets/braces, please group using {}.  For example, change "[U(D,E,\gamma)]^2" to "{[U(D,E,\gamma)]}^2".
 %
-% Do not use \cal for caligraphic font.  Instead, use \mathcal{}
-%
-% % % % % % % % % % % % % % % % % % % % % % % %
-%
-% Please contact latex@plos.org with any questions.
-%
-% % % % % % % % % % % % % % % % % % % % % % % %
 
 \documentclass[10pt,letterpaper]{article}
 \usepackage[top=0.85in,left=2.75in,footskip=0.75in]{geometry}
@@ -238,11 +215,6 @@
 
 \newcolumntype{t}{>{\tiny}c}
 
-%% START CUSTOM MACROS
-
-
-%% END CUSTOM MACROS
-
 \begin{document}
 \vspace*{0.2in}
 
@@ -264,9 +236,9 @@ Edward L. Ionides\textsuperscript{1}
 \bigskip
 \textbf{1} Statistics Department, University of Michigan, Ann Arbor, Michigan, USA
 \\
-\textbf{2} Affiliation Dept/Program/Center, Institution Name, City, State, Country
+\textbf{2} Statistics and Data Science, Carnegie Mellon University, Pittsburgh, Pennsylvania, USA
 \\
-\textbf{3} Affiliation Dept/Program/Center, Institution Name, City, State, Country
+\textbf{3} Wharton Statistics and Data Science, University of Pennsylvania, Philadelphia, Pennsylvania, USA
 \\
 \bigskip
 
@@ -285,12 +257,6 @@ Edward L. Ionides\textsuperscript{1}
 % \textcurrency Current Address: Dept/Program/Center, Institution Name, City, State, Country % change symbol to "\textcurrency a" if more than one current address note
 % \textcurrency b Insert second current address
 % \textcurrency c Insert third current address
-
-% Deceased author note
-% \dag Deceased
-
-% Group/Consortium Author Note
-% \textpilcrow Membership list can be found in the Acknowledgments section.
 
 % Use the asterisk to denote corresponding authorship and provide email address in note below.
 * jeswheel@umich.edu
@@ -585,8 +551,6 @@ rm(
 gc()
 @
 
-
-% Please keep the abstract below 300 words
 \section*{Abstract}
 Public health decisions must be made about when and how to implement interventions to control an infectious disease epidemic.
 These decisions should be informed by data on the epidemic as well as current understanding about the transmission dynamics.
@@ -599,9 +563,6 @@ We assess previous methods used for fitting and evaluating these models, and we 
 Specifically, we present approaches to diagnosis of model misspecification, development of alternative models, and computational improvements in optimization, in the context of likelihood-based inference on nonlinear dynamic systems.
 Our workflow is reproducible and extendable, facilitating future investigations of this disease system.
 
-% Please keep the Author Summary between 150 and 200 words
-% Use first person. PLOS ONE authors please skip this step.
-% Author Summary not valid for PLOS ONE submissions.
 \section*{Author summary}
 Quantitative understanding of infectious disease transmission dynamics relies upon mathematical models informed by scientific knowledge and relevant data.
 The models aim to provide a statistical description of the trajectory of an epidemic and its uncertainty, together with a representation of the underlying biological mechanisms.
@@ -615,10 +576,8 @@ However, inference for high-dimensional systems remains a methodological challen
 One of the models under consideration involves spatially coupled stochastic meta-populations, and we demonstrate how a recently developed algorithm permits likelihood-based inference and model diagnostics in this setting.
 We contend that raising the currently accepted standards of infectious disease modeling will result in a greater ability of scientists and policy makers to understand and respond to future infectious disease outbreaks.
 
-
 \linenumbers
 
-% Use "Eq" instead of "Equation" for equation citations.
 \section*{Introduction}
 
 Regulation of biological populations is a fundamental topic in epidemiology, ecology, fisheries and agriculture.
@@ -691,7 +650,6 @@ We proceed by introducing the general modeling scheme employed by Models~1--3 an
 we then describe how each model is calibrated to data, and present a systematic approach to examining and refining these models.
 We then use improved model fits to project cholera incidence in Haiti under various vaccination scenarios considered by Lee et al.~\cite{lee20}.
 Finally, we conclude with a discussion of the results.
-% This is followed by a consideration of the robustness of model based policy recommendations in Sec.~\ref{sec:advice}, and a discussion in Sec.~\ref{sec:discussion}.
 
 <<FitModel1, echo=FALSE, message=FALSE, include=FALSE>>=
 
@@ -909,20 +867,9 @@ if (RUN_LEVEL == 1){
   )
 }
 
-# Search hyper-parameters for each run-level and search. This sets
-# parameters like number of particles, number of BPF iterations, and
-# number of replications for each search.
-# h3_fit_parms <- set_h3_fit_parms(
-#   RUN_LEVEL = RUN_LEVEL,
-#   rw_1.sd = chol_rw_1.sd,
-#   rw_2.sd = chol_rw_2.sd
-# )
-
 # Calculate the number of parameters that are estimated:
 # This is calculated by the number of non-zero rw_sd values (including expressions), but then subtracting of repeated shared parameters.
 mod3_n_params <- sum(reg_rw_1.sd != 0, na.rm = TRUE) + sum(sapply(reg_rw_1.sd, is.expression)) - length(shared_param_names) * 9
-
-# haiti3_fit <- readRDS("model3/run_level_3/h3_revision.rds")
 
 # Fit Model 3
 haiti3_fit <- bake(
@@ -1145,15 +1092,6 @@ registerDoRNG(49637421)
 # Create Lee et al (2020a) version of model 3 on sub-data
 lee3_sub <- lee3_spatPomp()
 
-# This model is only fit for a subset of the data, so we will set data
-# that are not part of this subset as NA. This will allow us to estimate
-# the likelihood for only the values that were considered during the
-# parameter estimation phase.
-# set_as_na <- lee3_sub@times < lubridate::decimal_date(as.Date('2017-06-10'))
-# temp_ouest_cases <- lee3_sub@data['casesOuest', ]
-# temp_ouest_cases[set_as_na] <- NA_real_
-# lee3_sub@data['casesOuest', ] <- temp_ouest_cases
-
 lee3_all <- lee3_spatPomp(start_date = "2010-10-23")
 
 lee3_results <- bake(
@@ -1232,14 +1170,12 @@ The four mechanistic models of Lee et al.~\cite{lee20} were deliberately develop
 This allows us to treat the models as fairly independently developed expert approaches to understanding cholera transmission.
 However, it led to differences in notation, and in subsets of the data chosen for analysis, that hinder direct comparison.
 Here, we have created a common notational framework that facilitates model comparison, and put all comparable model parameters---including parameters that were estimated or held constant---into Table~\ref{tab:params}.
-% Here, we have put all three models into a common notational framework.
 Translations back to the original notation of Lee et al.~\cite{lee20} are given in the supplement (\nameref{S1_Table}).
 
 \begin{table}
 \begin{adjustwidth}{-2.25in}{0in}
 \centering
 \caption{\label{tab:params} {\bf Model parameters.}}
-% \small
 \begin{tabular}{|p{0.15\linewidth}|p{0.14\linewidth}t|p{0.13\linewidth}t|p{0.17\linewidth}t|}
 \hline
 Mechanism & Model 1 && Model 2 && Model 3 &
@@ -1260,7 +1196,6 @@ Latency (day)
   & ${\fixed \muEI^{-1}=\Sexpr{myround(365/h2_fit$h2_params["gammaE"],1)}}$
   & \eqref{model2:mu_EI}
   & \missing
-  % & \multicolumn{1}{c}{\hspace{16pt}\missing}
   &
 \\
 \hline
@@ -1359,11 +1294,9 @@ infectivity
 \hline
 \multirow{5}{*}{Water to human}
   & \multirow{5}{*}{\missing}
-  % & \multicolumn{1}{c}{\hspace{16pt}\missing}
   &
   & \multirow{3}{*}{${\fixed \Wsat = \Sexpr{signif(h2_fit$h2_params["Sat"],2)}}$}
   & \multirow{3}{*}{\eqref{model2:lambda}}
-  % \eqref{model2:lambda}
   & $\Wbeta{_{1:10}}= (
         \Sexpr{myround(p3u["betaB",1],2)}, \allowbreak
         \Sexpr{myround(p3u["betaB",2],2)}, \allowbreak
@@ -1382,7 +1315,6 @@ infectivity
 \hline
 Human to water
   & \missing
-  % & \multicolumn{1}{c}{\hspace{16pt}\missing}
   &
   & $\Wshed = $ \Sexpr{signif(h2_fit$h2_params["Mu"],3)}
   & \eqref{model2:to_W}
@@ -1391,7 +1323,6 @@ Human to water
 \\
 Water survival \newline (wk)
   & \multirow{2}{*}{\missing}
-  % & \multicolumn{1}{c}{\hspace{16pt}\missing}
   &
   & \multirow{2}{*}{${\fixed \Wremoval^{-1} = \Sexpr{signif(52/h2_fit$h2_params["Delta"],3)}}$}
   & \multirow{2}{*}{\eqref{model2:from_W}}
@@ -1402,10 +1333,8 @@ Mixing exponent
   & $\mixExponent=\Sexpr{myround(p1["nu"],2)}$
   & \eqref{model1:lambda}
   & \missing
-  % & \multicolumn{1}{c}{\hspace{16pt}\missing}
   &
   & \missing
-  % & \multicolumn{1}{c}{\hspace{16pt}\missing}
   &
 \\
 \hline
@@ -1414,7 +1343,6 @@ Process noise \newline (wk\textsuperscript{1/2})
   \Sexpr{myround(sqrt(p1["sig_sq_end"]),2)})^*$
   & \multirow{2}{*}{\eqref{model1:lambda}}
   & \multirow{2}{*}{\missing}
-  % & \multicolumn{1}{c}{\hspace{16pt}\missing}
   &
   & \multirow{2}{*}{$\sigmaProc= \Sexpr{myround(p3s["std_W"],3)}$}
   & \multirow{2}{*}{\eqref{eq:model3:SA}}
@@ -1439,7 +1367,6 @@ Observation \newline variance
 \multirow{2}{*}{Initial Values} & $\Iinit = \Sexpr{round(prod(p1[c('pop_0', 'I_0')]))}$
   &
   & \multirow{2}{*}{\missing}
-  % & \multicolumn{1}{c}{\multirow{2}{*}{\hspace{16pt}\missing}}
   &
   & \multirow{2}{*}{$\Iinit^{3,4} = (
         \Sexpr{round(prod(p3[c('H3', 'Iinit3')]))}, \Sexpr{round(prod(p3[c('H4', 'Iinit4')]))})^*$}
@@ -1452,19 +1379,15 @@ Observation \newline variance
 \\\hline
 \multirow{3}{*}{Hurricane}
   & \multirow{4}{*}{\missing}
-% & \multicolumn{1}{c}{\multirow{2}{*}{\hspace{16pt}\missing}}
   &
   & \multirow{4}{*}{\missing}
-  % & \multicolumn{1}{c}{\multirow{2}{*}{\hspace{16pt}\missing}}
   &
   & $\Whur{3, 9} =$\newline $(\Sexpr{myround(p3['aHur3'], 2)}, \Sexpr{myround(p3['aHur9'], 2)})^*$
   & \multirow{2}{*}{\eqref{eq:model3:foi}}
 \\
  \multirow{-1}{*}{Parameters} &
-  % & \multicolumn{1}{c}{}
   &
   &
-  % & \multicolumn{1}{c}{}
   &
   & $\hHur{3, 9} =$\newline $(\Sexpr{myround(p3['hHur3'], 2)}, \Sexpr{myround(p3['hHur9'], 2)})^*$
   & \multirow{2}{*}{\eqref{eq:model3:foi}}
@@ -1515,8 +1438,6 @@ While the complete model description is scientifically critical, as well as nece
 A first-time reader may choose to skim through the rest of this section, and return later.
 Additional details about the numeric implementation of these models are provided in Sec.~S1 and S2 of the supplemental text (\nameref{S1_Text}).
 
-%%%%%%%%% 11111111111 %%%%%%%%%%
-
 \subsubsection*{Model~1}
 \label{sec:model1}
 The latent state vector $\bm{X}(t) = \big(S_{\vaccCounter}(t),  E_{\vaccCounter}(t), I_{\vaccCounter}(t), A_{\vaccCounter}(t), R_{\vaccCounter}(t), \vaccCounter \in 0:\vaccClass\big)$ describes susceptible, latent (exposed), infected (and symptomatic), asymptomatic, and recovered individuals in vaccine cohort $\vaccCounter$ at time $t$.
@@ -1540,22 +1461,22 @@ Per-capita transition rates are given in Eqs.~\myeqref{model1:SE}-\myeqref{model
 \begin{eqnarray}
 \label{model1:SE}
 \mu_{S_{\vaccCounter}E_{\vaccCounter}} &=& \lambda(t),
-\\%[-3pt]
+\\
 \label{model1:EI}
 \mu_{E_{\vaccCounter}I_{\vaccCounter}} &=& \muEI\big(1-\vaccineEfficacy_\vaccCounter(t)\big),
-\\%[-3pt]
+\\
 \label{model1:EA}
 \mu_{E_{\vaccCounter}A_{\vaccCounter}} &=& \muEI\, \vaccineEfficacy_\vaccCounter(t),
-\\%[-3pt]
+\\
 \label{model1:toR}
 \mu_{I_{\vaccCounter}R_{\vaccCounter}} &=& \mu_{A_{\vaccCounter}R_{\vaccCounter}} = \muIR,
-\\%[-3pt]
+\\
 \label{model1:RS}
 \mu_{R_{\vaccCounter}S_{\vaccCounter}} &=& \muRS,
-\\%[-3pt]
+\\
 \label{model1:vacc}
 \mu_{S_0S_{\vaccCounter}} &=& \mu_{E_0E_{\vaccCounter}} = \mu_{I_0I_{\vaccCounter}} = \mu_{A_0A_{\vaccCounter}} = \mu_{R_0R_{\vaccCounter}} = \eta_{\vaccCounter}(t),
-\\%[-3pt]
+\\
 \label{model1:death}
 \mu_{S_{\vaccCounter}\demography} &=& \mu_{E_{\vaccCounter}\demography} = \mu_{I_{\vaccCounter}\demography} = \mu_{A_{\vaccCounter}\demography}=\mu_{R_{\vaccCounter}\demography} = \delta,
 \\
@@ -1577,8 +1498,6 @@ Single and double vaccine doses were modeled by changing the waning of protectio
 The latent state vector $\bm{X}(t)$ is initialized by setting the counts for each compartment and vaccination scenario $\vaccCounter \neq 0$ as zero, and introducing initial-value parameters $I_{0,0}$ and $E_{0, 0}$ such that $R_{0}(0) = 0$, $I_{0}(0) = \mathrm{Pop} \times I_{0, 0}$, $E_{0}(0) = \mathrm{Pop} \times E_{0, 0}$ and $S_{0}(0) = \mathrm{Pop} \times (1 - I_{0, 0} - E_{0, 0})$, where $\mathrm{Pop}$ is the total population of Haiti.
 The measurement model assumes reported cholera cases at time point $n$ come from a negative binomial distribution, where only a fraction ($\reportRate$) of new weekly cases are reported.
 See Sec.~S3 of the supplement material for more details.
-
-%%%%%%% 222222222222 %%%%%%%%%%
 
 \subsubsection*{Model~2}
 \label{sec:model2}
@@ -1609,31 +1528,31 @@ The nonzero transition rates are
 \begin{eqnarray}
 \label{model2:mu_SE}
 \mu_{S_{u\vaccCounter}E_{u\vaccCounter}} &=& \vaccineEfficacy_\vaccCounter \, \lambda,
-\\%[-3pt]
+\\
 \label{model2:mu_EI}
 \mu_{E_{u\vaccCounter}I_{u\vaccCounter}} &=& \symptomFrac\muEI, \quad \mu_{E_{u\vaccCounter}A_{u\vaccCounter}} = (1-\symptomFrac)\muEI,
-\\%[-3pt]
+\\
 \label{model2:mu_IR}
 \mu_{I_{u\vaccCounter}R_{u\vaccCounter}} &=& \mu_{A_{u\vaccCounter}R^A_{u\vaccCounter}} = \muIR,
-\\%[-3pt]
+\\
 \label{model2:RS}
 \mu_{R_{u\vaccCounter}S_{u\vaccCounter}} &=& \mu_{R^A_{u\vaccCounter}S_{u\vaccCounter}} = \muRS,
-\\%[-3pt]
+\\
 \label{model2:transport}
 \mu_{S_{u\vaccCounter}S_{{\varv}\vaccCounter}} &=& \mu_{E_{u\vaccCounter}E_{{\varv}\vaccCounter}} = \mu_{I_{u\vaccCounter} I_{{\varv}\vaccCounter}} = \mu_{A_{u\vaccCounter}A_{{\varv}\vaccCounter}} = \mu_{R_{u\vaccCounter}R_{{\varv}\vaccCounter}} = \mu_{R^A_{u\vaccCounter} R^A_{{\varv}\vaccCounter}} = T_{u\varv},
-\\%[-3pt]
+\\
 \label{model2:omega1}
 \mu_{S_{u1}S_{u0}} &=& \mu_{S_{u3}S_{u0}} = \omega_1,
-\\%[-3pt]
+\\
 \label{model2:omega2}
 \mu_{S_{u2}S_{u0}} &=& \mu_{S_{u4}S_{u0}} = \omega_2,
-\\%[-3pt]
+\\
 \label{model2:to_W}
 \mu_{\demography W_u} &=& \Wshed \left\{ \sum_{\vaccCounter=0}^4 I_{u\vaccCounter}(t) + \asymptomRelativeShed \sum_{\vaccCounter=0}^4 A_{u\vaccCounter}(t) \right\},
-\\%[-3pt]
+\\
 \label{model2:from_W}
 \mu_{W_u\demography} &=& \Wremoval,
-\\%[-3pt]
+\\
 \label{model2:water_transport}
 \mu_{W_uW_{\varv}} &=& w_r T^W_{u\varv}.
 \end{eqnarray}
@@ -1653,8 +1572,6 @@ Because vaccine efficacy remains constant, individuals in this model transition 
 The starting value for each element of the latent state vector $\bm{X}(0)$ are set to zero except for $I_{u0}(0) = y_u^*(0)/\reportRate$ and $R_{u0}(0) = \mathrm{Pop}_u - I_{u0}(0)$, where $y_u^*(0)$ is the reported number of cholera cases in department $u$ at time $t = 0$.
 Reported cases are assumed to come from a log-normal distribution, with the log-scale mean equal to the reporting rate $\reportRate$ times the number of newly infected individuals.
 See the section describing how Model~2 is fit to data and Sec.~S3.2 of the supplement for more details.
-
-%%%%%%% 333333333 %%%%%%%%%%
 
 \subsubsection*{Model~3}
 \label{sec:model3}
@@ -1676,25 +1593,25 @@ Per-capita transition rates are used for both compartments representing human co
 \begin{eqnarray}
 \label{eq:model3:SI}
 \mu_{S_{u\vaccCounter}I_{u}} &=& \symptomFrac \,  \lambda_u \big(1-\vaccineEfficacy_{u\vaccCounter}(t)\big) \, d\Gamma/dt,
-\\%[-3pt]
+\\
 \label{eq:model3:SA}
 \mu_{S_{u\vaccCounter}A_{u}} &=& (1-\symptomFrac) \,  \lambda_u \big(1-\vaccineEfficacy_{u\vaccCounter}(t)\big) \,  d\Gamma/dt,
-\\%[-3pt]
+\\
 \label{eq:model3:IR}
 \mu_{I_{u}R_{u\vaccCounter 1}} &=& \mu_{A_{u}R_{u\vaccCounter 1}} = \muIR,
-\\%[-3pt]
+\\
 \label{eq:model3:IS}
 \mu_{I_{u}S_{u0}} &=& \muDeath + \choleraDeath, \hspace{2mm} \mu_{A_{u}S_{u0}} = \muDeath
-\\%[-3pt]
+\\
 \label{eq:model3:RRnext}
 \mu_{R_{u\vaccCounter 1}R_{u\vaccCounter 2}} &=& \mu_{R_{u\vaccCounter 2}R_{u\vaccCounter 3}} = 3\muRS,
-\\%[-3pt]
+\\
 \label{eq:model3:RS}
 \mu_{R_{u\vaccCounter k}S_{u0}} &=& \muDeath + 3\muRS \, \mathbf{1}_{\{k=3\}},
-\\%[-3pt]
+\\
 \label{eq:model3:water}
 \mu_{{\demography}W_u} &=& \big[1 + \seasAmplitude \big(J_u(t)\big)^r \big] \mathrm{Den}_u \, \Wshed \big[ I_{u}(t)+ \asymptomRelativeShed A_{u}(t) \big],
-\\%[-3pt]
+\\
 \label{eq:model3:Decay}
 \mu_{W_u\demography} &=& \Wremoval.
 \end{eqnarray}
@@ -1983,7 +1900,6 @@ ggplot() +
                                 "V2" = '#b2182b',
                                 "V3" = '#92c5de',
                                 "V4" = '#4393c3')) +
-  # geom_vline(xintercept = yearsToDate(2014.161), linetype = 'dashed') +
   scale_y_log10(labels = scales::trans_format("log10", scales::math_format(10^.x))) +
   scale_x_date(date_labels = "'%y", breaks = seq.Date(from = as.Date("2010-01-01"), as.Date("2030-01-01"), by = '2 years'))
 @
@@ -1991,7 +1907,7 @@ ggplot() +
 {\figTitle Simulated trajectory of Model~2.}
 The black line shows the nationally aggregated weekly cholera incidence data.
 The blue curve from 2012-2019 is the trajectory of the calibrated version of Model~2.
-Projections under the various vaccination scenarios, which are discussed in the \bf{Forecasts} subsection are also included.}
+Projections under the various vaccination scenarios, which are discussed in detail in the  {\bf Forecasts} subsection are also included.}
 \end{figure}
 
 \subsubsection*{Calibrating Model~3 Parameters}\label{sec:fit3}
@@ -2277,7 +2193,6 @@ In the context of our analysis, the statistical evidence of a trend in transmiss
 Alternatively, the trend could be attributed to a decreasing reporting rate rather than decreasing transmission rate, resulting in confounded mechanisms.
 The robust statistical conclusion is that a model which allows for change fits better than one which does not---we argue that a decreasing transmission rate is a plausible way to explain this, but the incidence data themselves do not provide enough information to pin down the mechanism.
 
-% Results and Discussion can be combined.
 \section*{Results}
 
 \subsection*{Forecasts}\label{sec:filter}
@@ -2681,7 +2596,6 @@ Simulations from probabilistic models (Models~1 and~3) represent possible trajec
 Estimates of the probability of cholera elimination can therefore be obtained as the proportion of simulations from these models that result in cholera elimination.
 The results of these projections are summarized in Figs. \ref{fig:elimProbs}.
 
-
 <<Compute Elimination Probs, echo=FALSE>>=
 h1_S0_results$mod1_V0_probs$ElimTime$scenario = "V0"
 h1_S2_results$mod1_V1_probs$ElimTime$scenario = "V1"
@@ -2772,7 +2686,6 @@ The dynamic document, together with the R packages, form a {\it compendium}, def
 
 \section*{Supporting information}
 
-% Include only the SI item label in the paragraph heading. Use the \nameref{label} command to cite SI items in the text.
 \paragraph*{S1 Table}
 \label{S1_Table}
 {\bf Notation conversion table.} Conversions between the notation used here and the notation of Lee et al. (2020) \cite{lee20}.
@@ -2806,42 +2719,6 @@ Cras egestas velit mauris, eu mollis turpis pellentesque sit amet. Interdum et m
 
 \nolinenumbers
 
-% Either type in your references using
-% \begin{thebibliography}{}
-% \bibitem{}
-% Text
-% \end{thebibliography}
-%
-% or
-%
-% Compile your BiBTeX database using our plos2015.bst
-% style file and paste the contents of your .bbl file
-% here. See http://journals.plos.org/plosone/s/latex for
-% step-by-step instructions.
-%
-% \begin{thebibliography}{10}
-%
-% \bibitem{bib1}
-% Conant GC, Wolfe KH.
-% \newblock {{T}urning a hobby into a job: how duplicated genes find new
-%   functions}.
-% \newblock Nat Rev Genet. 2008 Dec;9(12):938--950.
-%
-% \bibitem{bib2}
-% Ohno S.
-% \newblock Evolution by gene duplication.
-% \newblock London: George Alien \& Unwin Ltd. Berlin, Heidelberg and New York:
-%   Springer-Verlag.; 1970.
-%
-% \bibitem{bib3}
-% Magwire MM, Bayer F, Webster CL, Cao C, Jiggins FM.
-% \newblock {{S}uccessive increases in the resistance of {D}rosophila to viral
-%   infection through a transposon insertion followed by a {D}uplication}.
-% \newblock PLoS Genet. 2011 Oct;7(10):e1002337.
-%
-% \end{thebibliography}
-
-% TODO: we have to remove this and copy the output from the .bbl file.
 \bibliography{bib-haiti}
 
 \end{document}
