@@ -38,18 +38,31 @@ help:
 	$(RSCRIPT) -e "library(knitr); purl(\"$*.Rnw\")"
 
 .PHONY:clean dust
-clean: dust
-	for f in $(FILES); do (rm -f $(basename $$f).pdf $(basename $$f).dvi $(basename $$f).html); done;\
-	$(foreach f, $(wildcard *.Rnw), rm -f $(basename $f).tex $(basename $f).R)
-	rm -f cache/figs/*.*
 
-dust:
-	for f in $(FILES); do (rm -f $(basename $$f).$(DUST_EXT)); done
+clean:
+	rm -f *.aux *.bbl *.blg *.Rout *.log *.out *-concordance.tex *.gz
+
+# clean: dust
+# 	for f in $(FILES); do (rm -f $(basename $$f).pdf $(basename $$f).dvi $(basename $$f).html); done;\
+# 	$(foreach f, $(wildcard *.Rnw), rm -f $(basename $f).tex $(basename $f).R)
+# 	rm -f cache/figs/*.*
+
+# dust:
+# 	for f in $(FILES); do (rm -f $(basename $$f).$(DUST_EXT)); done
 
 %.tif: %.pdf
 	pdftoppm -tiff $*.pdf $*
 	Rscript --vanilla removeTrailingNums.R $*-1.tif
 
 tifs: $(TIF_FILES)
+
+submission: ms-plos.tex
+	Rscript --vanilla remove_knitrout.R ms-plos.tex
+	pdflatex ms-plos-submission.tex
+	bibtex ms-plos-submission.aux
+	Rscript --vanilla append_bib.R ms-plos-submission.tex
+	pdflatex ms-plos-submission.tex
+	pdflatex ms-plos-submission.tex
+
 
 
