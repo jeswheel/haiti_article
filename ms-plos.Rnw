@@ -1,4 +1,3 @@
-% TODO: Remove colored text from table, instead, create a new symbol.
 % Please do not include colors or graphics in the text.
 %
 % % % % % % % % % % % % % % % % % % % % % % %
@@ -16,9 +15,6 @@
 %
 % TODO: See below
 % Do not include text that is not math in the math environment. For example, CO2 should be written as CO\textsubscript{2} instead of CO$_2$.
-%
-% TODO: see below.
-% For inline equations, please do not include punctuation (commas, etc) within the math environment unless this is part of the equation.
 %
 % TODO: see below
 % When adding superscript or subscripts outside of brackets/braces, please group using {}.  For example, change "[U(D,E,\gamma)]^2" to "{[U(D,E,\gamma)]}^2".
@@ -163,7 +159,7 @@
 \newcommand\vaccCounter{z}
 \newcommand\modelCounter{m}
 \newcommand\missing{---}
-\newcommand\fixed{\color{blue}}
+\newcommand\fixed{^\dagger}
 \newcommand\demography{\bullet}
 \newcommand\code[1]{\texttt{#1}}
 \newcommand\figTitle{\bf}
@@ -1183,17 +1179,17 @@ Mechanism & Model 1 && Model 2 && Model 3 &
 \hline
 \hline
 Infection (day)
-  & ${\fixed \muIR^{-1}=\Sexpr{myround(7/p1["gamma"],1)}}$
+  & ${\muIR^{-1}=\Sexpr{myround(7/p1["gamma"],1)}}\fixed$
   & \eqref{model1:toR}
-  & ${\fixed \muIR^{-1}=\Sexpr{myround(365/h2_fit$h2_params["gamma"],1)}}$
+  & ${\muIR^{-1}=\Sexpr{myround(365/h2_fit$h2_params["gamma"],1)}}\fixed $
   & \eqref{model2:mu_IR}
-  & ${\fixed \muIR^{-1}=\Sexpr{myround(365/p3["gamma1"],1)}}$
+  & ${\muIR^{-1}=\Sexpr{myround(365/p3["gamma1"],1)}}\fixed $
   & \eqref{eq:model3:IR}
 \\
 Latency (day)
-  & ${\fixed \muEI^{-1}=\Sexpr{myround(7/p1["sigma"],1)}}$
+  & ${\muEI^{-1}=\Sexpr{myround(7/p1["sigma"],1)}}\fixed$
   & \eqref{model1:EA}
-  & ${\fixed \muEI^{-1}=\Sexpr{myround(365/h2_fit$h2_params["gammaE"],1)}}$
+  & ${\muEI^{-1}=\Sexpr{myround(365/h2_fit$h2_params["gammaE"],1)}}\fixed$
   & \eqref{model2:mu_EI}
   & \missing
   &
@@ -1208,7 +1204,7 @@ Latency (day)
       \Sexpr{myround(p1["beta5"],1)},\allowbreak
       \Sexpr{myround(p1["beta6"],1)})$
   & \eqref{model1:beta}
-  & \multirow{2}{*}{${\fixed \seasAmplitude=0.4}$}
+  & \multirow{2}{*}{${\seasAmplitude=0.4}\fixed$}
   & \multirow{2}{*}{\eqref{model2:lambda}}
   & \multirow{2}{*}{$\seasAmplitude = \Sexpr{myround(p3s["lambdaR"],2)}$}
   & \multirow{2}{*}{\eqref{eq:model3:water}}
@@ -1221,52 +1217,52 @@ Latency (day)
   & \multirow{-2}{*}{\eqref{eq:model3:water}}
   \\\hline
   \multirow{3}{*}{Immunity (yr)}
-  & \multirow{3}{*}{${\fixed \muRS^{-1}=\Sexpr{myround(1/p1["alpha"]/52,1)}}$}
+  & \multirow{3}{*}{${\muRS^{-1}=\Sexpr{myround(1/p1["alpha"]/52,1)}}\fixed$}
   & \multirow{3}{*}{\eqref{model1:RS}}
   & $\muRS^{-1}= \Sexpr{signif(1/h2_fit$h2_params["sigma"],2)}$
   & \eqref{model2:RS}
-  & \multirow{3}{*}{${\fixed \muRS^{-1}=\Sexpr{myround(1/p3['rho1'],1)}}$}
+  & \multirow{3}{*}{${\muRS^{-1}=\Sexpr{myround(1/p3['rho1'],1)}}\fixed$}
   & \multirow{3}{*}{\eqref{eq:model3:RRnext}}
 \\
-& & & ${\fixed \omega_1^{-1} = \Sexpr{myround(1/h2_fit$h2_params["Omega1"],1)}}$ & \eqref{model2:omega1} & &\\
-& & & ${\fixed \omega_2^{-1} = \Sexpr{myround(1/h2_fit$h2_params["Omega2"],1)}}$ & \eqref{model2:omega2} & &\\
+& & & ${\omega_1^{-1} = \Sexpr{myround(1/h2_fit$h2_params["Omega1"],1)}}\fixed$ & \eqref{model2:omega1} & &\\
+& & & ${\omega_2^{-1} = \Sexpr{myround(1/h2_fit$h2_params["Omega2"],1)}}\fixed$ & \eqref{model2:omega2} & &\\
 \hline
 \multirow{2}{*}{Birth/death (yr)}
-  & ${\fixed \muBirth^{-1} = \Sexpr{myround(1/p1["mu"]/52,1)}}$
+  & ${\muBirth^{-1} = \Sexpr{myround(1/p1["mu"]/52,1)}}\fixed$
     %
   & \eqref{model1:death}
   & \multirow{2}{*}{\missing}
   &
-  & ${\fixed \muDeath^{-1} = \Sexpr{myround(1/p3["mu1"],1)}}$
+  & ${\muDeath^{-1} = \Sexpr{myround(1/p3["mu1"],1)}}\fixed$
   & \multirow{2}{*}{\eqref{eq:model3:IS}}
 \\
-& ${\fixed \muDeath^{-1} = \Sexpr{myround(1/p1["delta"]/52,1)}}$
+& ${\muDeath^{-1} = \Sexpr{myround(1/p1["delta"]/52,1)}}\fixed$
 & \eqref{model1:death}
 &
 &
-& ${\fixed \choleraDeath^{-1} = \Sexpr{myround(1/p3["alpha1"],2)}}$
+& ${\choleraDeath^{-1} = \Sexpr{myround(1/p3["alpha1"],2)}}\fixed$
 &
 \\
 Sympt. frac.
-  & ${\fixed \symptomFrac_z(t)=c\vaccineEfficacy^*(t-\tau_d)}$
+  & ${\symptomFrac_z(t)=c\vaccineEfficacy^*(t-\tau_d)}\fixed$
   & (\ref{model1:EI}-\ref{model1:EA})
-  & ${\fixed \symptomFrac=\Sexpr{myround(h2_fit$h2_params["k"],1)}}$
+  & ${\symptomFrac=\Sexpr{myround(h2_fit$h2_params["k"],1)}}\fixed$
   & \eqref{model2:mu_EI}
-  & ${\fixed \symptomFrac=\Sexpr{myround(p3["sigma1"],2)}}$
+  & ${\symptomFrac=\Sexpr{myround(p3["sigma1"],2)}}\fixed$
   & \eqref{eq:model3:SA}
 \\
 Asympt.
-  & \multirow{2}{*}{${\fixed \asymptomRelativeInfect=0.05}$}
+  & \multirow{2}{*}{${\asymptomRelativeInfect=0.05}\fixed$}
   & \multirow{2}{*}{\eqref{model1:lambda}}
-  & ${\fixed \asymptomRelativeInfect = 0.001}$
+  & ${\asymptomRelativeInfect = 0.001}\fixed$
   & \eqref{model2:lambda}
-  &  ${\fixed \asymptomRelativeInfect = 1}$
+  &  ${\asymptomRelativeInfect = 1}\fixed$
   & \eqref{eq:model3:foi}
 \\
 infectivity
 &
 &
-& ${\fixed \asymptomRelativeShed = \Sexpr{1e-7} }$
+& ${\asymptomRelativeShed = \Sexpr{1e-7}}\fixed$
 & \eqref{model2:to_W}
 & $\asymptomRelativeShed = \Sexpr{myround(p3s["XthetaA"],3)}$
 & \eqref{eq:model3:water}
@@ -1295,7 +1291,7 @@ infectivity
 \multirow{5}{*}{Water to human}
   & \multirow{5}{*}{\missing}
   &
-  & \multirow{3}{*}{${\fixed \Wsat = \Sexpr{signif(h2_fit$h2_params["Sat"],2)}}$}
+  & \multirow{3}{*}{${\Wsat = \Sexpr{signif(h2_fit$h2_params["Sat"],2)}}\fixed$}
   & \multirow{3}{*}{\eqref{model2:lambda}}
   & $\Wbeta{_{1:10}}= (
         \Sexpr{myround(p3u["betaB",1],2)}, \allowbreak
@@ -1324,7 +1320,7 @@ Human to water
 Water survival \newline (wk)
   & \multirow{2}{*}{\missing}
   &
-  & \multirow{2}{*}{${\fixed \Wremoval^{-1} = \Sexpr{signif(52/h2_fit$h2_params["Delta"],3)}}$}
+  & \multirow{2}{*}{${\Wremoval^{-1} = \Sexpr{signif(52/h2_fit$h2_params["Delta"],3)}}\fixed$}
   & \multirow{2}{*}{\eqref{model2:from_W}}
   & \multirow{2}{*}{$\Wremoval^{-1}=\Sexpr{myround(52/p3s["mu_B"],2)}$}
   & \multirow{2}{*}{\eqref{eq:model3:Decay}}
@@ -1350,7 +1346,7 @@ Process noise \newline (wk\textsuperscript{1/2})
 Reporting rate
   & $\reportRate=\Sexpr{myround(p1["rho"], 3)}$
   & (S15)
-  & ${\fixed \reportRate=\Sexpr{myround(h2_fit$h2_params["Rho"],2)}}$
+  & ${\reportRate=\Sexpr{myround(h2_fit$h2_params["Rho"],2)}}\fixed$
   & (S16)
   & $\reportRate=\Sexpr{myround(p3s["epsilon"],2)}$
   & (S19)
@@ -1394,9 +1390,9 @@ Observation \newline variance
 \\\hline
 \end{tabular}
 \begin{flushleft} References to the relevant equation are given in parentheses.
-Parameters in blue were fixed based on scientific reasoning and not fitted to the data.
-$^*$ denotes parameters added during our re-analysis, not considered by Lee et al.
-Translations back into the notation of \cite{lee20} are given in Table~S1.
+Parameters that were fixed and not calibrated using the data are indicated with $\fixed$;
+parameters that were added during our re-analysis and were not considered by Lee et al. are indicated with $^*$.
+Translations back into the notation of \cite{lee20} are given in \nameref{S1_Table}.
 \end{flushleft}
 \end{adjustwidth}
 \end{table}
@@ -1436,7 +1432,11 @@ Here, the spatial units are the $U=10$ Haitian administrative d\'{e}partements (
 
 While the complete model description is scientifically critical, as well as necessary for transparency and reproducibility, the model details are not essential to our methodological discussions of how to diagnose and address model misspecification with the purpose of informing policy.
 A first-time reader may choose to skim through the rest of this section, and return later.
-Additional details about the numeric implementation of these models are provided in Sec.~S1 and S2 of the supplemental text (\nameref{S1_Text}).
+Additional details about the numeric implementation of these models are provided in a supplemental text (\nameref{S1_Text}).
+While each of the dynamic models considered in this manuscript can be fully described using the mathematical equations provided in the following section, diagrams of dynamic systems are often helpful to understand the equations.
+For this reason, we provide flow chart diagrams for Models~1--3 in supplement figures (\nameref{S_Mod1}, \nameref{S_Mod2} and \nameref{S_Mod3}).
+Because flow diagrams do not uniquely describe a dynamic model, these diagrams are not unique visual representations of each model.
+Alternative representations that may be helpful in understanding the models explored in this paper were made by Lee et al. \cite{lee20sup}.
 
 \subsubsection*{Model~1}
 \label{sec:model1}
@@ -1497,7 +1497,7 @@ Single and double vaccine doses were modeled by changing the waning of protectio
 
 The latent state vector $\bm{X}(t)$ is initialized by setting the counts for each compartment and vaccination scenario $\vaccCounter \neq 0$ as zero, and introducing initial-value parameters $I_{0,0}$ and $E_{0, 0}$ such that $R_{0}(0) = 0$, $I_{0}(0) = \mathrm{Pop} \times I_{0, 0}$, $E_{0}(0) = \mathrm{Pop} \times E_{0, 0}$ and $S_{0}(0) = \mathrm{Pop} \times (1 - I_{0, 0} - E_{0, 0})$, where $\mathrm{Pop}$ is the total population of Haiti.
 The measurement model assumes reported cholera cases at time point $n$ come from a negative binomial distribution, where only a fraction ($\reportRate$) of new weekly cases are reported.
-See Sec.~S3 of the supplement material for more details.
+More details about the initialization model $f_{\bm{X}_0}\big(\bm{x}_0;\paramVec\big)$ and the \emph{measurement model} $f_{\bm{Y}_n|\bm{X}_{n}}\big(\bm{y}_n|\bm{x}_{n}\big)$ for Models~1--3 are provided a supplement text (\nameref{S_init} and \nameref{S_meas}).
 
 \subsubsection*{Model~2}
 \label{sec:model2}
@@ -1694,6 +1694,7 @@ Number of &
 Values in parentheses are corresponding values using Lee et al.~\cite{lee20} parameter estimates.  \textsuperscript{1}The reported likelihood is an upper bound of the likelihood of the Lee et al.~\cite{lee20} model. \textsuperscript{2}Lee et al.~\cite{lee20} fit Model~3 to a subset of the data (March 2014 onward, excluding data from Ouest in 2015-2016).
 On this subset, their model has a likelihood of $\Sexpr{myround(lee3_results$sub_ll_eval, 1)}$.
 On this same subset, our model has a likelihood of $\Sexpr{myround(mod3_eval_res$subset_ll, 1)}$.
+Details of estimating the likelihood of the Lee et al.~\cite{lee20} models is provided in \nameref{S_lee20}
 See Sec.~S6 of the supplement material for more details on estimating the likelihood of the Lee et al.~\cite{lee20} models.
 \end{flushleft}
 \end{table}
@@ -2073,7 +2074,7 @@ Large advantages (or shortcomings) in model likelihood relative to the benchmark
 
 Comparing model log-likelihoods to a suitable benchmark may not be sufficient to identify all the strengths and weaknesses of a given model.
 Additional techniques include the inspection of conditional log-likelihoods of each observation given the previous observations in order to understand how well the model describes each data point (Sec.~S5).
-Other tools include plotting the effective sample size of each observation \cite{liu01}; plotting the values of the hidden states from simulations (supplement Sec.~5.1);
+Other tools include plotting the effective sample size of each observation \cite{liu01}; plotting the values of the hidden states from simulations (\nameref{S_mod3cal});
 and comparing summary statistics of the observed data to simulations from the model \cite{wood10,king15}.
 
 \subsection*{Corroborating Fitted Models with Scientific Knowledge}
@@ -2181,7 +2182,7 @@ A model which aspires to provide quantitative guidance for assessing interventio
 However, strong statistical fit does not guarantee a correct causal structure: it does not even necessarily require the model to assert a causal explanation.
 A causal interpretation is strengthened by corroborative evidence.
 For example, reconstructed latent variables (such as numbers of susceptible and recovered individuals) should make sense in the context of alternative measurements of these variables \cite{grad12}.
-In the context of our case study, by reconstructing the latent states of Model~3, we notice that the calibrated model favors higher levels of cholera transmission than what was typically observed in the incidence data (Sec.~S5.1 of the supplement).
+In the context of our case study, by reconstructing the latent states of Model~3, we notice that the calibrated model favors higher levels of cholera transmission than what was typically observed in the incidence data (\nameref{S_mod3cal}).
 This result hints at the possibility of model mispecification, and should prompt us to be sceptical of the reliability of forecasts from this model.
 Similarly, parameters that have been calibrated to data should make sense in the context of alternative lines of evidence about the phenomena being modeled, while making allowance for the possibility that the interpretations of parameters may vary when modeling across differing spatial scales.
 
@@ -2212,7 +2213,7 @@ The decision not to do this partially explains the unsuccessful forecasts of Lee
 Uncertainty in just a single parameter can lead to drastically different forecasts \cite{saltelli20}.
 Therefore, parameter uncertainty should also be considered when obtaining model forecasts to influence policy.
 If a Bayesian technique is used for parameter estimation, a natural way to account for parameter uncertainty is to obtain simulations from the model where each simulation is obtained using parameters drawn from the estimated posterior distribution.
-For frequentist inference, one possible approach is obtaining model forecasts from various values of $\paramVec$, where the values of $\paramVec$ are sampled proportionally according to their corresponding likelihoods \cite{king15}; see Sec.~S7 of the supplement material for more details.
+For frequentist inference, one possible approach is obtaining model forecasts from various values of $\paramVec$, where the values of $\paramVec$ are sampled proportionally according to their corresponding likelihoods \cite{king15} (\nameref{S_uncertain}).
 Both of these approaches share the similarity that parameters are chosen for the forecast approximately in proportion to their corresponding value of the likelihood function, $f_{\bm{Y}_{1:N}}(\bm{y}_{1:N}^*; \paramVec)$.
 In this analysis, we do not construct forecasts accounting for parameter uncertainty as our focus is on the estimation and diagnosis of mechanistic models.
 Furthermore, we use the projections from a single point estimate to highlight the deficiency of deterministic models that the only variability in model projections is a result of parameter uncertainty, which can lead to over-confidence in forecasts \cite{king15}.
@@ -2686,36 +2687,50 @@ The dynamic document, together with the R packages, form a {\it compendium}, def
 
 \section*{Supporting information}
 
+\paragraph*{S1 Fig.}
+\label{S_Mod1}
+{\bf Model~1.} Flow chart representation of Model~1.
+
+\paragraph*{S2 Fig.}
+\label{S_Mod2}
+{\bf Model~2.} Flow chart representation of Model~2.
+
+\paragraph*{S3 Fig.}
+\label{S_Mod3}
+{\bf Model~3.} Flow chart representation of Model~3.
+
 \paragraph*{S1 Table}
 \label{S1_Table}
 {\bf Notation conversion table.} Conversions between the notation used here and the notation of Lee et al. (2020) \cite{lee20}.
 
 \paragraph*{S1 Text}
 \label{S1_Text}
-{\bf Supplemental Material.} In depth description of the numeric implementation of models.
+{\bf Model details.} In depth description of the Markov chain and differential equation interpretations of compartment flow rates, as well as details on the numeric implementation of these models.
 
-\paragraph*{S2 Fig.}
-\label{S2_Fig}
-{\bf Lorem ipsum.} Maecenas convallis mauris sit amet sem ultrices gravida. Etiam eget sapien nibh. Sed ac ipsum eget enim egestas ullamcorper nec euismod ligula. Curabitur fringilla pulvinar lectus consectetur pellentesque.
+\paragraph*{S2 Text}
+\label{S_init}
+{\bf Initialization models.} Additional details of the initialization model that were used for Models~1--3.
 
-\paragraph*{S1 File.}
-\label{S1_File}
-{\bf Lorem ipsum.}  Maecenas convallis mauris sit amet sem ultrices gravida. Etiam eget sapien nibh. Sed ac ipsum eget enim egestas ullamcorper nec euismod ligula. Curabitur fringilla pulvinar lectus consectetur pellentesque.
+\paragraph*{S3 Text}
+\label{S_meas}
+{\bf Measurement models.} Additional details of the measurement model that were used for Models~1--3.
 
-\paragraph*{S1 Video.}
-\label{S1_Video}
-{\bf Lorem ipsum.}  Maecenas convallis mauris sit amet sem ultrices gravida. Etiam eget sapien nibh. Sed ac ipsum eget enim egestas ullamcorper nec euismod ligula. Curabitur fringilla pulvinar lectus consectetur pellentesque.
+\paragraph*{S4 Text}
+\label{S_lee20}
+{\bf Likelihood of Lee et al. models.} Details of how the log-likelihood of the Lee et al. models were calculated.
 
-\paragraph*{S1 Appendix.}
-\label{S1_Appendix}
-{\bf Lorem ipsum.} Maecenas convallis mauris sit amet sem ultrices gravida. Etiam eget sapien nibh. Sed ac ipsum eget enim egestas ullamcorper nec euismod ligula. Curabitur fringilla pulvinar lectus consectetur pellentesque.
+\paragraph*{S5 Text}
+\label{S_mod3cal}
+{\bf Likelihood of Lee et al. models.} Additional details on the procedures for fitting and diagnosing Model~3.
 
-% \paragraph*{S1 Table.}
-% \label{S1_Table}
-% {\bf Lorem ipsum.} Maecenas convallis mauris sit amet sem ultrices gravida. Etiam eget sapien nibh. Sed ac ipsum eget enim egestas ullamcorper nec euismod ligula. Curabitur fringilla pulvinar lectus consectetur pellentesque.
+\paragraph*{S6 Text}
+\label{S_uncertain}
+{\bf Accounting for parameter uncertainty} A description of a empirical-Bayes approach that can be used to account for parameter uncertainty.
 
 \section*{Acknowledgments}
-Cras egestas velit mauris, eu mollis turpis pellentesque sit amet. Interdum et malesuada fames ac ante ipsum primis in faucibus. Nam id pretium nisi. Sed ac quam id nisi malesuada congue. Sed interdum aliquet augue, at pellentesque quam rhoncus vitae.
+
+This work was supported by National Science Foundation grants DMS-1761603 and DMS-1646108.
+The authors would like to thank Mercedes Pascual and Betz Halloran for helpful discussions. Laura Matrajt provided additional data for the Model~2 analysis.
 
 \nolinenumbers
 
