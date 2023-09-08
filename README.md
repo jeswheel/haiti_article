@@ -4,23 +4,25 @@ This repository contains the necessary code to reproduce the article: "Informing
 
 ### TODO: 
 
-- [ ] In the `si`-makefile, need to create command to create all sub-results and save the in the folder `si_files`. 
-- [ ] In the primary makefile, need to write code to move `.bbl` documents into the `.tex` file for article submission. 
-- [ ] All images need to be `.tif` files... easiest would be to convert them via command line and makefile. 
-- [ ] Fix undefined references in `si`-sub `.Rnw` documents. 
+- [ ] Probably need to change the parameter table to a figure... See: [when should I make my table a figure](https://journals.plos.org/ploscompbiol/s/tables)
+- [ ] Make SI README file that describes the makefile.
+- [ ] Describe the makefile here in the README.
 - [ ] **DON'T FORGET**: Before re-running everything, remove `ncores` argument from `fit_haiti3` and `fit_haiti1`. This argument doesn't do anything, but was left in so as to not trigger the `bake` recalculation of the file, which would be inconvinient when working on the manuscript. 
-- [x] Make sure supplement is up to date 
-   - [ ] Fix the supporting-information section in manuscript 
-   - [ ] write an acknowledgement section 
-   - [x] Add model diagrams to supplement, and mention them in the manuscript. 
-- [ ] Fix author affiliations and emails. 
 - [ ] Final things: 
    - [ ] Check all journal requirements are met
    - [ ] Final proof-read.
    - [ ] Delete all commented out text and code 
    - [ ] Re-run everything and submit. 
 
-
+- [x] Fix author affiliations and emails. 
+- [x] Make sure supplement is up to date 
+   - [x] Fix the supporting-information section in manuscript 
+   - [x] write an acknowledgement section 
+   - [x] Add model diagrams to supplement, and mention them in the manuscript. 
+- [x] In the `si`-makefile, need to create command to create all sub-results and save the in the folder `si_files`. 
+- [x] In the primary makefile, need to write code to move `.bbl` documents into the `.tex` file for article submission. 
+- [x] All images need to be `.tif` files... easiest would be to convert them via command line and makefile. 
+- [x] Fix undefined references in `si`-sub `.Rnw` documents. 
 - [x] Write more about why model 3 is a poor description of the data, even if this is just added to the supplement. 
 - [x] Update Model 3 initialization model description. 
 - [x] Double check all model equations match the code 
