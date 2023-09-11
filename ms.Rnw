@@ -663,8 +663,7 @@ h1_MIF <- bake(
       NUM_TREND = NUM_TREND,
       NPROF = NPROF,
       NREPS_EVAL = NREPS_EVAL,
-      NP_EVAL = NP_EVAL,
-      ncores = cores
+      NP_EVAL = NP_EVAL
     )
   }
 )
@@ -870,8 +869,7 @@ haiti3_fit <- bake(
       search_rho = FALSE,
       search_gamma = FALSE,
       search_Iinit = TRUE,
-      search_hur = TRUE,
-      ncores = cores
+      search_hur = TRUE
     )
   }
 )

@@ -153,8 +153,7 @@ haiti3_sub_fit <- bake(
       search_rho = FALSE,
       search_gamma = FALSE,
       search_Iinit = FALSE,
-      search_hur = FALSE,
-      ncores = cores
+      search_hur = FALSE
     )
   }
 )
