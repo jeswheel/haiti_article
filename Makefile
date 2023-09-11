@@ -56,13 +56,13 @@ clean:
 
 tifs: $(TIF_FILES)
 
-submission: ms-plos.tex
-	Rscript --vanilla remove_knitrout.R ms-plos.tex
-	pdflatex ms-plos-submission.tex
-	bibtex ms-plos-submission.aux
-	Rscript --vanilla append_bib.R ms-plos-submission.tex
-	pdflatex ms-plos-submission.tex
-	pdflatex ms-plos-submission.tex
+submission: ms.tex
+	Rscript --vanilla remove_knitrout.R ms.tex
+	pdflatex ms-submission.tex
+	bibtex ms-submission.aux
+	Rscript --vanilla append_bib.R ms-submission.tex
+	pdflatex ms-submission.tex
+	pdflatex ms-submission.tex
 
 
 
