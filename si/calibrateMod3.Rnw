@@ -417,7 +417,8 @@ floor(100 * sum(mod3_cases[, c(bench_diffs$unit[1:4])], na.rm = TRUE) / sum(mod3
 We refit Model~3 after introducing these hurricane-related parameters using the same successive search scheme described above.
 The resulting model has a log-likelihood value of $\Sexpr{round(max(h3_final_results$search2$logLiks$logLik), 1)}$.
 The addition of the Hurricane parameters seems to have resulted in a dramatic increase in conditional likelihoods around and after October 2016, as seen in Fig.~\ref{fig:finalCondLL}.
-The inclusion of these parameters resulted in an overall increase of $\Sexpr{round(max(h3_final_results$search2$logLiks$logLik) - max(haiti3_sub_fit$search2$logLiks$logLik), 1)}$ log-likelihood units, which is a highly statistically significant difference.
+The inclusion of these parameters resulted in an overall increase of $\Sexpr{round(max(h3_final_results$search2$logLiks$logLik) - max(haiti3_sub_fit$search2$logLiks$logLik), 1)}$ log-likelihood units.
+Such a large difference in log-likelihoods is well beyond the threshold of statistical uncertainty determined by Wilks' theorem, suggesting that the data highly favor the inclusion of the additional parameters.
 
 <<finalModel3BPF, echo=FALSE, message=FALSE, include=FALSE>>=
 
