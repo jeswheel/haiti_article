@@ -2,6 +2,8 @@
 
 This repository contains the necessary code to reproduce the article: "Informing policy via dynamic models: Cholera in Haiti". 
 
+The `ms.Rnw` file took 4 days, 9 hours, and 2 minutes to compile using 36 cores. It required 42 GB of memory. 
+
 ### TODO: 
 
 - [ ] Probably need to change the parameter table to a figure... See: [when should I make my table a figure](https://journals.plos.org/ploscompbiol/s/tables)
