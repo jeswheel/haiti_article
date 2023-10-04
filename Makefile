@@ -68,5 +68,21 @@ submission: ms.tex
 	mv ms-submission.pdf submission/
 	mv ms-submission.tex submission/
 
-
-
+ArXiv: ms.tex ms.bbl si/si.tex si/calibrateMod3Out.tex si/ReplicateLee20Out.tex
+	if ! [ -d "ArXiv" ]; then mkdir ArXiv; fi
+	cp ms.tex ArXiv/
+	cp ms.bbl ArXiv/
+	cp plos2015.bst ArXiv/
+# 	cp bib-haiti.bib ArXiv/ms.bib
+	cp -r figure/. ArXiv/
+	rm -r ArXiv/*.tif
+	cp si/si.tex ArXiv/
+	cp si/si.bbl ArXiv/
+	cp -r si/inputs/ ArXiv/
+	cp -r si/figure/ ArXiv/
+	cp si/calibrateMod3Out.tex ArXiv/
+	cp si/ReplicateLee20Out.tex ArXiv/
+	Rscript --vanilla ArXiv.R ArXiv/ms.tex
+	rm ArXiv/ms.bbl
+	rm ArXiv/si.bbl
+	zip -vr ArXiv.zip ArXiv/ -x "*.DS_Store"
