@@ -4,44 +4,65 @@ This repository contains the necessary code to reproduce the article: "Informing
 
 The `ms.Rnw` file took 4 days, 9 hours, and 2 minutes to compile using 36 cores. It required 42 GB of memory. 
 
+The `si/si.Rnw` file took 2 days, 11 hours, and 5 minutes to compile using 36 cores. It also required 36 GB of memory. 
+In order for this file to compile, it is assumed that the data files created from `ms.Rnw` already exist. 
+
+### How to recreate documents
+
+First, the `ms.Rnw` needs to be knit into a `.tex` file. 
+This is where the actually `R` code is run, and is very computationally intensive. 
+As noted above, on 36 cores, this took longer than 4 days. 
+Knitting the file will create all of the `R` data files that will then be loaded 
+later. 
+These files are used to create tables, figures, and output numbers in the 
+manuscript. 
+To avoid needing to recreate the `R` data files every time the code is ran, 
+we use the function `pomp::bake`; this function will check if the code needs to 
+be re-ran by checking if the code has changed or the reproducible seed before
+the `pomp::bake` call has changed. 
+If there are no changes, and the data file already exists, then the function 
+simply loads existing results rather than recomputing them. 
+Therefore if there are no changes to the `R` code that would force a recompute 
+by `pomp::bake`, and the computed `R` data files already exist, then it only 
+takes a few seconds to knit the document. 
+
+### Plos Comp Bio submission
+
+Once the document has been knit into a `.tex` file, several steps are taken to 
+prepare the document for submission to Plos Comp Bio. 
+For example, no graphics should be included in the submission, and all figures
+need to be Tiffs. 
+Also, the `.bbl` file should be included in the `.tex` document and not be 
+loaded later. 
+
+The make file contains a command `submission` which simplifies these steps. 
+Running `make submission` will create a sub-folder called `submission/` that 
+contains the `ms-submission.tex` file with all of the requirements. 
+It also creates the corresponding `ms-submission.pdf` so that you can check to 
+make sure that everything is working as expected. 
+A final step that is not currently covered by `make submission` is to convert 
+the parameter table into a figure.
+This is necessary because the table contains some nested tabular environments 
+(created by `\multirow`). 
+To do this, I simply copy `submission/ms-submission.tex`, remove fancy header /
+foot and page numbers, remove the caption from the table, compile into a pdf, 
+and save the single page with the parameter table to it's own `.pdf` file 
+named `submission/paramTab.pdf`. 
+I can then convert this to a `.tiff` by running `make submission/paramTab.tiff`. 
+
+Finally, it is necessary to manually change the table -> figure in the 
+`submission/ms-submission/tex` file, and reference the table as a figure. 
+
+### ArXiv submission
+
+This is primarily documented for personal benefit. The `make ArXiv` command will 
+create a `.zip` file that should be able to be submitted to ArXiv. 
+For this to work, you need the `.bbl` files for both `ms.tex` and `si/si.tex`, 
+so these should be compiled, but not cleaned, prior to running `make ArXiv`. 
+A more advanced modification to the make file would make sure these exist, but 
+because this is just for personal use, it felt unecessary to spend the additional 
+effort to create the make file in this case. 
+
 ### TODO: 
 
-- [ ] Probably need to change the parameter table to a figure... See: [when should I make my table a figure](https://journals.plos.org/ploscompbiol/s/tables)
-- [ ] Make SI README file that describes the makefile.
-- [ ] Describe the makefile here in the README.
-- [ ] Final things: 
-   - [ ] Check all journal requirements are met
-   - [ ] Final proof-read.
-   - [x] Delete all commented out text and code 
-   - [x] Re-run everything. 
-
-- [x] **DON'T FORGET**: Before re-running everything, remove `ncores` argument from `fit_haiti3` and `fit_haiti1`. This argument doesn't do anything, but was left in so as to not trigger the `bake` recalculation of the file, which would be inconvenient when working on the manuscript. 
-- [x] Fix author affiliations and emails. 
-- [x] Make sure supplement is up to date 
-   - [x] Fix the supporting-information section in manuscript 
-   - [x] write an acknowledgement section 
-   - [x] Add model diagrams to supplement, and mention them in the manuscript. 
-- [x] In the `si`-makefile, need to create command to create all sub-results and save the in the folder `si_files`. 
-- [x] In the primary makefile, need to write code to move `.bbl` documents into the `.tex` file for article submission. 
-- [x] All images need to be `.tif` files... easiest would be to convert them via command line and makefile. 
-- [x] Fix undefined references in `si`-sub `.Rnw` documents. 
-- [x] Write more about why model 3 is a poor description of the data, even if this is just added to the supplement. 
-- [x] Update Model 3 initialization model description. 
-- [x] Double check all model equations match the code 
-- [x] The measurement models for Models 2 and 3 in the supplement need notation fixed
-   - [x] In Model 2, change NEI -> NEIu, as we don't sum across units and this is more clear. 
-   - [x] In Model 3, there is no Iuz compartment, just Iu, so notation should suggest any Suz -> Iu.
-- [x] Remove parallel back-ends from inside functions in `haitipkg`. 
-- [x] Move all images and tables to the correct spot (directly after referencing them).
-- [x] Have to reference all tables. When should we reference Table 2 (parameter table). How about the table of likelihoods? 
-- [x] Remove vaccination scenario projection figures (maybe move into the supplement later).
-- [x] Check we meet following requirement: "Please refrain from using math mode for non-math content, such as chemical formulas. For example, please use "CO\textsubscript{2}" instead of "$\mathrm{CO}_2$"
-- [x] Fix the formatting of the parameter table. 
-- [x] Write an author summary for the paper 
-- [x] Description of theta (vaccine efficacy) in model 2 is missing. It's only in the equation, not even in the table. Make a mention of where this can be found.
-- [x] Check that everything in the supplement material is referenced in the ms
-- [x] Code has been refactored to calculate in the manuscript the likelihood of Lee et al model 1. Fix the supplemental material so that it doesn't have to redo these computations, then remove redundant comments from ms.Rnw
-- [x] Check that all equations end in comma or period, remove unnecessary indentation after equations, and capitalize following text accordingly. 
-- [x] Check that all in text citations are refer to the authors rather than the article (eg: in lee20 -> by lee20). 
-- [x] Convert urls to xurls in .bib, except for packages. 
-- [x] Capitalize title of all articles in .bib.
+Nothing to do! 
