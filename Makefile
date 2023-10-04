@@ -63,6 +63,10 @@ submission: ms.tex
 	Rscript --vanilla append_bib.R ms-submission.tex
 	pdflatex ms-submission.tex
 	pdflatex ms-submission.tex
+	rm ms-submission.log ms-submission.blg ms-submission.out ms-submission.aux ms-submission.bbl
+	if ! [ -d "submission" ]; then mkdir submission; fi
+	mv ms-submission.pdf submission/
+	mv ms-submission.tex submission/
 
 
 
