@@ -1,3 +1,5 @@
+[![DOI](https://zenodo.org/badge/521646880.svg)](https://zenodo.org/badge/latestdoi/521646880)
+
 ## Haiti Article
 
 This repository contains the necessary code to reproduce the article: "Informing policy via dynamic models: Cholera in Haiti". 
