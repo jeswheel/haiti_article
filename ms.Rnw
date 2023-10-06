@@ -1734,7 +1734,7 @@ ggplot() +
         axis.title = element_text(size = 10))
 @
 \caption{\label{fig:betat}
-{\figTitle Confidence inverval for linear trend in transmission.}
+{\figTitle Confidence interval for linear trend in transmission.}
 Monte Carlo adjusted profile of $\transmissionTrend$ for Model~1.
 The blue curve is the profile, the blue line indicates the MLE, and the dashed lines indicate the $95\%$ confidence interval.
 }
@@ -2705,7 +2705,7 @@ The dynamic document, together with the R packages, form a {\it compendium}, def
 
 \paragraph*{S5 Text}
 \label{S_mod3cal}
-{\bf Likelihood of Lee et al. models.} Additional details on the procedures for fitting and diagnosing Model~3.
+{\bf Calibrating Model 3.} Additional details on the procedures for fitting and diagnosing Model~3.
 
 \paragraph*{S6 Text}
 \label{S_uncertain}
