@@ -275,7 +275,7 @@ if (RUN_LEVEL == 3) {
   # is when the final results are calculated.
   cat(
     utils::capture.output(sessionInfo()),
-    file = "sessionInfo.txt",
+    file = "sessionInfo_tmp.txt",
     sep="\n"
   )
 }
@@ -608,7 +608,7 @@ The groups largely adhered to existing guidelines for creating models to inform 
 Their forecasts, however, were inconsistent with the prolonged period with no confirmed cholera cases between February, 2019 and September, 2022 \cite{trevisin22}.
 Though cholera has recently reemerged in Haiti \cite{rubin22,PAHO23}, the inability to accurately forecast cholera incidence from 2019-2022---while diligently adhering to existing scientific standards for infectious disease modeling---demonstrates that existing standards of disease modeling and forecasting may be insufficient.
 
-The discrepancy between the model based conclusions of Lee et al.~\cite{lee20} and the prolonged absence of cholera in Haiti has been debated \cite{francois20,rebaudetComment20,henrys20,leeReply20}.
+The discrepancy between the model-based conclusions of Lee et al.~\cite{lee20} and the prolonged absence of cholera in Haiti has been debated \cite{francois20,rebaudetComment20,henrys20,leeReply20}.
 Suggested origins of this discrepancy include the use of unrealistic models \cite{rebaudetComment20} and unrealistic criteria for cholera elimination \cite{henrys20}.
 We find a more nuanced conclusion: attention to methodological details in model fitting, diagnosis and forecasting can improve each of the proposed model's ability to quantitatively describe observed data.
 This improved ability may result in more accurate forecasts and facilitates the exploration of model assumptions.
@@ -1386,7 +1386,7 @@ An important example is the marginal density of the observed random vector $\bm{
 
 \begin{eqnarray}
 \label{eq:likedef}
-f_{\bm{Y}_{1:N}}\big(\bm{y}_{1:N}^*; \paramVec\big) = \int f_{\bm{X}_{0:N}, \bm{Y}_{1:N}}\big(\bm{x}_{0:N}, \bm{y}_{1:N};\paramVec\big) d\bm{x}_{0:N}.
+f_{\bm{Y}_{1:N}}\big(\bm{y}_{1:N}^*; \paramVec\big) = \int f_{\bm{X}_{0:N}, \bm{Y}_{1:N}}\big(\bm{x}_{0:N}, \bm{y}_{1:N}^*;\paramVec\big) d\bm{x}_{0:N}.
 \end{eqnarray}
 
 \noindent When treated as a function of the parameter vector $\paramVec$, this marginal density is called the \emph{likelihood function}, which is the basis of likelihood based statistical inference.
@@ -1429,7 +1429,7 @@ The process noise $d\Gamma(t)/dt$ is multiplicative Gamma-distributed white nois
 Lee et al.~\cite{lee20} included process noise in Model~3 but not in Model~1, i.e., they fixed $\sigmaProc^2 = 0$.
 Gamma white noise in the transmission rate gives rise to an over-dispersed latent Markov process \cite{breto11} which has been found to improve the statistical fit of disease transmission models \cite{stocks20,he10}.
 
-For any time point in $t_{1:N}$, the process model $f_{\bm{X}_n|\bm{X}_{n-1}}\big(\bm{x}_{n}|\bm{x}_{n-1}; \paramVec\big)$ is defined by the describing how individuals move from one latent state compartment to another.
+For any time point in $t_{1:N}$, the process model $f_{\bm{X}_n|\bm{X}_{n-1}}\big(\bm{x}_{n}|\bm{x}_{n-1}; \paramVec\big)$ is defined by describing how individuals move from one latent state compartment to another.
 Per-capita transition rates are given in Eqs.~\myeqref{model1:SE}-\myeqref{model1:birth}:
 \begin{eqnarray}
 \label{model1:SE}
@@ -1609,7 +1609,7 @@ Finally, reported cholera cases are modeled using a negative binomial measuremen
 
 Each of the three models considered in this study describes cholera dynamics as a partially observed Markov process (POMP), with the understanding that the deterministic Model~2 is a degenerate case of a stochastic model.
 Each model is indexed by a parameter vector, $\paramVec$, and different values of $\paramVec$ can result in qualitative differences in the predicted behavior of the system.
-Therefore, the choice of $\paramVec$ used to make inference about the system can greatly affect model based conclusions.
+Therefore, the choice of $\paramVec$ used to make inference about the system can greatly affect model-based conclusions.
 Elements of $\paramVec$ can be fixed at a constant value based on scientific understanding of the system, but parameters can also be calibrated to data by maximizing a measure of congruency between the observed data and the model's mechanistic structure.
 Calibrating model parameters to observed data does not guarantee that the resulting model successfully approximates real-world mechanisms, since the model description of the dynamic system may be incorrect and do not change as the model is calibrated to data.
 However, the congruency between the model and observed data serves as a proxy for the congruency between the model and the true underlying dynamic system.
@@ -2075,7 +2075,7 @@ and comparing summary statistics of the observed data to simulations from the mo
 \subsection*{Corroborating Fitted Models with Scientific Knowledge}
 
 The resulting mechanisms in a fitted model can be compared to current scientific knowledge about a system.
-Agreement between model based inference and our current understanding of a system may be taken as a confirmation of both model based conclusions and our scientific understanding.
+Agreement between model-based inference and our current understanding of a system may be taken as a confirmation of both model-based conclusions and our scientific understanding.
 On the other hand, comparisons may generate unexpected results that have the potential to spark new scientific knowledge \cite{ganusov16}.
 
 In the context of our case study, we demonstrate how the fit of Model~1 corroborates other evidence concerning the role of rainfall in cholera epidemics.
