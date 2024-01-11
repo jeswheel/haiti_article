@@ -18,68 +18,15 @@ library(tidyverse)
 # library(data.table)
 library(haitipkg)
 
-RUN_LEVEL <- 2
+RUN_LEVEL <- 1
 
+nprof <- switch(RUN_LEVEL, 2, 12, 20)
 NBPF <- switch(RUN_LEVEL, 5, 50, 100)
 NP <- switch(RUN_LEVEL, 50, 500, 1000)
 NP_EVAL <- switch(RUN_LEVEL, 100, 1000, 2000)
 NREPS_EVAL <- switch(RUN_LEVEL, 3, 6, 10)
 SPAT_REGRESSION <- 0.05
 COOLING <- 0.05
-
-# Create vectors for the unit and shared parameters
-unit_specific_names <- c("betaB", "foi_add", "aHur", "hHur")
-shared_param_names <- c(
-  "mu_B", "XthetaA", "thetaI", "lambdaR", "r", "std_W",
-  "epsilon", "k"
-)
-
-est_param_names <- c(
-  unit_specific_names, shared_param_names
-)
-
-# Add unit numbers to each parameter
-est_param_names_expanded <- paste0(rep(est_param_names, each = 10), 1:10)
-
-# Simple function that is used to set the rw_sd for the first search
-# This function is convenient so that we don't have to type out the rw_sd
-# for each unit parameter.
-set_rw_1 <- function(x) {
-  if (gsub("[[:digit:]]+$", "", x) %in% shared_param_names) {
-    return(0.01)
-  } else if (x %in% paste0(rep(c("aHur", 'hHur'), each = 2), c(3, 9))) {
-    return(expression(ifelse(time >= 2016.754 & time <= 2017, 0.015, 0)))
-  } else if (x %in% c("Iinit3", "Iinit4")) {
-    return(expression(ivp(0.25)))
-  } else if (grepl('^foi_add[[:digit:]]+$', x)) {
-    return(0.015)
-  } else if (grepl('^betaB[[:digit:]]+$', x)) {
-    return(0.01)
-  } else {
-    return(0)
-  }
-}
-
-set_rw_2 <- function(x) {
-  if (gsub("[[:digit:]]+$", "", x) %in% shared_param_names) {
-    return(0.003)
-  } else if (x %in% paste0(rep(c("aHur", 'hHur'), each = 2), c(3, 9))) {
-    return(expression(ifelse(time >= 2016.754 & time <= 2017, 0.005, 0)))
-  } else if (x %in% c("Iinit3", "Iinit4")) {
-    return(expression(ivp(0.125)))
-  } else if (grepl('^foi_add[[:digit:]]+$', x)) {
-    return(0.005)
-  } else if (grepl('^betaB[[:digit:]]+$', x)) {
-    return(0.003)
-  } else {
-    return(0)
-  }
-}
-
-reg_rw_1.sd <- lapply(est_param_names_expanded, set_rw_1)
-names(reg_rw_1.sd) <- est_param_names_expanded
-
-RW_SD <- do.call(rw_sd, reg_rw_1.sd)
 
 # Create Experiment Registry ----------------------------------------------
 
@@ -98,11 +45,21 @@ haiti3_fit <- readRDS("model3/run_level_3/haiti3_fit.rds")
 best_pars <- haiti3_fit$search2$params[which.max(haiti3_fit$search2$logLiks$logLik), ]
 h3_spat <- haiti3_spatPomp()
 
-nprof <- 12
+# Create vectors for the unit and shared parameters
+unit_specific_names <- c("betaB", "foi_add", "aHur", "hHur")
+shared_param_names <- c(
+  "mu_B", "XthetaA", "thetaI", "lambdaR", "r", "std_W",
+  "epsilon", "k"
+)
+
+est_param_names <- c(
+  unit_specific_names, shared_param_names
+)
+
 prof_params <- shared_param_names
 
 final_pars <- best_pars
-
+prof_vars <- c()
 for (pp in prof_params) {
 
   if (pp == "mu_B") {
@@ -268,41 +225,87 @@ for (pp in prof_params) {
   guesses_all <- cbind(guesses, fixed_mat)[, names(coef(h3_spat))]
   guesses_all <- rbind(guesses_all, tmp_pars)[, names(coef(h3_spat))]
   final_pars <- rbind(final_pars, guesses_all)
+  prof_vars <- c(prof_vars, rep(pp, nrow(guesses_all)))
 }
 
 final_pars <- final_pars[-1, names(coef(h3_spat))]
-# dim(final_pars)
 
+data_obj <- list(starts = final_pars, prof_vars = prof_vars)
+# dim(final_pars)
 
 # Define profile problem for registry -------------------------------------
 
-sample_starting_point <- function(data = final_pars, job, i, ...) {
-  unlist(data[i, ])
+sample_starting_point <- function(data = data_obj, job, i, ...) {
+  list(
+    start_par = unlist(data$starts[i, ]),
+    prof_var = data$prof_vars[i]
+  )
 }
 
-addProblem(name = 'profile', data = final_pars, fun = sample_starting_point)
+addProblem(name = 'profile', data = data_obj, fun = sample_starting_point)
 
 # Define algorithm for parameter estimation -------------------------------
 
 fit_model <- function(
     data, job, instance, nbpf, np, spat_regression, np_eval, nreps_eval,
-    rwsd = RW_SD, cooling, start_date = "2010-11-20", ...
+    cooling, start_date = "2010-11-20", ...
 ) {
+
+  # Create vectors for the unit and shared parameters
+  unit_specific_names <- c("betaB", "foi_add", "aHur", "hHur")
+  shared_param_names <- c(
+    "mu_B", "XthetaA", "thetaI", "lambdaR", "r", "std_W",
+    "epsilon", "k"
+  )
+
+  est_param_names <- c(
+    unit_specific_names, shared_param_names
+  )
+
+  # Add unit numbers to each parameter
+  est_param_names_expanded <- paste0(rep(est_param_names, each = 10), 1:10)
+
+  # Simple function that is used to set the rw_sd for the first search
+  # This function is convenient so that we don't have to type out the rw_sd
+  # for each unit parameter.
+  set_rw_1 <- function(x) {
+
+    if (x == instance$prof_var || gsub("[[:digit:]]+$", "", x) == instance$prof_var) {
+      return(0)
+    } else if (gsub("[[:digit:]]+$", "", x) %in% shared_param_names) {
+      return(0.01)
+    } else if (x %in% paste0(rep(c("aHur", 'hHur'), each = 2), c(3, 9))) {
+      return(expression(ifelse(time >= 2016.754 & time <= 2017, 0.015, 0)))
+    } else if (x %in% c("Iinit3", "Iinit4")) {
+      return(expression(ivp(0.25)))
+    } else if (grepl('^foi_add[[:digit:]]+$', x)) {
+      return(0.015)
+    } else if (grepl('^betaB[[:digit:]]+$', x)) {
+      return(0.01)
+    } else {
+      return(0)
+    }
+  }
+
+  reg_rw_1.sd <- lapply(est_param_names_expanded, set_rw_1)
+  names(reg_rw_1.sd) <- est_param_names_expanded
+
+  RW_SD <- do.call(rw_sd, reg_rw_1.sd)
+
   fit_haiti3(
-    start_params = instance,
+    start_params = instance$start_par,
     NBPF = nbpf,
     NP = np,
     SPAT_REGRESSION = spat_regression,
     NP_EVAL = np_eval,
     NREPS_EVAL = nreps_eval,
-    RW_SD = rwsd,
+    RW_SD = RW_SD,
     COOLING = cooling,
     start_date = start_date
   )
 }
 
 addAlgorithm(name = 'fitMod', fun = fit_model)
-
 
 # Completing the experiment -----------------------------------------------
 
@@ -318,7 +321,8 @@ addExperiments(prob.designs = pdes, algo.designs = ades)
 
 # Submit Jobs -------------------------------------------------------------
 
-resources1 <- list(account = 'stats_dept1', walltime = '90:00', memory = '5000m', ncpus = 1)
-submitJobs(resources = resources1)
+resources1 <- list(account = 'stats_dept1', walltime = '10:00', memory = '5000m', ncpus = 1)
+# resources1 <- list(account = 'stats_dept1', walltime = '90:00', memory = '5000m', ncpus = 1)
 
-# submitJobs(ids = 1)
+# submitJobs(resources = resources1)
+submitJobs(ids = 1)
