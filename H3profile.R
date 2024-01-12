@@ -18,7 +18,7 @@ library(tidyverse)
 # library(data.table)
 library(haitipkg)
 
-RUN_LEVEL <- 1
+RUN_LEVEL <- 2
 
 nprof <- switch(RUN_LEVEL, 2, 14, 20)
 NBPF <- switch(RUN_LEVEL, 5, 50, 100)
@@ -321,8 +321,8 @@ addExperiments(prob.designs = pdes, algo.designs = ades)
 
 # Submit Jobs -------------------------------------------------------------
 
-resources1 <- list(account = 'stats_dept1', walltime = '10:00', memory = '5000m', ncpus = 1)
-# resources1 <- list(account = 'stats_dept1', walltime = '90:00', memory = '5000m', ncpus = 1)
+# resources1 <- list(account = 'stats_dept1', walltime = '10:00', memory = '5000m', ncpus = 1)
+resources1 <- list(account = 'stats_dept1', walltime = '90:00', memory = '5000m', ncpus = 1)
 
-# submitJobs(resources = resources1)
-submitJobs(ids = 1)
+submitJobs(resources = resources1)
+# submitJobs(ids = 1, resources = resources1)
