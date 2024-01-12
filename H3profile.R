@@ -26,12 +26,12 @@ NP <- switch(RUN_LEVEL, 50, 750, 1000)
 NP_EVAL <- switch(RUN_LEVEL, 100, 1000, 2000)
 NREPS_EVAL <- switch(RUN_LEVEL, 3, 6, 10)
 SPAT_REGRESSION <- 0.05
-COOLING <- 0.05
+COOLING <- 0.50
 
 # Create Experiment Registry ----------------------------------------------
 
 reg <- makeExperimentRegistry(
-  file.dir = paste0('model3/profileReg_RL', RUN_LEVEL, '_v2'),
+  file.dir = paste0('model3/profileReg_RL', RUN_LEVEL, '_v3'),
   seed = 739164,
   packages = c("spatPomp", 'haitipkg', 'pomp')
 )
@@ -96,7 +96,7 @@ for (pp in prof_params) {
   } else {
     prof_cols <- matrix(rep(prof_values, each = nprof), ncol = 1)
     colnames(prof_cols) <- pp
-    tmp_pars[pp] <- prof_values
+    tmp_pars[, pp] <- prof_values
   }
 
   # Unit-lower bounds
