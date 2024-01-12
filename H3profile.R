@@ -20,9 +20,9 @@ library(haitipkg)
 
 RUN_LEVEL <- 1
 
-nprof <- switch(RUN_LEVEL, 2, 12, 20)
+nprof <- switch(RUN_LEVEL, 2, 14, 20)
 NBPF <- switch(RUN_LEVEL, 5, 50, 100)
-NP <- switch(RUN_LEVEL, 50, 500, 1000)
+NP <- switch(RUN_LEVEL, 50, 750, 1000)
 NP_EVAL <- switch(RUN_LEVEL, 100, 1000, 2000)
 NREPS_EVAL <- switch(RUN_LEVEL, 3, 6, 10)
 SPAT_REGRESSION <- 0.05
@@ -63,21 +63,21 @@ prof_vars <- c()
 for (pp in prof_params) {
 
   if (pp == "mu_B") {
-    prof_values <- seq(375, 750, length.out = 20)
+    prof_values <- seq(300, 700, length.out = 25)
   } else if (pp == 'XthetaA') {
-    prof_values <- seq(0.02, 0.25, length.out = 20)
+    prof_values <- seq(0.03, 0.25, length.out = 21)
   } else if (pp == 'thetaI') {
-    prof_values <- seq(2.5e-05, 1e-04, length.out = 20)
+    prof_values <- seq(2.5e-05, 1e-04, length.out = 21)
   } else if (pp == 'lambdaR') {
-    prof_values <- seq(0.5, 3.5, length.out = 15)
+    prof_values <- seq(0.5, 3.2, length.out = 15)
   } else if (pp == 'r') {
-    prof_values <- seq(0.5, 1.75, length.out = 15)
+    prof_values <- seq(0.5, 1.75, length.out = 16)
   } else if (pp == 'std_W') {
-    prof_values <- seq(0.02, 0.03, length.out = 20)
+    prof_values <- seq(0.02, 0.04, length.out = 25)
   } else if (pp == 'epsilon') {
     prof_values <- seq(0.65, 0.99, length.out = 20)
   } else if (pp == 'k') {
-    prof_values <- seq(75, 175, length.out = 20)
+    prof_values <- seq(70, 175, length.out = 25)
   }
 
   tmp_pars <- matrix(
@@ -167,7 +167,7 @@ for (pp in prof_params) {
     "r" = 0.5,
     "std_W" = 0.02,
     "epsilon" = 0.65,
-    "k" = 75
+    "k" = 70
   )
 
   shared_upper_bounds <- c(
@@ -176,7 +176,7 @@ for (pp in prof_params) {
     "thetaI" = 1e-04,
     "lambdaR" = 3.5,
     "r" = 1.75,
-    "std_W" = 0.03,
+    "std_W" = 0.04,
     "epsilon" = 0.99,
     "k" = 175
   )
