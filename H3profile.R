@@ -31,14 +31,14 @@ COOLING <- 0.05
 # Create Experiment Registry ----------------------------------------------
 
 reg <- makeExperimentRegistry(
-  file.dir = paste0('model3/profileReg_RL', RUN_LEVEL),
+  file.dir = paste0('model3/profileReg_RL', RUN_LEVEL, '_v2'),
   seed = 739164,
   packages = c("spatPomp", 'haitipkg', 'pomp')
 )
 
 # Create Profile Design Matrix --------------------------------------------
 
-set.seed(998877)
+set.seed(665544)
 
 # Read in previous best results
 haiti3_fit <- readRDS("model3/run_level_3/haiti3_fit.rds")
@@ -322,7 +322,7 @@ addExperiments(prob.designs = pdes, algo.designs = ades)
 # Submit Jobs -------------------------------------------------------------
 
 # resources1 <- list(account = 'stats_dept1', walltime = '10:00', memory = '5000m', ncpus = 1)
-resources1 <- list(account = 'stats_dept1', walltime = '90:00', memory = '5000m', ncpus = 1)
+resources1 <- list(account = 'stats_dept1', walltime = '2:00:00', memory = '5000m', ncpus = 1)
 
 submitJobs(resources = resources1)
 # submitJobs(ids = 1, resources = resources1)
