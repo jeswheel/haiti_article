@@ -104,9 +104,26 @@ jeswheel@umich.edu
   My most substantial concern is with the framing of the paper, and whether that might mislead potential readers. To me, the paper serves more of an educational purpose, presenting ideas on how to best use mathematical models to gain insight from time series data. While the case study into cholera in Haiti is methodologically sound, it does not seem to be the main focus of the manuscript. To such an extent that, in the discussion, the only comment to on the Haiti analysis is that the authors ``used the same data and models, and even much of the same code, as Lee et al. [1], and yet ended up with drastically different conclusions."
 }
 
+
 \report{
   This major concern can be resolved in two ways, both of which seem acceptable to me, either a) reframe the paper as a more general series of recommendations for how to better perform statistical inference on time series data using mechanistic models (including a longer introduction and discussion of existing methodological deficiencies) or b) perform a more in-depth analysis and commentary on cholera in Haiti (some of which has already been done but is buried in supplementary information files that are only briefly mentioned in the main text, e.g. S5).
 }
+
+WE CAN TRIM DOWN THE RESPONSE LATER. HERE ARE SOME INITIAL BRAINSTORMING THOUGHTS.
+
+Thanks for the feedback on the framing of our contribution.
+The original goal of our manuscript was to combine the two foci identified by the referee: 
+we use an in-depth case study to motivate general procedures for fitting mathematical models to time series data, while explaining how these procedures help to address limitations of previous approaches.
+The case study was intended both to help motivate the advice and to make sure that the advice is pertinent and practical on at least one suite of models.
+Since our approach is predicated on the possibility of carrying out some nontrivial computational procedures, we are led to address computational issues in parallel with scientific and statistical issues.
+
+The referee would prefer us to emphasize one of these foci, and this feedback has helped us see how readers might find themselves struggling to orient themselves while reading the manuscript.
+We agree that the ``educational'' purpose of the paper is primary to the specific conclusions about the Haiti cholera epidemic.
+However, the validity of our reanalysis of the Haiti data and models provides critical support to our methodological points.
+\TODO{For the revision, we have edited the abstract and introduction to make explicit how the case study fits into the overall goals of the paper.}
+\TODO{In the methods and results sections, we have made explicit how the decisions about what to present in the main text and in the supplement relate to these goals.}
+In the discussion, we return from the concrete consideration of the case study, placing it back in the more general setting of inferring complex dynamics from time series data.
+\TODO{In the revision, we have added more signposts to help the reader see how the points that arise in the discussion generalize the corresponding points arising in the case study.}
 
 \report{
   I found the methodology used to be well-suited to addressing the aims of the paper.
@@ -122,62 +139,85 @@ jeswheel@umich.edu
   The authors state they ``develop data analysis strategies leading to improved statistical fit." It's not clear to me exactly what novel strategies have been developed, it seems the authors exclusively use pre-existing techniques from the literature. This is fine, if the focus of the paper is either a) pedagogical or b) on understanding a specific disease system (cholera in Haiti). If any methods are novel, this should be more clearly stated.
 }
 
+Fitting models 1 and 2 does not require any methodological innovation. Model 3 has a stochastic spatiotemporal partially-observed structure that leads to methodological challenges. \citet{lee20} made some approximations to avoid carrying out inference for the full coupled system. We show some consequences of those approximations, taking advantage of a newly developed method which has not yet been applied in the context of scientific investigations. So, although the method is not entirely new, its applicability to this task is novel.
+\TODO{We have clarified this in the manuscript WHERE?}
+  
+
 \report{
   \textbf{\underline{Introduction}}
 
-  To make clear that the issues being addressed by this paper go beyond one modelling study of Haiti, the authors should provide examples and references to support the (accurate in my opinion) statement about, ``common modeling decisions that may not provide an adequate statistical explanation of the data".
+1.  To make clear that the issues being addressed by this paper go beyond one modelling study of Haiti, the authors should provide examples and references to support the (accurate in my opinion) statement about, ``common modeling decisions that may not provide an adequate statistical explanation of the data".
 }
 
-\report{
+\report{2.
   Given the focus of the paper on how to better perform inference, explicitly commenting on what are the ``existing guidelines for creating models to inform policy [4, 5]". It would then also be helpful in the discussion to comment on how the recommendations of this study extend these pre-existing guidelines.
 }
+
+Thanks for this suggestion.
+\TODO{We have implemented this in the revision.}
+
+THIS IS DISCUSSED MORE EXTENSIVELY IN JIFAN'S COVID PAPER. THERE IS SOME DANGER THAT THESE PAPERS COULD CONVERGE TOO MUCH. ANOTHER OPTION IS TO REFER TO THAT PAPER. SO, AS ANOTHER OPTION:
+
+\TODO{A subsequent manuscript addresses [4,5] more directly \citep{li23} and so we have referred the reader to that paper (currently available on arXiv) for additional discussion of this point.}
+
 
 \report{
   \textbf{\underline{Methods}}
 
-  Fig 2. Model parameters. I think this should be ``Table 1"?
+3.  Fig 2. Model parameters. I think this should be ``Table 1"?
 }
 
-\report{
+\report{4.
     ``and $z \in 1:Z$ describes hypothetical vaccination programs" It would help to give an example of the different vaccine programs here. E.g. does this mean the number of doses the individual has received, or differences in the vaccine administered?
 }
 
-\report{
+\report{5.
   Eq 6 and line 1: I think the notation for the asymptomatic fraction might be clearer and more consistent with the other models if you used $f_z(t)$ instead of $\vartheta_z(t)$. In fact, this is the notation used in the table in Figure 2.
 }
 
-\report{
+\report{6.
   Line 198: Reference for where value of $v_{rate}$ comes from.
 }
 
-\report{
+\report{7.
   Usually, vaccine efficacy = 1 implies the vaccine completely blocks transmission and 0 implies no effect. In model 2 the definition of vaccine efficacy (lines 200-205 and Eq 14) implies the opposite. I suggest re-parameterising the model, or renaming the variable. For what its worth, models 1 and 3 seem to follow the usual convention.
 }
 
-\report{
+\report{8.
   I found the commentary on comparing fitted mechanistic models to a (statistical) benchmark model to be informative and helpful. I was wondering if the authors had any comments on whether (or not) to directly compare the AIC values of the different fitted models directly. Am I right in thinking this should be possible for models 2 and 3 given (I think) they are fitted to the same data? Model 1 is fitted to a different data set, which I understand makes such a comparison impossible.
 }
 
-\report{
+\TODO{This is right, as long as there are not any initialization issues...}
+
+\report{9. 
   Lines 308-309: Isn't this a log-linear trend in the transmission rate?
 }
 
-\report{
+\report{10.
   While the data support a linear trend at the $95\%$ confidence level, it's worth commenting on the magnitude of the trend, e.g. the total reduction in $\beta(t)$ over the period of study.
 }
 
-\report{
+\report{11.
   I might have misunderstood it slightly, but I don't entirely follow the reasoning of lines 340-346. It seems that two different claims are being made: A) the model can’t identify which mechanism underlies a trend in $\beta(t)$ and B) the model can't definitively state there is a trend in $\beta(t)$ compared with some other time-varying parameter (e.g. reporting probability). For model 1, I agree with the authors that claims A and B are valid. What I take issue with is the final statement, which seems to be stronger and apply to both claims and mechanistic models more generally: ``we argue that a decreasing transmission rate is a plausible way to explain this, but the incidence data themselves do not provide enough information to pin down the mechanism." I agree that the ``incidence data themselves" (which I take to imply ``without additional covariates data") make claim A valid regardless of the model. However, I don’t think claim B holds regardless of the model. By changing model 1 to include time variation in the reporting rate I don't see \emph{a priori} why the ``the incidence data themselves" might not provide enough information to distinguish between time variation in transmission compared with time variation in reporting without the need for additional data. The deficiency is in model 1 rather than the information content of the data. I suggest the authors rework the paragraph to make the reasoning clearer.
 }
 
-\report{
-  Lines 53-56: I push back against this point. The models assume an exponential distribution for vaccine-derived immunity. Assuming a mean duration of 10 years, the proportion of individuals who remain immune 9 years after vaccination is . Even for much larger durations of immunity a non-negligible fraction of the population will lose immunity after 9 years, e.g. . I therefore don't expect values for the duration of immunity around 10 years to ``effectively result in the same model dynamics".
+Our views align with the referee's comments, and we have rewritten the article to make this clearer.
+
+WE COULD ADD THE SUBMITTED PDF TO THE REVISION REPO SO WE CAN CHECK LINE NUMBERS.
+
+
+\report{12.  [I THINK THIS MEANS LINES 553-556, ASSUMING THE NUMBERING MATCHES]
+  Lines 53-56: I push back against this point. The models assume an exponential distribution for vaccine-derived immunity. Assuming a mean duration of 10 years, the proportion of individuals who remain immune 9 years after vaccination is . Even for much larger durations of immunity a non-negligible fraction of the population will lose immunity after 9 years, e.g. $e^{-9/10}\approx 0.41$. I therefore don't expect values for the duration of immunity around 10 years to ``effectively result in the same model dynamics".
 }
+
+The qualitative comparison we had in mind was the regime with short immunity where many people become infected multiple times during the ten year epidemic, allowing multiple epidemic peaks due to susceptible replenishment.
+\TODO{We have reworded the sentence to avoid making too strong a claim about 10yr immunity being a precise point where the dynamics transition to a regime where reinfection events become negligible.}
+
 
 \report{
   \textbf{\underline{Discussion}}
 
-In contrast with the introduction, which almost exclusively focuses on cholera in Haiti, the discussion only mentions it once, briefly: ``We used the same data and models, and even much of the same code, as Lee et al. [1], and yet ended up with drastically different conclusions." It would help the reader to have those discrepancies summarised. It would be helpful to summarise the recommendations the authors make attempting to fit mechanistic models to time series data (even as a list). Along similar lines, it would be helpful to present a more concise summary of what the ``more accurate policy evaluations" found by using the approaches outlined in this study.
+13. In contrast with the introduction, which almost exclusively focuses on cholera in Haiti, the discussion only mentions it once, briefly: ``We used the same data and models, and even much of the same code, as Lee et al. [1], and yet ended up with drastically different conclusions." It would help the reader to have those discrepancies summarised. It would be helpful to summarise the recommendations the authors make attempting to fit mechanistic models to time series data (even as a list). Along similar lines, it would be helpful to present a more concise summary of what the ``more accurate policy evaluations" found by using the approaches outlined in this study.
 }
 
 \report{
