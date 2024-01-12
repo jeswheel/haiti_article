@@ -96,7 +96,7 @@ for (pp in prof_params) {
   } else {
     prof_cols <- matrix(rep(prof_values, each = nprof), ncol = 1)
     colnames(prof_cols) <- pp
-    tmp_pars[pp] <- prof_values
+    tmp_pars[, pp] <- prof_values
   }
 
   # Unit-lower bounds
