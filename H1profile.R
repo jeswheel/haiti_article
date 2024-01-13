@@ -18,13 +18,13 @@ library(tidyverse)
 # library(data.table)
 library(haitipkg)
 
-RUN_LEVEL <- 1
+RUN_LEVEL <- 2
 
-nprof      <- switch(RUN_LEVEL, 2, 14, 20)
-NMIF       <- switch(RUN_LEVEL, 5, 100, 200)
-NP         <- switch(RUN_LEVEL, 50, 1000, 1000)
-NP_EVAL    <- switch(RUN_LEVEL, 100, 5000, 10000)
-NREPS_EVAL <- switch(RUN_LEVEL, 3, 6, 10)
+nprof      <- switch(RUN_LEVEL,  2,    14, 20)
+NMIF       <- switch(RUN_LEVEL,  5,   100, 200)
+NP         <- switch(RUN_LEVEL,  50, 1000, 1000)
+NP_EVAL    <- switch(RUN_LEVEL, 100, 2500, 10000)
+NREPS_EVAL <- switch(RUN_LEVEL,   3,   10, 10)
 COOLING    <- 0.5
 
 # Create Experiment Registry ----------------------------------------------
@@ -222,8 +222,7 @@ addAlgorithm(name = 'fitMod', fun = fit_model)
 pdes <- list('profile' = data.frame(i = 1:nrow(final_pars)))
 ades <- list(
   'fitMod' = data.frame(
-    nbpf = NBPF, np = NP, spat_regression = SPAT_REGRESSION,
-    np_eval = NP_EVAL, nreps_eval = NREPS_EVAL, cooling = COOLING
+    nmif = NMIF, np = NP, np_eval = NP_EVAL, nreps_eval = NREPS_EVAL, cooling = COOLING
   )
 )
 
@@ -231,8 +230,13 @@ addExperiments(prob.designs = pdes, algo.designs = ades)
 
 # Submit Jobs -------------------------------------------------------------
 
-resources1 <- list(account = 'stats_dept1', walltime = '10:00', memory = '1000m', ncpus = 1)
-# resources1 <- list(account = 'stats_dept1', walltime = '50:00', memory = '5000m', ncpus = 1)
+# resources1 <- list(account = 'stats_dept1', walltime = '10:00', memory = '1000m', ncpus = 1)
+resources1 <- list(account = 'stats_dept1', walltime = '50:00', memory = '5000m', ncpus = 1)
 
-# submitJobs(resources = resources1)
-submitJobs(ids = 1, resources = resources1)
+submitJobs(
+   data.table(
+      job.id = 1:nrow(final_pars), 
+      chunk = 1:(round(nrow(final_pars) / 2))
+   ), resources = resources1
+)
+# submitJobs(ids = 1, resources = resources1)
