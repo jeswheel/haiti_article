@@ -15,7 +15,7 @@
 
 library(batchtools)
 library(tidyverse)
-# library(data.table)
+library(data.table)
 library(haitipkg)
 
 RUN_LEVEL <- 2
