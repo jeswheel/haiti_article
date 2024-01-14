@@ -26,12 +26,12 @@ NP <- switch(RUN_LEVEL, 50, 750, 1000)
 NP_EVAL <- switch(RUN_LEVEL, 100, 1000, 2000)
 NREPS_EVAL <- switch(RUN_LEVEL, 3, 6, 10)
 SPAT_REGRESSION <- 0.05
-COOLING <- 0.50
+COOLING <- 0.4
 
 # Create Experiment Registry ----------------------------------------------
 
 reg <- makeExperimentRegistry(
-  file.dir = paste0('model3/profileReg_RL', RUN_LEVEL, '_v3'),
+  file.dir = paste0('model3/profileReg_RL', RUN_LEVEL, '_v4'),
   seed = 739164,
   packages = c("spatPomp", 'haitipkg', 'pomp')
 )
@@ -63,21 +63,21 @@ prof_vars <- c()
 for (pp in prof_params) {
 
   if (pp == "mu_B") {
-    prof_values <- seq(300, 700, length.out = 25)
+    prof_values <- seq(200, 650, length.out = 25)
   } else if (pp == 'XthetaA') {
-    prof_values <- seq(0.03, 0.25, length.out = 21)
+    prof_values <- seq(0.025, 0.25, length.out = 21)
   } else if (pp == 'thetaI') {
-    prof_values <- seq(2.5e-05, 1e-04, length.out = 21)
+    prof_values <- seq(4e-05, 1.75e-04, length.out = 21)
   } else if (pp == 'lambdaR') {
-    prof_values <- seq(0.5, 3.2, length.out = 15)
+    prof_values <- seq(1, 3.5, length.out = 21)
   } else if (pp == 'r') {
-    prof_values <- seq(0.5, 1.75, length.out = 16)
+    prof_values <- seq(0.5, 1.5, length.out = 21)
   } else if (pp == 'std_W') {
-    prof_values <- seq(0.02, 0.04, length.out = 25)
+    prof_values <- seq(0.025, 0.05, length.out = 25)
   } else if (pp == 'epsilon') {
-    prof_values <- seq(0.65, 0.99, length.out = 20)
+    prof_values <- seq(0.8, 0.999, length.out = 20)
   } else if (pp == 'k') {
-    prof_values <- seq(70, 175, length.out = 25)
+    prof_values <- seq(30, 120, length.out = 25)
   }
 
   tmp_pars <- matrix(
@@ -165,9 +165,9 @@ for (pp in prof_params) {
     "thetaI" = 2.5e-05,
     "lambdaR" = 0.5,
     "r" = 0.5,
-    "std_W" = 0.02,
-    "epsilon" = 0.65,
-    "k" = 70
+    "std_W" = 0.025,
+    "epsilon" = 0.8,
+    "k" = 30
   )
 
   shared_upper_bounds <- c(
@@ -176,9 +176,9 @@ for (pp in prof_params) {
     "thetaI" = 1e-04,
     "lambdaR" = 3.5,
     "r" = 1.75,
-    "std_W" = 0.04,
+    "std_W" = 0.05,
     "epsilon" = 0.99,
-    "k" = 175
+    "k" = 120
   )
 
   est_u_names <- names(unit_lower_bounds)
@@ -273,15 +273,15 @@ fit_model <- function(
     if (x == instance$prof_var || gsub("[[:digit:]]+$", "", x) == instance$prof_var) {
       return(0)
     } else if (gsub("[[:digit:]]+$", "", x) %in% shared_param_names) {
-      return(0.01)
+      return(0.005)
     } else if (x %in% paste0(rep(c("aHur", 'hHur'), each = 2), c(3, 9))) {
-      return(expression(ifelse(time >= 2016.754 & time <= 2017, 0.015, 0)))
+      return(expression(ifelse(time >= 2016.754 & time <= 2017, 0.01, 0)))
     } else if (x %in% c("Iinit3", "Iinit4")) {
-      return(expression(ivp(0.25)))
+      return(expression(ivp(0.15)))
     } else if (grepl('^foi_add[[:digit:]]+$', x)) {
-      return(0.015)
+      return(0.0075)
     } else if (grepl('^betaB[[:digit:]]+$', x)) {
-      return(0.01)
+      return(0.005)
     } else {
       return(0)
     }
@@ -322,7 +322,7 @@ addExperiments(prob.designs = pdes, algo.designs = ades)
 # Submit Jobs -------------------------------------------------------------
 
 # resources1 <- list(account = 'stats_dept1', walltime = '10:00', memory = '5000m', ncpus = 1)
-resources1 <- list(account = 'stats_dept1', walltime = '2:00:00', memory = '5000m', ncpus = 1)
+resources1 <- list(account = 'stats_dept1', walltime = '2:30:00', memory = '5000m', ncpus = 1)
 
 submitJobs(resources = resources1)
 # submitJobs(ids = 1, resources = resources1)
