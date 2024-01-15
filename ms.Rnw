@@ -165,28 +165,6 @@
 \def\lik{L}
 \def\loglik{\ell}
 
-%%%%%% EDITING MACROS %%%%%%%%%
-% orange for EI
-\definecolor{orange}{rgb}{1,0.5,0}
-\newcommand\ei[2]{\sout{#1} \textcolor{orange}{#2}}
-\newcommand\eic[1]{\textcolor{orange}{[#1]}}
-% green for JW
-\definecolor{green}{rgb}{0,0.5,0}
-\newcommand\jw[2]{\sout{#1} \textcolor{green}{#2}}
-\newcommand\jwc[1]{\textcolor{green}{[#1]}}
-% purple for JJ
-\definecolor{purple}{rgb}{0.5,0,1}
-\newcommand\jj[2]{\sout{#1} \textcolor{purple}{#2}}
-\newcommand\jjc[1]{\textcolor{purple}{[#1]}}
-% cyan for AR
-\definecolor{cyan}{rgb}{0,.5,.5}
-\newcommand\ar[2]{\sout{#1} \textcolor{cyan}{#2}}
-\newcommand\arc[1]{\textcolor{cyan}{#1}}
-% light brown for KT
-\definecolor{lightbrown}{rgb}{0.5,0.5,0}
-\newcommand\kt[2]{\sout{#1} \textcolor{lightbrown}{#2}}
-\newcommand\ktc[1]{\textcolor{lightbrown}{#1}}
-
 \newcolumntype{t}{>{\tiny}c}
 
 \begin{document}
@@ -531,9 +509,10 @@ These decisions should be informed by data on the epidemic as well as current un
 Such decisions can be posed as statistical questions about scientifically motivated dynamic models.
 Thus, we encounter the methodological task of building credible, data-informed decisions based on stochastic, partially observed, nonlinear dynamic models.
 This necessitates addressing the tradeoff between biological fidelity and model simplicity, and the reality of misspecification for models at all levels of complexity.
-As a case study, we consider the 2010-2019 cholera epidemic in Haiti.
-We study three dynamic models developed by expert teams to advise on vaccination policies.
-We assess previous methods used for fitting and evaluating these models, and we develop data analysis strategies leading to improved statistical fit.
+\ei{I'VE RE-WRITTEN HERE, LOOKING TO BE MORE SPECIFIC ABOUT THE GOALS AND CONTRIBUTION OF THE PAPER.} 
+We assess current methodological approaches to these issues via a case study of the 2010-2019 cholera epidemic in Haiti.
+We consider three dynamic models developed by expert teams to advise on vaccination policies.
+We evaluate previous methods used for fitting these models, and we demonstrate modified data analysis strategies leading to improved statistical fit.
 Specifically, we present approaches to diagnosis of model misspecification, development of alternative models, and computational improvements in optimization, in the context of likelihood-based inference on nonlinear dynamic systems.
 Our workflow is reproducible and extendable, facilitating future investigations of this disease system.
 

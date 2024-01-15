@@ -1,10 +1,5 @@
 \documentclass[11pt]{article}
 
-\input{../edits.tex}
-%\usepackage[sectionbib]{natbib}
-
-%\usepackage{xr}
-%\externaldocument{../ms}
 
 \renewcommand\thefigure{L-\arabic{figure}}
 \renewcommand\thetable{L-\arabic{table}}
@@ -24,6 +19,12 @@
 \usepackage{natbib}
  \usepackage{url}
 \usepackage{color}
+
+\input{../edits.tex}
+%\usepackage[sectionbib]{natbib}
+
+%\usepackage{xr}
+%\externaldocument{../ms}
 
 %\newcommand\ifLetter[2]{{#1}}
 
@@ -266,6 +267,38 @@ While the arguments provided throughout the article are well-articulated, there 
 In various passages of this paper, it is hinted that modellers should refrain from deterministic models and instead opt for more realistic stochastic representations. While the critique of ODE models is valid, the shift to stochastic structures is not a free choice. For example, introducing extra-demographic variability adds one additional parameter (infinitesimal variance). In ODE models, one extra parameter can lead to unidentifiability, and there's no apparent reason why this would differ in a stochastic version. Moreover, transitioning to stochastic models involves abandoning well-established MCMC algorithms in favour of methods still in development. Therefore, modellers should not assume that more realistic models with additional parameters are necessarily better without proper caution. In my experience, diagnosing unidentifiability is easier in ODE models than in POMP structures. Hence, there is a trade-off between benefits and costs.
 }
 
+The referee raises several points in this paragraph, and we consider them one at a time.
+
+We agree that adding to model complexity has costs, including loss of identifability, AIC and other formal statistical methods can assess whether the additional complexity is justified by a sufficiently large improvement of statistical fit. Identifiability and model simplicity have practical scientific value which goes beyond their statistical role in reducing generalization error and hence improving out-of-fit predictions. This is a variation on the issue of "statistical significance versus practical significance" familiar from introductory statistics textbooks. 
+HOW DOES THIS PLAY OUT IN THE MS? HOW DO WE CLARIFY IT?
+
+Moving from an ODE model to a stochastic model may not involve any additional parameters, if only demographic stochasticity is included.
+Generally, it is advisable to consider the possibility of over-dispersed variation on the transmission rate \cite{breto09,he10} leading to one extra parameter compared to a deterministic model.
+In the context of cholera dynamics, \cite{lemaitre19} found a substantial improvement in model fit by including stochasticity, involving one over-dispersion parameter.
+stocks20 found similar results, favoring a stochastic dynamic model with over-dispersion, when investigating transmission dynamics of a different enteric pathogen, rotavirus.
+In other contexts, king15 noted various scientific advantages for including stochasticity in the model; it is undoubtedly part of the biological dynamics, and its omission can lead to over-confident predictions.
+In our study, we find that the deterministic model (model 2) has poor statistical fit.
+This can lead to a risk of identifying spurious scientific phenomena: addition deterministic complexity added to the model may help to describe unmodeled stochastic phenomena present in the data, and may therefore spuriously be assessed as a highly statistically significant model improvement.
+
+The decision on whether to choose Markov chain Monte Carlo (MCMC) methods is not fully aligned with the decision on whether to include stochasticity in the model.
+In our literature review, of the 9 previous Haiti cholera investigations including stochastic dynamic models \cite{tuite11,mukandavire13,lewnard16,kunkel17,sallah17,azman12,kuhn14,azman15,lee20}, four of them carried out inference via MCMC \cite{lewnard16,sallah17,azman12,kuhn14}.
+WHAT SORTS OF MCMC ALGORITHMS DID THEY USE?
+We agree with the referee that MCMC is more routine for determinstic models than for stochastic models, and advanced MCMC methods such as Hamiltonian Monte Carlo become more readily applicable. 
+Sequential Monte Carlo (SMC) was used for only two of the investigations in our literature review \cite{lee20,azman15}.
+In principle, MCMC methods can be applied for inference in over-dispersed stochastic dynamic models via so-called particle MCMC (PMCMC) \cite{andrieu10}.
+In practice, these models have been fitted by maximum likelihood, some examples including \cite{lemaitre19,fox22,molodecky23,pons-salort18,subramanian20,stocks20}.
+In this case, identifiability is generally addressed via profile likelihood methods.
+
+We have included some additional sentences to address these comments in the discussion section of the revision.
+TODO
+
+We acknowledge the existence of useful mathematical tools for studying ODE models, their identifiability and stability and limiting properties.
+Stochastic dynamic models can be reduced to a deterministic model (a so-called determinsitic skeleton) which can usefully be analyzed to help understand the stochastic dynamics \cite{coulson04}.
+We therefore encourage the use of ODE analysis tools whether or not a stochastic model is adopted.
+We have not followed that approach in the current manuscript.
+
+In summary, maximum likelihood (ML) inference via SMC nowaways provides a fairly well estabilished alternative to Bayesian MCMC inference. ML appears to be methodologically more convenient for stochastic dynamic models with overdispersion. When analyzing long epidemiological datasets, this stochasticity appears to be important for statistical model fit. That alone is not enough to show that models with overdispersed stochastic dynamics are scientifically preferable. However, discovery of a  model feature which generates a large improvement in statistcal fit from adding one more parameter is typically treated as scientific evidence favoring the inclusion of that feature in a scientific model for the phenomenon.
+
 \report{
 Moreover, Monte Carlo methods, such as the Particle Filter and, by extension, Iterated Filtering, aim to approximate integrals (the posterior or filtering distributions). However, one cannot take for granted that these methods provide accurate descriptions of these targets without proper validation. In more ‘traditional’ MCMC methods, diagnostics like the potential scale reduction factor and effective sample size play a crucial role in the inference process. Unsatisfactory values of these diagnostics render inferences unreliable, often necessitating model reformulation. In contrast, in the literature on POMP models (including this paper), diagnostics are tangentially mentioned. Users (like me) sometimes face uncertainty about whether the lack of fit is due to model misspecification or problems with the Monte Carlo algorithm exploring the parameter space.
 
@@ -364,7 +397,7 @@ A hyphen has been added for all instances of the phrase: ``model-based".
   19. Line 631. Since Model 1 accounts for infections at the national level, how are scenarios V1 and V2 handled?
 }
 
-\bibliography{../bib-haiti.bib}
+\bibliography{../bib-haiti.bib,../bib-lit.bib}
 
 \end{document}
 
