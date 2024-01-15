@@ -1,6 +1,8 @@
 \documentclass[10pt,letterpaper]{article}
 \usepackage[top=0.85in,left=2.75in,footskip=0.75in]{geometry}
 
+\input{edits.tex}
+
 % amsmath and amssymb packages, useful for mathematical formulas and symbols
 \usepackage{amsmath,amssymb}
 
@@ -24,7 +26,7 @@
 \DisableLigatures[f]{encoding = *, family = * }
 
 % color can be used to apply background shading to table cells only
-\usepackage[table]{xcolor}
+% \usepackage[table]{xcolor}
 
 % array package and thick rules for tables
 \usepackage{array}
@@ -509,7 +511,7 @@ These decisions should be informed by data on the epidemic as well as current un
 Such decisions can be posed as statistical questions about scientifically motivated dynamic models.
 Thus, we encounter the methodological task of building credible, data-informed decisions based on stochastic, partially observed, nonlinear dynamic models.
 This necessitates addressing the tradeoff between biological fidelity and model simplicity, and the reality of misspecification for models at all levels of complexity.
-\ei{I'VE RE-WRITTEN HERE, LOOKING TO BE MORE SPECIFIC ABOUT THE GOALS AND CONTRIBUTION OF THE PAPER.} 
+\ei{I'VE RE-WRITTEN HERE, LOOKING TO BE MORE SPECIFIC ABOUT THE GOALS AND CONTRIBUTION OF THE PAPER.}
 We assess current methodological approaches to these issues via a case study of the 2010-2019 cholera epidemic in Haiti.
 We consider three dynamic models developed by expert teams to advise on vaccination policies.
 We evaluate previous methods used for fitting these models, and we demonstrate modified data analysis strategies leading to improved statistical fit.
@@ -542,7 +544,7 @@ What diagnostic tests and model variations can and should be considered in the c
 What are the possible trade-offs of increasing model complexity, such as the inclusion of interactions across spatial units?
 
 This case study investigates the use of dynamic models and spatiotemporal data to inform public health policy in the context of the cholera outbreak in Haiti, which started in 2010.
-Various dynamic models were developed to study this outbreak: searching PubMed with keywords ``Haiti, cholera, model'' we obtained 20 deterministic models \cite{kirpich16,kirpich17,andrews11,botelho21,fitzgibbon20,eisenberg13,rinaldo12,chao11,date11,lin19,collins21,akman15,trevisin22,mavian20,collins14,kelly16,capone14,bengtsson15,mari15,gatto12} and 8 stochastic models \cite{tuite11,mukandvire13,lewnard16,kunke17,sallah17,azman12,kuhn14,azman15}. 
+Various dynamic models were developed to study this outbreak: searching PubMed with keywords ``Haiti, cholera, model'' we obtained 20 deterministic models \cite{kirpich16,kirpich17,andrews11,botelho21,fitzgibbon20,eisenberg13,rinaldo12,chao11,date11,lin19,collins21,akman15,trevisin22,mavian20,collins14,kelly16,capone14,bengtsson15,mari15,gatto12} and 8 stochastic models \cite{tuite11,mukandvire13,lewnard16,kunke17,sallah17,azman12,kuhn14,azman15}.
 Here we focus on a multi-group modeling exercise by Lee et al.~\cite{lee20} in which four expert modeling teams developed models to the same dataset with the goal of comparing conclusions on the feasibility of eliminating cholera by a vaccination campaign.
 Model~1 is stochastic and describes cholera at the national level;
 Model~2 is deterministic with spatial structure, and includes transmission via contaminated water;
@@ -1599,7 +1601,7 @@ Calibrating model parameters to observed data does not guarantee that the result
 However, the congruency between the model and observed data serves as a proxy for the congruency between the model and the true underlying dynamic system.
 As such, it is desirable to obtain the best possible fit of the proposed mechanistic structure to the observed data.
 
-In this article we follow \cite{lee20) by calibrating the parameters of each of our models using maximizing the likelihood, as described in Eq.~\myeqref{eq:likedef}.
+In this article we follow \cite{lee20} by calibrating the parameters of each of our models using maximizing the likelihood, as described in Eq.~\myeqref{eq:likedef}.
 The likelihood for each of the fitted models---and the corresponding AIC values for model comparisons that include an adjustment for the number of calibrated parameters---is provided in Table~\ref{tab:likes}.
 In the following subsections we describe in detail our approach to calibrating the three proposed mechanistic models to observed cholera incidence data.
 \eic{I'VE STARTED TO PUT IN SOME DISCUSSION OF BAYESIAN METHODS HERE, THOUGH IT COULD ALSO GO IN THE DISCUSSION}
