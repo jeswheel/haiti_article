@@ -30,7 +30,7 @@ COOLING    <- 0.5
 # Create Experiment Registry ----------------------------------------------
 
 reg <- makeExperimentRegistry(
-  file.dir = paste0('model1/profileReg_RL', RUN_LEVEL, '_v1'),
+  file.dir = paste0('model1/profileReg_RL', RUN_LEVEL, '_v2'),
   seed = 739164,
   packages = c("spatPomp", 'haitipkg', 'pomp')
 )
@@ -66,19 +66,19 @@ prof_vars <- c()
 for (pp in prof_params) {
 
   if (pp == "betat") {
-    prof_values <- seq(-0.15, 0.05, length.out = 30)
+    prof_values <- seq(-0.15, 0.05, length.out = 31)
   } else if (pp == 'tau_epi') {
-    prof_values <- seq(180, 1800, length.out = 30)
+    prof_values <- seq(180, 1800, length.out = 31)
   } else if (pp == 'tau_end') {
-    prof_values <- seq(50, 1800, length.out = 30)
+    prof_values <- seq(50, 1600, length.out = 30)
   } else if (pp == 'rho') {
-    prof_values <- seq(0.1, 1, length.out = 30)
+    prof_values <- seq(0.25, 1, length.out = 30)
   } else if (pp == 'nu') {
-    prof_values <- seq(0.94, 1, length.out = 20)
+    prof_values <- seq(0.94, 1, length.out = 21)
   } else if (pp == 'sig_sq_epi') {
-    prof_values <- seq(0.075, 0.125, length.out = 30)
+    prof_values <- seq(0.075, 0.125, length.out = 31)
   } else if (pp == 'sig_sq_end') {
-    prof_values <- seq(0.05, 0.2, length.out = 30)
+    prof_values <- seq(0.05, 0.25, length.out = 30)
   } else if (pp == 'E_0') {
     prof_values <- seq(10 / 10911819, 5000 / 10911819, 100 / 10911819)
   } else if (pp == 'I_0') {
@@ -97,6 +97,10 @@ for (pp in prof_params) {
   prof_cols <- matrix(rep(prof_values, each = nprof), ncol = 1)
   colnames(prof_cols) <- pp
   tmp_pars[, pp] <- prof_values
+
+  if (pp == "E_0" || pp == 'I_0') {
+    tmp_pars[, 'S_0'] <- unname(1 - tmp_pars[, 'E_0'] - tmp_pars[, 'I_0'])
+  }
 
   bounds <- tibble::tribble(
     ~param, ~lower, ~upper,
@@ -133,6 +137,10 @@ for (pp in prof_params) {
   )
 
   guesses <- dplyr::bind_cols(prof_cols, guesses_tmp)
+
+  S_0 <- matrix(unname(1 - guesses[, 'I_0'] - guesses[, 'E_0']), ncol = 1)
+  colnames(S_0) <- 'S_0'
+  guesses <- dplyr::bind_cols(guesses, S_0)
 
   # We need to add fixed parameters
   all_params <- coef(h1)
@@ -219,7 +227,7 @@ addAlgorithm(name = 'fitMod', fun = fit_model)
 
 # Completing the experiment -----------------------------------------------
 
-pdes <- list('profile' = data.frame(i = 1:nrow(final_pars)))
+pdes <- list('profile' = data.frame(i = 1:nrow(final_pars), prof_var = prof_vars))
 ades <- list(
   'fitMod' = data.frame(
     nmif = NMIF, np = NP, np_eval = NP_EVAL, nreps_eval = NREPS_EVAL, cooling = COOLING
@@ -231,11 +239,11 @@ addExperiments(prob.designs = pdes, algo.designs = ades)
 # Submit Jobs -------------------------------------------------------------
 
 # resources1 <- list(account = 'stats_dept1', walltime = '10:00', memory = '1000m', ncpus = 1)
-resources1 <- list(account = 'stats_dept1', walltime = '50:00', memory = '5000m', ncpus = 1)
+resources1 <- list(account = 'stats_dept1', walltime = '30:00', memory = '5000m', ncpus = 1)
 
 submitJobs(
    data.table(
-      job.id = 1:nrow(final_pars), 
+      job.id = 1:nrow(final_pars),
       chunk = 1:(round(nrow(final_pars) / 2))
    ), resources = resources1
 )
