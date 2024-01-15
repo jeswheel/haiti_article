@@ -26,12 +26,12 @@ NP <- switch(RUN_LEVEL, 50, 750, 1000)
 NP_EVAL <- switch(RUN_LEVEL, 100, 1000, 2000)
 NREPS_EVAL <- switch(RUN_LEVEL, 3, 6, 10)
 SPAT_REGRESSION <- 0.05
-COOLING <- 0.3
+COOLING <- 0.25
 
 # Create Experiment Registry ----------------------------------------------
 
 reg <- makeExperimentRegistry(
-  file.dir = paste0('model3/profileReg_RL', RUN_LEVEL, '_v4'),
+  file.dir = paste0('model3/profileReg_RL', RUN_LEVEL, '_v5'),
   seed = 739164,
   packages = c("spatPomp", 'haitipkg', 'pomp')
 )
@@ -56,7 +56,10 @@ est_param_names <- c(
   unit_specific_names, shared_param_names
 )
 
-prof_params <- shared_param_names
+# prof_params <- shared_param_names
+prof_params <- c(
+  "epsilon", "k", "lambdaR", "r", "thetaI", "XthetaA"
+  )
 
 final_pars <- best_pars
 prof_vars <- c()
@@ -65,19 +68,19 @@ for (pp in prof_params) {
   if (pp == "mu_B") {
     prof_values <- seq(200, 650, length.out = 25)
   } else if (pp == 'XthetaA') {
-    prof_values <- seq(0.025, 0.25, length.out = 21)
+    prof_values <- seq(0.005, 0.1, length.out = 21)
   } else if (pp == 'thetaI') {
-    prof_values <- seq(4e-05, 1.75e-04, length.out = 21)
+    prof_values <- seq(0.000075, 0.00016, length.out = 20)
   } else if (pp == 'lambdaR') {
-    prof_values <- seq(1, 3.5, length.out = 21)
+    prof_values <- seq(1, 3, length.out = 20)
   } else if (pp == 'r') {
-    prof_values <- seq(0.5, 1.5, length.out = 21)
+    prof_values <- seq(0.15, 1, length.out = 21)
   } else if (pp == 'std_W') {
     prof_values <- seq(0.025, 0.05, length.out = 25)
   } else if (pp == 'epsilon') {
-    prof_values <- seq(0.8, 0.999, length.out = 20)
+    prof_values <- seq(0.85, 0.9999, length.out = 20)
   } else if (pp == 'k') {
-    prof_values <- seq(30, 120, length.out = 25)
+    prof_values <- seq(10, 95, length.out = 25)
   }
 
   tmp_pars <- matrix(
@@ -160,25 +163,25 @@ for (pp in prof_params) {
   )
 
   shared_lower_bounds <- c(
-    "mu_B" = 350,
-    "XthetaA" = 0.02,
+    "mu_B" = 450,
+    "XthetaA" = 0.01,
     "thetaI" = 2.5e-05,
-    "lambdaR" = 0.5,
-    "r" = 0.5,
+    "lambdaR" = 0.75,
+    "r" = 0.25,
     "std_W" = 0.025,
     "epsilon" = 0.8,
     "k" = 30
   )
 
   shared_upper_bounds <- c(
-    "mu_B" = 750,
-    "XthetaA" = 0.25,
+    "mu_B" = 700,
+    "XthetaA" = 0.15,
     "thetaI" = 1e-04,
     "lambdaR" = 3.5,
-    "r" = 1.75,
-    "std_W" = 0.05,
+    "r" = 1.25,
+    "std_W" = 0.04,
     "epsilon" = 0.99,
-    "k" = 120
+    "k" = 110
   )
 
   est_u_names <- names(unit_lower_bounds)
