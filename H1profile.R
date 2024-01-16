@@ -18,19 +18,19 @@ library(tidyverse)
 library(data.table)
 library(haitipkg)
 
-RUN_LEVEL <- 2
+RUN_LEVEL <- 3
 
-nprof      <- switch(RUN_LEVEL,  2,    14, 20)
+nprof      <- switch(RUN_LEVEL,  2,    14, 25)
 NMIF       <- switch(RUN_LEVEL,  5,   100, 200)
-NP         <- switch(RUN_LEVEL,  50, 1000, 1000)
-NP_EVAL    <- switch(RUN_LEVEL, 100, 2500, 10000)
-NREPS_EVAL <- switch(RUN_LEVEL,   3,   10, 10)
+NP         <- switch(RUN_LEVEL,  50, 1000, 1500)
+NP_EVAL    <- switch(RUN_LEVEL, 100, 2500, 5000)
+NREPS_EVAL <- switch(RUN_LEVEL,   3,   10, 15)
 COOLING    <- 0.5
 
 # Create Experiment Registry ----------------------------------------------
 
 reg <- makeExperimentRegistry(
-  file.dir = paste0('model1/profileReg_RL', RUN_LEVEL, '_v3'),
+  file.dir = paste0('model1/profileReg_RL', RUN_LEVEL, '_v1'),
   seed = 739164,
   packages = c("spatPomp", 'haitipkg', 'pomp')
 )
@@ -39,75 +39,71 @@ reg <- makeExperimentRegistry(
 
 set.seed(665544)
 
-# Read in previous best results
-haiti1_fit <- readRDS("model1/run_level_3/haiti1_fit.rds")
-best_pars <- haiti1_fit %>%
-  filter(ll == max(ll)) %>%
-  select(-ll, -ll.se) %>%
-  unlist()
-
 h1 <- haiti1_joint()
-coef(h1) <- best_pars
 
 prof_params <- c(
-  # 'betat',
-  # 'tau_epi',
-  # 'tau_end',
-  # 'rho',
-  # 'nu',
-  # 'sig_sq_epi',
-  # 'sig_sq_end',
+  'betat',
+  'tau_epi',
+  'tau_end',
+  'rho',
+  'nu',
+  'sig_sq_epi',
+  'sig_sq_end',
   'E_0',
-  'I_0'
+  'I_0',
+  'beta1',
+  'beta2',
+  'beta3',
+  'beta4',
+  'beta5',
+  'beta6'
 )
 
-final_pars <- best_pars
+final_pars <- coef(h1)
 prof_vars <- c()
 for (pp in prof_params) {
 
   if (pp == "betat") {
-    prof_values <- seq(-0.15, 0.05, length.out = 31)
+    prof_values <- seq(-0.15, 0.05, length.out = 30)
   } else if (pp == 'tau_epi') {
-    prof_values <- seq(180, 1800, length.out = 31)
+    prof_values <- seq(150, 2000, length.out = 30)
   } else if (pp == 'tau_end') {
-    prof_values <- seq(50, 1600, length.out = 30)
+    prof_values <- seq(20, 1800, length.out = 30)
   } else if (pp == 'rho') {
-    prof_values <- seq(0.25, 1, length.out = 30)
+    prof_values <- seq(0.18, 1, length.out = 30)
   } else if (pp == 'nu') {
-    prof_values <- seq(0.94, 1, length.out = 21)
+    prof_values <- seq(0.85, 1, 0.01)
   } else if (pp == 'sig_sq_epi') {
-    prof_values <- seq(0.075, 0.125, length.out = 31)
+    prof_values <- seq(0.08, 0.14, length.out = 30)
   } else if (pp == 'sig_sq_end') {
     prof_values <- seq(0.05, 0.25, length.out = 30)
   } else if (pp == 'E_0') {
-    prof_values <- seq(1000 / 10911819, 8000 / 10911819, 50 / 10911819)
+    prof_values <- seq(100 / 10911819, 8000 / 10911819, length.out = 30)
   } else if (pp == 'I_0') {
-    prof_values <- seq(1 / 10911819, 5000 / 10911819, 50 / 10911819)
+    prof_values <- seq(1 / 10911819, 5000 / 10911819, length.out = 30)
+  } else if (pp == 'beta1') {
+    prof_values <- seq(0.5, 2.5, length.out = 20)
+  } else if (pp == 'beta2') {
+    prof_values <- seq(0.25, 2, length.out = 20)
+  } else if (pp == 'beta3') {
+    prof_values <- seq(0.4, 2.1, length.out = 20)
+  } else if (pp == 'beta4') {
+    prof_values <- seq(0.4, 2.1, length.out = 20)
+  } else if (pp == 'beta5') {
+    prof_values <- seq(0.5, 2.5, length.out = 20)
+  } else if (pp == 'beta6') {
+    prof_values <- seq(-0.1, 2, length.out = 20)
   }
-
-  tmp_pars <- matrix(
-    rep(best_pars, length(prof_values)),
-    nrow = length(prof_values),
-    ncol = length(best_pars),
-    byrow = TRUE
-  )
-
-  colnames(tmp_pars) <- names(best_pars)
 
   prof_cols <- matrix(rep(prof_values, each = nprof), ncol = 1)
   colnames(prof_cols) <- pp
-  tmp_pars[, pp] <- prof_values
-
-  if (pp == "E_0" || pp == 'I_0') {
-    tmp_pars[, 'S_0'] <- unname(1 - tmp_pars[, 'E_0'] - tmp_pars[, 'I_0'])
-  }
 
   bounds <- tibble::tribble(
     ~param, ~lower, ~upper,
     "beta1",        1.00,  2.15,
-    "beta2",         .75,  1.75,
+    "beta2",         .50,  2.00,
     "beta3",         .75,  1.75,
-    "beta4",         .75,  1.75,
+    "beta4",         .75,  1.50,
     "beta5",        1.00,  2.10,
     "beta6",         .50,  1.50,
     "betat",       -0.15,  0.05,
@@ -118,7 +114,7 @@ for (pp in prof_params) {
     "sig_sq_epi",  0.075, 0.125,
     "sig_sq_end",   0.05,   0.2,
     "E_0", 10 / 10911819, 5000 / 10911819,
-    "I_0", 10 / 10911819, 25000 / 10911819
+    "I_0", 10 / 10911819, 20000 / 10911819
   )
 
   bounds <- bounds %>%
@@ -155,7 +151,6 @@ for (pp in prof_params) {
 
   # Combine estimated and fixed parameters, and reorder based on original order.
   guesses_all <- cbind(guesses, fixed_mat)[, names(coef(h1))]
-  guesses_all <- rbind(guesses_all, tmp_pars)[, names(coef(h1))]
   final_pars <- rbind(final_pars, guesses_all)
   prof_vars <- c(prof_vars, rep(pp, nrow(guesses_all)))
 }
@@ -239,12 +234,22 @@ addExperiments(prob.designs = pdes, algo.designs = ades)
 # Submit Jobs -------------------------------------------------------------
 
 # resources1 <- list(account = 'stats_dept1', walltime = '10:00', memory = '1000m', ncpus = 1)
-resources1 <- list(account = 'stats_dept1', walltime = '30:00', memory = '5000m', ncpus = 1)
+resources1 <- list(
+  account = 'ionides2', walltime = '2:00:00',
+  memory = '5000m', ncpus = 1
+  )
 
 submitJobs(
-   data.table(
-      job.id = 1:nrow(final_pars),
-      chunk = 1:(round(nrow(final_pars) / 2))
-   ), resources = resources1
+  data.table(
+    job.id = 1:4000,
+    chunk = 1:2000
+  ), resources = resources1
 )
+
+# submitJobs(
+#    data.table(
+#       job.id = 1:nrow(final_pars),
+#       chunk = 1:(round(nrow(final_pars) / 2))
+#    ), resources = resources1
+# )
 # submitJobs(ids = 1, resources = resources1)
