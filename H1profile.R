@@ -30,7 +30,7 @@ COOLING    <- 0.5
 # Create Experiment Registry ----------------------------------------------
 
 reg <- makeExperimentRegistry(
-  file.dir = paste0('model1/profileReg_RL', RUN_LEVEL, '_v2'),
+  file.dir = paste0('model1/profileReg_RL', RUN_LEVEL, '_v3'),
   seed = 739164,
   packages = c("spatPomp", 'haitipkg', 'pomp')
 )
@@ -50,13 +50,13 @@ h1 <- haiti1_joint()
 coef(h1) <- best_pars
 
 prof_params <- c(
-  'betat',
-  'tau_epi',
-  'tau_end',
-  'rho',
-  'nu',
-  'sig_sq_epi',
-  'sig_sq_end',
+  # 'betat',
+  # 'tau_epi',
+  # 'tau_end',
+  # 'rho',
+  # 'nu',
+  # 'sig_sq_epi',
+  # 'sig_sq_end',
   'E_0',
   'I_0'
 )
@@ -80,9 +80,9 @@ for (pp in prof_params) {
   } else if (pp == 'sig_sq_end') {
     prof_values <- seq(0.05, 0.25, length.out = 30)
   } else if (pp == 'E_0') {
-    prof_values <- seq(10 / 10911819, 5000 / 10911819, 100 / 10911819)
+    prof_values <- seq(1000 / 10911819, 8000 / 10911819, 50 / 10911819)
   } else if (pp == 'I_0') {
-    prof_values <- seq(10 / 10911819, 25000 / 10911819, 500 / 10911819)
+    prof_values <- seq(1 / 10911819, 5000 / 10911819, 50 / 10911819)
   }
 
   tmp_pars <- matrix(
