@@ -26,12 +26,12 @@ NP <- switch(RUN_LEVEL, 50, 750, 1000)
 NP_EVAL <- switch(RUN_LEVEL, 100, 1000, 2000)
 NREPS_EVAL <- switch(RUN_LEVEL, 3, 6, 10)
 SPAT_REGRESSION <- 0.05
-COOLING <- 0.25
+COOLING <- 0.3
 
 # Create Experiment Registry ----------------------------------------------
 
 reg <- makeExperimentRegistry(
-  file.dir = paste0('model3/profileReg_RL', RUN_LEVEL, '_v5'),
+  file.dir = paste0('model3/profileReg_RL', RUN_LEVEL, '_v6'),
   seed = 739164,
   packages = c("spatPomp", 'haitipkg', 'pomp')
 )
@@ -58,8 +58,8 @@ est_param_names <- c(
 
 # prof_params <- shared_param_names
 prof_params <- c(
-  "epsilon", "k", "lambdaR", "r", "thetaI", "XthetaA"
-  )
+  "XthetaA"
+)
 
 final_pars <- best_pars
 prof_vars <- c()
@@ -68,7 +68,7 @@ for (pp in prof_params) {
   if (pp == "mu_B") {
     prof_values <- seq(200, 650, length.out = 25)
   } else if (pp == 'XthetaA') {
-    prof_values <- seq(0.005, 0.1, length.out = 21)
+    prof_values <- seq(0.002, 0.125, length.out = 31)
   } else if (pp == 'thetaI') {
     prof_values <- seq(0.000075, 0.00016, length.out = 20)
   } else if (pp == 'lambdaR') {
@@ -167,10 +167,10 @@ for (pp in prof_params) {
     "XthetaA" = 0.01,
     "thetaI" = 2.5e-05,
     "lambdaR" = 0.75,
-    "r" = 0.25,
-    "std_W" = 0.025,
+    "r" = 0.2,
+    "std_W" = 0.0275,
     "epsilon" = 0.8,
-    "k" = 30
+    "k" = 25
   )
 
   shared_upper_bounds <- c(
@@ -178,10 +178,10 @@ for (pp in prof_params) {
     "XthetaA" = 0.15,
     "thetaI" = 1e-04,
     "lambdaR" = 3.5,
-    "r" = 1.25,
-    "std_W" = 0.04,
+    "r" = 1,
+    "std_W" = 0.0375,
     "epsilon" = 0.99,
-    "k" = 110
+    "k" = 80
   )
 
   est_u_names <- names(unit_lower_bounds)
