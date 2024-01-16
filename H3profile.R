@@ -31,7 +31,7 @@ COOLING <- 0.3
 # Create Experiment Registry ----------------------------------------------
 
 reg <- makeExperimentRegistry(
-  file.dir = paste0('model3/profileReg_RL', RUN_LEVEL, '_v6'),
+  file.dir = paste0('model3/profileReg_RL', RUN_LEVEL, '_v7'),
   seed = 739164,
   packages = c("spatPomp", 'haitipkg', 'pomp')
 )
@@ -58,7 +58,8 @@ est_param_names <- c(
 
 # prof_params <- shared_param_names
 prof_params <- c(
-  "XthetaA"
+  'aHur3', 'hHur3', 'aHur9', 'hHur9',
+  'Iinit3', "Iinit4", 'betaB1'
 )
 
 final_pars <- best_pars
@@ -81,6 +82,20 @@ for (pp in prof_params) {
     prof_values <- seq(0.85, 0.9999, length.out = 20)
   } else if (pp == 'k') {
     prof_values <- seq(10, 95, length.out = 25)
+  } else if (pp == 'aHur3') {
+    prof_values <- seq(0, 75, 3)
+  } else if (pp == 'aHur9') {
+    prof_values <- seq(0, 75, 3)
+  } else if (pp == 'hHur3') {
+    prof_values <- seq(0, 175, 5)
+  } else if (pp == 'hHur9') {
+    prof_values <- seq(0, 150, 5)
+  } else if (pp == 'Iinit3') {
+    prof_values <- seq(0 / best_pars['H3'], 32 / best_pars['H3'], 2 / best_pars['H3'])
+  } else if (pp == 'Iinit4') {
+    prof_values <- seq(0 / best_pars['H4'], 32 / best_pars['H4'], 2 / best_pars['H4'])
+  } else if (pp == 'betaB1') {
+    prof_values <- seq(1.75, 8, length.out = 20)
   }
 
   tmp_pars <- matrix(
@@ -104,11 +119,11 @@ for (pp in prof_params) {
 
   # Unit-lower bounds
   unit_lower_bounds <- c(
-    'betaB1' = 2.6,
+    'betaB1' = 2.5,
     'betaB2' = 9,
-    'betaB3' = 13,
-    'betaB4' = 13,
-    'betaB5' = 2.5,
+    'betaB3' = 10,
+    'betaB4' = 10,
+    'betaB5' = 2.1,
     'betaB6' = 15,
     'betaB7' = 5,
     'betaB8' = 0.4,
@@ -134,13 +149,13 @@ for (pp in prof_params) {
 
   # Unit upper-bounds
   unit_upper_bounds <- c(
-    'betaB1' = 8,
-    'betaB2' = 35,
-    'betaB3' = 50,
-    'betaB4' = 50,
-    'betaB5' = 10,
-    'betaB6' = 50,
-    'betaB7' = 20,
+    'betaB1' = 7.5,
+    'betaB2' = 30,
+    'betaB3' = 40,
+    'betaB4' = 40,
+    'betaB5' = 9,
+    'betaB6' = 45,
+    'betaB7' = 15,
     'betaB8' = 2,
     'betaB9' = 20,
     'betaB10' = 20,
@@ -312,7 +327,7 @@ addAlgorithm(name = 'fitMod', fun = fit_model)
 
 # Completing the experiment -----------------------------------------------
 
-pdes <- list('profile' = data.frame(i = 1:nrow(final_pars)))
+pdes <- list('profile' = data.frame(i = 1:nrow(final_pars), prof_var = prof_vars))
 ades <- list(
   'fitMod' = data.frame(
     nbpf = NBPF, np = NP, spat_regression = SPAT_REGRESSION,
@@ -325,7 +340,7 @@ addExperiments(prob.designs = pdes, algo.designs = ades)
 # Submit Jobs -------------------------------------------------------------
 
 # resources1 <- list(account = 'stats_dept1', walltime = '10:00', memory = '5000m', ncpus = 1)
-resources1 <- list(account = 'stats_dept1', walltime = '2:30:00', memory = '5000m', ncpus = 1)
+resources1 <- list(account = 'ionides2', walltime = '2:30:00', memory = '5000m', ncpus = 1)
 
 submitJobs(resources = resources1)
 # submitJobs(ids = 1, resources = resources1)
