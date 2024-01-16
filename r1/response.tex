@@ -351,9 +351,19 @@ A hyphen has been added for all instances of the phrase: ``model-based".
   8. Lines 209-211. In model 2, an incidence measurement is employed to configure a prevalence compartment. As the authors may know, initial values severely condition the dynamics of a model. Please explain this decision. Is it because that was the approach followed in the original formulation (Lee at al's paper)?
 }
 
+Our starting point was the formulation of \cite{lee20}.
+Judging by the referee's comment, they will not be suprised to learn that this structure led to difficulties in some situations. \TODO{}
+
 \report{
   9. Lines 245-247. Same comment as before. What’s the justification for assuming incidence measurements as the basis for prevalence states? What are the risks?
 }
+
+The cholera pathogen was recently introduced to Haiti, which facilitates the specification of initial conditions.
+The goals of inferring initial prevalence is to reduce the number of parameters.
+The risk is that the form of this assumption could have substantial effects on the dynamics, and hence on the consequences of the analysis.
+Our approaches to addressing this issue involve: (i) looking at residual diagnostic plots to assess time points at which the model is misspecified; (ii) if the initial values seem problematic, calculate the room for improvement by estimating the initial values as free parameters.  
+
+
 
 \report{
   10. Line 262. ``deterministic Model 2 is a degenerate case of a stochastic model". Please explain why or provide a reference.
@@ -367,6 +377,11 @@ A hyphen has been added for all instances of the phrase: ``model-based".
   12. Lines 343-345. This sentence is key for this paper, but it’s hard to follow: ``The robust statistical conclusion is that a model which allows for change fits better than one which does not—we argue that a decreasing transmission rate is a plausible way to explain this, but the incidence data themselves do not provide enough information to pin down the mechanism". Please rephrase.
 }
 
+This is similar to point 11 of referee 1. LET'S DISCUSS THIS. Our point is that there are many other ways one might include time-varying effects in the model, and a strongly supported conclusion should avoid ruling out untested hypotheses.  We can say that the best available model with trending parameters is statistically superior to the best available model with time-constant parameters. This frames the evidence in a way that avoids asserting clear support for any one particular way of modeling this effect.
+
+R1 mentioned the possibility of reporting rate decreasing instead. I'M TRYING TO RECALL OUR REASONING THAT MODEL 3 IN LEE ET AL OVER-EMPHASIZED THIS. APART FROM THE POSSIBILITY OF A CASE DEFINITION CHANGE, ONE MIGHT EXPECT REPORTING RATE TO INCREASE?
+
+
 \report{
   13. Line 357. ``Determining the necessary computational effort needed to maximize model likelihoods and acting accordingly" How do we determine the necessary computational effort?
 }
@@ -378,6 +393,16 @@ A hyphen has been added for all instances of the phrase: ``model-based".
 \report{
   15. Lines 513-515. Please clarify the comparison between disaggregated models and a benchmark. Let’s say I have spatial units 1 and 2, for which I have observations y1 and y2. Should I fit the disaggregated mechanistic model to y1 and y2 simultaneously (as usual) but keep a record of the individual log-likelihoods (log-lik y1 and log-lik y2). In parallel, fit the benchmark independently to y1 and y2, and then compare by log-likelihoods or information criteria by spatial unit.
 }
+
+The benchmarks we have looked at operate independently on each unit, and in this case the joint log-likelihood benchmark for units 1 and 2 is the sum of the marginal log-likelihoods.
+A simple statistical benchmark does not need to have this structure; for example, one could consider an autoregressive model including spatial dependence. 
+
+In general, a joint model for units 1 and 2 may not have well-defined individual log-likelihoods log-lik y1 and log-lik y2 that sum to the full likelihood.
+An exception arises in the case of likelihood evaluation by the block particle filter, in which conditinal log likelihoods for each block of units do sum to the total log likelihood estimate.
+If the block approximation is found to be appropriate \cite{ionides21,ionides22} then fits can be compared against an independent benchmark for each block, and then summed to compare on the entire dataset.
+
+Since the value of benchmarks is a major point in this paper, we have added these extra details in a supplementary section \TODO{}.
+
 
 \report{
   16. Line 528. Please add hyphen: ``Model-based inference".
