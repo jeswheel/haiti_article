@@ -18,7 +18,7 @@ library(tidyverse)
 # library(data.table)
 library(haitipkg)
 
-RUN_LEVEL <- 2
+RUN_LEVEL <- 3
 
 nprof <- switch(RUN_LEVEL, 2, 14, 20)
 NBPF <- switch(RUN_LEVEL, 5, 50, 100)
@@ -26,7 +26,7 @@ NP <- switch(RUN_LEVEL, 50, 750, 1000)
 NP_EVAL <- switch(RUN_LEVEL, 100, 1000, 2000)
 NREPS_EVAL <- switch(RUN_LEVEL, 3, 6, 10)
 SPAT_REGRESSION <- 0.05
-COOLING <- 0.3
+COOLING <- 0.35
 
 # Create Experiment Registry ----------------------------------------------
 
@@ -41,9 +41,8 @@ reg <- makeExperimentRegistry(
 set.seed(665544)
 
 # Read in previous best results
-haiti3_fit <- readRDS("model3/run_level_3/haiti3_fit.rds")
-best_pars <- haiti3_fit$search2$params[which.max(haiti3_fit$search2$logLiks$logLik), ]
 h3_spat <- haiti3_spatPomp()
+final_pars <- coef(h3_spat)
 
 # Create vectors for the unit and shared parameters
 unit_specific_names <- c("betaB", "foi_add", "aHur", "hHur")
@@ -52,69 +51,54 @@ shared_param_names <- c(
   "epsilon", "k"
 )
 
-est_param_names <- c(
-  unit_specific_names, shared_param_names
-)
+prof_params <- shared_param_names
+# If you wanted to profile over the six added unit-specific
+# parameters
+# prof_params <- c(
+#   shared_param_names, 'aHur3', 'hHur3',
+#   'aHur9', 'hHur9', 'Iinit3', 'Iinit4'
+# )
 
-# prof_params <- shared_param_names
-prof_params <- c(
-  'aHur3', 'hHur3', 'aHur9', 'hHur9',
-  'Iinit3', "Iinit4", 'betaB1'
-)
-
-final_pars <- best_pars
+best_pars <- final_pars
 prof_vars <- c()
 for (pp in prof_params) {
 
   if (pp == "mu_B") {
-    prof_values <- seq(200, 650, length.out = 25)
+    prof_values <- seq(300, 750, length.out = 30)
   } else if (pp == 'XthetaA') {
-    prof_values <- seq(0.002, 0.125, length.out = 31)
+    prof_values <- seq(0.0001, 0.15, length.out = 30)
   } else if (pp == 'thetaI') {
-    prof_values <- seq(0.000075, 0.00016, length.out = 20)
+    prof_values <- seq(2e-05, 0.00015, length.out = 30)
   } else if (pp == 'lambdaR') {
-    prof_values <- seq(1, 3, length.out = 20)
+    prof_values <- seq(0.5, 3.6, length.out = 30)
   } else if (pp == 'r') {
-    prof_values <- seq(0.15, 1, length.out = 21)
+    prof_values <- seq(0.05, 1.3, length.out = 30)
   } else if (pp == 'std_W') {
-    prof_values <- seq(0.025, 0.05, length.out = 25)
+    prof_values <- seq(0.025, 0.045, length.out = 30)
   } else if (pp == 'epsilon') {
-    prof_values <- seq(0.85, 0.9999, length.out = 20)
+    prof_values <- seq(0.66, 1, 0.02)
   } else if (pp == 'k') {
-    prof_values <- seq(10, 95, length.out = 25)
+    prof_values <- seq(10, 115, length.out = 30)
   } else if (pp == 'aHur3') {
-    prof_values <- seq(0, 75, 3)
+    prof_values <- seq(0, 100, length.out = 30)
   } else if (pp == 'aHur9') {
-    prof_values <- seq(0, 75, 3)
+    prof_values <- seq(0, 100, length.out = 30)
   } else if (pp == 'hHur3') {
-    prof_values <- seq(0, 175, 5)
+    prof_values <- seq(0, 55, length.out = 30)
   } else if (pp == 'hHur9') {
-    prof_values <- seq(0, 150, 5)
+    prof_values <- seq(0, 140, length.out = 30)
   } else if (pp == 'Iinit3') {
-    prof_values <- seq(0 / best_pars['H3'], 32 / best_pars['H3'], 2 / best_pars['H3'])
+    prof_values <- seq(0 / best_pars['H3'], 150 / best_pars['H3'], length.out = 25)
   } else if (pp == 'Iinit4') {
-    prof_values <- seq(0 / best_pars['H4'], 32 / best_pars['H4'], 2 / best_pars['H4'])
-  } else if (pp == 'betaB1') {
-    prof_values <- seq(1.75, 8, length.out = 20)
+    prof_values <- seq(0 / best_pars['H4'], 100 / best_pars['H4'], length.out = 25)
   }
-
-  tmp_pars <- matrix(
-    rep(best_pars, length(prof_values)),
-    nrow = length(prof_values),
-    ncol = length(best_pars),
-    byrow = TRUE
-  )
-
-  colnames(tmp_pars) <- names(best_pars)
 
   if (pp %in% shared_param_names) {
     prof_cols <- matrix(rep(rep(prof_values, 10), each = nprof), ncol = 10)
     colnames(prof_cols) <- paste0(pp, 1:10)
-    tmp_pars[, paste0(pp, 1:10)] <- prof_values
   } else {
     prof_cols <- matrix(rep(prof_values, each = nprof), ncol = 1)
     colnames(prof_cols) <- pp
-    tmp_pars[, pp] <- prof_values
   }
 
   # Unit-lower bounds
@@ -241,7 +225,6 @@ for (pp in prof_params) {
 
   # Combine estimated and fixed parameters, and reorder based on original order.
   guesses_all <- cbind(guesses, fixed_mat)[, names(coef(h3_spat))]
-  guesses_all <- rbind(guesses_all, tmp_pars)[, names(coef(h3_spat))]
   final_pars <- rbind(final_pars, guesses_all)
   prof_vars <- c(prof_vars, rep(pp, nrow(guesses_all)))
 }
@@ -340,7 +323,7 @@ addExperiments(prob.designs = pdes, algo.designs = ades)
 # Submit Jobs -------------------------------------------------------------
 
 # resources1 <- list(account = 'stats_dept1', walltime = '10:00', memory = '5000m', ncpus = 1)
-resources1 <- list(account = 'ionides2', walltime = '2:30:00', memory = '5000m', ncpus = 1)
+resources1 <- list(account = 'ionides2', walltime = '6:00:00', memory = '5000m', ncpus = 1)
 
 submitJobs(resources = resources1)
 # submitJobs(ids = 1, resources = resources1)
