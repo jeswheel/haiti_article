@@ -27,7 +27,7 @@ library(subplex)
 RUN_LEVEL = 2
 
 reg <- makeExperimentRegistry(
-  file.dir = paste0('model2/profileReg_RL', RUN_LEVEL, '_v3'),
+  file.dir = paste0('model2/profileReg_RL', RUN_LEVEL, '_v4'),
   seed = 739164,
   packages = c("spatPomp", 'haitipkg', 'pomp')
 )
