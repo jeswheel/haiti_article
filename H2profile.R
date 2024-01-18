@@ -32,7 +32,7 @@ reg <- makeExperimentRegistry(
   packages = c("spatPomp", 'haitipkg', 'pomp')
 )
 
-n_starts <- 3
+n_starts <- 1
 
 # Create Profile Design Matrix --------------------------------------------
 
@@ -41,7 +41,7 @@ h2 <- haiti2(cutoff = 10000, measure = "log")
 
 prof_params <- c(
   # "Mu",
-  "Beta",
+  # "Beta",
   # "BetaW",
   # "v",
   "sigma"
@@ -55,13 +55,13 @@ for (pp in prof_params) {
   if (pp == 'Mu') {
     prof_values <- seq(6500, 12500, length.out = 30)
   } else if (pp == "Beta") {
-    prof_values <- seq(.Machine$double.eps, 5e-05, length.out = 50)
+    prof_values <- seq(.Machine$double.eps, 5e-06, length.out = 100)
   } else if (pp == "BetaW") {
     prof_values <- seq(0.9, 1.25, length.out = 20)
   } else if (pp == "v") {
     prof_values <- seq(1.2, 1.5, length.out = 20)
   } else if (pp == "sigma") {
-    prof_values <- seq(2e-14, 1, length.out = 50)
+    prof_values <- seq(2e-14, 0.0005, length.out = 100)
   } else if (pp == "phase") {
     prof_values <- seq(6, 8.5, length.out = 30)
   }
