@@ -24,6 +24,8 @@ library(subplex)
 
 # Create Experiment Registry ----------------------------------------------
 
+RUN_LEVEL = 2
+
 reg <- makeExperimentRegistry(
   file.dir = paste0('model2/profileReg_RL', RUN_LEVEL, '_v1'),
   seed = 739164,
