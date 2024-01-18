@@ -27,12 +27,12 @@ library(subplex)
 RUN_LEVEL = 2
 
 reg <- makeExperimentRegistry(
-  file.dir = paste0('model2/profileReg_RL', RUN_LEVEL, '_v2'),
+  file.dir = paste0('model2/profileReg_RL', RUN_LEVEL, '_v3'),
   seed = 739164,
   packages = c("spatPomp", 'haitipkg', 'pomp')
 )
 
-n_starts <- 5
+n_starts <- 3
 
 # Create Profile Design Matrix --------------------------------------------
 
@@ -40,12 +40,12 @@ set.seed(22446688)
 h2 <- haiti2(cutoff = 10000, measure = "log")
 
 prof_params <- c(
-  "Mu",
+  # "Mu",
   "Beta",
-  "BetaW",
-  "v",
-  "sigma",
-  "phase"
+  # "BetaW",
+  # "v",
+  "sigma"
+  # "phase"
 )
 
 final_pars <- coef(h2)
@@ -53,17 +53,17 @@ prof_vars <- c()
 for (pp in prof_params) {
 
   if (pp == 'Mu') {
-    prof_values <- seq(7000, 12000, length.out = 50)
+    prof_values <- seq(6500, 12500, length.out = 30)
   } else if (pp == "Beta") {
-    prof_values <- seq(2e-17, 5e-15, length.out = 50)
+    prof_values <- seq(.Machine$double.eps, 5e-05, length.out = 50)
   } else if (pp == "BetaW") {
     prof_values <- seq(0.9, 1.25, length.out = 20)
   } else if (pp == "v") {
-    prof_values <- seq(1.1, 1.5, length.out = 20)
+    prof_values <- seq(1.2, 1.5, length.out = 20)
   } else if (pp == "sigma") {
-    prof_values <- seq(2e-14, 4e-12, length.out = 20)
+    prof_values <- seq(2e-14, 1, length.out = 50)
   } else if (pp == "phase") {
-    prof_values <- seq(6, 9.1, length.out = 30)
+    prof_values <- seq(6, 8.5, length.out = 30)
   }
 
   prof_cols <- matrix(rep(prof_values, each = n_starts), ncol = 1)
