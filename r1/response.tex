@@ -9,17 +9,29 @@
 \newcommand\vsp{\vspace{2mm}}
 
 \usepackage{fullpage}
-\bibliographystyle{apalike}
 
-\usepackage{natbib,amsmath,amsthm}
+\usepackage{amsmath,amsthm}
+
+% \usepackage{natbib}
+%\bibliographystyle{apalike}
+
+% Use the PLoS provided BiBTeX style
+\bibliographystyle{../plos2015}
+\usepackage{cite}
+
+% Remove brackets from numbering in List of References
+\makeatletter
+\renewcommand{\@biblabel}[1]{\quad#1.}
+\makeatother
+
 \usepackage{verbatim}
 \usepackage{graphicx}
 \usepackage{amsmath,amssymb}
 \usepackage{amsfonts}
-\usepackage{natbib}
  \usepackage{url}
 \usepackage{color}
 
+\newcommand\code[1]{\texttt{#1}}
 \input{../edits.tex}
 %\usepackage[sectionbib]{natbib}
 
@@ -140,7 +152,7 @@ In the discussion, we return from the concrete consideration of the case study, 
   The authors state they ``develop data analysis strategies leading to improved statistical fit." It's not clear to me exactly what novel strategies have been developed, it seems the authors exclusively use pre-existing techniques from the literature. This is fine, if the focus of the paper is either a) pedagogical or b) on understanding a specific disease system (cholera in Haiti). If any methods are novel, this should be more clearly stated.
 }
 
-Fitting models 1 and 2 does not require any methodological innovation. Model 3 has a stochastic spatiotemporal partially-observed structure that leads to methodological challenges. \citet{lee20} made some approximations to avoid carrying out inference for the full coupled system. We show some consequences of those approximations, taking advantage of a newly developed method which has not yet been applied in the context of scientific investigations. So, although the method is not entirely new, its applicability to this task is novel.
+Fitting models 1 and 2 does not require any methodological innovation. Model 3 has a stochastic spatiotemporal partially-observed structure that leads to methodological challenges. \cite{lee20} made some approximations to avoid carrying out inference for the full coupled system. We show some consequences of those approximations, taking advantage of a newly developed method which has not yet been applied in the context of scientific investigations. So, although the method is not entirely new, its applicability to this task is novel.
 \TODO{We have clarified this in the manuscript WHERE?}
   
 
@@ -161,7 +173,7 @@ We have cited \cite{he10,stocks20,li23} for examples demonstrating situations wh
 
 We have added some material in the discussion connecting our results to the stated goals of the paper from the abstract and introduction.
 We could have gone further and discussed in more detail the relationship to the references [4, 5], following this recommendation.
-However, a subsequent manuscript addresses [4,5] more directly \citep{li23} and so we have referred the reader to that paper (currently available on arXiv) for additional discussion of this point.
+However, a subsequent manuscript addresses [4,5] more directly \cite{li23} and so we have referred the reader to that paper (currently available on arXiv) for additional discussion of this point.
 
 \eic{IF THE P0INTS OF 4, 5 CAN BE CONNECTED DIRECTLY TO THIS DATA ANALYSIS, WE OUGHT TO BE ABLE TO DISCUSS THAT WITHOUT CONFLICTING WITH LI23. WE SHOULD PROBABLY RE-READ THESE REFERENCES AND FIGURE IT OUT.}
 
@@ -267,6 +279,12 @@ Fixed.
 While the arguments provided throughout the article are well-articulated, there needs to be more supporting literature at the beginning of major sections. For instance, I don’t need to be convinced that the structure of a model should be based on a realistic theory about the observed phenomenon; namely, models should be a white box. However, not everyone is on board with this premise, and supporting literature that argues in favour of this approach should be mentioned. In short, more citations should be added at the beginning of each major section.
 }
 
+The referee's suggestions have led to the addition of various references in the revision.
+For the particular issue of black box versus white box models, we have included the following paragraph
+\TODO{where?}
+
+\article{\editMechModels}
+
 \report{
 \textbf{\underline{2. Limitations}}
 
@@ -307,11 +325,50 @@ In summary, maximum likelihood (ML) inference via SMC nowaways provides a fairly
 
 \report{
 Moreover, Monte Carlo methods, such as the Particle Filter and, by extension, Iterated Filtering, aim to approximate integrals (the posterior or filtering distributions). However, one cannot take for granted that these methods provide accurate descriptions of these targets without proper validation. In more ‘traditional’ MCMC methods, diagnostics like the potential scale reduction factor and effective sample size play a crucial role in the inference process. Unsatisfactory values of these diagnostics render inferences unreliable, often necessitating model reformulation. In contrast, in the literature on POMP models (including this paper), diagnostics are tangentially mentioned. Users (like me) sometimes face uncertainty about whether the lack of fit is due to model misspecification or problems with the Monte Carlo algorithm exploring the parameter space.
+}
 
+We agree with the referee that diagnostic are an important aspect of careful data analysis.
+The most widely used diagnostic tools for particle filter and iterated particle filter methods probably match those provided by default in the \code{pomp} R package \cite{king16} when objects generated by \code{pfilter()} or \code{mif2()} are plotted.
+For filtering, one tracks the effective sample size, the conditional log likelihood for each observation, and the values of the filtered states.
+For iterated filtering, one checks the filtering diagnostics for the last iteration and also how the parameter estimates and the log-likelihood estimate evolve through iterations, typically superimposing the results of 10-100 independent searches.
+
+The particle filter provides access to the likelihood of the data, and conditional likelhood of each individual data point.
+By contrast, obtaining reliable likelihood values from MCMC is not straightforward.
+Thus, particle filter methods facilitate the use of various likelihood-based methods for diagnostics and model selection.
+We demonstrate this in Figs S4, S5, S6, S7.
+
+The particle filter is unbiased for the likelihood, and therefore negatively biased for the log-likelihood with bias approaching zero as the number of particles increases and the Monte Carlo variance decreases.
+%%Log-likelihood is a proper scoring rule for probabilistic forecasts \cite{gneiting07}, so any error in filtering is expected to lead to a loss in log-likelihood. Thus, log-likelihood is an appropriate way to evaluate filters as well as models.
+If optimization searches from diverse starting pionts provide a consensus on the maximum log-likelihood, and the Monte Carlo variance is small, we can have reasonable confidence in our maximization.
+Monte Carlo adusted profile (MCAP) methods \cite{ionides17,ning21} provide methodology which reduces and evaluates the consequences of this Monte Carlo error.
+MCAP methods have been used in various recent investigations using particle filters \eic{REFS}.
+
+We conclude that suitable diagnostic methods are available for the POMP methods we employ, and some of them are demonstrated and discussed in our paper.
+We would like to do what we can, within the constraints of this paper, to help build awareness of these diagnostic methods and ways in which they can be useful.
+A full exposition of this topic is out of the scope of this paper.
+Howerver, we can alert the reader to the topic, and provide some additional references.
+Not infrequently, diagnostic issues are relegated to supplementary material and so we have indicated to interested readers some papers with extensive supplements demonstrating these diagnostic issues in action.
+\TODO{}
+
+\report{
 For example, in Figure 5, department Ouest exhibits substantial uncertainty from 2014 onwards, and this figure is on a log scale. Essentially, the inference suggests that 'anything can happen'. I would like to pinpoint the nature of this collapse in uncertainty. Identifiability issues might be at play, given the possibility of more estimated parameters than the incidence data can inform. Sometimes, we ask too much from the data. Observe the discrepancy in trends between the average behaviour and the uncertainty ribbons.
 
 In summary, the authors should elaborate on the limitations of the proposed approach.
 }
+
+We agree with the referee that uncertainty quantification and evaluation of identifiability are fundamental tasks for model-based data analysis.
+
+Wide prediction intervals are not necessarily a sign of a problem.
+For example, nobody knew for sure whether cholera was banished from Haiti after it was declared eliminated in February 2022.
+Cholera reemerged in September 2022, but a reasonable model might be expected to cover the possiblity of this reemergence either happening or not happening, leading to wide prediction intervals.
+
+In the revision, we have included profile confidence intervals on all parameters, except those taking separate values on each unit.
+For these unit-specific parameters, the spread of values across units provides an alternative measure of uncertainty.
+We find that all parameters are identifiable, though some are more tightly estimable than others.
+
+We had not done this in the original submission since it was only tangentially relevant to the comparison with \cite{lee20} that lies at the center of our paper.
+However, these additional results are worthwhile extension to our analysis and we are grateful for the encouragement to include it.
+
 
 \report{
   \textbf{\underline{3. Conclusions}}
