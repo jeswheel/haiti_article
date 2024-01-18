@@ -27,7 +27,7 @@ library(subplex)
 RUN_LEVEL = 2
 
 reg <- makeExperimentRegistry(
-  file.dir = paste0('model2/profileReg_RL', RUN_LEVEL, '_v1'),
+  file.dir = paste0('model2/profileReg_RL', RUN_LEVEL, '_v2'),
   seed = 739164,
   packages = c("spatPomp", 'haitipkg', 'pomp')
 )
@@ -53,17 +53,17 @@ prof_vars <- c()
 for (pp in prof_params) {
 
   if (pp == 'Mu') {
-    prof_values <- seq(9000, 9500, length.out = 30)
+    prof_values <- seq(7000, 12000, length.out = 50)
   } else if (pp == "Beta") {
-    prof_values <- seq(2e-16, 5e-16, length.out = 30)
+    prof_values <- seq(2e-17, 5e-15, length.out = 50)
   } else if (pp == "BetaW") {
-    prof_values <- seq(0.5, 1.5, length.out = 20)
+    prof_values <- seq(0.9, 1.25, length.out = 20)
   } else if (pp == "v") {
-    prof_values <- seq(0.75, 2, length.out = 20)
+    prof_values <- seq(1.1, 1.5, length.out = 20)
   } else if (pp == "sigma") {
-    prof_values <- seq(2e-13, 4e-13, length.out = 20)
+    prof_values <- seq(2e-14, 4e-12, length.out = 20)
   } else if (pp == "phase") {
-    prof_values <- seq(0, 12, length.out = 30)
+    prof_values <- seq(6, 9.1, length.out = 30)
   }
 
   prof_cols <- matrix(rep(prof_values, each = n_starts), ncol = 1)
@@ -71,12 +71,12 @@ for (pp in prof_params) {
 
   bounds <- tibble::tribble(
     ~param, ~lower, ~upper,
-    "Mu",     9000,  9500,
-    "Beta",  2e-16, 5e-16,
-    "BetaW",   0.5,   1.5,
-    "v",      0.75,     2,
-    "sigma", 2e-13, 4e-13,
-    "phase",     0,    12
+    "Mu",     8000,  10000,
+    "Beta",  2e-17,  5e-15,
+    "BetaW",  0.75,    1.3,
+    "v",      0.75,      2,
+    "sigma", 2e-13,  4e-13,
+    "phase",  4.36,  10.64
   )
 
   bounds <- bounds %>%
@@ -206,14 +206,14 @@ addExperiments(prob.designs = pdes)
 # Submit Jobs -------------------------------------------------------------
 
 resources1 <- list(
-  account = 'stats_dept1', walltime = '20:00',
+  account = 'stats_dept1', walltime = '45:00',
   memory = '1000m', ncpus = 1
 )
 
 submitJobs(
   data.table(
     job.id = 1:nrow(final_pars),
-    chunk = 1:(round(nrow(final_pars)) / 15)
+    chunk = 1:(round(nrow(final_pars)) / 3)
   ), resources = resources1
 )
 
