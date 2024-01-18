@@ -27,7 +27,7 @@ library(subplex)
 RUN_LEVEL = 2
 
 reg <- makeExperimentRegistry(
-  file.dir = paste0('model2/profileReg_RL', RUN_LEVEL, '_v4'),
+  file.dir = paste0('model2/profileReg_RL', RUN_LEVEL, '_v6'),
   seed = 739164,
   packages = c("spatPomp", 'haitipkg', 'pomp')
 )
@@ -40,12 +40,12 @@ set.seed(22446688)
 h2 <- haiti2(cutoff = 10000, measure = "log")
 
 prof_params <- c(
-  # "Mu",
-  # "Beta",
-  # "BetaW",
-  # "v",
-  "sigma"
-  # "phase"
+  "Mu",
+  "Beta",
+  "BetaW",
+  "v",
+  "sigma",
+  "phase"
 )
 
 final_pars <- coef(h2)
@@ -55,13 +55,13 @@ for (pp in prof_params) {
   if (pp == 'Mu') {
     prof_values <- seq(6500, 12500, length.out = 30)
   } else if (pp == "Beta") {
-    prof_values <- seq(.Machine$double.eps, 5e-06, length.out = 100)
+    prof_values <- seq((.Machine$double.eps)^(1/5), (5e-05)^(1/5), length.out = 100)^5
   } else if (pp == "BetaW") {
     prof_values <- seq(0.9, 1.25, length.out = 20)
   } else if (pp == "v") {
     prof_values <- seq(1.2, 1.5, length.out = 20)
   } else if (pp == "sigma") {
-    prof_values <- seq(2e-14, 0.0005, length.out = 100)
+    prof_values <- seq((.Machine$double.eps)^(1/5), (1e-03)^(1/5), length.out = 100)^5
   } else if (pp == "phase") {
     prof_values <- seq(6, 8.5, length.out = 30)
   }
