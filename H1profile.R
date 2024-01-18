@@ -30,7 +30,7 @@ COOLING    <- 0.5
 # Create Experiment Registry ----------------------------------------------
 
 reg <- makeExperimentRegistry(
-  file.dir = paste0('model1/profileReg_RL', RUN_LEVEL, '_v2'),
+  file.dir = paste0('model1/profileReg_RL', RUN_LEVEL, '_v3'),
   seed = 739164,
   packages = c("spatPomp", 'haitipkg', 'pomp')
 )
@@ -66,21 +66,21 @@ for (pp in prof_params) {
   if (pp == "betat") {
     prof_values <- seq(-0.15, 0.05, length.out = 30)
   } else if (pp == 'tau_epi') {
-    prof_values <- seq(5, 600, length.out = 30)
+    prof_values <- seq(1, 800, length.out = 30)
   } else if (pp == 'tau_end') {
-    prof_values <- seq(1, 500, length.out = 30)
+    prof_values <- seq(1, 350, length.out = 30)
   } else if (pp == 'rho') {
-    prof_values <- seq(0.15, 0.75, length.out = 30)
+    prof_values <- seq(0.1, 0.9, length.out = 30)
   } else if (pp == 'nu') {
     prof_values <- seq(0.9, 1, 0.01)
   } else if (pp == 'sig_sq_epi') {
-    prof_values <- seq(0.025, 0.12, length.out = 30)
+    prof_values <- seq(0.035, 0.2, length.out = 30)
   } else if (pp == 'sig_sq_end') {
-    prof_values <- seq(0.06, 0.225, length.out = 30)
+    prof_values <- seq(0.02, 0.3, length.out = 30)
   } else if (pp == 'E_0') {
-    prof_values <- seq(1 / 10911819, 16000 / 10911819, length.out = 50)
+    prof_values <- seq(1 / 10911819, 25000 / 10911819, length.out = 50)
   } else if (pp == 'I_0') {
-    prof_values <- seq(1 / 10911819, 12000 / 10911819, length.out = 50)
+    prof_values <- seq(1 / 10911819, 25000 / 10911819, length.out = 50)
   } else if (pp == 'beta1') {
     prof_values <- seq(0.5, 2.5, length.out = 20)
   } else if (pp == 'beta2') {
