@@ -31,7 +31,7 @@ COOLING <- 0.35
 # Create Experiment Registry ----------------------------------------------
 
 reg <- makeExperimentRegistry(
-  file.dir = paste0('model3/profileReg_RL', RUN_LEVEL, '_v7'),
+  file.dir = paste0('model3/profileReg_RL', RUN_LEVEL, '_thetaI_lambdaR'),
   seed = 739164,
   packages = c("spatPomp", 'haitipkg', 'pomp')
 )
@@ -51,7 +51,12 @@ shared_param_names <- c(
   "epsilon", "k"
 )
 
-prof_params <- shared_param_names
+prof_params <- c(
+  'thetaI',
+  'lambdaR'
+)
+
+# prof_params <- shared_param_names
 # If you wanted to profile over the six added unit-specific
 # parameters
 # prof_params <- c(
@@ -68,9 +73,9 @@ for (pp in prof_params) {
   } else if (pp == 'XthetaA') {
     prof_values <- seq(0.0001, 0.15, length.out = 30)
   } else if (pp == 'thetaI') {
-    prof_values <- seq(2e-05, 0.00015, length.out = 30)
+    prof_values <- seq(7.5e-06, 0.0001, length.out = 30)
   } else if (pp == 'lambdaR') {
-    prof_values <- seq(0.5, 3.6, length.out = 30)
+    prof_values <- seq(0.15, 1.75, length.out = 30)
   } else if (pp == 'r') {
     prof_values <- seq(0.05, 1.3, length.out = 30)
   } else if (pp == 'std_W') {
@@ -323,7 +328,7 @@ addExperiments(prob.designs = pdes, algo.designs = ades)
 # Submit Jobs -------------------------------------------------------------
 
 # resources1 <- list(account = 'stats_dept1', walltime = '10:00', memory = '5000m', ncpus = 1)
-resources1 <- list(account = 'ionides2', walltime = '6:00:00', memory = '5000m', ncpus = 1)
+resources1 <- list(account = 'ionides2', walltime = '8:00:00', memory = '9000m', ncpus = 1)
 
 submitJobs(resources = resources1)
 # submitJobs(ids = 1, resources = resources1)
