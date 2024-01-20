@@ -20,10 +20,10 @@ library(haitipkg)
 
 RUN_LEVEL <- 2
 
-nprof      <- switch(RUN_LEVEL,  2,    14, 25)
-NMIF       <- switch(RUN_LEVEL,  5,   100, 200)
+nprof      <- switch(RUN_LEVEL,  2,    15, 25)
+NMIF       <- switch(RUN_LEVEL,  5,   150, 200)
 NP         <- switch(RUN_LEVEL,  50, 1000, 1500)
-NP_EVAL    <- switch(RUN_LEVEL, 100, 2500, 5000)
+NP_EVAL    <- switch(RUN_LEVEL, 100, 3000, 5000)
 NREPS_EVAL <- switch(RUN_LEVEL,   3,   10, 15)
 COOLING    <- 0.5
 
@@ -235,7 +235,7 @@ addExperiments(prob.designs = pdes, algo.designs = ades)
 
 # resources1 <- list(account = 'stats_dept1', walltime = '10:00', memory = '1000m', ncpus = 1)
 resources1 <- list(
-  account = 'stats_dept1', walltime = '30:00',
+  account = 'stats_dept1', walltime = '45:00',
   memory = '5000m', ncpus = 1
   )
 
