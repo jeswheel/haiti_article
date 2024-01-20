@@ -18,7 +18,7 @@ library(tidyverse)
 library(data.table)
 library(haitipkg)
 
-RUN_LEVEL <- 3
+RUN_LEVEL <- 2
 
 nprof      <- switch(RUN_LEVEL,  2,    14, 25)
 NMIF       <- switch(RUN_LEVEL,  5,   100, 200)
@@ -30,7 +30,7 @@ COOLING    <- 0.5
 # Create Experiment Registry ----------------------------------------------
 
 reg <- makeExperimentRegistry(
-  file.dir = paste0('model1/profileReg_RL', RUN_LEVEL, '_v3'),
+  file.dir = paste0('model1/profileReg_RL', RUN_LEVEL, '_tau'),
   seed = 739164,
   packages = c("spatPomp", 'haitipkg', 'pomp')
 )
@@ -44,13 +44,13 @@ h1 <- haiti1_joint()
 prof_params <- c(
   # 'betat',
   'tau_epi',
-  'tau_end',
-  'rho',
+  'tau_end'
+  # 'rho',
   # 'nu',
-  'sig_sq_epi',
+  # 'sig_sq_epi',
   # 'sig_sq_end',
-  'E_0',
-  'I_0'
+  # 'E_0',
+  # 'I_0'
   # 'beta1',
   # 'beta2',
   # 'beta3',
@@ -66,21 +66,21 @@ for (pp in prof_params) {
   if (pp == "betat") {
     prof_values <- seq(-0.15, 0.05, length.out = 30)
   } else if (pp == 'tau_epi') {
-    prof_values <- seq(1, 800, length.out = 30)
+    prof_values <- c(exp(seq(log(5), log(5000), length.out = 40)), 5e+12)
   } else if (pp == 'tau_end') {
-    prof_values <- seq(1, 350, length.out = 30)
+    prof_values <- c(exp(seq(log(5), log(5000), length.out = 40)), 5e+12)
   } else if (pp == 'rho') {
     prof_values <- seq(0.1, 0.9, length.out = 30)
   } else if (pp == 'nu') {
     prof_values <- seq(0.9, 1, 0.01)
   } else if (pp == 'sig_sq_epi') {
-    prof_values <- seq(0.035, 0.2, length.out = 30)
+    prof_values <- seq(0.04, 0.2, length.out = 30)
   } else if (pp == 'sig_sq_end') {
-    prof_values <- seq(0.02, 0.3, length.out = 30)
+    prof_values <- seq(0.02, 0.275, length.out = 30)
   } else if (pp == 'E_0') {
-    prof_values <- seq(1 / 10911819, 25000 / 10911819, length.out = 50)
+    prof_values <- seq(1 / 10911819, 25000 / 10911819, 1000 / 10911819)
   } else if (pp == 'I_0') {
-    prof_values <- seq(1 / 10911819, 25000 / 10911819, length.out = 50)
+    prof_values <- seq(1 / 10911819, 25000 / 10911819, 1000 / 10911819)
   } else if (pp == 'beta1') {
     prof_values <- seq(0.5, 2.5, length.out = 20)
   } else if (pp == 'beta2') {
@@ -107,10 +107,10 @@ for (pp in prof_params) {
     "beta5",        1.00,  2.10,
     "beta6",         .50,  1.50,
     "betat",       -0.15,  0.05,
-    "tau_epi",       180,  1800,
-    "tau_end",        50,  1800,
-    "rho",          0.15,     1,
-    "nu",           0.95,     1,
+    "tau_epi",       180,  1250,
+    "tau_end",        50,  1000,
+    "rho",          0.2,   0.95,
+    "nu",           0.94,     1,
     "sig_sq_epi",  0.075, 0.125,
     "sig_sq_end",   0.05,   0.2,
     "E_0", 10 / 10911819, 5000 / 10911819,
@@ -235,7 +235,7 @@ addExperiments(prob.designs = pdes, algo.designs = ades)
 
 # resources1 <- list(account = 'stats_dept1', walltime = '10:00', memory = '1000m', ncpus = 1)
 resources1 <- list(
-  account = 'ionides2', walltime = '70:00',
+  account = 'stats_dept1', walltime = '30:00',
   memory = '5000m', ncpus = 1
   )
 
