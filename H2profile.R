@@ -24,10 +24,8 @@ library(subplex)
 
 # Create Experiment Registry ----------------------------------------------
 
-RUN_LEVEL = 2
-
 reg <- makeExperimentRegistry(
-  file.dir = paste0('model2/profileReg_RL', RUN_LEVEL, '_v6'),
+  file.dir ='model2/profileReg_RL',
   seed = 739164,
   packages = c("spatPomp", 'haitipkg', 'pomp')
 )
@@ -53,17 +51,17 @@ prof_vars <- c()
 for (pp in prof_params) {
 
   if (pp == 'Mu') {
-    prof_values <- seq(6500, 12500, length.out = 30)
+    prof_values <- seq(6750, 13000, length.out = 30)
   } else if (pp == "Beta") {
-    prof_values <- seq((.Machine$double.eps)^(1/5), (5e-05)^(1/5), length.out = 100)^5
+    prof_values <- seq((.Machine$double.eps)^(1/5), (6.5e-05)^(1/5), length.out = 50)^5
   } else if (pp == "BetaW") {
-    prof_values <- seq(0.9, 1.25, length.out = 20)
+    prof_values <- seq(1, 1.2, length.out = 30)
   } else if (pp == "v") {
-    prof_values <- seq(1.2, 1.5, length.out = 20)
+    prof_values <- seq(1.225, 1.44, length.out = 25)
   } else if (pp == "sigma") {
-    prof_values <- seq((.Machine$double.eps)^(1/5), (1e-03)^(1/5), length.out = 100)^5
+    prof_values <- seq((.Machine$double.eps)^(1/5), (2e-03)^(1/5), length.out = 50)^5
   } else if (pp == "phase") {
-    prof_values <- seq(6, 8.5, length.out = 30)
+    prof_values <- seq(6.5, 7.9, length.out = 30)
   }
 
   prof_cols <- matrix(rep(prof_values, each = n_starts), ncol = 1)
@@ -73,10 +71,10 @@ for (pp in prof_params) {
     ~param, ~lower, ~upper,
     "Mu",     8000,  10000,
     "Beta",  2e-17,  5e-15,
-    "BetaW",  0.75,    1.3,
-    "v",      0.75,      2,
+    "BetaW",  0.85,   1.25,
+    "v",      1.2,     1.5,
     "sigma", 2e-13,  4e-13,
-    "phase",  4.36,  10.64
+    "phase",     6,    8.5
   )
 
   bounds <- bounds %>%
