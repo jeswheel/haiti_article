@@ -18,7 +18,7 @@ library(tidyverse)
 library(data.table)
 library(haitipkg)
 
-RUN_LEVEL <- 2
+RUN_LEVEL <- 3
 
 nprof      <- switch(RUN_LEVEL,  2,    15, 25)
 NMIF       <- switch(RUN_LEVEL,  5,   150, 200)
@@ -30,7 +30,7 @@ COOLING    <- 0.5
 # Create Experiment Registry ----------------------------------------------
 
 reg <- makeExperimentRegistry(
-  file.dir = paste0('model1/profileReg_RL', RUN_LEVEL, '_tau'),
+  file.dir = paste0('model1/profileReg_RL', RUN_LEVEL),
   seed = 739164,
   packages = c("spatPomp", 'haitipkg', 'pomp')
 )
@@ -39,30 +39,34 @@ reg <- makeExperimentRegistry(
 
 set.seed(665544)
 
+# Create Model 1 pomp object, used to get fixed parameters in the searches.
 h1 <- haiti1_joint()
 
+# Vector of parameters to profile over.
 prof_params <- c(
-  # 'betat',
+  'betat',
   'tau_epi',
-  'tau_end'
-  # 'rho',
-  # 'nu',
-  # 'sig_sq_epi',
-  # 'sig_sq_end',
-  # 'E_0',
-  # 'I_0'
-  # 'beta1',
-  # 'beta2',
-  # 'beta3',
-  # 'beta4',
-  # 'beta5',
-  # 'beta6'
+  'tau_end',
+  'rho',
+  'nu',
+  'sig_sq_epi',
+  'sig_sq_end',
+  'E_0',
+  'I_0',
+  'beta1',
+  'beta2',
+  'beta3',
+  'beta4',
+  'beta5',
+  'beta6'
 )
 
+# Initialize parameter matrix using default parameter values.
 final_pars <- coef(h1)
 prof_vars <- c()
-for (pp in prof_params) {
+for (pp in prof_params) {  # Loop through all profile parameters
 
+  # Profile bounds estimated using RL = 2
   if (pp == "betat") {
     prof_values <- seq(-0.15, 0.05, length.out = 30)
   } else if (pp == 'tau_epi') {
@@ -98,6 +102,7 @@ for (pp in prof_params) {
   prof_cols <- matrix(rep(prof_values, each = nprof), ncol = 1)
   colnames(prof_cols) <- pp
 
+  # Parameter bounds found using RL 2.
   bounds <- tibble::tribble(
     ~param, ~lower, ~upper,
     "beta1",        1.00,  2.15,
@@ -162,6 +167,7 @@ data_obj <- list(starts = final_pars, prof_vars = prof_vars)
 
 # Define profile problem for registry -------------------------------------
 
+# A simple function that will sample the starting values of the profile search
 sample_starting_point <- function(data = data_obj, job, i, ...) {
   list(
     start_par = unlist(data$starts[i, ]),
@@ -173,6 +179,9 @@ addProblem(name = 'profile', data = data_obj, fun = sample_starting_point)
 
 # Define algorithm for parameter estimation -------------------------------
 
+# This function estimates model parameters using the IF2 algorithm. All
+# calibrated parameters besides the profile parameter in the instance object
+# and the fixed parameters have a non-zero RW_SD.
 fit_model <- function(
     data, job, instance, nmif, np, np_eval, nreps_eval,
     cooling, ...
@@ -235,21 +244,13 @@ addExperiments(prob.designs = pdes, algo.designs = ades)
 
 # resources1 <- list(account = 'stats_dept1', walltime = '10:00', memory = '1000m', ncpus = 1)
 resources1 <- list(
-  account = 'stats_dept1', walltime = '45:00',
+  account = 'stats_dept1', walltime = '3:30:00',
   memory = '5000m', ncpus = 1
   )
-
-# submitJobs(
-#   data.table(
-#     job.id = 1:4000,
-#     chunk = 1:2000
-#   ), resources = resources1
-# )
 
 submitJobs(
    data.table(
       job.id = 1:nrow(final_pars),
-      chunk = 1:(round(nrow(final_pars) / 2))
+      chunk = 1:(round(nrow(final_pars) / 3))
    ), resources = resources1
 )
-# submitJobs(ids = 1, resources = resources1)

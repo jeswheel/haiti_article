@@ -40,7 +40,7 @@ reg <- makeExperimentRegistry(
 
 set.seed(665544)
 
-# Read in previous best results
+# Create H3 model object to get fixed parameters
 h3_spat <- haiti3_spatPomp()
 final_pars <- coef(h3_spat)
 
@@ -51,18 +51,7 @@ shared_param_names <- c(
   "epsilon", "k"
 )
 
-prof_params <- c(
-  'thetaI',
-  'lambdaR'
-)
-
-# prof_params <- shared_param_names
-# If you wanted to profile over the six added unit-specific
-# parameters
-# prof_params <- c(
-#   shared_param_names, 'aHur3', 'hHur3',
-#   'aHur9', 'hHur9', 'Iinit3', 'Iinit4'
-# )
+prof_params <- shared_param_names
 
 best_pars <- final_pars
 prof_vars <- c()
@@ -222,13 +211,14 @@ for (pp in prof_params) {
   prof_vars <- c(prof_vars, rep(pp, nrow(guesses_all)))
 }
 
+# Remove the first row which contains the original params as a place-holder.
 final_pars <- final_pars[-1, names(coef(h3_spat))]
-
 data_obj <- list(starts = final_pars, prof_vars = prof_vars)
 # dim(final_pars)
 
 # Define profile problem for registry -------------------------------------
 
+# Function to sample a starting point for a given profile search
 sample_starting_point <- function(data = data_obj, job, i, ...) {
   list(
     start_par = unlist(data$starts[i, ]),
@@ -240,6 +230,9 @@ addProblem(name = 'profile', data = data_obj, fun = sample_starting_point)
 
 # Define algorithm for parameter estimation -------------------------------
 
+# Function used to fit the model under the constraints of the profile search.
+# If parameter "PARAM" is getting profiled over, the RW_SD is set to zero
+# for "PARAM" and all other fixed parameters.
 fit_model <- function(
     data, job, instance, nbpf, np, spat_regression, np_eval, nreps_eval,
     cooling, start_date = "2010-11-20", ...
@@ -315,8 +308,6 @@ addExperiments(prob.designs = pdes, algo.designs = ades)
 
 # Submit Jobs -------------------------------------------------------------
 
-# resources1 <- list(account = 'stats_dept1', walltime = '10:00', memory = '5000m', ncpus = 1)
 resources1 <- list(account = 'ionides2', walltime = '8:00:00', memory = '9000m', ncpus = 1)
 
 submitJobs(resources = resources1)
-# submitJobs(ids = 1, resources = resources1)
