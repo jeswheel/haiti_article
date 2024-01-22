@@ -31,7 +31,7 @@ COOLING <- 0.35
 # Create Experiment Registry ----------------------------------------------
 
 reg <- makeExperimentRegistry(
-  file.dir = paste0('model3/profileReg_RL', RUN_LEVEL, '_thetaI_lambdaR'),
+  file.dir = paste0('model3/profileReg_RL', RUN_LEVEL),
   seed = 739164,
   packages = c("spatPomp", 'haitipkg', 'pomp')
 )
@@ -69,33 +69,21 @@ prof_vars <- c()
 for (pp in prof_params) {
 
   if (pp == "mu_B") {
-    prof_values <- seq(300, 750, length.out = 30)
+    prof_values <- seq(350, 700, length.out = 25)
   } else if (pp == 'XthetaA') {
-    prof_values <- seq(0.0001, 0.15, length.out = 30)
+    prof_values <- seq(0, sqrt(0.15), length.out = 25)^2
   } else if (pp == 'thetaI') {
-    prof_values <- seq(7.5e-06, 0.0001, length.out = 30)
+    prof_values <- seq(1.05e-05, 1.2e-04, length.out = 30)
   } else if (pp == 'lambdaR') {
-    prof_values <- seq(0.15, 1.75, length.out = 30)
+    prof_values <- c(seq(0, 2, length.out = 24), 1)
   } else if (pp == 'r') {
-    prof_values <- seq(0.05, 1.3, length.out = 30)
+    prof_values <- c(seq(0.55, 1.5, length.out = 24), 1)
   } else if (pp == 'std_W') {
-    prof_values <- seq(0.025, 0.045, length.out = 30)
+    prof_values <- seq(0.024, 0.04, length.out = 27)
   } else if (pp == 'epsilon') {
-    prof_values <- seq(0.66, 1, 0.02)
+    prof_values <- seq(0.84^5, 1, length.out = 14)^(1/5)
   } else if (pp == 'k') {
-    prof_values <- seq(10, 115, length.out = 30)
-  } else if (pp == 'aHur3') {
-    prof_values <- seq(0, 100, length.out = 30)
-  } else if (pp == 'aHur9') {
-    prof_values <- seq(0, 100, length.out = 30)
-  } else if (pp == 'hHur3') {
-    prof_values <- seq(0, 55, length.out = 30)
-  } else if (pp == 'hHur9') {
-    prof_values <- seq(0, 140, length.out = 30)
-  } else if (pp == 'Iinit3') {
-    prof_values <- seq(0 / best_pars['H3'], 150 / best_pars['H3'], length.out = 25)
-  } else if (pp == 'Iinit4') {
-    prof_values <- seq(0 / best_pars['H4'], 100 / best_pars['H4'], length.out = 25)
+    prof_values <- seq(20, 135, length.out = 25)
   }
 
   if (pp %in% shared_param_names) {
@@ -168,10 +156,10 @@ for (pp in prof_params) {
 
   shared_lower_bounds <- c(
     "mu_B" = 450,
-    "XthetaA" = 0.01,
+    "XthetaA" = 1e-8,
     "thetaI" = 2.5e-05,
     "lambdaR" = 0.75,
-    "r" = 0.2,
+    "r" = 0.4,
     "std_W" = 0.0275,
     "epsilon" = 0.8,
     "k" = 25
@@ -181,8 +169,8 @@ for (pp in prof_params) {
     "mu_B" = 700,
     "XthetaA" = 0.15,
     "thetaI" = 1e-04,
-    "lambdaR" = 3.5,
-    "r" = 1,
+    "lambdaR" = 2,
+    "r" = 1.2,
     "std_W" = 0.0375,
     "epsilon" = 0.99,
     "k" = 80
