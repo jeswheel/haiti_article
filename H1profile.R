@@ -66,13 +66,13 @@ for (pp in prof_params) {
   if (pp == "betat") {
     prof_values <- seq(-0.15, 0.05, length.out = 30)
   } else if (pp == 'tau_epi') {
-    prof_values <- c(exp(seq(log(5), log(5000), length.out = 40)), 5e+12)
+    prof_values <- c(exp(seq(2.75, 9, length.out = 40)), 5e+12)
   } else if (pp == 'tau_end') {
-    prof_values <- c(exp(seq(log(5), log(5000), length.out = 40)), 5e+12)
+    prof_values <- c(exp(seq(2, 9, length.out = 40)), 5e+12)
   } else if (pp == 'rho') {
     prof_values <- seq(0.1, 0.9, length.out = 30)
   } else if (pp == 'nu') {
-    prof_values <- seq(0.9, 1, 0.01)
+    prof_values <- seq(0.9, 1, length.out = 15)
   } else if (pp == 'sig_sq_epi') {
     prof_values <- seq(0.04, 0.2, length.out = 30)
   } else if (pp == 'sig_sq_end') {
