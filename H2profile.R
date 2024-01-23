@@ -1,5 +1,17 @@
 # Fitting profiles for Haiti 2.
 #
+# ********
+# NOTE:
+#
+#   If you would like to run this code but have never used the `batchtools` R
+#   package, then we strongly recommend completing both Examples 1 and 2 from
+#   the batchtools vignette, by first installing the `batchtools` package and
+#   running: `vignette('batchtools')`, or visiting:
+#
+#         https://mllg.github.io/batchtools/articles/batchtools.html
+#
+# ********
+#
 # The fit_haiti2 function is a very simple helper that will take as input
 # some starting parameters and an objective function for Model 2 and will
 # return parameters estimates along with corresponding estimates of their
@@ -25,7 +37,7 @@ library(subplex)
 # Create Experiment Registry ----------------------------------------------
 
 reg <- makeExperimentRegistry(
-  file.dir ='model2/profileReg_RL',
+  file.dir ='model2/profileReg',
   seed = 739164,
   packages = c("spatPomp", 'haitipkg', 'pomp')
 )
@@ -215,3 +227,48 @@ submitJobs(
   ), resources = resources1
 )
 
+# Get Results -------------------------------------------------------------
+
+# You can check the status of the jobs (how many are queued, how many have
+# started, how many have finished, and how many have errors / ran out of time)
+# by running:
+#
+# getJobStatus()
+#
+# You can ensure that you won't summarize the results until everything has
+# finished by running:
+#
+# waitForJobs()
+#
+# Because there are many long jobs, however, it may not be the best idea to do
+# this interactively. Instead, it's wise to periodically check on the status
+# of the jobs when you think they may have finished. Therefore if you would
+# like to check on your results after closing your R session, you need to
+# re-load your registry (after opening up a new R-session in the same
+# working directory that was used to create the registry) using:
+#
+# library(batchtools)
+#
+# reg = loadRegistry('model2/profileReg')
+# getStatus()
+#
+# Once all of the jobs are finished, we can summarize the results using:
+#
+# h2_profile_results = unwrap(reduceResultsDataTable())
+# h2_pars = unwrap(getJobPars())
+# h2_results = ijoin(h2_pars, h2_profile_results)
+#
+# saveRDS(
+#   h2_profile_results,
+#   'model2/h2_profiles.rds')
+# )
+#
+# We can also get information about each job, which can be helpful to pick the
+# size of each run level and to estimate the cost of the RUN_LEVEL_3 search.
+# For example, we can see the total / average computational time of all of the
+# jobs by running:
+#
+# h2_stats <- unwrap(getJobStatus())
+# h2_stats <- ijoin(h2_pars, h2_stats)
+#
+# summary(h2_stats$time.running |> as.numeric())  # unit of measurement is seconds
