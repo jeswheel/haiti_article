@@ -683,21 +683,90 @@ rm(h1_prof)
 gc()
 @
 
-<<FitModel2, echo=FALSE, include=FALSE, message=FALSE>>=
+<<FitModel2, echo=FALSE, include=FALSE, message=FALSE, warning=FALSE>>=
+
+# Calculate log-likelihood of Lee et al (2020) model.
+# We have parameter estimates for everything except the variance of the
+# measurement model, so here we fix all parameters except the variance, which
+# is estimated for both endemic and epidemic periods.
+lee20_replication <- bake(
+  file = 'model2/lee20_replication.rds', {
+    h2_lee_epi <- haiti2()
+    lee_epi_params <- h2_lee_epi@params
+    epi_ofun_v <- traj_objfun(
+      h2_lee_epi, est = c('v'), paramnames = c('v')
+    )
+
+    # Get starting values for the estimated parameter
+    start_v_epi <- lee_epi_params[c('v')]
+
+    # Use the subplex package to calibrate 'v' for the epi-model with fixed coefs.
+    epi_fit_v <- subplex::subplex(par = log(start_v_epi), fn = epi_ofun_v)
+    epi_params_update_v <- lee_epi_params
+    epi_params_update_v['v'] <- exp(epi_fit_v$par)
+
+    # Now we repeat this for the endemic portion of the model:
+    h2_lee_end <- haiti2(region = 'after')
+    lee_end_params <- h2_lee_end@params
+    end_ofun_v <- traj_objfun(
+      h2_lee_end, est = 'v', paramnames = 'v'
+    )
+
+    # Get starting values for the estimated parameter
+    start_v_end <- lee_end_params[c('v')]
+
+    # Use the subplex package to calibrate 'v' for the epi-model with fixed coefs.
+    end_fit_v <- subplex::subplex(par = log(start_v_end), fn = end_ofun_v)
+    end_params_update_v <- lee_end_params
+    end_params_update_v['v'] <- exp(epi_fit_v$par)
+
+    # Return the results
+    c(
+      "leeFit_ll" = -epi_fit_v$value - end_fit_v$value,
+      "leeFit_n_params" = 6
+    )
+  }, timing = FALSE
+)
 
 # TODO: Model 2
 
-# This code chunk fits Model 2. This is a quick caclulation compared to models
-# 1 and 3, so no run_level is used.
+h2_fit <- bake(
+  file = 'model2/model2_fit.rds', {
 
-h2_fit <- readRDS("model2/model2_fit.rds")
+    # Create model and save initial values for each parameter
+    h2 <- haiti2(cutoff = 10000, measure = "log")  # Default is epidemic period
+    h2_params <- h2@params
+    est_params <- c('Mu', 'Beta', 'BetaW', 'v', 'sigma', 'phase')
+    n_fit_params <- length(est_params)
 
-# h2_fit <- bake(
-#   file = paste0("model2/model2_fit.rds"), {
-#     fit_haiti2()
-#   },
-#   timing = FALSE
-# )
+    # Get objective function to minimize
+    epi_ofun <- pomp::traj_objfun(h2, est = est_params, params = h2_params)
+
+    # Vector of starting values of the parameters that are estimated.
+    # phase is not included because it's the only non log-transformed variable
+    theta <- h2_params[c("Mu", "Beta", "BetaW", "v", "sigma")]
+
+    # Fit the epi model
+    h2_fit_tmp <- subplex::subplex(
+      par = c(log(theta), h2_params['phase']),
+      fn = epi_ofun
+    )
+
+    # Save the fitted parameters to the h2_params vector
+    h2_params[c("Mu","Beta","BetaW","v", "sigma")] <- exp(h2_fit_tmp$par[c("Mu", "Beta", "BetaW", "v", "sigma")])
+    h2_params['phase'] <- h2_fit_tmp$par['phase']
+
+
+    model2_fit_results <- list()
+    model2_fit_results[['h2_params']] <- h2_params
+    model2_fit_results[["n_fit_params"]] <- n_fit_params
+    model2_fit_results[['logLik']] <- h2_fit_tmp$value
+
+    rm(h2, epi_ofun, theta, h2_fit_tmp)
+
+    model2_fit_results
+  }, timing = FALSE
+)
 @
 
 <<FitModel3, echo=FALSE, include=FALSE, message=FALSE>>=
@@ -925,14 +994,7 @@ stew(file = "models.rda", {
 NREPS_EVAL <- switch(RUN_LEVEL,   3,   8,    36)
 NP_EVAL    <- switch(RUN_LEVEL, 100, 500,  5000)
 
-# Objective function of model 2, epidemic phase
-epi_ofun <- traj_objfun(
-  h2_epi,
-  params = h2_fit$h2_params
-)
-
-mod2_epi_ll <- -epi_ofun(par = h2_fit$h2_params)
-mod2_ll <- mod2_epi_ll - sum(log(h2_epi@data + 1), na.rm = TRUE)
+mod2_ll <- h2_fit$logLik
 
 arima_lik2 <- 0
 
@@ -1066,7 +1128,7 @@ lee3_NREP <- switch(RUN_LEVEL,  3,   8,   36)
 mod1_lee_n_params <- 20
 mod1_lee_aic <- 2 * mod1_lee_n_params - 2 * mod1_lee_ll
 
-mod2_lee_aic <- 2 * h2_fit$leeFit_n_params - 2 * h2_fit$leeFit_ll
+mod2_lee_aic <- 2 * unname(lee20_replication['leeFit_n_params']) - 2 * unname(lee20_replication['leeFit_ll'])
 
 registerDoRNG(49637421)
 
@@ -1647,7 +1709,7 @@ Alternatively, some investigations obtained parameters from previous sources wit
   $\Sexpr{myround(mod2_ll, 1)}$ &
   $\Sexpr{myround(mod3_ll, 1)}$ \\
     & ($\Sexpr{myround(mod1_lee_ll, 1)}$)\footnotemark[1] &
-  ($\Sexpr{myround(h2_fit$leeFit_ll, 1)}$) &
+  ($\Sexpr{myround(unname(lee20_replication['leeFit_ll']), 1)}$) &
   ($\Sexpr{myround(lee3_results[["all_ll_eval"]], 1)}$)\footnotemark[2]
 \\
 \hline
@@ -1657,7 +1719,7 @@ Number of &
   $\Sexpr{as.character(mod3_n_params)}$ \\
  Fit Parameters &
  (\Sexpr{as.character(mod1_lee_n_params)}) &
- ($\Sexpr{as.character(h2_fit$leeFit_n_params)}$) &
+ ($\Sexpr{as.character(unname(lee20_replication['leeFit_n_params']))}$) &
  ($\Sexpr{as.character(lee3_results$n_params, 1)}$)
 \\
 \hline
@@ -1785,7 +1847,10 @@ Simulations from the initial conditions of our fitted model are plotted against 
 # This code chunk creates the figure containing simulations from Model 1
 
 # Simulate Model 1 from initial conditions.
-sims <- simulate(h1, nsim = 500, format = 'data.frame', seed = 3448931)
+sims <- simulate(
+  h1, nsim = switch(RUN_LEVEL, 50, 100, 500),
+  format = 'data.frame', seed = 3448931
+)
 
 # Calculate 0.025 and 0.975 percentiles of simulations, at each time point.
 quants <- sims %>%
@@ -1891,15 +1956,14 @@ h2_traj <- h2_epi_traj %>%
 
 # Run Vaccination scenarios for Model 2. Note that the code runs the same
 # speed for each run-level.
-mod2_VaccScenarios <- readRDS("model2/VaccinationScenarios.rds")
-# mod2_VaccScenarios <- bake(
-#   file = paste0("model2/VaccinationScenarios.rds"), {
-#     haiti2_vaccScenario(
-#       h2_params = h2_fit$h2_params
-#     )
-#   },
-#   timing = FALSE
-# )
+mod2_VaccScenarios <- bake(
+  file = paste0("model2/VaccinationScenarios.rds"), {
+    haiti2_vaccScenario(
+      h2_params = h2_fit$h2_params
+    )
+  },
+  timing = FALSE
+)
 @
 
 \begin{figure}[!h]
