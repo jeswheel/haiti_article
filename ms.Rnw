@@ -387,7 +387,7 @@ true_agg_cases <- dep_plot_df %>%
   )
 @
 
-<<CalculateLee1Likelihoods, echo=FALSE, message=FALSE, include=FALSE>>=
+<<Calculate Lee1 Likelihoods, echo=FALSE, message=FALSE, include=FALSE>>=
 
 # In this code chunk, we attempt to estimate the likelihood of Model 1 that
 # is described by Lee et al (2020). Because this chunk produces some
@@ -640,10 +640,7 @@ we then describe how each model is calibrated to data, and present a systematic 
 We then use improved model fits to project cholera incidence in Haiti under various vaccination scenarios considered by Lee et al.~\cite{lee20}.
 Finally, we conclude with a discussion of the results.
 
-<<LoadModel1Params, echo=FALSE, message=FALSE, include=FALSE>>=
-
-# This code chunk is used to fit Model 1 using the IF2 algorithm.
-set.seed(636813)
+<<Load Model1 Params, echo=FALSE, message=FALSE, include=FALSE>>=
 
 # Load the file containing profiles of Model 1 Parameters.
 if (RUN_LEVEL != 3 && file.exists("model1/run_level_3/h1_profiles.rds")) {
@@ -683,7 +680,7 @@ rm(h1_prof)
 gc()
 @
 
-<<FitModel2, echo=FALSE, include=FALSE, message=FALSE, warning=FALSE>>=
+<<Fit Model 2, echo=FALSE, include=FALSE, message=FALSE, warning=FALSE>>=
 
 # Calculate log-likelihood of Lee et al (2020) model.
 # We have parameter estimates for everything except the variance of the
@@ -728,8 +725,6 @@ lee20_replication <- bake(
   }, timing = FALSE
 )
 
-# TODO: Model 2
-
 h2_fit <- bake(
   file = 'model2/model2_fit.rds', {
 
@@ -760,7 +755,7 @@ h2_fit <- bake(
     model2_fit_results <- list()
     model2_fit_results[['h2_params']] <- h2_params
     model2_fit_results[["n_fit_params"]] <- n_fit_params
-    model2_fit_results[['logLik']] <- h2_fit_tmp$value
+    model2_fit_results[['logLik']] <- -h2_fit_tmp$value
 
     rm(h2, epi_ofun, theta, h2_fit_tmp)
 
@@ -769,198 +764,54 @@ h2_fit <- bake(
 )
 @
 
-<<FitModel3, echo=FALSE, include=FALSE, message=FALSE>>=
+<<Load Model3 Parameters, echo=FALSE, include=FALSE, message=FALSE>>=
 
-# This code chunk is used to fit Model 3 using the IBPF algorithm.
-set.seed(8636712)
+# Calculate the number of parameters that are estimated:
+mod3_n_params <- length(c(
+  "mu_B", "XthetaA", "thetaI", "lambdaR", "r", "std_W", "epsilon", "k",
+  paste0('betaB', 1:10), paste0('foi_add', 1:10),
+  'aHur3', 'aHur9',
+  'hHur3', 'aHur9',
+  'Iinit3', 'Iinit4'
+))
 
-# Create vectors for the unit and shared parameters
+# Load the file containing profiles of Model 1 Parameters.
+if (RUN_LEVEL != 3 && file.exists("model3/run_level_3/h3_profiles.rds")) {
+
+  # If RUN_LEVEL != 3, and RUN_LEVEL == 3 results exist, just load the RL3
+  # results.
+  h3_prof <- readRDS("model3/run_level_3/h3_profiles.rds")
+} else if (file.exists(paste0('model3', rl_dir, 'h3_profiles.rds'))) {
+
+  # If the `model3/run_level_<RUN_LEVEL>/h3_profiles.rds` file exists, load it
+  h3_prof <- readRDS(paste0('model3', rl_dir, 'h3_profiles.rds'))
+} else {
+
+  # Otherwise (missing RL3 file, and the corresponding <RUN_LEVEL> file):
+  # Throw an error, letting users know how to create the file.
+  stop(paste0("Missing file: `model3/", rl_dir, 'h3_profiles.rds`;\nThe file can be obtained by running the script `H3profile.R`'))
+}
+
+# haiti3_fit contains ll estimate for many parameter sets, so we want to find
+# the highest value
+mod3_ll <- h3_prof %>%
+  slice_max(order_by = logLik, n = 1) %>%
+  pull(logLik)
+@
+
+<<Create Model Objects,echo=FALSE,eval=TRUE, include=FALSE, message=FALSE>>=
+
+# Save the parameters that correspond to the MLE of Model 3.
+p3 <- h3_prof %>%
+  slice_max(logLik, n = 1) %>%
+  select(-(job.id:logLik_se)) %>%
+  unlist()
+
 unit_specific_names <- c("betaB", "foi_add", "aHur", "hHur", "Iinit")
 shared_param_names <- c(
   "mu_B", "XthetaA", "thetaI", "lambdaR", "r", "std_W",
   "epsilon", "k"
 )
-est_param_names <- c(
-  unit_specific_names, shared_param_names
-)
-
-# Add unit numbers to each parameter
-est_param_names_expanded <- paste0(rep(est_param_names, each = 10), 1:10)
-
-# Simple function that is used to set the rw_sd for the first search
-# This function is convenient so that we don't have to type out the rw_sd
-# for each unit parameter.
-set_rw_1 <- function(x) {
-  if (gsub("[[:digit:]]+$", "", x) %in% shared_param_names) {
-    return(0.01)
-  } else if (x %in% paste0(rep(c("aHur", 'hHur'), each = 2), c(3, 9))) {
-    return(expression(ifelse(time >= 2016.754 & time <= 2017, 0.015, 0)))
-  } else if (x %in% c("Iinit3", "Iinit4")) {
-    return(expression(ivp(0.25)))
-  } else if (grepl('^foi_add[[:digit:]]+$', x)) {
-    return(0.015)
-  } else if (grepl('^betaB[[:digit:]]+$', x)) {
-    return(0.01)
-  } else {
-    return(0)
-  }
-}
-
-set_rw_2 <- function(x) {
-  if (gsub("[[:digit:]]+$", "", x) %in% shared_param_names) {
-    return(0.003)
-  } else if (x %in% paste0(rep(c("aHur", 'hHur'), each = 2), c(3, 9))) {
-    return(expression(ifelse(time >= 2016.754 & time <= 2017, 0.005, 0)))
-  } else if (x %in% c("Iinit3", "Iinit4")) {
-    return(expression(ivp(0.125)))
-  } else if (grepl('^foi_add[[:digit:]]+$', x)) {
-    return(0.005)
-  } else if (grepl('^betaB[[:digit:]]+$', x)) {
-    return(0.003)
-  } else {
-    return(0)
-  }
-}
-
-# First Search RW
-reg_rw_1.sd <- lapply(est_param_names_expanded, set_rw_1)
-names(reg_rw_1.sd) <- est_param_names_expanded
-chol_rw_1.sd <- do.call(rw_sd, reg_rw_1.sd)
-
-# Second Search RW
-reg_rw_2.sd <- lapply(est_param_names_expanded, set_rw_2)
-names(reg_rw_2.sd) <- est_param_names_expanded
-chol_rw_2.sd <- do.call(rw_sd, reg_rw_2.sd)
-
-if (RUN_LEVEL == 1){
-  SEARCH1 = list(
-    NBPF = 10,
-    NP = 200,
-    SPAT_REGRESSION = 0.05,
-    NREPS = 20,
-    NP_EVAL = 200,
-    NREPS_EVAL = 3,
-    RW_SD = chol_rw_1.sd,
-    COOLING = 0.5,
-    KEEP_TRACES = TRUE
-  )
-
-  SEARCH2 = list(
-    TOP_N = 8,
-    NBPF = 10,
-    NP = 200,
-    SPAT_REGRESSION = 0.05,
-    NREPS = 2,
-    NP_EVAL = 200,
-    NREPS_EVAL = 3,
-    RW_SD = chol_rw_2.sd,
-    COOLING = 0.5,
-    KEEP_TRACES = TRUE
-  )
-
-} else if (RUN_LEVEL == 2) {
-  SEARCH1 = list(
-    NBPF = 100,
-    NP = 1000,
-    SPAT_REGRESSION = 0.05,
-    NREPS = 72,
-    NP_EVAL = 1000,
-    NREPS_EVAL = 8,
-    RW_SD = chol_rw_1.sd,
-    COOLING = 0.5,
-    KEEP_TRACES = TRUE,
-    KEEP_LIK_MAT = TRUE
-  )
-
-  SEARCH2 = list(
-    TOP_N = 9,
-    NBPF = 100,
-    NP = 1000,
-    SPAT_REGRESSION = 0.05,
-    NREPS = 4,
-    NP_EVAL = 1000,
-    NREPS_EVAL = 9,
-    RW_SD = chol_rw_2.sd,
-    COOLING = 0.5,
-    KEEP_TRACES = TRUE,
-    KEEP_LIK_MAT = TRUE
-  )
-
-} else if (RUN_LEVEL == 3) {
-
-  SEARCH1 = list(
-    NBPF = 100,
-    NP = 2500,
-    SPAT_REGRESSION = 0.05,
-    NREPS = 144,
-    NP_EVAL = 2500,
-    NREPS_EVAL = 18,
-    RW_SD = chol_rw_1.sd,
-    COOLING = 0.5,
-    KEEP_TRACES = FALSE,
-    KEEP_LIKE_MAT = FALSE
-  )
-
-  SEARCH2 = list(
-    TOP_N = 12,
-    NBPF = 100,
-    NP = 2500,
-    SPAT_REGRESSION = 0.05,
-    NREPS = 6,
-    NP_EVAL = 2500,
-    NREPS_EVAL = 18,
-    RW_SD = chol_rw_2.sd,
-    COOLING = 0.5,
-    KEEP_TRACES = FALSE,
-    KEEP_LIK_MAT = TRUE
-  )
-}
-
-# Calculate the number of parameters that are estimated:
-# This is calculated by the number of non-zero rw_sd values (including expressions), but then subtracting of repeated shared parameters.
-mod3_n_params <- sum(reg_rw_1.sd != 0, na.rm = TRUE) + sum(sapply(reg_rw_1.sd, is.expression)) - length(shared_param_names) * 9
-
-# Fit Model 3
-haiti3_fit <- readRDS("model3/run_level_3/haiti3_fit.rds")
-# haiti3_fit <- bake(
-#   file = paste0("model3/", rl_dir, "haiti3_fit.rds"), {
-#     fit_haiti3(
-#       nsearches = 2L,
-#       search1 = SEARCH1,
-#       search2 = SEARCH2,
-#       search_rho = FALSE,
-#       search_gamma = FALSE,
-#       search_Iinit = TRUE,
-#       search_hur = TRUE
-#     )
-#   }
-# )
-
-# haiti3_fit contains ll estimate for many parameter sets, so we want to find
-# the highest value
-mod3_ll <- max(
-  haiti3_fit[[length(haiti3_fit)]]$logLiks$logLik,
-  na.rm = TRUE
-)
-
-# Just a bit of tidying up: removing parameters that we won't use again.
-rm(
-  SEARCH1, SEARCH2, N_SEARCHES,
-  est_param_names, est_param_names_expanded,
-  set_rw_1, set_rw_2, set_rw_3, reg_rw_1.sd, reg_rw_2.sd, reg_rw_3.sd,
-  chol_rw_1.sd, chol_rw_2.sd, chol_rw_3.sd
-)
-gc()
-
-@
-
-<<createModelObjects,echo=FALSE,eval=TRUE, include=FALSE, message=FALSE>>=
-
-# Find the index for parameters of model 3 that correspond to the MLE.
-best_m3 <- which.max(haiti3_fit[[length(haiti3_fit)]]$logLiks$logLik)
-
-# Save the parameters that correspond to the MLE of Model 3.
-p3 <- haiti3_fit[[length(haiti3_fit)]]$params[best_m3, ]
 
 p3u <- matrix(nrow = length(unit_specific_names), ncol = 10)
 rownames(p3u) <- unit_specific_names
@@ -990,9 +841,9 @@ stew(file = "models.rda", {
 })
 @
 
-<<AICtableInput, echo=FALSE, eval=TRUE>>=
+<<Get AIC table Input, echo=FALSE, eval=TRUE>>=
 NREPS_EVAL <- switch(RUN_LEVEL,   3,   8,    36)
-NP_EVAL    <- switch(RUN_LEVEL, 100, 500,  5000)
+NP_EVAL    <- switch(RUN_LEVEL,  50, 500,  5000)
 
 mod2_ll <- h2_fit$logLik
 
@@ -1014,49 +865,48 @@ mod1_aic <- 2 * mod1_n_params - 2 * mod1_ll
 mod3_aic <- 2 * mod3_n_params - 2 * mod3_ll
 
 # Calculate likelihood via block-particle filter
-mod3_eval_res <- readRDS("model3/run_level_3/mod3_eval_res.rds")
-# mod3_eval_res <- bake(
-#   file = paste0('model3/', rl_dir, 'mod3_eval_res.rds'), {
-#
-#     # Create a list to store results
-#     results <- list()
-#
-#     coef(h3Spat) <- p3
-#
-#     # Perform block-particle filter
-#     h3_bpf <- foreach(i = 1:NREPS_EVAL, .combine = c) %dopar% {
-#       bpfilter(h3Spat, Np = NP_EVAL, block_size = 1)
-#     }
-#
-#     ll <- logLik(h3_bpf)
-#     results$ll <- logmeanexp(ll[!is.na(ll)], se = FALSE)
-#
-#     ### Get likelihood for subset of the data
-#
-#     # Find appropriate sub-set
-#     in_subset_cols <- h3_bpf[[1]]@times >= as.numeric(lubridate::decimal_date(as.Date("2014-03-01")))
-#     in_subset_rows <- h3_bpf[[1]]@unit_names != 'Ouest'
-#
-#     mod3_coupled_subset_evals <- c()
-#     for (i in 1:length(h3_bpf)) {
-#       mod3_coupled_subset_evals <- c(
-#         mod3_coupled_subset_evals,
-#         sum(h3_bpf[[i]]@block.cond.loglik[in_subset_rows, in_subset_cols])
-#       )
-#     }
-#
-#     results$subset_ll <- logmeanexp(mod3_coupled_subset_evals)
-#     results
-#   },
-#   timing = FALSE
-# )
+mod3_eval_res <- bake(
+  file = paste0('model3/', rl_dir, 'mod3_eval_res.rds'), {
+
+    # Create a list to store results
+    results <- list()
+
+    coef(h3Spat) <- p3
+
+    # Perform block-particle filter
+    h3_bpf <- foreach(i = 1:NREPS_EVAL, .combine = c) %dopar% {
+      bpfilter(h3Spat, Np = NP_EVAL, block_size = 1)
+    }
+
+    ll <- logLik(h3_bpf)
+    results$ll <- logmeanexp(ll[!is.na(ll)], se = FALSE)
+
+    ### Get likelihood for subset of the data
+
+    # Find appropriate sub-set
+    in_subset_cols <- h3_bpf[[1]]@times >= as.numeric(lubridate::decimal_date(as.Date("2014-03-01")))
+    in_subset_rows <- h3_bpf[[1]]@unit_names != 'Ouest'
+
+    mod3_coupled_subset_evals <- c()
+    for (i in 1:length(h3_bpf)) {
+      mod3_coupled_subset_evals <- c(
+        mod3_coupled_subset_evals,
+        sum(h3_bpf[[i]]@block.cond.loglik[in_subset_rows, in_subset_cols])
+      )
+    }
+
+    results$subset_ll <- logmeanexp(mod3_coupled_subset_evals)
+    results
+  },
+  timing = FALSE
+)
 
 mod3_eval_res$subset_aic <- 2 * mod3_n_params - 2 * mod3_eval_res$subset_ll
 
 rm(NREPS_EVAL, NP_EVAL)
 @
 
-<<CalculateBenchLikelihood, echo=FALSE, message=FALSE, include=FALSE, cache=TRUE>>=
+<<Calculate Bench Likelihood, echo=FALSE, message=FALSE, include=FALSE, cache=TRUE>>=
 
 benchmarks <- list()
 
@@ -1117,11 +967,11 @@ for (dep in 1:10) {
 }
 
 benchmarks[['m3']] <- m3_benchmark
-rm(cases, m3_benchmark, m3_bench, dep, mod3_cases)
+rm(cases, m3_benchmark, dep, mod3_cases)
 gc()
 @
 
-<<AIC Lee et al, echo=FALSE, include=FALSE, message=FALSE>>=
+<<Computing AIC of Lee et al, echo=FALSE, include=FALSE, message=FALSE>>=
 lee3_NP   <- switch(RUN_LEVEL, 50, 250, 5000)
 lee3_NREP <- switch(RUN_LEVEL,  3,   8,   36)
 
@@ -1134,71 +984,68 @@ registerDoRNG(49637421)
 
 # Create Lee et al (2020a) version of model 3 on sub-data
 lee3_sub <- lee3_spatPomp()
-
 lee3_all <- lee3_spatPomp(start_date = "2010-10-23")
 
-lee3_results <- readRDS("model3/run_level_3/lee3_results.rds")
-# lee3_results <- bake(
-#   file = paste0('model3/', rl_dir, 'lee3_results.rds'), {
-#
-#     # Create lists to save results
-#     lee3_results <- list()
-#
-#     # Save how long it takes for sub-data
-#     lee3_results[["sub_bpf_time"]] <- system.time({
-#
-#       lee3_sub_ll_evals <- foreach(
-#         i = 1:lee3_NREP, .combine = rbind
-#       ) %dopar% {
-#
-#         liks <- numeric(10L)
-#
-#         lee_bpf_out <- bpfilter(lee3_sub, block_size = 1, Np = lee3_NP)
-#         Ouest_ind <- which(lee_bpf_out@unit_names == "Ouest")
-#
-#         for (u in 1:10) {
-#           if (u == Ouest_ind) {
-#             liks[u] <- sum(lee_bpf_out@block.cond.loglik[u, lee3_sub@times >= lubridate::decimal_date(as.Date('2017-06-10'))])
-#           } else {
-#             liks[u] <- sum(lee_bpf_out@block.cond.loglik[u, ])
-#           }
-#         }
-#
-#         liks
-#       }
-#     })
-#
-#     # Save all likelihood evaluations
-#     lee3_results[["sub_ll_eval"]] <- logmeanexp(rowSums(lee3_sub_ll_evals)[!is.na(rowSums(lee3_sub_ll_evals))])
-#
-#     registerDoRNG(2789131)
-#
-#     # Save how long it takes for all data
-#     lee3_results[["all_pf_time"]] <- system.time({
-#       # Save all likelihood evaluations
-#
-#       lee3_all_ll_evals <- foreach(
-#         i = 1:lee3_NREP, .combine = c
-#       ) %dopar% {
-#         logLik(bpfilter(lee3_all, block_size = 1, Np = lee3_NP))  # Get likelihood evaluations
-#       }
-#
-#       lee3_results[["all_ll_eval"]] <- logmeanexp(lee3_all_ll_evals[!is.na(lee3_all_ll_evals)])
-#
-#     })
-#
-#     lee3_results[["n_params"]] <- 29
-#
-#     lee3_results
-#   },
-#   timing = FALSE
-# )
+lee3_results <- bake(
+  file = paste0('model3/', rl_dir, 'lee3_results.rds'), {
+
+    # Create lists to save results
+    lee3_results <- list()
+
+    # Save how long it takes for sub-data
+    lee3_results[["sub_bpf_time"]] <- system.time({
+
+      lee3_sub_ll_evals <- foreach(
+        i = 1:lee3_NREP, .combine = rbind
+      ) %dopar% {
+
+        liks <- numeric(10L)
+
+        lee_bpf_out <- bpfilter(lee3_sub, block_size = 1, Np = lee3_NP)
+        Ouest_ind <- which(lee_bpf_out@unit_names == "Ouest")
+
+        for (u in 1:10) {
+          if (u == Ouest_ind) {
+            liks[u] <- sum(lee_bpf_out@block.cond.loglik[u, lee3_sub@times >= lubridate::decimal_date(as.Date('2017-06-10'))])
+          } else {
+            liks[u] <- sum(lee_bpf_out@block.cond.loglik[u, ])
+          }
+        }
+
+        liks
+      }
+    })
+
+    # Save all likelihood evaluations
+    lee3_results[["sub_ll_eval"]] <- logmeanexp(rowSums(lee3_sub_ll_evals)[!is.na(rowSums(lee3_sub_ll_evals))])
+
+    registerDoRNG(2789131)
+
+    # Save how long it takes for all data
+    lee3_results[["all_pf_time"]] <- system.time({
+      # Save all likelihood evaluations
+
+      lee3_all_ll_evals <- foreach(
+        i = 1:lee3_NREP, .combine = c
+      ) %dopar% {
+        logLik(bpfilter(lee3_all, block_size = 1, Np = lee3_NP))  # Get likelihood evaluations
+      }
+
+      lee3_results[["all_ll_eval"]] <- logmeanexp(lee3_all_ll_evals[!is.na(lee3_all_ll_evals)])
+
+    })
+
+    lee3_results[["n_params"]] <- 29
+
+    lee3_results
+  },
+  timing = FALSE
+)
 
 rm(lee3_sub, lee3_all, lee3_NP, lee3_NREP)
 gc()
 
 mod3_lee_coupled_aic <- 2 * lee3_results$n_params - 2 * lee3_results$all_ll_eval
-
 mod3_lee_coupled_partial_aic <- 2 * lee3_results$n_params - 2 * lee3_results$sub_ll_eval
 @
 
@@ -1817,7 +1664,7 @@ The blue curve is the MCAP, the vertical blue line indicates the MLE, and the ve
 }
 \end{figure}
 
-<<cleanUpBetatFig, echo=FALSE, message=FALSE, include=FALSE, warning=FALSE>>=
+<<clean Up of Betat data, echo=FALSE, message=FALSE, include=FALSE, warning=FALSE>>=
 suppressWarnings(
   rm(h1_prof_res, mcap_results)
 )
@@ -2029,37 +1876,34 @@ Simulations from the fitted model are displayed in Fig.~\ref{fig:h3spatsims}.
 h3_nsim <- switch(RUN_LEVEL, 20, 100, 500)
 
 # Get quantiles of simulations from the calibrated Model 3.
-h3_quants <- readRDS("model3/run_level_3/h3Sims.rds")
-# h3_quants <- bake(
-#   file = paste0('model3/', rl_dir, 'h3Sims.rds'), {
-#
-#     coef(h3Spat) <- p3
-#     # Simulate from the fitted version of Model 3
-#     h3_sims <- simulate(
-#       h3Spat, nsim = h3_nsim, format = 'data.frame'
-#     )
-#
-#     # For each department and time-point, calculate percentiles of the
-#     # simulations
-#     h3_sims %>%
-#       rename(dep = unitname) %>%
-#       group_by(dep, time) %>%
-#       summarise(
-#         q05 = quantile(cases, 0.025, na.rm = T),
-#         mean = mean(cases, na.rm = T),
-#         q50 = quantile(cases, 0.5, na.rm = T),
-#         q95 = quantile(cases, 0.975, na.rm = T)
-#       ) %>%
-#       ungroup() %>%
-#       mutate(
-#         date = lubridate::date_decimal(time)
-#       ) %>%
-#       mutate(date = as.Date(lubridate::round_date(date, unit = 'day')))
-#   },
-#   timing = FALSE
-# )
+h3_quants <- bake(
+  file = paste0('model3/', rl_dir, 'h3Sims.rds'), {
 
+    coef(h3Spat) <- p3
+    # Simulate from the fitted version of Model 3
+    h3_sims <- simulate(
+      h3Spat, nsim = h3_nsim, format = 'data.frame'
+    )
 
+    # For each department and time-point, calculate percentiles of the
+    # simulations
+    h3_sims %>%
+      rename(dep = unitname) %>%
+      group_by(dep, time) %>%
+      summarise(
+        q05 = quantile(cases, 0.025, na.rm = T),
+        mean = mean(cases, na.rm = T),
+        q50 = quantile(cases, 0.5, na.rm = T),
+        q95 = quantile(cases, 0.975, na.rm = T)
+      ) %>%
+      ungroup() %>%
+      mutate(
+        date = lubridate::date_decimal(time)
+      ) %>%
+      mutate(date = as.Date(lubridate::round_date(date, unit = 'day')))
+  },
+  timing = FALSE
+)
 @
 
 \begin{figure}[!h]
@@ -2499,177 +2343,167 @@ h1_S1_results <- bake(
 )
 @
 
-<<Load Model 3 Vacc Scenarios, message=FALSE, include=FALSE>>=
-NP_BPF <- switch(RUN_LEVEL, 50, 200, 2000)
-NSIM   <- switch(RUN_LEVEL, 10,  50, 1000)
+<<Simulate Model 3 Vacc Scenarios, message=FALSE, include=FALSE>>=
+NP_BPF <- switch(RUN_LEVEL, 20, 200, 2000)
+NSIM   <- switch(RUN_LEVEL, 5,  50, 1000)
 
-h3_bpf_end_stats <- readRDS("model3/run_level_3/h3_bpf_end_states.rds")
-# h3_bpf_end_states <- bake(
-#   file = paste0("model3/", rl_dir, "h3_bpf_end_states.rds"),
-#   expr = {
-#     coef(h3Spat) <- p3
-#     h3_bpf <- bpfilter(h3Spat, Np = NP_BPF, block_size = 1, save_states = TRUE)
-#     ss <- h3_bpf@saved.states
-#     ss[[length(ss)]]
-#   },
-#   timing = FALSE
-# )
+h3_bpf_end_states <- bake(
+  file = paste0("model3/", rl_dir, "h3_bpf_end_states.rds"),
+  expr = {
+    coef(h3Spat) <- p3
+    h3_bpf <- bpfilter(h3Spat, Np = NP_BPF, block_size = 1, save_states = TRUE)
+    ss <- h3_bpf@saved.states
+    ss[[length(ss)]]
+  },
+  timing = FALSE
+)
 
-mod3_V0_res <- readRDS("model3/run_level_3/mod3_V0_res.rds")
-# mod3_V0_res <- bake(
-#   file = paste0("model3/", rl_dir, "mod3_V0_res.rds"), {
-#
-#     # Create a list to store results
-#     h3_V0_res <- list()
-#
-#     # Get "noVacc" scenario parameters
-#     h3_S0_par <- get_model3_vacc_scenario_params(scenario = "noVacc")
-#     coef(h3Spat) <- p3
-#     coef(h3Spat)[names(h3_S0_par)] <- h3_S0_par
-#
-#     # Using parameters and filtered distribution, project system
-#     h3_V0_sims <- project_from_filter(
-#       h3Spat, end_states = h3_bpf_end_states, covarGen = project_rain,
-#       nsims = NSIM, seed = 6897154
-#     )
-#
-#     # Store nationally aggregated results
-#     h3_V0_res$mod3_V0_sims <- agg_mod3_sims(h3_V0_sims)
-#     h3_V0_res$mod3_V0_probs <- get_elimProbs(h3_V0_sims, model = 3)
-#
-#     # For the supplement material, save quantiles of the Susceptible individuals
-#     h3_V0_res$SQuants <- h3_V0_sims %>%
-#       mutate(
-#         date = as.Date(lubridate::round_date(lubridate::date_decimal(time), unit = 'day'))
-#       ) %>%
-#       group_by(unitname, date) %>%
-#       mutate(
-#         pop = h3Spat@params[paste0("H", which(first(unitname) == unit_names(h3Spat)))]
-#       ) %>%
-#       summarize(
-#         Q025 = quantile((S + VSd + VSdd + VSdd_alt + VSd_alt) / pop, probs = 0.025),
-#         Q50 = quantile((S + VSd + VSdd + VSdd_alt + VSd_alt) / pop, probs = 0.5),
-#         Q975 = quantile((S + VSd + VSdd + VSdd_alt + VSd_alt) / pop, probs = 0.975)
-#       ) %>%
-#       ungroup() %>%
-#       rename(dep = unitname)
-#
-#     # Return results
-#     h3_V0_res
-#
-#   }
-# )
+mod3_V0_res <- bake(
+  file = paste0("model3/", rl_dir, "mod3_V0_res.rds"), {
 
-mod3_V1_res <- readRDS("model3/run_level_3/mod3_V1_res.rds")
-# mod3_V1_res <- bake(
-#   file = paste0("model3/", rl_dir, "mod3_V1_res.rds"), {
-#
-#     # Create a list to store results
-#     h3_V1_res <- list()
-#
-#     # Get "noVacc" scenario parameters
-#     h3_V1_par <- get_model3_vacc_scenario_params(scenario = "2dep")
-#     coef(h3Spat) <- p3
-#     coef(h3Spat)[names(h3_V1_par)] <- h3_V1_par
-#
-#     # Using parameters and filtered distribution, project system
-#     h3_V1_sims <- project_from_filter(
-#       h3Spat, end_states = h3_bpf_end_states, covarGen = project_rain,
-#       nsims = NSIM, seed = 6897154
-#     )
-#
-#     # Store nationally aggregated results
-#     h3_V1_res$mod3_V1_sims <- agg_mod3_sims(h3_V1_sims)
-#     h3_V1_res$mod3_V1_probs <- get_elimProbs(h3_V1_sims, model = 3)
-#
-#     # Return results
-#     h3_V1_res
-#
-#   }
-# )
+    # Create a list to store results
+    h3_V0_res <- list()
 
-mod3_V2_res <- readRDS("model3/run_level_3/mod3_V2_res.rds")
-# mod3_V2_res <- bake(
-#   file = paste0("model3/", rl_dir, "mod3_V2_res.rds"), {
-#
-#     # Create a list to store results
-#     h3_V2_res <- list()
-#
-#     # Get "noVacc" scenario parameters
-#     h3_V2_par <- get_model3_vacc_scenario_params(scenario = "3dep")
-#     coef(h3Spat) <- p3
-#     coef(h3Spat)[names(h3_V2_par)] <- h3_V2_par
-#
-#     # Using parameters and filtered distribution, project system
-#     h3_V2_sims <- project_from_filter(
-#       h3Spat, end_states = h3_bpf_end_states, covarGen = project_rain,
-#       nsims = NSIM, seed = 6897154
-#     )
-#
-#     # Store nationally aggregated results
-#     h3_V2_res$mod3_V2_sims <- agg_mod3_sims(h3_V2_sims)
-#     h3_V2_res$mod3_V2_probs <- get_elimProbs(h3_V2_sims, model = 3)
-#
-#     # Return results
-#     h3_V2_res
-#   }
-# )
+    # Get "noVacc" scenario parameters
+    h3_S0_par <- get_model3_vacc_scenario_params(scenario = "noVacc")
+    coef(h3Spat) <- p3
+    coef(h3Spat)[names(h3_S0_par)] <- h3_S0_par
 
-mod3_V3_res <- readRDS("model3/run_level_3/mod3_V3_res.rds")
-# mod3_V3_res <- bake(
-#   file = paste0("model3/", rl_dir, "mod3_V3_res.rds"), {
-#
-#     # Create a list to store results
-#     h3_V3_res <- list()
-#
-#     # Get "noVacc" scenario parameters
-#     h3_V3_par <- get_model3_vacc_scenario_params(scenario = "slowNation")
-#     coef(h3Spat) <- p3
-#     coef(h3Spat)[names(h3_V3_par)] <- h3_V3_par
-#
-#     # Using parameters and filtered distribution, project system
-#     h3_V3_sims <- project_from_filter(
-#       h3Spat, end_states = h3_bpf_end_states, covarGen = project_rain,
-#       nsims = NSIM, seed = 6897154
-#     )
-#
-#     # Store nationally aggregated results
-#     h3_V3_res$mod3_V3_sims <- agg_mod3_sims(h3_V3_sims)
-#     h3_V3_res$mod3_V3_probs <- get_elimProbs(h3_V3_sims, model = 3)
-#
-#     # Return results
-#     h3_V3_res
-#
-#   }
-# )
+    # Using parameters and filtered distribution, project system
+    h3_V0_sims <- project_from_filter(
+      h3Spat, end_states = h3_bpf_end_states, covarGen = project_rain,
+      nsims = NSIM, seed = 6897154
+    )
 
-mod3_V4_res <- readRDS("model3/run_level_3/mod3_V4_res.rds")
-# mod3_V4_res <- bake(
-#   file = paste0("model3/", rl_dir, "mod3_V4_res.rds"), {
-#
-#     # Create a list to store results
-#     h3_V4_res <- list()
-#
-#     # Get "noVacc" scenario parameters
-#     h3_V4_par <- get_model3_vacc_scenario_params(scenario = "fastNation")
-#     coef(h3Spat) <- p3
-#     coef(h3Spat)[names(h3_V4_par)] <- h3_V4_par
-#
-#     # Using parameters and filtered distribution, project system
-#     h3_V4_sims <- project_from_filter(
-#       h3Spat, end_states = h3_bpf_end_states, covarGen = project_rain,
-#       nsims = NSIM, seed = 6897154
-#     )
-#
-#     # Store nationally aggregated results
-#     h3_V4_res$mod3_V4_sims <- agg_mod3_sims(h3_V4_sims)
-#     h3_V4_res$mod3_V4_probs <- get_elimProbs(h3_V4_sims, model = 3)
-#
-#     # Return results
-#     h3_V4_res
-#
-#   }
-# )
+    # Store nationally aggregated results
+    h3_V0_res$mod3_V0_sims <- agg_mod3_sims(h3_V0_sims)
+    h3_V0_res$mod3_V0_probs <- get_elimProbs(h3_V0_sims, model = 3)
+
+    # For the supplement material, save quantiles of the Susceptible individuals
+    h3_V0_res$SQuants <- h3_V0_sims %>%
+      mutate(
+        date = as.Date(lubridate::round_date(lubridate::date_decimal(time), unit = 'day'))
+      ) %>%
+      group_by(unitname, date) %>%
+      mutate(
+        pop = h3Spat@params[paste0("H", which(first(unitname) == unit_names(h3Spat)))]
+      ) %>%
+      summarize(
+        Q025 = quantile((S + VSd + VSdd + VSdd_alt + VSd_alt) / pop, probs = 0.025),
+        Q50 = quantile((S + VSd + VSdd + VSdd_alt + VSd_alt) / pop, probs = 0.5),
+        Q975 = quantile((S + VSd + VSdd + VSdd_alt + VSd_alt) / pop, probs = 0.975)
+      ) %>%
+      ungroup() %>%
+      rename(dep = unitname)
+
+    # Return results
+    h3_V0_res
+  }
+)
+
+mod3_V1_res <- bake(
+  file = paste0("model3/", rl_dir, "mod3_V1_res.rds"), {
+
+    # Create a list to store results
+    h3_V1_res <- list()
+
+    # Get "noVacc" scenario parameters
+    h3_V1_par <- get_model3_vacc_scenario_params(scenario = "2dep")
+    coef(h3Spat) <- p3
+    coef(h3Spat)[names(h3_V1_par)] <- h3_V1_par
+
+    # Using parameters and filtered distribution, project system
+    h3_V1_sims <- project_from_filter(
+      h3Spat, end_states = h3_bpf_end_states, covarGen = project_rain,
+      nsims = NSIM, seed = 6897154
+    )
+
+    # Store nationally aggregated results
+    h3_V1_res$mod3_V1_sims <- agg_mod3_sims(h3_V1_sims)
+    h3_V1_res$mod3_V1_probs <- get_elimProbs(h3_V1_sims, model = 3)
+
+    # Return results
+    h3_V1_res
+  }
+)
+
+mod3_V2_res <- bake(
+  file = paste0("model3/", rl_dir, "mod3_V2_res.rds"), {
+
+    # Create a list to store results
+    h3_V2_res <- list()
+
+    # Get "noVacc" scenario parameters
+    h3_V2_par <- get_model3_vacc_scenario_params(scenario = "3dep")
+    coef(h3Spat) <- p3
+    coef(h3Spat)[names(h3_V2_par)] <- h3_V2_par
+
+    # Using parameters and filtered distribution, project system
+    h3_V2_sims <- project_from_filter(
+      h3Spat, end_states = h3_bpf_end_states, covarGen = project_rain,
+      nsims = NSIM, seed = 6897154
+    )
+
+    # Store nationally aggregated results
+    h3_V2_res$mod3_V2_sims <- agg_mod3_sims(h3_V2_sims)
+    h3_V2_res$mod3_V2_probs <- get_elimProbs(h3_V2_sims, model = 3)
+
+    # Return results
+    h3_V2_res
+  }
+)
+
+mod3_V3_res <- bake(
+  file = paste0("model3/", rl_dir, "mod3_V3_res.rds"), {
+
+    # Create a list to store results
+    h3_V3_res <- list()
+
+    # Get "noVacc" scenario parameters
+    h3_V3_par <- get_model3_vacc_scenario_params(scenario = "slowNation")
+    coef(h3Spat) <- p3
+    coef(h3Spat)[names(h3_V3_par)] <- h3_V3_par
+
+    # Using parameters and filtered distribution, project system
+    h3_V3_sims <- project_from_filter(
+      h3Spat, end_states = h3_bpf_end_states, covarGen = project_rain,
+      nsims = NSIM, seed = 6897154
+    )
+
+    # Store nationally aggregated results
+    h3_V3_res$mod3_V3_sims <- agg_mod3_sims(h3_V3_sims)
+    h3_V3_res$mod3_V3_probs <- get_elimProbs(h3_V3_sims, model = 3)
+
+    # Return results
+    h3_V3_res
+  }
+)
+
+mod3_V4_res <- bake(
+  file = paste0("model3/", rl_dir, "mod3_V4_res.rds"), {
+
+    # Create a list to store results
+    h3_V4_res <- list()
+
+    # Get "noVacc" scenario parameters
+    h3_V4_par <- get_model3_vacc_scenario_params(scenario = "fastNation")
+    coef(h3Spat) <- p3
+    coef(h3Spat)[names(h3_V4_par)] <- h3_V4_par
+
+    # Using parameters and filtered distribution, project system
+    h3_V4_sims <- project_from_filter(
+      h3Spat, end_states = h3_bpf_end_states, covarGen = project_rain,
+      nsims = NSIM, seed = 6897154
+    )
+
+    # Store nationally aggregated results
+    h3_V4_res$mod3_V4_sims <- agg_mod3_sims(h3_V4_sims)
+    h3_V4_res$mod3_V4_probs <- get_elimProbs(h3_V4_sims, model = 3)
+
+    # Return results
+    h3_V4_res
+  }
+)
 @
 
 Simulations from probabilistic models (Models~1 and~3) represent possible trajectories of the dynamic system under the scientific assumptions of the models.
