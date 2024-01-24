@@ -879,7 +879,7 @@ mod3_eval_res <- bake(
     }
 
     ll <- logLik(h3_bpf)
-    results$ll <- logmeanexp(ll[!is.na(ll)], se = FALSE)
+    results$ll <- logmeanexp(ll[!is.na(ll)], se = TRUE)
 
     ### Get likelihood for subset of the data
 
@@ -895,13 +895,13 @@ mod3_eval_res <- bake(
       )
     }
 
-    results$subset_ll <- logmeanexp(mod3_coupled_subset_evals)
+    results$subset_ll <- logmeanexp(mod3_coupled_subset_evals, se = TRUE)
     results
   },
   timing = FALSE
 )
 
-mod3_eval_res$subset_aic <- 2 * mod3_n_params - 2 * mod3_eval_res$subset_ll
+mod3_eval_res$subset_aic <- 2 * mod3_n_params - 2 * mod3_eval_res$subset_ll['se']
 
 rm(NREPS_EVAL, NP_EVAL)
 @
@@ -1589,7 +1589,7 @@ Number of &
 \begin{flushleft}
 Values in parentheses are corresponding values using Lee et al.~\cite{lee20} parameter estimates.  \textsuperscript{1}The reported likelihood is an upper bound of the likelihood of the Lee et al.~\cite{lee20} model. \textsuperscript{2}Lee et al.~\cite{lee20} fit Model~3 to a subset of the data (March 2014 onward, excluding data from Ouest in 2015-2016).
 On this subset, their model has a likelihood of $\Sexpr{myround(lee3_results$sub_ll_eval, 1)}$.
-On this same subset, our model has a likelihood of $\Sexpr{myround(mod3_eval_res$subset_ll, 1)}$.
+On this same subset, our model has a likelihood of $\Sexpr{myround(mod3_eval_res$subset_ll['est'], 1)}$.
 Details of estimating the likelihood of the Lee et al.~\cite{lee20} models is provided in \nameref{S_lee20}
 See Sec.~S6 of the supplement material for more details on estimating the likelihood of the Lee et al.~\cite{lee20} models.
 \end{flushleft}
@@ -1867,7 +1867,7 @@ The IBPF algorithm enables us to directly estimate the parameters of models desc
 The ability to directly estimate parameters of Model~3 is responsible for the large increase in model likelihoods reported in Table~\ref{tab:likes}.
 Simulations from the fitted model are displayed in Fig.~\ref{fig:h3spatsims}.
 
-<<Model 3 SpatPOMP sims, echo=FALSE>>=
+<<Model 3 SpatPOMP Sims, echo=FALSE>>=
 
 # Number of simulations from Model 3. Because it's high-dimensional, we include
 # a run level to avoid time/memory issues when editing. Final results shown
