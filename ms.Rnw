@@ -1324,7 +1324,7 @@ Reporting rate
 \raggedright Observation variance
   & \raggedright $\obsOverdispersion = (\Sexpr{myround(p1["tau_epi"],2)}, \Sexpr{round(p1["tau_end"],2)})$
   & \multirow{2}{*}{(S15)}
-  & \multirow{2}{*}{$\obsOverdispersion = \Sexpr{signif(h2_fit$h2_params['sigma'], 3)}$}
+  & \multirow{2}{*}{$\obsOverdispersion = \Sexpr{myround(h2_fit$h2_params['v'], 3)}$}
   & \multirow{2}{*}{(S16)}
   & \multirow{2}{*}{$\obsOverdispersion = \Sexpr{myround(p3s["k"],2)}$}
   & \multirow{2}{*}{(S19)}
