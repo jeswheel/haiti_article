@@ -645,8 +645,8 @@ Finally, we conclude with a discussion of the results.
 # Load the file containing profiles of Model 1 Parameters.
 if (RUN_LEVEL != 3 && file.exists("model1/run_level_3/h1_profiles.rds")) {
   h1_prof <- readRDS("model1/run_level_3/h1_profiles.rds")
-} else if (file.exists(paste0('model1', rl_dir, 'h1_profiles.rds'))) {
-  h1_prof <- readRDS(paste0('model1', rl_dir, 'h1_profiles.rds'))
+} else if (file.exists(paste0('model1/', rl_dir, 'h1_profiles.rds'))) {
+  h1_prof <- readRDS(paste0('model1/', rl_dir, 'h1_profiles.rds'))
 } else {
   stop(paste0("Missing file: `model1/", rl_dir, 'h1_profiles.rds`;\nThe file can be obtained by running the script `H1profile.R`'))
 }
@@ -781,10 +781,10 @@ if (RUN_LEVEL != 3 && file.exists("model3/run_level_3/h3_profiles.rds")) {
   # If RUN_LEVEL != 3, and RUN_LEVEL == 3 results exist, just load the RL3
   # results.
   h3_prof <- readRDS("model3/run_level_3/h3_profiles.rds")
-} else if (file.exists(paste0('model3', rl_dir, 'h3_profiles.rds'))) {
+} else if (file.exists(paste0('model3/', rl_dir, 'h3_profiles.rds'))) {
 
   # If the `model3/run_level_<RUN_LEVEL>/h3_profiles.rds` file exists, load it
-  h3_prof <- readRDS(paste0('model3', rl_dir, 'h3_profiles.rds'))
+  h3_prof <- readRDS(paste0('model3/', rl_dir, 'h3_profiles.rds'))
 } else {
 
   # Otherwise (missing RL3 file, and the corresponding <RUN_LEVEL> file):
