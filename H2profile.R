@@ -259,7 +259,7 @@ submitJobs(
 # h2_results = ijoin(h2_pars, h2_profile_results)
 #
 # saveRDS(
-#   h2_profile_results,
+#   h2_results,
 #   'model2/h2_profiles.rds')
 # )
 #

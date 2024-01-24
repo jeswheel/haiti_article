@@ -325,7 +325,7 @@ submitJobs(
 # h1_results = ijoin(h1_pars, h1_profile_results)
 #
 # saveRDS(
-#   h1_profile_results,
+#   h1_results,
 #   paste0('model1/run_level_', RUN_LEVEL, '/', 'h1_profiles.rds')
 # )
 #

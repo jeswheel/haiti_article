@@ -383,7 +383,7 @@ submitJobs(resources = resources1)
 # h3_results = ijoin(h3_pars, h3_profile_results)
 #
 # saveRDS(
-#   h3_profile_results,
+#   h3_results,
 #   paste0('model3/run_level_', RUN_LEVEL, '/', 'h3_profiles.rds')
 # )
 #
