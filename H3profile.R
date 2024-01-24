@@ -31,7 +31,7 @@ COOLING <- 0.35
 # Create Experiment Registry ----------------------------------------------
 
 reg <- makeExperimentRegistry(
-  file.dir = paste0('model3/profileReg_RL', RUN_LEVEL, '_v7'),
+  file.dir = paste0('model3/profileReg_RL', RUN_LEVEL),
   seed = 739164,
   packages = c("spatPomp", 'haitipkg', 'pomp')
 )
@@ -40,7 +40,7 @@ reg <- makeExperimentRegistry(
 
 set.seed(665544)
 
-# Read in previous best results
+# Create H3 model object to get fixed parameters
 h3_spat <- haiti3_spatPomp()
 final_pars <- coef(h3_spat)
 
@@ -52,45 +52,27 @@ shared_param_names <- c(
 )
 
 prof_params <- shared_param_names
-# If you wanted to profile over the six added unit-specific
-# parameters
-# prof_params <- c(
-#   shared_param_names, 'aHur3', 'hHur3',
-#   'aHur9', 'hHur9', 'Iinit3', 'Iinit4'
-# )
 
 best_pars <- final_pars
 prof_vars <- c()
 for (pp in prof_params) {
 
   if (pp == "mu_B") {
-    prof_values <- seq(300, 750, length.out = 30)
+    prof_values <- seq(350, 700, length.out = 25)
   } else if (pp == 'XthetaA') {
-    prof_values <- seq(0.0001, 0.15, length.out = 30)
+    prof_values <- seq(0, sqrt(0.15), length.out = 25)^2
   } else if (pp == 'thetaI') {
-    prof_values <- seq(2e-05, 0.00015, length.out = 30)
+    prof_values <- seq(1.05e-05, 1.2e-04, length.out = 30)
   } else if (pp == 'lambdaR') {
-    prof_values <- seq(0.5, 3.6, length.out = 30)
+    prof_values <- c(seq(0, 2, length.out = 24), 1)
   } else if (pp == 'r') {
-    prof_values <- seq(0.05, 1.3, length.out = 30)
+    prof_values <- c(seq(0.55, 1.5, length.out = 24), 1)
   } else if (pp == 'std_W') {
-    prof_values <- seq(0.025, 0.045, length.out = 30)
+    prof_values <- seq(0.024, 0.04, length.out = 27)
   } else if (pp == 'epsilon') {
-    prof_values <- seq(0.66, 1, 0.02)
+    prof_values <- seq(0.84^5, 1, length.out = 14)^(1/5)
   } else if (pp == 'k') {
-    prof_values <- seq(10, 115, length.out = 30)
-  } else if (pp == 'aHur3') {
-    prof_values <- seq(0, 100, length.out = 30)
-  } else if (pp == 'aHur9') {
-    prof_values <- seq(0, 100, length.out = 30)
-  } else if (pp == 'hHur3') {
-    prof_values <- seq(0, 55, length.out = 30)
-  } else if (pp == 'hHur9') {
-    prof_values <- seq(0, 140, length.out = 30)
-  } else if (pp == 'Iinit3') {
-    prof_values <- seq(0 / best_pars['H3'], 150 / best_pars['H3'], length.out = 25)
-  } else if (pp == 'Iinit4') {
-    prof_values <- seq(0 / best_pars['H4'], 100 / best_pars['H4'], length.out = 25)
+    prof_values <- seq(20, 135, length.out = 25)
   }
 
   if (pp %in% shared_param_names) {
@@ -163,10 +145,10 @@ for (pp in prof_params) {
 
   shared_lower_bounds <- c(
     "mu_B" = 450,
-    "XthetaA" = 0.01,
+    "XthetaA" = 1e-8,
     "thetaI" = 2.5e-05,
     "lambdaR" = 0.75,
-    "r" = 0.2,
+    "r" = 0.4,
     "std_W" = 0.0275,
     "epsilon" = 0.8,
     "k" = 25
@@ -176,8 +158,8 @@ for (pp in prof_params) {
     "mu_B" = 700,
     "XthetaA" = 0.15,
     "thetaI" = 1e-04,
-    "lambdaR" = 3.5,
-    "r" = 1,
+    "lambdaR" = 2,
+    "r" = 1.2,
     "std_W" = 0.0375,
     "epsilon" = 0.99,
     "k" = 80
@@ -229,13 +211,14 @@ for (pp in prof_params) {
   prof_vars <- c(prof_vars, rep(pp, nrow(guesses_all)))
 }
 
+# Remove the first row which contains the original params as a place-holder.
 final_pars <- final_pars[-1, names(coef(h3_spat))]
-
 data_obj <- list(starts = final_pars, prof_vars = prof_vars)
 # dim(final_pars)
 
 # Define profile problem for registry -------------------------------------
 
+# Function to sample a starting point for a given profile search
 sample_starting_point <- function(data = data_obj, job, i, ...) {
   list(
     start_par = unlist(data$starts[i, ]),
@@ -247,6 +230,9 @@ addProblem(name = 'profile', data = data_obj, fun = sample_starting_point)
 
 # Define algorithm for parameter estimation -------------------------------
 
+# Function used to fit the model under the constraints of the profile search.
+# If parameter "PARAM" is getting profiled over, the RW_SD is set to zero
+# for "PARAM" and all other fixed parameters.
 fit_model <- function(
     data, job, instance, nbpf, np, spat_regression, np_eval, nreps_eval,
     cooling, start_date = "2010-11-20", ...
@@ -322,8 +308,6 @@ addExperiments(prob.designs = pdes, algo.designs = ades)
 
 # Submit Jobs -------------------------------------------------------------
 
-# resources1 <- list(account = 'stats_dept1', walltime = '10:00', memory = '5000m', ncpus = 1)
-resources1 <- list(account = 'ionides2', walltime = '6:00:00', memory = '5000m', ncpus = 1)
+resources1 <- list(account = 'ionides2', walltime = '8:00:00', memory = '9000m', ncpus = 1)
 
 submitJobs(resources = resources1)
-# submitJobs(ids = 1, resources = resources1)
