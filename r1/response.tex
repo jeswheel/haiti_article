@@ -125,7 +125,7 @@ jeswheel@umich.edu
 WE CAN TRIM DOWN THE RESPONSE LATER. HERE ARE SOME INITIAL BRAINSTORMING THOUGHTS.
 
 Thanks for the feedback on the framing of our contribution.
-The original goal of our manuscript was to combine the two foci identified by the referee: 
+The original goal of our manuscript was to combine the two foci identified by the referee:
 we use an in-depth case study to motivate general procedures for fitting mathematical models to time series data, while explaining how these procedures help to address limitations of previous approaches.
 The case study was intended both to help motivate the advice and to make sure that the advice is pertinent and practical on at least one suite of models.
 Since our approach is predicated on the possibility of carrying out some nontrivial computational procedures, we are led to address computational issues in parallel with scientific and statistical issues.
@@ -154,7 +154,7 @@ In the discussion, we return from the concrete consideration of the case study, 
 
 Fitting models 1 and 2 does not require any methodological innovation. Model 3 has a stochastic spatiotemporal partially-observed structure that leads to methodological challenges. \cite{lee20} made some approximations to avoid carrying out inference for the full coupled system. We show some consequences of those approximations, taking advantage of a newly developed method which has not yet been applied in the context of scientific investigations. So, although the method is not entirely new, its applicability to this task is novel.
 \TODO{We have clarified this in the manuscript WHERE?}
-  
+
 
 \report{
   \textbf{\underline{Introduction}}
@@ -208,13 +208,18 @@ However, a subsequent manuscript addresses [4,5] more directly \cite{li23} and s
 
 \TODO{This is right, as long as there are not any initialization issues...}
 
-\report{9. 
+\report{9.
   Lines 308-309: Isn't this a log-linear trend in the transmission rate?
 }
+
+Yes, that is correct. This has been fixed in the revision. In other instances where the linear trend was previously mentioned, we simply refer to it now as a trend in transmision rate, unless the additional detail of the trend being log-linear is needed for clarity.
 
 \report{10.
   While the data support a linear trend at the $95\%$ confidence level, it's worth commenting on the magnitude of the trend, e.g. the total reduction in $\beta(t)$ over the period of study.
 }
+
+Thank you for this suggestion, a sentence on the overall effect of the parameter estimate has been included.
+For reference, the maxmum likelihood estimate of the parameter corresponds with a 7.3\% reduction to the transmission rate over the course of the outbreak, with a $95\%$ confidence interval $(1.8\%, 17.9\%)$ for the overall reduction in transmission.
 
 \report{11.
   I might have misunderstood it slightly, but I don't entirely follow the reasoning of lines 340-346. It seems that two different claims are being made: A) the model can’t identify which mechanism underlies a trend in $\beta(t)$ and B) the model can't definitively state there is a trend in $\beta(t)$ compared with some other time-varying parameter (e.g. reporting probability). For model 1, I agree with the authors that claims A and B are valid. What I take issue with is the final statement, which seems to be stronger and apply to both claims and mechanistic models more generally: ``we argue that a decreasing transmission rate is a plausible way to explain this, but the incidence data themselves do not provide enough information to pin down the mechanism." I agree that the ``incidence data themselves" (which I take to imply ``without additional covariates data") make claim A valid regardless of the model. However, I don’t think claim B holds regardless of the model. By changing model 1 to include time variation in the reporting rate I don't see \emph{a priori} why the ``the incidence data themselves" might not provide enough information to distinguish between time variation in transmission compared with time variation in reporting without the need for additional data. The deficiency is in model 1 rather than the information content of the data. I suggest the authors rework the paragraph to make the reasoning clearer.
@@ -281,7 +286,7 @@ While the arguments provided throughout the article are well-articulated, there 
 
 The referee's suggestions have led to the addition of various references in the revision.
 For the particular issue of black box versus white box models, we have included the following paragraph
-\TODO{where?}
+\TODO{where?} \jwc{How does the Materials and Methods: Mechanistic models for disease modeling sub-section sound?}
 
 \article{\editMechModels}
 
@@ -293,28 +298,28 @@ In various passages of this paper, it is hinted that modellers should refrain fr
 
 The referee raises several points in this paragraph, and we consider them one at a time.
 
-We agree that adding to model complexity has costs, including loss of identifability, AIC and other formal statistical methods can assess whether the additional complexity is justified by a sufficiently large improvement of statistical fit. Identifiability and model simplicity have practical scientific value which goes beyond their statistical role in reducing generalization error and hence improving out-of-fit predictions. This is a variation on the issue of "statistical significance versus practical significance" familiar from introductory statistics textbooks. 
-HOW DOES THIS PLAY OUT IN THE MS? HOW DO WE CLARIFY IT?
+We agree that adding to model complexity has costs, including loss of identifability.
+AIC and other formal statistical methods can assess whether the additional complexity is justified by a sufficiently large improvement of statistical fit. Identifiability and model simplicity have practical scientific value which goes beyond their statistical role in reducing generalization error and hence improving out-of-fit predictions. This is a variation on the issue of ``statistical significance versus practical significance" familiar from introductory statistics textbooks.
+\eic{HOW DOES THIS PLAY OUT IN THE MS? HOW DO WE CLARIFY IT?}
 
 Moving from an ODE model to a stochastic model may not involve any additional parameters, if only demographic stochasticity is included.
 Generally, it is advisable to consider the possibility of over-dispersed variation on the transmission rate \cite{breto09,he10} leading to one extra parameter compared to a deterministic model.
 In the context of cholera dynamics, \cite{lemaitre19} found a substantial improvement in model fit by including stochasticity, involving one over-dispersion parameter.
-stocks20 found similar results, favoring a stochastic dynamic model with over-dispersion, when investigating transmission dynamics of a different enteric pathogen, rotavirus.
-In other contexts, king15 noted various scientific advantages for including stochasticity in the model; it is undoubtedly part of the biological dynamics, and its omission can lead to over-confident predictions.
+\cite{stocks20} found similar results, favoring a stochastic dynamic model with over-dispersion, when investigating transmission dynamics of a different enteric pathogen, rotavirus.
+In other contexts, \cite{king15} noted various scientific advantages for including stochasticity in the model; it is undoubtedly part of the biological dynamics, and its omission can lead to over-confident predictions.
 In our study, we find that the deterministic model (model 2) has poor statistical fit.
-This can lead to a risk of identifying spurious scientific phenomena: addition deterministic complexity added to the model may help to describe unmodeled stochastic phenomena present in the data, and may therefore spuriously be assessed as a highly statistically significant model improvement.
+This can lead to a risk of identifying spurious scientific phenomena: additional deterministic complexity added to the model may help to describe unmodeled stochastic phenomena present in the data, and may therefore spuriously be assessed as a highly statistically significant model improvement.
 
 The decision on whether to choose Markov chain Monte Carlo (MCMC) methods is not fully aligned with the decision on whether to include stochasticity in the model.
 In our literature review, of the 9 previous Haiti cholera investigations including stochastic dynamic models \cite{tuite11,mukandavire13,lewnard16,kunkel17,sallah17,azman12,kuhn14,azman15,lee20}, four of them carried out inference via MCMC \cite{lewnard16,sallah17,azman12,kuhn14}.
-WHAT SORTS OF MCMC ALGORITHMS DID THEY USE?
-We agree with the referee that MCMC is more routine for determinstic models than for stochastic models, and advanced MCMC methods such as Hamiltonian Monte Carlo become more readily applicable. 
+\eic{WHAT SORTS OF MCMC ALGORITHMS DID THEY USE?}
+We agree with the referee that MCMC is more routine for determinstic models than for stochastic models, and advanced MCMC methods such as Hamiltonian Monte Carlo become more readily applicable.
 Sequential Monte Carlo (SMC) was used for only two of the investigations in our literature review \cite{lee20,azman15}.
 In principle, MCMC methods can be applied for inference in over-dispersed stochastic dynamic models via so-called particle MCMC (PMCMC) \cite{andrieu10}.
 In practice, these models have been fitted by maximum likelihood, some examples including \cite{lemaitre19,fox22,molodecky23,pons-salort18,subramanian20,stocks20}.
 In this case, identifiability is generally addressed via profile likelihood methods.
 
-We have included some additional sentences to address these comments in the discussion section of the revision.
-TODO
+\TODO{We have included some additional sentences to address these comments in the discussion section of the revision.}
 
 We acknowledge the existence of useful mathematical tools for studying ODE models, their identifiability and stability and limiting properties.
 Stochastic dynamic models can be reduced to a deterministic model (a so-called determinsitic skeleton) which can usefully be analyzed to help understand the stochastic dynamics \cite{coulson04}.
@@ -424,7 +429,7 @@ Judging by the referee's comment, they will not be suprised to learn that this s
 The cholera pathogen was recently introduced to Haiti, which facilitates the specification of initial conditions.
 The goals of inferring initial prevalence is to reduce the number of parameters.
 The risk is that the form of this assumption could have substantial effects on the dynamics, and hence on the consequences of the analysis.
-Our approaches to addressing this issue involve: (i) looking at residual diagnostic plots to assess time points at which the model is misspecified; (ii) if the initial values seem problematic, calculate the room for improvement by estimating the initial values as free parameters.  
+Our approaches to addressing this issue involve: (i) looking at residual diagnostic plots to assess time points at which the model is misspecified; (ii) if the initial values seem problematic, calculate the room for improvement by estimating the initial values as free parameters.
 
 
 
@@ -458,7 +463,7 @@ R1 mentioned the possibility of reporting rate decreasing instead. I'M TRYING TO
 }
 
 The benchmarks we have looked at operate independently on each unit, and in this case the joint log-likelihood benchmark for units 1 and 2 is the sum of the marginal log-likelihoods.
-A simple statistical benchmark does not need to have this structure; for example, one could consider an autoregressive model including spatial dependence. 
+A simple statistical benchmark does not need to have this structure; for example, one could consider an autoregressive model including spatial dependence.
 
 In general, a joint model for units 1 and 2 may not have well-defined individual log-likelihoods log-lik y1 and log-lik y2 that sum to the full likelihood.
 An exception arises in the case of likelihood evaluation by the block particle filter, in which conditinal log likelihoods for each block of units do sum to the total log likelihood estimate.

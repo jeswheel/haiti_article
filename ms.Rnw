@@ -1054,13 +1054,16 @@ mod3_lee_coupled_aic <- 2 * lee3_results$n_params - 2 * lee3_results$all_ll_eval
 mod3_lee_coupled_partial_aic <- 2 * lee3_results$n_params - 2 * lee3_results$sub_ll_eval
 @
 
+
 \section*{Materials and methods}
 \subsection*{Mechanistic models for disease modeling}
 Models that focus on learning relationships between variables in a dataset are called {\it associative}, whereas models that incorporate a known scientific property of the system are called {\it causal} or {\it mechanistic}.
 The danger in using forecasting techniques which rely on associative models to predict the consequence of interventions is called the Lucas critique in an econometric context.
 Lucas et al.~\cite{lucas76} pointed out that it is naive to predict the effects of an intervention on a given system based entirely on historical associations.
 To successfully predict the effect of an intervention, a model should therefore both provide a quantitative explanation of existing data and should have a causal interpretation: a manipulation of the system should correspond quantitatively with the corresponding change to the model.
-This motivates the development of mechanistic models, which provides a statistical fit to the available data while also supporting a causal interpretation.
+This motivates the development of mechanistic models, which provides a statistical fit to the available data while also supporting a causal interpretation. \jwc{This paragraph and the one below seem to go well together, so perhaps this is a natural place to put this new paragraph.}
+
+\new{\editMechModels}
 
 The four mechanistic models of Lee et al.~\cite{lee20} were deliberately developed with limited coordination.
 This allows us to treat the models as fairly independently developed expert approaches to understanding cholera transmission.
@@ -1631,21 +1634,22 @@ With a sufficient number of iterations, the resulting parameter values converge 
 % these perturbations are carried out iteratively over multiple filtering operations, using the collection of parameters from the previous filtering pass as the parameter initialization for the next iteration, and decreasing the random walk variance at each step.
 
 The ability to maximize the likelihood allows for likelihood-based inference, such as performing statistical tests for potential model improvements.
-We demonstrate this capability by proposing a linear trend $\transmissionTrend$ in transmission in Eq.~\myeqref{model1:beta}:
+We demonstrate this capability by proposing a \new{log-}linear trend $\transmissionTrend$ in transmission in Eq.~\myeqref{model1:beta}:
 \begin{equation}
 \label{model1:betat}
 \log\transmission(t) = \sum_{j=1}^6 \transmission_s s_j(t) + \transmissionTrend\bar{t},
 \end{equation}
 where $\bar{t} = \frac{t - (t_N + t_0) / 2}{t_N - (t_N + t_0) / 2}$, so that $\bar{t} \in [-1, 1]$.
-The proposal of a linear trend in transmission is a result of observing an apparent decrease in reported cholera infections from 2012-2019 in Fig.~\ref{fig:CholeraData}.
+The proposal of a \old{linear} trend in transmission is a result of observing an apparent decrease in reported cholera infections from 2012-2019 in Fig.~\ref{fig:CholeraData}.
 While several factors may contribute to this decrease, one explanation is that case-area targeted interventions (CATIs), which included education sessions, increased monitoring, household decontamination, soap distribution, and water chlorination in infected areas \cite{rebaudet19CATI}, may have substantially reduced cholera transmission over time \cite{rebaudet21}.
 
-We perform a statistical test to determine whether or not the data indicate the presence of a linear trend in transmissibility.
+We perform a statistical test to determine whether or not the data indicate the presence of a \old{linear} trend in transmissibility.
 To do this, we perform a profile-likelihood search on the parameter $\transmissionTrend$ and obtain a $95\%$ confidence interval via a Monte Carlo Adjusted Profile (MCAP) \cite{ionides17}.
 Lee et al.~\cite{lee20} implemented Model~1 by fitting two distinct phases: an epidemic phase from October 2010 through March 2015, and an endemic phase from March 2015 onward.
 We similarly allow the re-estimation of process and measurement overdispersion parameters ($\sigmaProc^2$ and $\obsOverdispersion$), and require that the latent Markov process $X(t)$ carry over from one phase into the next.
-The resulting confidence interval for $\transmissionTrend$ is $(\Sexpr{myround(mcap_results$ci[1], digits = 3)}, \Sexpr{myround(mcap_results$ci[2], digits = 3)})$, with the full results displayed in Fig.~\ref{fig:betat}.
+The resulting 95\% confidence interval for $\transmissionTrend$ is $(\Sexpr{myround(mcap_results$ci[1], digits = 3)}, \Sexpr{myround(mcap_results$ci[2], digits = 3)})$, with the full results displayed in Fig.~\ref{fig:betat}.
 These results are suggestive that the inclusion of a trend in the transmission rate improves the quantitative ability of Model~1 to describe the observed data.
+\new{The maximum likelihood estimate for the trend corresponds with a \Sexpr{paste0(myround(100 - 100*exp(mcap_results$mle * 430/215), 1), '\\%')} reduction to the transmission rate over the course of the outbreak, with a $95\%$ confidence interval (\Sexpr{paste0(rev(myround(100 - 100*exp(mcap_results$ci * 430/215), 1)), collapse = ', ', sep = '\\%')}) for the overall reduction in transmission.}.
 The reported results for Model~1 in the remainder of this article were obtained with the inclusion of the parameter $\transmissionTrend$.
 
 \begin{figure}[!h]
@@ -1658,12 +1662,12 @@ ggplot() +
   geom_vline(xintercept = mcap_results$ci[1], linetype = 'dashed') +
   geom_vline(xintercept = mcap_results$ci[2], linetype = 'dashed') +
   geom_vline(xintercept = mcap_results$mle, col = 'blue') +
-  labs(x = "Linear Trend in Transmission", y = 'Log Likelihood') +
+  labs(x = "Log-Linear Trend in Transmission", y = 'Log Likelihood') +
   theme(axis.text = element_text(size = 8),
         axis.title = element_text(size = 10))
 @
 \caption{\label{fig:betat}
-{\figTitle Confidence interval for linear trend in transmission.}
+{\figTitle Confidence interval for \new{the log-}linear trend in transmission.}
 Monte Carlo adjusted profile (MCAP) of $\transmissionTrend$ for Model~1.
 The blue curve is the MCAP, the vertical blue line indicates the MLE, and the vertical dashed lines indicate the $95\%$ confidence interval.
 }
