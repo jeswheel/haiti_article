@@ -387,7 +387,7 @@ true_agg_cases <- dep_plot_df %>%
   )
 @
 
-<<CalculateLee1Likelihoods, echo=FALSE, message=FALSE, include=FALSE>>=
+<<Calculate Lee1 Likelihoods, echo=FALSE, message=FALSE, include=FALSE>>=
 
 # In this code chunk, we attempt to estimate the likelihood of Model 1 that
 # is described by Lee et al (2020). Because this chunk produces some
@@ -398,93 +398,112 @@ true_agg_cases <- dep_plot_df %>%
 # Setting algorithmic hyper-parameters based on RUN_LEVEL.
 #
 #                    RUN_LEVEL =  1,   2,    3
-N_PARAMS   <- switch(RUN_LEVEL,  10,  20,  nrow(h1LeeStartsEpi))  # Number of parameters to sample
-N_LEE_SIMS <- switch(RUN_LEVEL,  10,  20,   20)  # Number of simulations per parameter
+N_PARAMS   <- switch(RUN_LEVEL,   5,  20,  nrow(h1LeeStartsEpi))  # Number of parameters to sample
+N_LEE_SIMS <- switch(RUN_LEVEL,   5,  20,   20)  # Number of simulations per parameter
 NP_EVAL    <- switch(RUN_LEVEL,  50, 200, 2000)  # Number of particles used to evaluate the likelihood
-NREPS_EVAL <- switch(RUN_LEVEL,   3,   5,   36)  # Number of replicates of likelihood evaluation.
+NREPS_EVAL <- switch(RUN_LEVEL,   2,   5,   36)  # Number of replicates of likelihood evaluation.
 
 h1_epi <- haiti1()
 
 set.seed(141837)
 
-# Compute the run_level_<RUN_LEVEL> results and save them.
-lee_epi_ll <- readRDS("model1/run_level_3/lee1_epi_evals.rds")
-# lee_epi_ll <- bake(
-#   file = paste0("model1/", rl_dir, "lee1_epi_evals.rds"), {
-#
-#     # Randomly sample from starting params used by Lee et al (2020).
-#     # If RUN_LEVEL == 3, all starting parameters are used.
-#     which_params <- sample(
-#       1:nrow(h1LeeStartsEpi),
-#       size = N_PARAMS,
-#       replace = FALSE
-#     )
-#     epi_params <- h1LeeStartsEpi[which_params, ]
-#
-#     # Create data.frame to save results
-#     lee_epi_ll <- data.frame(
-#       "pfLL" = NA_real_,
-#       "pfse" = NA_real_,
-#       "parid" = epi_params$parid
-#     )
-#
-#     for (j in 1:nrow(lee_epi_ll)) {
-#       # Get parameters of interest
-#       pf_params <- epi_params[j, -1][names(coef(h1_epi))]
-#
-#       # make results reproducible
-#       registerDoRNG((j * 687383921) %% 7919)
-#
-#       # Calculate log likelihoods
-#       ll_evals <- foreach(i=1:NREPS_EVAL, .combine = c) %dopar% {
-#         logLik(pfilter(h1_epi, params = pf_params, Np = NP_EVAL))
-#       }
-#       lee_epi_ll[j, 'pfLL'] <- logmeanexp(ll_evals, se = TRUE)[1]  # Log-lik
-#       lee_epi_ll[j, 'pfse'] <- logmeanexp(ll_evals, se = TRUE)[2]  # SE
-#     }
-#
-#     lee_epi_ll
-#   }
-# )
+if (RUN_LEVEL == 1 && file.exists('model1/run_level_3/lee1_epi_evals.rds')) {
+
+  # If RUN_LEVEL == 1, and RUN_LEVEL == 3 results exist, just load the RL3
+  # results.
+  lee_epi_ll <- readRDS("model1/run_level_3/lee1_epi_evals.rds")
+} else {
+
+  # Compute the run_level_<RUN_LEVEL> results and save them, or simply load
+  # the results if the bake load conditions are met.
+  lee_epi_ll <- bake(
+    file = paste0("model1/", rl_dir, "lee1_epi_evals.rds"), {
+
+      # Randomly sample from starting params used by Lee et al (2020).
+      # If RUN_LEVEL == 3, all starting parameters are used.
+      which_params <- sample(
+        1:nrow(h1LeeStartsEpi),
+        size = N_PARAMS,
+        replace = FALSE
+      )
+      epi_params <- h1LeeStartsEpi[which_params, ]
+
+      # Create data.frame to save results
+      lee_epi_ll <- data.frame(
+        "pfLL" = NA_real_,
+        "pfse" = NA_real_,
+        "parid" = epi_params$parid
+      )
+
+      for (j in 1:nrow(lee_epi_ll)) {
+        # Get parameters of interest
+        pf_params <- epi_params[j, -1][names(coef(h1_epi))]
+
+        # make results reproducible
+        registerDoRNG((j * 687383921) %% 7919)
+
+        # Calculate log likelihoods
+        ll_evals <- foreach(i=1:NREPS_EVAL, .combine = c) %dopar% {
+          logLik(pfilter(h1_epi, params = pf_params, Np = NP_EVAL))
+        }
+        lee_epi_ll[j, 'pfLL'] <- logmeanexp(ll_evals, se = TRUE)[1]  # Log-lik
+        lee_epi_ll[j, 'pfse'] <- logmeanexp(ll_evals, se = TRUE)[2]  # SE
+      }
+
+      lee_epi_ll
+    }
+  )
+}
+
 
 # Create the endemic version of the model
 h1_end <- haiti1(period = "endemic")
 
-lee_end_ll <- readRDS("model1/run_level_3/lee1_end_evals.rds")
-# lee_end_ll <- bake(
-#   file = paste0("model1/", rl_dir, "lee1_end_evals.rds"), {
-#
-#     end_params <- h1LeeStartsEnd[h1LeeStartsEnd$parid %in% lee_epi_ll$parid, ]
-#
-#     # Create data.frame to save results
-#     lee_end_ll <- data.frame(
-#       "pfLL" = NA_real_,
-#       "pfse" = NA_real_,
-#       'parid' = end_params$parid
-#     )
-#
-#     # Perform particle filter to get likelihood estimates
-#     for (j in 1:nrow(lee_end_ll)) {
-#       # Get parameters of interest
-#       pf_params <- end_params[j, ][names(coef(h1_end))]
-#
-#       # make results reproducible
-#       registerDoRNG((j * 687383921) %% 7919)
-#
-#       # Calculate log likelihoods
-#       ll_evals <- foreach(i=1:NREPS_EVAL, .combine = c) %dopar% {
-#         logLik(pfilter(h1_end, params = pf_params, Np = NP_EVAL))
-#       }
-#
-#       lee_end_ll[j, 'pfLL'] <- logmeanexp(ll_evals, se = TRUE)[1]
-#       lee_end_ll[j, 'pfse'] <- logmeanexp(ll_evals, se = TRUE)[2]
-#     }
-#
-#     lee_end_ll
-#   }
-# )
 
-# Combine epidemic and endemic likelihoods by parid to get the likelihood of
+if (RUN_LEVEL == 1 && file.exists('model1/run_level_3/lee1_end_evals.rds')) {
+
+  # If RUN_LEVEL == 1, and RUN_LEVEL == 3 results exist, just load the RL3
+  # results.
+  lee_end_ll <- readRDS("model1/run_level_3/lee1_end_evals.rds")
+} else {
+
+  # Compute the run_level_<RUN_LEVEL> results and save them, or simply load
+  # the results if the bake load conditions are met.
+  lee_end_ll <- bake(
+    file = paste0("model1/", rl_dir, "lee1_end_evals.rds"), {
+
+      end_params <- h1LeeStartsEnd[h1LeeStartsEnd$parid %in% lee_epi_ll$parid, ]
+
+      # Create data.frame to save results
+      lee_end_ll <- data.frame(
+        "pfLL" = NA_real_,
+        "pfse" = NA_real_,
+        'parid' = end_params$parid
+      )
+
+      # Perform particle filter to get likelihood estimates
+      for (j in 1:nrow(lee_end_ll)) {
+        # Get parameters of interest
+        pf_params <- end_params[j, ][names(coef(h1_end))]
+
+        # make results reproducible
+        registerDoRNG((j * 687383921) %% 7919)
+
+        # Calculate log likelihoods
+        ll_evals <- foreach(i=1:NREPS_EVAL, .combine = c) %dopar% {
+          logLik(pfilter(h1_end, params = pf_params, Np = NP_EVAL))
+        }
+
+        lee_end_ll[j, 'pfLL'] <- logmeanexp(ll_evals, se = TRUE)[1]
+        lee_end_ll[j, 'pfse'] <- logmeanexp(ll_evals, se = TRUE)[2]
+      }
+
+      lee_end_ll
+    }
+  )
+}
+
+# Combine epidemic and endemic likelihoods by `parid` to get the likelihood of
 # the complete model.
 mod1_all_likes <- dplyr::inner_join(
   x = lee_epi_ll,
@@ -499,12 +518,21 @@ mod1_all_likes <- dplyr::inner_join(
 # using the parameter sets that resulted in the maximum likelihood.
 mod1_lee_ll <- max(mod1_all_likes$joint_ll, na.rm = TRUE)
 
-rm(
-  lee_end_ll, lee_epi_ll, h1_end, h1_epi, i, mod1_all_likes,
-  N_LEE_SIMS, N_PARAMS, NP_EVAL, NREPS_EVAL, end_params, epi_params,
-  pf_params, j, ll_evals, which_params
+# Doing some clean-up. The goal is that each major chunk can be run independent
+# of other chunks. Removing saved objects is not entirely necessary, but can
+# help new users know what objects are needed later on and which were only
+# temporarily needed for each particular chunk. Here we suppress warnings
+# because some of the temporary objects only exist if the `bake` code needs to
+# be recomputed, and hence `rm` will throw warnings if it tries to remove
+# objects that don't exist.
+suppressWarnings(
+  rm(
+    lee_end_ll, lee_epi_ll, h1_end, h1_epi, i, mod1_all_likes,
+    N_LEE_SIMS, N_PARAMS, NP_EVAL, NREPS_EVAL, end_params, epi_params,
+    pf_params, j, ll_evals, which_params
+  )
 )
-gc()
+gc()  # Garbage Collection to free un-used memory
 @
 
 \section*{Abstract}
@@ -513,10 +541,13 @@ These decisions should be informed by data on the epidemic as well as current un
 Such decisions can be posed as statistical questions about scientifically motivated dynamic models.
 Thus, we encounter the methodological task of building credible, data-informed decisions based on stochastic, partially observed, nonlinear dynamic models.
 This necessitates addressing the tradeoff between biological fidelity and model simplicity, and the reality of misspecification for models at all levels of complexity.
-\ei{I'VE RE-WRITTEN HERE, LOOKING TO BE MORE SPECIFIC ABOUT THE GOALS AND CONTRIBUTION OF THE PAPER.}
-We assess current methodological approaches to these issues via a case study of the 2010-2019 cholera epidemic in Haiti.
+\eic{I'VE RE-WRITTEN HERE, LOOKING TO BE MORE SPECIFIC ABOUT THE GOALS AND CONTRIBUTION OF THE PAPER.}
+\old{As a case study, we consider the 2010-2019 cholera epidemic in Haiti.
+We study three dynamic models developed by expert teams to advise on vaccination policies.
+We assess previous methods used for fitting and evaluating these models, and we develop data analysis strategies leading to improved statistical fit.}
+\new{We assess current methodological approaches to these issues via a case study of the 2010-2019 cholera epidemic in Haiti.
 We consider three dynamic models developed by expert teams to advise on vaccination policies.
-We evaluate previous methods used for fitting these models, and we demonstrate modified data analysis strategies leading to improved statistical fit.
+We evaluate previous methods used for fitting these models, and we demonstrate modified data analysis strategies leading to improved statistical fit.}
 Specifically, we present approaches to diagnosis of model misspecification, development of alternative models, and computational improvements in optimization, in the context of likelihood-based inference on nonlinear dynamic systems.
 Our workflow is reproducible and extendable, facilitating future investigations of this disease system.
 
@@ -545,17 +576,19 @@ Questions of interest include: What indications should we look for in the data t
 What diagnostic tests and model variations can and should be considered in the course of the data analysis?
 What are the possible trade-offs of increasing model complexity, such as the inclusion of interactions across spatial units?
 
-This case study investigates the use of dynamic models and spatiotemporal data to inform public health policy in the context of the cholera outbreak in Haiti, which started in 2010.
-Various dynamic models were developed to study this outbreak: searching PubMed with keywords ``Haiti, cholera, model'' we obtained 20 deterministic models \cite{kirpich16,kirpich17,andrews11,botelho21,fitzgibbon20,eisenberg13,rinaldo12,chao11,date11,lin19,collins21,akman15,trevisin22,mavian20,collins14,kelly16,capone15,bengtsson15,mari15,gatto12} and 8 stochastic models \cite{tuite11,mukandavire13,lewnard16,kunkel17,sallah17,azman12,kuhn14,azman15}.
-Here we focus on a multi-group modeling exercise by Lee et al.~\cite{lee20} in which four expert modeling teams developed models to the same dataset with the goal of comparing conclusions on the feasibility of eliminating cholera by a vaccination campaign.
+This case study investigates the use of dynamic models and spatiotemporal data to inform \old{a policy decision} \new{public health policy} in the context of the cholera outbreak in Haiti, which started in 2010.
+\old{We build on a multi-group modeling exercise by Lee et al. [1] in which four expert modeling teams developed models to the same dataset with the goal of comparing conclusions on the feasibility of eliminating cholera by a vaccination campaign}.
+\old{The data that were used for this study, and that is the subject of our reanalysis, is displayed in Fig.~[1].}
+\new{Various dynamic models were developed to study this outbreak: searching PubMed with keywords ``Haiti, cholera, model'' we obtained 20 deterministic models \cite{kirpich16,kirpich17,andrews11,botelho21,fitzgibbon20,eisenberg13,rinaldo12,chao11,date11,lin19,collins21,akman15,trevisin22,mavian20,collins14,kelly16,capone15,bengtsson15,mari15,gatto12} and 8 stochastic models \cite{tuite11,mukandavire13,lewnard16,kunkel17,sallah17,azman12,kuhn14,azman15}.
+Here we focus on a multi-group modeling exercise by Lee et al.~\cite{lee20} in which four expert modeling teams developed models to the same dataset with the goal of comparing conclusions on the feasibility of eliminating cholera by a vaccination campaign.}
 Model~1 is stochastic and describes cholera at the national level;
 Model~2 is deterministic with spatial structure, and includes transmission via contaminated water;
 Model~3 is stochastic with spatial structure, and accounts for measured rainfall.
 Model~4 has an agent-based construction, featuring considerable mechanistic detail but limited ability to calibrate these details to data.
-These modeling strategies were selected by \cite{li20} to represent the range of approaches used in the research community.
+\new{These modeling strategies were selected by \cite{li20} to represent the range of approaches used in the research community.}
 We focus on Models~1--3, as the strengths and weaknesses of the agent-based modeling approach \cite{tracy18} are outside the scope of this article.
 \eic{In addition, agent-based models were less widely used [NO OTHERS SHOW UP IN OUR LITERATURE REVIEW???].}
-The data that were used for this study, and that is the subject of our reanalysis, are displayed in Fig.~\ref{fig:CholeraData}.
+\new{The data that were used for this study, and that is the subject of our reanalysis, are displayed in Fig.~\ref{fig:CholeraData}.}
 
 \begin{figure}[!h]
 <<Plot_Reported_Cases, echo=FALSE, fig.height=3.5>>=
@@ -601,281 +634,189 @@ This improved ability may result in more accurate forecasts and facilitates the 
 Based on this retrospective analysis, we offer suggestions on fitting mechanistic models to dynamic systems for future studies.
 
 
-%% IT SEEMS THIS PARAGRAPH IS DEPRECATED IN FAVOR OF CITING THESE REFERENCES WEHRE APPROPRIAT
-%% While this work is focused on the models proposed by Lee et al.~\cite{lee20}, our suggestions have broader relevance.
-%% To investigate the extent to which \cite{lee20} is typical of the substantial body of work on Haiti cholera dynamics, we performed a literature review by searching PubMed with keywords: Haiti, cholera, model.
-%% The search resulted in 66 papers, of which 32 used dynamic models to describe the cholera epidemic in Haiti.
-%% The models make various choices on the dichotomies considered by Lee et al.~\cite{lee20}; deterministic versus stochastic; compartment model versus agent-based; aggregated versus spatially explicit.
+%% IT SEEMS THIS PARAGRAPH IS DEPRECATED IN FAVOR OF CITING THESE REFERENCES WHERE APPROPRIATE
+\old{While this work is focused on the models proposed by Lee et al.~[1], our suggestions have broader relevance.
+To investigate the extent to which [1] is typical of the substantial body of work on Haiti cholera dynamics, we performed a literature review by searching PubMed with keywords: Haiti, cholera, model.
+The search resulted in 66 papers, of which 32 used dynamic models to describe the cholera epidemic in Haiti.
+The models make various choices on the dichotomies considered by Lee et al.~[1]; deterministic versus stochastic; compartment model versus agent-based; aggregated versus spatially explicit.}
 
 We proceed by introducing the general modeling scheme employed by Models~1--3 and provide details of each individual model;
 we then describe how each model is calibrated to data, and present a systematic approach to examining and refining these models.
 We then use improved model fits to project cholera incidence in Haiti under various vaccination scenarios considered by Lee et al.~\cite{lee20}.
 Finally, we conclude with a discussion of the results.
 
-<<FitModel1, echo=FALSE, message=FALSE, include=FALSE>>=
+<<Load Model1 Params, echo=FALSE, message=FALSE, include=FALSE>>=
 
-# This code chunk is used to fit Model 1 using the IF2 algorithm.
-set.seed(636813)
-
-# Check RUN_LEVEL, and set hyper-parameters to IF2 and pfilter accordingly.
-#                      RUN_LEVEL =    1,    2,      3
-NP_H1        <- switch(RUN_LEVEL,   100, 1000,   2000)
-NMIF_H1      <- switch(RUN_LEVEL,    10,   50,    200)
-NUM_TREND    <- switch(RUN_LEVEL,     5,   10,     90)
-NPROF        <- switch(RUN_LEVEL,     4,    4,     24)
-NP_EVAL      <- switch(RUN_LEVEL,   200, 1000,   5000)
-NREPS_EVAL   <- switch(RUN_LEVEL, cores,   20,  cores)
-
-# Create the <RUN_LEVEL> version of the results and save them.
-h1_MIF <- readRDS('model1/run_level_3/haiti1_fit.rds')
-
-# h1_MIF <- bake(
-#   file = paste0("model1/", rl_dir, "haiti1_fit.rds"), {
-#     fit_haiti1(  # haitipkg function used to fit Model 1
-#       NP = NP_H1,
-#       NMIF = NMIF_H1,
-#       NUM_TREND = NUM_TREND,
-#       NPROF = NPROF,
-#       NREPS_EVAL = NREPS_EVAL,
-#       NP_EVAL = NP_EVAL
-#     )
-#   }
-# )
+# Load the file containing profiles of Model 1 Parameters.
+if (RUN_LEVEL != 3 && file.exists("model1/run_level_3/h1_profiles.rds")) {
+  h1_prof <- readRDS("model1/run_level_3/h1_profiles.rds")
+} else if (file.exists(paste0('model1/', rl_dir, 'h1_profiles.rds'))) {
+  h1_prof <- readRDS(paste0('model1/', rl_dir, 'h1_profiles.rds'))
+} else {
+  stop(paste0("Missing file: `model1/", rl_dir, 'h1_profiles.rds`;\nThe file can be obtained by running the script `H1profile.R`'))
+}
 
 # The result is a data.frame containing many parameter values and their
 # corresponding likelihood evaluation. To perform a likelihood profile,
 # we calculate the maximum likelihood for each value of betat.
-h1_prof_res <- h1_MIF %>%
+h1_prof_res <- h1_prof %>%
+  filter(prof_var == 'betat') %>%
   group_by(betat) %>%
-  summarize(logLik = max(ll))
+  summarize(logLik = max(logLik))
 
+# TODO: This is used later in figure 2 (TODO)
 mcap_results <- pomp::mcap(h1_prof_res$logLik, h1_prof_res$betat, span = 1)
 
-# Get the best set of parameters from MIF2 search.
-p1 <- h1_MIF %>%
-  filter(ll == max(ll)) %>%
-  select(-ll, -ll.se) %>%
+# Find the set of parameters that correspond to the maximum likelihood
+p1 <- h1_prof %>%
+  slice_max(order_by = logLik, n = 1) %>%
+  # Remove non-parameters from the data.frame (hyperparameters + likelihood)
+  select(-(1:12)) %>%
   unlist()
 
 # Save the likelihood of the best parameters, for use later.
-mod1_ll <- h1_MIF %>%
-  filter(ll == max(ll)) %>%
-  select(ll) %>%
+mod1_ll <- h1_prof %>%
+  slice_max(order_by = logLik, n = 1) %>%
+  select(logLik) %>%
   unlist()
 
 # Just a bit of tidying up: removing parameters that we won't use again.
-rm(NP_H1, NMIF_H1, NUM_TREND, NPROF, NREPS_EVAL, NP_EVAL, h1_MIF)
+rm(h1_prof)
 gc()
-
 @
 
-<<FitModel2, echo=FALSE, include=FALSE, message=FALSE>>=
+<<Fit Model 2, echo=FALSE, include=FALSE, message=FALSE, warning=FALSE>>=
 
-# This code chunk fits Model 2. This is a quick caclulation compared to models
-# 1 and 3, so no run_level is used.
+# Calculate log-likelihood of Lee et al (2020) model.
+# We have parameter estimates for everything except the variance of the
+# measurement model, so here we fix all parameters except the variance, which
+# is estimated for both endemic and epidemic periods.
+lee20_replication <- bake(
+  file = 'model2/lee20_replication.rds', {
+    h2_lee_epi <- haiti2()
+    lee_epi_params <- h2_lee_epi@params
+    epi_ofun_v <- traj_objfun(
+      h2_lee_epi, est = c('v'), paramnames = c('v')
+    )
 
-h2_fit <- readRDS("model2/model2_fit.rds")
+    # Get starting values for the estimated parameter
+    start_v_epi <- lee_epi_params[c('v')]
 
-# h2_fit <- bake(
-#   file = paste0("model2/model2_fit.rds"), {
-#     fit_haiti2()
-#   },
-#   timing = FALSE
-# )
+    # Use the subplex package to calibrate 'v' for the epi-model with fixed coefs.
+    epi_fit_v <- subplex::subplex(par = log(start_v_epi), fn = epi_ofun_v)
+    epi_params_update_v <- lee_epi_params
+    epi_params_update_v['v'] <- exp(epi_fit_v$par)
+
+    # Now we repeat this for the endemic portion of the model:
+    h2_lee_end <- haiti2(region = 'after')
+    lee_end_params <- h2_lee_end@params
+    end_ofun_v <- traj_objfun(
+      h2_lee_end, est = 'v', paramnames = 'v'
+    )
+
+    # Get starting values for the estimated parameter
+    start_v_end <- lee_end_params[c('v')]
+
+    # Use the subplex package to calibrate 'v' for the epi-model with fixed coefs.
+    end_fit_v <- subplex::subplex(par = log(start_v_end), fn = end_ofun_v)
+    end_params_update_v <- lee_end_params
+    end_params_update_v['v'] <- exp(epi_fit_v$par)
+
+    # Return the results
+    c(
+      "leeFit_ll" = -epi_fit_v$value - end_fit_v$value,
+      "leeFit_n_params" = 6
+    )
+  }, timing = FALSE
+)
+
+h2_fit <- bake(
+  file = 'model2/model2_fit.rds', {
+
+    # Create model and save initial values for each parameter
+    h2 <- haiti2(cutoff = 10000, measure = "log")  # Default is epidemic period
+    h2_params <- h2@params
+    est_params <- c('Mu', 'Beta', 'BetaW', 'v', 'sigma', 'phase')
+    n_fit_params <- length(est_params)
+
+    # Get objective function to minimize
+    epi_ofun <- pomp::traj_objfun(h2, est = est_params, params = h2_params)
+
+    # Vector of starting values of the parameters that are estimated.
+    # phase is not included because it's the only non log-transformed variable
+    theta <- h2_params[c("Mu", "Beta", "BetaW", "v", "sigma")]
+
+    # Fit the epi model
+    h2_fit_tmp <- subplex::subplex(
+      par = c(log(theta), h2_params['phase']),
+      fn = epi_ofun
+    )
+
+    # Save the fitted parameters to the h2_params vector
+    h2_params[c("Mu","Beta","BetaW","v", "sigma")] <- exp(h2_fit_tmp$par[c("Mu", "Beta", "BetaW", "v", "sigma")])
+    h2_params['phase'] <- h2_fit_tmp$par['phase']
+
+
+    model2_fit_results <- list()
+    model2_fit_results[['h2_params']] <- h2_params
+    model2_fit_results[["n_fit_params"]] <- n_fit_params
+    model2_fit_results[['logLik']] <- -h2_fit_tmp$value
+
+    rm(h2, epi_ofun, theta, h2_fit_tmp)
+
+    model2_fit_results
+  }, timing = FALSE
+)
 @
 
-<<FitModel3, echo=FALSE, include=FALSE, message=FALSE>>=
+<<Load Model3 Parameters, echo=FALSE, include=FALSE, message=FALSE>>=
 
-# This code chunk is used to fit Model 3 using the IBPF algorithm.
-set.seed(8636712)
+# Calculate the number of parameters that are estimated:
+mod3_n_params <- length(c(
+  "mu_B", "XthetaA", "thetaI", "lambdaR", "r", "std_W", "epsilon", "k",
+  paste0('betaB', 1:10), paste0('foi_add', 1:10),
+  'aHur3', 'aHur9',
+  'hHur3', 'aHur9',
+  'Iinit3', 'Iinit4'
+))
 
-# Create vectors for the unit and shared parameters
+# Load the file containing profiles of Model 1 Parameters.
+if (RUN_LEVEL != 3 && file.exists("model3/run_level_3/h3_profiles.rds")) {
+
+  # If RUN_LEVEL != 3, and RUN_LEVEL == 3 results exist, just load the RL3
+  # results.
+  h3_prof <- readRDS("model3/run_level_3/h3_profiles.rds")
+} else if (file.exists(paste0('model3/', rl_dir, 'h3_profiles.rds'))) {
+
+  # If the `model3/run_level_<RUN_LEVEL>/h3_profiles.rds` file exists, load it
+  h3_prof <- readRDS(paste0('model3/', rl_dir, 'h3_profiles.rds'))
+} else {
+
+  # Otherwise (missing RL3 file, and the corresponding <RUN_LEVEL> file):
+  # Throw an error, letting users know how to create the file.
+  stop(paste0("Missing file: `model3/", rl_dir, 'h3_profiles.rds`;\nThe file can be obtained by running the script `H3profile.R`'))
+}
+
+# haiti3_fit contains ll estimate for many parameter sets, so we want to find
+# the highest value
+mod3_ll <- h3_prof %>%
+  slice_max(order_by = logLik, n = 1) %>%
+  pull(logLik)
+@
+
+<<Create Model Objects,echo=FALSE,eval=TRUE, include=FALSE, message=FALSE>>=
+
+# Save the parameters that correspond to the MLE of Model 3.
+p3 <- h3_prof %>%
+  slice_max(logLik, n = 1) %>%
+  select(-(job.id:logLik_se)) %>%
+  unlist()
+
 unit_specific_names <- c("betaB", "foi_add", "aHur", "hHur", "Iinit")
 shared_param_names <- c(
   "mu_B", "XthetaA", "thetaI", "lambdaR", "r", "std_W",
   "epsilon", "k"
 )
-est_param_names <- c(
-  unit_specific_names, shared_param_names
-)
-
-# Add unit numbers to each parameter
-est_param_names_expanded <- paste0(rep(est_param_names, each = 10), 1:10)
-
-# Simple function that is used to set the rw_sd for the first search
-# This function is convenient so that we don't have to type out the rw_sd
-# for each unit parameter.
-set_rw_1 <- function(x) {
-  if (gsub("[[:digit:]]+$", "", x) %in% shared_param_names) {
-    return(0.01)
-  } else if (x %in% paste0(rep(c("aHur", 'hHur'), each = 2), c(3, 9))) {
-    return(expression(ifelse(time >= 2016.754 & time <= 2017, 0.015, 0)))
-  } else if (x %in% c("Iinit3", "Iinit4")) {
-    return(expression(ivp(0.25)))
-  } else if (grepl('^foi_add[[:digit:]]+$', x)) {
-    return(0.015)
-  } else if (grepl('^betaB[[:digit:]]+$', x)) {
-    return(0.01)
-  } else {
-    return(0)
-  }
-}
-
-set_rw_2 <- function(x) {
-  if (gsub("[[:digit:]]+$", "", x) %in% shared_param_names) {
-    return(0.003)
-  } else if (x %in% paste0(rep(c("aHur", 'hHur'), each = 2), c(3, 9))) {
-    return(expression(ifelse(time >= 2016.754 & time <= 2017, 0.005, 0)))
-  } else if (x %in% c("Iinit3", "Iinit4")) {
-    return(expression(ivp(0.125)))
-  } else if (grepl('^foi_add[[:digit:]]+$', x)) {
-    return(0.005)
-  } else if (grepl('^betaB[[:digit:]]+$', x)) {
-    return(0.003)
-  } else {
-    return(0)
-  }
-}
-
-# First Search RW
-reg_rw_1.sd <- lapply(est_param_names_expanded, set_rw_1)
-names(reg_rw_1.sd) <- est_param_names_expanded
-chol_rw_1.sd <- do.call(rw_sd, reg_rw_1.sd)
-
-# Second Search RW
-reg_rw_2.sd <- lapply(est_param_names_expanded, set_rw_2)
-names(reg_rw_2.sd) <- est_param_names_expanded
-chol_rw_2.sd <- do.call(rw_sd, reg_rw_2.sd)
-
-if (RUN_LEVEL == 1){
-  SEARCH1 = list(
-    NBPF = 10,
-    NP = 200,
-    SPAT_REGRESSION = 0.05,
-    NREPS = 20,
-    NP_EVAL = 200,
-    NREPS_EVAL = 3,
-    RW_SD = chol_rw_1.sd,
-    COOLING = 0.5,
-    KEEP_TRACES = TRUE
-  )
-
-  SEARCH2 = list(
-    TOP_N = 8,
-    NBPF = 10,
-    NP = 200,
-    SPAT_REGRESSION = 0.05,
-    NREPS = 2,
-    NP_EVAL = 200,
-    NREPS_EVAL = 3,
-    RW_SD = chol_rw_2.sd,
-    COOLING = 0.5,
-    KEEP_TRACES = TRUE
-  )
-
-} else if (RUN_LEVEL == 2) {
-  SEARCH1 = list(
-    NBPF = 100,
-    NP = 1000,
-    SPAT_REGRESSION = 0.05,
-    NREPS = 72,
-    NP_EVAL = 1000,
-    NREPS_EVAL = 8,
-    RW_SD = chol_rw_1.sd,
-    COOLING = 0.5,
-    KEEP_TRACES = TRUE,
-    KEEP_LIK_MAT = TRUE
-  )
-
-  SEARCH2 = list(
-    TOP_N = 9,
-    NBPF = 100,
-    NP = 1000,
-    SPAT_REGRESSION = 0.05,
-    NREPS = 4,
-    NP_EVAL = 1000,
-    NREPS_EVAL = 9,
-    RW_SD = chol_rw_2.sd,
-    COOLING = 0.5,
-    KEEP_TRACES = TRUE,
-    KEEP_LIK_MAT = TRUE
-  )
-
-} else if (RUN_LEVEL == 3) {
-
-  SEARCH1 = list(
-    NBPF = 100,
-    NP = 2500,
-    SPAT_REGRESSION = 0.05,
-    NREPS = 144,
-    NP_EVAL = 2500,
-    NREPS_EVAL = 18,
-    RW_SD = chol_rw_1.sd,
-    COOLING = 0.5,
-    KEEP_TRACES = FALSE,
-    KEEP_LIKE_MAT = FALSE
-  )
-
-  SEARCH2 = list(
-    TOP_N = 12,
-    NBPF = 100,
-    NP = 2500,
-    SPAT_REGRESSION = 0.05,
-    NREPS = 6,
-    NP_EVAL = 2500,
-    NREPS_EVAL = 18,
-    RW_SD = chol_rw_2.sd,
-    COOLING = 0.5,
-    KEEP_TRACES = FALSE,
-    KEEP_LIK_MAT = TRUE
-  )
-}
-
-# Calculate the number of parameters that are estimated:
-# This is calculated by the number of non-zero rw_sd values (including expressions), but then subtracting of repeated shared parameters.
-mod3_n_params <- sum(reg_rw_1.sd != 0, na.rm = TRUE) + sum(sapply(reg_rw_1.sd, is.expression)) - length(shared_param_names) * 9
-
-# Fit Model 3
-haiti3_fit <- readRDS("model3/run_level_3/haiti3_fit.rds")
-# haiti3_fit <- bake(
-#   file = paste0("model3/", rl_dir, "haiti3_fit.rds"), {
-#     fit_haiti3(
-#       nsearches = 2L,
-#       search1 = SEARCH1,
-#       search2 = SEARCH2,
-#       search_rho = FALSE,
-#       search_gamma = FALSE,
-#       search_Iinit = TRUE,
-#       search_hur = TRUE
-#     )
-#   }
-# )
-
-# haiti3_fit contains ll estimate for many parameter sets, so we want to find
-# the highest value
-mod3_ll <- max(
-  haiti3_fit[[length(haiti3_fit)]]$logLiks$logLik,
-  na.rm = TRUE
-)
-
-# Just a bit of tidying up: removing parameters that we won't use again.
-rm(
-  SEARCH1, SEARCH2, N_SEARCHES,
-  est_param_names, est_param_names_expanded,
-  set_rw_1, set_rw_2, set_rw_3, reg_rw_1.sd, reg_rw_2.sd, reg_rw_3.sd,
-  chol_rw_1.sd, chol_rw_2.sd, chol_rw_3.sd
-)
-gc()
-
-@
-
-<<table-input,echo=FALSE,eval=T, include=FALSE, message=FALSE>>=
-
-# Find the index for parameters of model 3 that correspond to the MLE.
-best_m3 <- which.max(haiti3_fit[[length(haiti3_fit)]]$logLiks$logLik)
-
-# Save the parameters that correspond to the MLE of Model 3.
-p3 <- haiti3_fit[[length(haiti3_fit)]]$params[best_m3, ]
 
 p3u <- matrix(nrow = length(unit_specific_names), ncol = 10)
 rownames(p3u) <- unit_specific_names
@@ -905,18 +846,11 @@ stew(file = "models.rda", {
 })
 @
 
-<<AICtableInput, echo=FALSE, eval=TRUE>>=
+<<Get AIC table Input, echo=FALSE, eval=TRUE>>=
 NREPS_EVAL <- switch(RUN_LEVEL,   3,   8,    36)
-NP_EVAL    <- switch(RUN_LEVEL, 100, 500,  5000)
+NP_EVAL    <- switch(RUN_LEVEL,  50, 500,  5000)
 
-# Objective function of model 2, epidemic phase
-epi_ofun <- traj_objfun(
-  h2_epi,
-  params = h2_fit$h2_params
-)
-
-mod2_epi_ll <- -epi_ofun(par = h2_fit$h2_params)
-mod2_ll <- mod2_epi_ll - sum(log(h2_epi@data + 1), na.rm = TRUE)
+mod2_ll <- h2_fit$logLik
 
 arima_lik2 <- 0
 
@@ -936,49 +870,48 @@ mod1_aic <- 2 * mod1_n_params - 2 * mod1_ll
 mod3_aic <- 2 * mod3_n_params - 2 * mod3_ll
 
 # Calculate likelihood via block-particle filter
-mod3_eval_res <- readRDS("model3/run_level_3/mod3_eval_res.rds")
-# mod3_eval_res <- bake(
-#   file = paste0('model3/', rl_dir, 'mod3_eval_res.rds'), {
-#
-#     # Create a list to store results
-#     results <- list()
-#
-#     coef(h3Spat) <- p3
-#
-#     # Perform block-particle filter
-#     h3_bpf <- foreach(i = 1:NREPS_EVAL, .combine = c) %dopar% {
-#       bpfilter(h3Spat, Np = NP_EVAL, block_size = 1)
-#     }
-#
-#     ll <- logLik(h3_bpf)
-#     results$ll <- logmeanexp(ll[!is.na(ll)], se = FALSE)
-#
-#     ### Get likelihood for subset of the data
-#
-#     # Find appropriate sub-set
-#     in_subset_cols <- h3_bpf[[1]]@times >= as.numeric(lubridate::decimal_date(as.Date("2014-03-01")))
-#     in_subset_rows <- h3_bpf[[1]]@unit_names != 'Ouest'
-#
-#     mod3_coupled_subset_evals <- c()
-#     for (i in 1:length(h3_bpf)) {
-#       mod3_coupled_subset_evals <- c(
-#         mod3_coupled_subset_evals,
-#         sum(h3_bpf[[i]]@block.cond.loglik[in_subset_rows, in_subset_cols])
-#       )
-#     }
-#
-#     results$subset_ll <- logmeanexp(mod3_coupled_subset_evals)
-#     results
-#   },
-#   timing = FALSE
-# )
+mod3_eval_res <- bake(
+  file = paste0('model3/', rl_dir, 'mod3_eval_res.rds'), {
 
-mod3_eval_res$subset_aic <- 2 * mod3_n_params - 2 * mod3_eval_res$subset_ll
+    # Create a list to store results
+    results <- list()
+
+    coef(h3Spat) <- p3
+
+    # Perform block-particle filter
+    h3_bpf <- foreach(i = 1:NREPS_EVAL, .combine = c) %dopar% {
+      bpfilter(h3Spat, Np = NP_EVAL, block_size = 1)
+    }
+
+    ll <- logLik(h3_bpf)
+    results$ll <- logmeanexp(ll[!is.na(ll)], se = TRUE)
+
+    ### Get likelihood for subset of the data
+
+    # Find appropriate sub-set
+    in_subset_cols <- h3_bpf[[1]]@times >= as.numeric(lubridate::decimal_date(as.Date("2014-03-01")))
+    in_subset_rows <- h3_bpf[[1]]@unit_names != 'Ouest'
+
+    mod3_coupled_subset_evals <- c()
+    for (i in 1:length(h3_bpf)) {
+      mod3_coupled_subset_evals <- c(
+        mod3_coupled_subset_evals,
+        sum(h3_bpf[[i]]@block.cond.loglik[in_subset_rows, in_subset_cols])
+      )
+    }
+
+    results$subset_ll <- logmeanexp(mod3_coupled_subset_evals, se = TRUE)
+    results
+  },
+  timing = FALSE
+)
+
+mod3_eval_res$subset_aic <- 2 * mod3_n_params - 2 * mod3_eval_res$subset_ll['se']
 
 rm(NREPS_EVAL, NP_EVAL)
 @
 
-<<CalculateBenchLikelihood, echo=FALSE, message=FALSE, include=FALSE, cache=TRUE>>=
+<<Calculate Bench Likelihood, echo=FALSE, message=FALSE, include=FALSE, cache=TRUE>>=
 
 benchmarks <- list()
 
@@ -1039,88 +972,85 @@ for (dep in 1:10) {
 }
 
 benchmarks[['m3']] <- m3_benchmark
-rm(cases, m3_benchmark, m3_bench, dep, mod3_cases)
+rm(cases, m3_benchmark, dep, mod3_cases)
 gc()
 @
 
-<<AIC Lee et al, echo=FALSE, include=FALSE, message=FALSE>>=
+<<Computing AIC of Lee et al, echo=FALSE, include=FALSE, message=FALSE>>=
 lee3_NP   <- switch(RUN_LEVEL, 50, 250, 5000)
 lee3_NREP <- switch(RUN_LEVEL,  3,   8,   36)
 
 mod1_lee_n_params <- 20
 mod1_lee_aic <- 2 * mod1_lee_n_params - 2 * mod1_lee_ll
 
-mod2_lee_aic <- 2 * h2_fit$leeFit_n_params - 2 * h2_fit$leeFit_ll
+mod2_lee_aic <- 2 * unname(lee20_replication['leeFit_n_params']) - 2 * unname(lee20_replication['leeFit_ll'])
 
 registerDoRNG(49637421)
 
 # Create Lee et al (2020a) version of model 3 on sub-data
 lee3_sub <- lee3_spatPomp()
-
 lee3_all <- lee3_spatPomp(start_date = "2010-10-23")
 
-lee3_results <- readRDS("model3/run_level_3/lee3_results.rds")
-# lee3_results <- bake(
-#   file = paste0('model3/', rl_dir, 'lee3_results.rds'), {
-#
-#     # Create lists to save results
-#     lee3_results <- list()
-#
-#     # Save how long it takes for sub-data
-#     lee3_results[["sub_bpf_time"]] <- system.time({
-#
-#       lee3_sub_ll_evals <- foreach(
-#         i = 1:lee3_NREP, .combine = rbind
-#       ) %dopar% {
-#
-#         liks <- numeric(10L)
-#
-#         lee_bpf_out <- bpfilter(lee3_sub, block_size = 1, Np = lee3_NP)
-#         Ouest_ind <- which(lee_bpf_out@unit_names == "Ouest")
-#
-#         for (u in 1:10) {
-#           if (u == Ouest_ind) {
-#             liks[u] <- sum(lee_bpf_out@block.cond.loglik[u, lee3_sub@times >= lubridate::decimal_date(as.Date('2017-06-10'))])
-#           } else {
-#             liks[u] <- sum(lee_bpf_out@block.cond.loglik[u, ])
-#           }
-#         }
-#
-#         liks
-#       }
-#     })
-#
-#     # Save all likelihood evaluations
-#     lee3_results[["sub_ll_eval"]] <- logmeanexp(rowSums(lee3_sub_ll_evals)[!is.na(rowSums(lee3_sub_ll_evals))])
-#
-#     registerDoRNG(2789131)
-#
-#     # Save how long it takes for all data
-#     lee3_results[["all_pf_time"]] <- system.time({
-#       # Save all likelihood evaluations
-#
-#       lee3_all_ll_evals <- foreach(
-#         i = 1:lee3_NREP, .combine = c
-#       ) %dopar% {
-#         logLik(bpfilter(lee3_all, block_size = 1, Np = lee3_NP))  # Get likelihood evaluations
-#       }
-#
-#       lee3_results[["all_ll_eval"]] <- logmeanexp(lee3_all_ll_evals[!is.na(lee3_all_ll_evals)])
-#
-#     })
-#
-#     lee3_results[["n_params"]] <- 29
-#
-#     lee3_results
-#   },
-#   timing = FALSE
-# )
+lee3_results <- bake(
+  file = paste0('model3/', rl_dir, 'lee3_results.rds'), {
+
+    # Create lists to save results
+    lee3_results <- list()
+
+    # Save how long it takes for sub-data
+    lee3_results[["sub_bpf_time"]] <- system.time({
+
+      lee3_sub_ll_evals <- foreach(
+        i = 1:lee3_NREP, .combine = rbind
+      ) %dopar% {
+
+        liks <- numeric(10L)
+
+        lee_bpf_out <- bpfilter(lee3_sub, block_size = 1, Np = lee3_NP)
+        Ouest_ind <- which(lee_bpf_out@unit_names == "Ouest")
+
+        for (u in 1:10) {
+          if (u == Ouest_ind) {
+            liks[u] <- sum(lee_bpf_out@block.cond.loglik[u, lee3_sub@times >= lubridate::decimal_date(as.Date('2017-06-10'))])
+          } else {
+            liks[u] <- sum(lee_bpf_out@block.cond.loglik[u, ])
+          }
+        }
+
+        liks
+      }
+    })
+
+    # Save all likelihood evaluations
+    lee3_results[["sub_ll_eval"]] <- logmeanexp(rowSums(lee3_sub_ll_evals)[!is.na(rowSums(lee3_sub_ll_evals))])
+
+    registerDoRNG(2789131)
+
+    # Save how long it takes for all data
+    lee3_results[["all_pf_time"]] <- system.time({
+      # Save all likelihood evaluations
+
+      lee3_all_ll_evals <- foreach(
+        i = 1:lee3_NREP, .combine = c
+      ) %dopar% {
+        logLik(bpfilter(lee3_all, block_size = 1, Np = lee3_NP))  # Get likelihood evaluations
+      }
+
+      lee3_results[["all_ll_eval"]] <- logmeanexp(lee3_all_ll_evals[!is.na(lee3_all_ll_evals)])
+
+    })
+
+    lee3_results[["n_params"]] <- 29
+
+    lee3_results
+  },
+  timing = FALSE
+)
 
 rm(lee3_sub, lee3_all, lee3_NP, lee3_NREP)
 gc()
 
 mod3_lee_coupled_aic <- 2 * lee3_results$n_params - 2 * lee3_results$all_ll_eval
-
 mod3_lee_coupled_partial_aic <- 2 * lee3_results$n_params - 2 * lee3_results$sub_ll_eval
 @
 
@@ -1610,12 +1540,12 @@ Calibrating model parameters to observed data does not guarantee that the result
 However, the congruency between the model and observed data serves as a proxy for the congruency between the model and the true underlying dynamic system.
 As such, it is desirable to obtain the best possible fit of the proposed mechanistic structure to the observed data.
 
-In this article we follow \cite{lee20} by calibrating the parameters of each of our models using maximizing the likelihood, as described in Eq.~\myeqref{eq:likedef}.
+In this article we \old{calibrate} \new{follow \cite{lee20} by calibrating} the parameters of each of our models \old{by maximizing the likelihood} \new{using maximum likelihood}, as described in Eq.~\myeqref{eq:likedef}.
 The likelihood for each of the fitted models---and the corresponding AIC values for model comparisons that include an adjustment for the number of calibrated parameters---is provided in Table~\ref{tab:likes}.
 In the following subsections we describe in detail our approach to calibrating the three proposed mechanistic models to observed cholera incidence data.
 \eic{I'VE STARTED TO PUT IN SOME DISCUSSION OF BAYESIAN METHODS HERE, THOUGH IT COULD ALSO GO IN THE DISCUSSION}
-The main alternative to maximum likelihood estimation is Bayesian inference via Markov chain Monte Carlo, used to analyze the Haiti cholera epidemic by \cite{andrews11,rinaldo12,lewnard16,trevisin22,sallah17,azman12,kuhn14,mari15,gatto12}.
-Alternatively, some investigations obtained parameters from previous sources without calibrating to data.
+\new{The main alternative to maximum likelihood estimation is Bayesian inference via Markov chain Monte Carlo, used to analyze the Haiti cholera epidemic by \cite{andrews11,rinaldo12,lewnard16,trevisin22,sallah17,azman12,kuhn14,mari15,gatto12}.
+Alternatively, some investigations obtained parameters from previous sources without calibrating to data.}
 
 \begin{table}[!h]
 \centering
@@ -1631,7 +1561,7 @@ Alternatively, some investigations obtained parameters from previous sources wit
   $\Sexpr{myround(mod2_ll, 1)}$ &
   $\Sexpr{myround(mod3_ll, 1)}$ \\
     & ($\Sexpr{myround(mod1_lee_ll, 1)}$)\footnotemark[1] &
-  ($\Sexpr{myround(h2_fit$leeFit_ll, 1)}$) &
+  ($\Sexpr{myround(unname(lee20_replication['leeFit_ll']), 1)}$) &
   ($\Sexpr{myround(lee3_results[["all_ll_eval"]], 1)}$)\footnotemark[2]
 \\
 \hline
@@ -1641,7 +1571,7 @@ Number of &
   $\Sexpr{as.character(mod3_n_params)}$ \\
  Fit Parameters &
  (\Sexpr{as.character(mod1_lee_n_params)}) &
- ($\Sexpr{as.character(h2_fit$leeFit_n_params)}$) &
+ ($\Sexpr{as.character(unname(lee20_replication['leeFit_n_params']))}$) &
  ($\Sexpr{as.character(lee3_results$n_params, 1)}$)
 \\
 \hline
@@ -1664,7 +1594,7 @@ Number of &
 \begin{flushleft}
 Values in parentheses are corresponding values using Lee et al.~\cite{lee20} parameter estimates.  \textsuperscript{1}The reported likelihood is an upper bound of the likelihood of the Lee et al.~\cite{lee20} model. \textsuperscript{2}Lee et al.~\cite{lee20} fit Model~3 to a subset of the data (March 2014 onward, excluding data from Ouest in 2015-2016).
 On this subset, their model has a likelihood of $\Sexpr{myround(lee3_results$sub_ll_eval, 1)}$.
-On this same subset, our model has a likelihood of $\Sexpr{myround(mod3_eval_res$subset_ll, 1)}$.
+On this same subset, our model has a likelihood of $\Sexpr{myround(mod3_eval_res$subset_ll['est'], 1)}$.
 Details of estimating the likelihood of the Lee et al.~\cite{lee20} models is provided in \nameref{S_lee20}
 See Sec.~S6 of the supplement material for more details on estimating the likelihood of the Lee et al.~\cite{lee20} models.
 \end{flushleft}
@@ -1724,6 +1654,7 @@ The reported results for Model~1 in the remainder of this article were obtained 
 ggplot() +
   geom_point(data = h1_prof_res, aes(x = betat, y = logLik)) +
   geom_line(data = mcap_results$fit, aes(x = parameter, y = smoothed), col = 'blue') +
+  geom_line(data = mcap_results$fit, aes(x = parameter, y = quadratic), col = 'red') +
   geom_vline(xintercept = mcap_results$ci[1], linetype = 'dashed') +
   geom_vline(xintercept = mcap_results$ci[2], linetype = 'dashed') +
   geom_vline(xintercept = mcap_results$mle, col = 'blue') +
@@ -1733,10 +1664,18 @@ ggplot() +
 @
 \caption{\label{fig:betat}
 {\figTitle Confidence interval for linear trend in transmission.}
-Monte Carlo adjusted profile of $\transmissionTrend$ for Model~1.
-The blue curve is the profile, the blue line indicates the MLE, and the dashed lines indicate the $95\%$ confidence interval.
+Monte Carlo adjusted profile (MCAP) of $\transmissionTrend$ for Model~1.
+The blue curve is the MCAP, the vertical blue line indicates the MLE, and the vertical dashed lines indicate the $95\%$ confidence interval.
 }
 \end{figure}
+
+<<clean Up of Betat data, echo=FALSE, message=FALSE, include=FALSE, warning=FALSE>>=
+suppressWarnings(
+  rm(h1_prof_res, mcap_results)
+)
+gc()
+@
+
 
 If a mechanistic model including a feature (such as a representation of a mechanism, or the inclusion of a covariate) fits better than mechanistic models without that feature, and also has competitive fit compared to associative benchmarks, this may be taken as evidence supporting the scientific relevance of the feature.
 As for any analysis of observational data, we must be alert to the possibility of confounding.
@@ -1760,7 +1699,10 @@ Simulations from the initial conditions of our fitted model are plotted against 
 # This code chunk creates the figure containing simulations from Model 1
 
 # Simulate Model 1 from initial conditions.
-sims <- simulate(h1, nsim = 500, format = 'data.frame', seed = 3448931)
+sims <- simulate(
+  h1, nsim = switch(RUN_LEVEL, 50, 100, 500),
+  format = 'data.frame', seed = 3448931
+)
 
 # Calculate 0.025 and 0.975 percentiles of simulations, at each time point.
 quants <- sims %>%
@@ -1866,15 +1808,14 @@ h2_traj <- h2_epi_traj %>%
 
 # Run Vaccination scenarios for Model 2. Note that the code runs the same
 # speed for each run-level.
-mod2_VaccScenarios <- readRDS("model2/VaccinationScenarios.rds")
-# mod2_VaccScenarios <- bake(
-#   file = paste0("model2/VaccinationScenarios.rds"), {
-#     haiti2_vaccScenario(
-#       h2_params = h2_fit$h2_params
-#     )
-#   },
-#   timing = FALSE
-# )
+mod2_VaccScenarios <- bake(
+  file = paste0("model2/VaccinationScenarios.rds"), {
+    haiti2_vaccScenario(
+      h2_params = h2_fit$h2_params
+    )
+  },
+  timing = FALSE
+)
 @
 
 \begin{figure}[!h]
@@ -1931,7 +1872,7 @@ The IBPF algorithm enables us to directly estimate the parameters of models desc
 The ability to directly estimate parameters of Model~3 is responsible for the large increase in model likelihoods reported in Table~\ref{tab:likes}.
 Simulations from the fitted model are displayed in Fig.~\ref{fig:h3spatsims}.
 
-<<Model 3 SpatPOMP sims, echo=FALSE>>=
+<<Model 3 SpatPOMP Sims, echo=FALSE>>=
 
 # Number of simulations from Model 3. Because it's high-dimensional, we include
 # a run level to avoid time/memory issues when editing. Final results shown
@@ -1940,37 +1881,34 @@ Simulations from the fitted model are displayed in Fig.~\ref{fig:h3spatsims}.
 h3_nsim <- switch(RUN_LEVEL, 20, 100, 500)
 
 # Get quantiles of simulations from the calibrated Model 3.
-h3_quants <- readRDS("model3/run_level_3/h3Sims.rds")
-# h3_quants <- bake(
-#   file = paste0('model3/', rl_dir, 'h3Sims.rds'), {
-#
-#     coef(h3Spat) <- p3
-#     # Simulate from the fitted version of Model 3
-#     h3_sims <- simulate(
-#       h3Spat, nsim = h3_nsim, format = 'data.frame'
-#     )
-#
-#     # For each department and time-point, calculate percentiles of the
-#     # simulations
-#     h3_sims %>%
-#       rename(dep = unitname) %>%
-#       group_by(dep, time) %>%
-#       summarise(
-#         q05 = quantile(cases, 0.025, na.rm = T),
-#         mean = mean(cases, na.rm = T),
-#         q50 = quantile(cases, 0.5, na.rm = T),
-#         q95 = quantile(cases, 0.975, na.rm = T)
-#       ) %>%
-#       ungroup() %>%
-#       mutate(
-#         date = lubridate::date_decimal(time)
-#       ) %>%
-#       mutate(date = as.Date(lubridate::round_date(date, unit = 'day')))
-#   },
-#   timing = FALSE
-# )
+h3_quants <- bake(
+  file = paste0('model3/', rl_dir, 'h3Sims.rds'), {
 
+    coef(h3Spat) <- p3
+    # Simulate from the fitted version of Model 3
+    h3_sims <- simulate(
+      h3Spat, nsim = h3_nsim, format = 'data.frame'
+    )
 
+    # For each department and time-point, calculate percentiles of the
+    # simulations
+    h3_sims %>%
+      rename(dep = unitname) %>%
+      group_by(dep, time) %>%
+      summarise(
+        q05 = quantile(cases, 0.025, na.rm = T),
+        mean = mean(cases, na.rm = T),
+        q50 = quantile(cases, 0.5, na.rm = T),
+        q95 = quantile(cases, 0.975, na.rm = T)
+      ) %>%
+      ungroup() %>%
+      mutate(
+        date = lubridate::date_decimal(time)
+      ) %>%
+      mutate(date = as.Date(lubridate::round_date(date, unit = 'day')))
+  },
+  timing = FALSE
+)
 @
 
 \begin{figure}[!h]
@@ -2223,369 +2161,354 @@ h1_scen_sims <- switch(RUN_LEVEL, 20, 100, 1000)
 # Simulate vaccination scenario from filtering distribution. The code
 # below creates a model, samples from the filtering distribution, and then
 # projects the vaccination scenario, under the specified model.
-h1_S0_results <- readRDS("model1/run_level_3/S0_sims.rds")
-# h1_S0_results <- bake(
-#   file = paste0("model1/", rl_dir, "S0_sims.rds"), {
-#
-#     # Create the model
-#     s0 <- haiti1_joint(vacscen = 'id0')
-#
-#     # Load coefficients
-#     coef(s0) <- p1
-#
-#     # Get samples from filtering distribution
-#     s0_pf <- pfilter(s0, save.state = TRUE, Np = h1_scen_NP)
-#     end_states <- saved_states(s0_pf)
-#     end_states <- end_states[[length(end_states)]]
-#
-#     # project vacc scenario, with filtering dist, and model.
-#     h1_S0_sims <- project_from_filter(mod = s0, end_states = end_states, nsims = h1_scen_sims)
-#
-#     results <- list()
-#     results$mod1_V0_sims <- agg_mod1_sims(h1_S0_sims)
-#     results$mod1_V0_probs <- get_elimProbs(h1_S0_sims, model = 1)
-#
-#     results
-#   },
-#   timing = FALSE
-# )
+h1_S0_results <- bake(
+  file = paste0("model1/", rl_dir, "S0_sims.rds"), {
+
+    # Create the model
+    s0 <- haiti1_joint(vacscen = 'id0')
+
+    # Load coefficients
+    coef(s0) <- p1
+
+    # Get samples from filtering distribution
+    s0_pf <- pfilter(s0, save.state = TRUE, Np = h1_scen_NP)
+    end_states <- saved_states(s0_pf)
+    end_states <- end_states[[length(end_states)]]
+
+    # project vacc scenario, with filtering dist, and model.
+    h1_S0_sims <- project_from_filter(mod = s0, end_states = end_states, nsims = h1_scen_sims)
+
+    results <- list()
+    results$mod1_V0_sims <- agg_mod1_sims(h1_S0_sims)
+    results$mod1_V0_probs <- get_elimProbs(h1_S0_sims, model = 1)
+
+    results
+  },
+  timing = FALSE
+)
 
 # Simulate vaccination scenario from filtering distribution. The code
 # below creates a model, samples from the filtering distribution, and then
 # projects the vaccination scenario, under the specified model.
-h1_S2_results <- readRDS("model1/run_level_3/S2_sims.rds")
-# h1_S2_results <- bake(
-#   file = paste0('model1/', rl_dir, 'S2_sims.rds'), {
-#
-#     # Create the model
-#     s2 <- haiti1_joint(vacscen = "id2")
-#
-#     # Set model parameters that need to be adjusted
-#     depts <- 2
-#     h1_par_names <- names(p1)
-#     h1_params_temp <- c(p1, rep(0.0, 5 * depts))
-#     names(h1_params_temp) <- c(
-#       h1_par_names,
-#       paste0("S", 1:depts, "_0"),
-#       paste0("E", 1:depts, "_0"),
-#       paste0("I", 1:depts, "_0"),
-#       paste0("A", 1:depts, "_0"),
-#       paste0("R", 1:depts, "_0")
-#     )
-#     coef(s2) <- h1_params_temp  # Set model parameters
-#
-#     # Get samples from filtering distribution for Scenario 2 model:
-#     s2_pf <- pfilter(s2, save.state = TRUE, Np = h1_scen_NP)
-#     end_states <- saved_states(s2_pf)
-#     end_states <- end_states[[length(end_states)]]
-#
-#     # project vacc scenario, with filtering dist, and model.
-#     h1_S2_sims <- project_from_filter(mod = s2, end_states = end_states, nsims = h1_scen_sims)
-#
-#     results <- list()
-#     results$mod1_V1_sims <- agg_mod1_sims(h1_S2_sims)
-#     results$mod1_V1_probs <- get_elimProbs(h1_S2_sims, model = 1)
-#
-#     results
-#   },
-#   timing = FALSE
-# )
+h1_S2_results <- bake(
+  file = paste0('model1/', rl_dir, 'S2_sims.rds'), {
+
+    # Create the model
+    s2 <- haiti1_joint(vacscen = "id2")
+
+    # Set model parameters that need to be adjusted
+    depts <- 2
+    h1_par_names <- names(p1)
+    h1_params_temp <- c(p1, rep(0.0, 5 * depts))
+    names(h1_params_temp) <- c(
+      h1_par_names,
+      paste0("S", 1:depts, "_0"),
+      paste0("E", 1:depts, "_0"),
+      paste0("I", 1:depts, "_0"),
+      paste0("A", 1:depts, "_0"),
+      paste0("R", 1:depts, "_0")
+    )
+    coef(s2) <- h1_params_temp  # Set model parameters
+
+    # Get samples from filtering distribution for Scenario 2 model:
+    s2_pf <- pfilter(s2, save.state = TRUE, Np = h1_scen_NP)
+    end_states <- saved_states(s2_pf)
+    end_states <- end_states[[length(end_states)]]
+
+    # project vacc scenario, with filtering dist, and model.
+    h1_S2_sims <- project_from_filter(mod = s2, end_states = end_states, nsims = h1_scen_sims)
+
+    results <- list()
+    results$mod1_V1_sims <- agg_mod1_sims(h1_S2_sims)
+    results$mod1_V1_probs <- get_elimProbs(h1_S2_sims, model = 1)
+
+    results
+  },
+  timing = FALSE
+)
 
 # Simulate vaccination scenario from filtering distribution. The code
 # below creates a model, samples from the filtering distribution, and then
 # projects the vaccination scenario, under the specified model.
-h1_S4_results <- readRDS("model1/run_level_3/S4_sims.rds")
-# h1_S4_results <- bake(
-#   file = paste0('model1/', rl_dir, 'S4_sims.rds'), {
-#
-#     # Create the model
-#     s4 <- haiti1_joint(vacscen = "id4")
-#
-#     # Set model parameters that need to be adjusted
-#     depts <- 3
-#     h1_par_names <- names(p1)
-#     h1_params_temp <- c(p1, rep(0.0, 5 * depts))
-#     names(h1_params_temp) <- c(
-#       h1_par_names,
-#       paste0("S", 1:depts, "_0"),
-#       paste0("E", 1:depts, "_0"),
-#       paste0("I", 1:depts, "_0"),
-#       paste0("A", 1:depts, "_0"),
-#       paste0("R", 1:depts, "_0")
-#     )
-#     coef(s4) <- h1_params_temp  # Set model parameters
-#
-#     # Get samples from filtering distribution for Scenario 2 model:
-#     s4_pf <- pfilter(s4, save.state = TRUE, Np = h1_scen_NP)
-#     end_states <- saved_states(s4_pf)
-#     end_states <- end_states[[length(end_states)]]
-#
-#     # project vacc scenario, with filtering dist, and model.
-#     h1_S4_sims <- project_from_filter(mod = s4, end_states = end_states, nsims = h1_scen_sims)
-#
-#     results <- list()
-#     results$mod1_V2_sims <- agg_mod1_sims(h1_S4_sims)
-#     results$mod1_V2_probs <- get_elimProbs(h1_S4_sims, model = 1)
-#
-#     results
-#   },
-#   timing = FALSE
-# )
+h1_S4_results <- bake(
+  file = paste0('model1/', rl_dir, 'S4_sims.rds'), {
+
+    # Create the model
+    s4 <- haiti1_joint(vacscen = "id4")
+
+    # Set model parameters that need to be adjusted
+    depts <- 3
+    h1_par_names <- names(p1)
+    h1_params_temp <- c(p1, rep(0.0, 5 * depts))
+    names(h1_params_temp) <- c(
+      h1_par_names,
+      paste0("S", 1:depts, "_0"),
+      paste0("E", 1:depts, "_0"),
+      paste0("I", 1:depts, "_0"),
+      paste0("A", 1:depts, "_0"),
+      paste0("R", 1:depts, "_0")
+    )
+    coef(s4) <- h1_params_temp  # Set model parameters
+
+    # Get samples from filtering distribution for Scenario 2 model:
+    s4_pf <- pfilter(s4, save.state = TRUE, Np = h1_scen_NP)
+    end_states <- saved_states(s4_pf)
+    end_states <- end_states[[length(end_states)]]
+
+    # project vacc scenario, with filtering dist, and model.
+    h1_S4_sims <- project_from_filter(mod = s4, end_states = end_states, nsims = h1_scen_sims)
+
+    results <- list()
+    results$mod1_V2_sims <- agg_mod1_sims(h1_S4_sims)
+    results$mod1_V2_probs <- get_elimProbs(h1_S4_sims, model = 1)
+
+    results
+  },
+  timing = FALSE
+)
 
 # Simulate vaccination scenario from filtering distribution. The code
 # below creates a model, samples from the filtering distribution, and then
 # projects the vaccination scenario, under the specified model.
-h1_S3_results <- readRDS("model1/run_level_3/S3_sims.rds")
-# h1_S3_results <- bake(
-#   file = paste0('model1/', rl_dir, 'S3_sims.rds'), {
-#
-#     # Create the model
-#     s3 <- haiti1_joint(vacscen = "id3")
-#
-#     # Set model parameters that need to be adjusted
-#     depts <- 10
-#     h1_par_names <- names(p1)
-#     h1_params_temp <- c(p1, rep(0.0, 5 * depts))
-#     names(h1_params_temp) <- c(
-#       h1_par_names,
-#       paste0("S", 1:depts, "_0"),
-#       paste0("E", 1:depts, "_0"),
-#       paste0("I", 1:depts, "_0"),
-#       paste0("A", 1:depts, "_0"),
-#       paste0("R", 1:depts, "_0")
-#     )
-#     coef(s3) <- h1_params_temp  # Set model parameters
-#
-#     # Get samples from filtering distribution for Scenario 2 model:
-#     s3_pf <- pfilter(s3, save.state = TRUE, Np = h1_scen_NP)
-#     end_states <- saved_states(s3_pf)
-#     end_states <- end_states[[length(end_states)]]
-#
-#     # project vacc scenario, with filtering dist, and model.
-#     h1_S3_sims <- project_from_filter(mod = s3, end_states = end_states, nsims = h1_scen_sims)
-#
-#     results <- list()
-#     results$mod1_V3_sims <- agg_mod1_sims(h1_S3_sims)
-#     results$mod1_V3_probs <- get_elimProbs(h1_S3_sims, model = 1)
-#
-#     results
-#   },
-#   timing = FALSE
-# )
+h1_S3_results <- bake(
+  file = paste0('model1/', rl_dir, 'S3_sims.rds'), {
+
+    # Create the model
+    s3 <- haiti1_joint(vacscen = "id3")
+
+    # Set model parameters that need to be adjusted
+    depts <- 10
+    h1_par_names <- names(p1)
+    h1_params_temp <- c(p1, rep(0.0, 5 * depts))
+    names(h1_params_temp) <- c(
+      h1_par_names,
+      paste0("S", 1:depts, "_0"),
+      paste0("E", 1:depts, "_0"),
+      paste0("I", 1:depts, "_0"),
+      paste0("A", 1:depts, "_0"),
+      paste0("R", 1:depts, "_0")
+    )
+    coef(s3) <- h1_params_temp  # Set model parameters
+
+    # Get samples from filtering distribution for Scenario 2 model:
+    s3_pf <- pfilter(s3, save.state = TRUE, Np = h1_scen_NP)
+    end_states <- saved_states(s3_pf)
+    end_states <- end_states[[length(end_states)]]
+
+    # project vacc scenario, with filtering dist, and model.
+    h1_S3_sims <- project_from_filter(mod = s3, end_states = end_states, nsims = h1_scen_sims)
+
+    results <- list()
+    results$mod1_V3_sims <- agg_mod1_sims(h1_S3_sims)
+    results$mod1_V3_probs <- get_elimProbs(h1_S3_sims, model = 1)
+
+    results
+  },
+  timing = FALSE
+)
 
 # Simulate vaccination scenario from filtering distribution. The code
 # below creates a model, samples from the filtering distribution, and then
 # projects the vaccination scenario, under the specified model.
-h1_S1_results <- readRDS("model1/run_level_3/S1_sims.rds")
-# h1_S1_results <- bake(
-#   file = paste0('model1/', rl_dir, 'S1_sims.rds'), {
-#
-#     # Create the model
-#     s1 <- haiti1_joint(vacscen = "id1")
-#
-#     # Set model parameters that need to be adjusted
-#     depts <- 10
-#     h1_par_names <- names(p1)
-#     h1_params_temp <- c(p1, rep(0.0, 5 * depts))
-#     names(h1_params_temp) <- c(
-#       h1_par_names,
-#       paste0("S", 1:depts, "_0"),
-#       paste0("E", 1:depts, "_0"),
-#       paste0("I", 1:depts, "_0"),
-#       paste0("A", 1:depts, "_0"),
-#       paste0("R", 1:depts, "_0")
-#     )
-#     coef(s1) <- h1_params_temp  # Set model parameters
-#
-#     # Get samples from filtering distribution for Scenario 2 model:
-#     s1_pf <- pfilter(s1, save.state = TRUE, Np = h1_scen_NP)
-#     end_states <- saved_states(s1_pf)
-#     end_states <- end_states[[length(end_states)]]
-#
-#     # project vacc scenario, with filtering dist, and model.
-#     h1_S1_sims <- project_from_filter(mod = s1, end_states = end_states, nsims = h1_scen_sims)
-#
-#     results <- list()
-#     results$mod1_V4_sims <- agg_mod1_sims(h1_S1_sims)
-#     results$mod1_V4_probs <- get_elimProbs(h1_S1_sims, model = 1)
-#
-#     results
-#   },
-#   timing = FALSE
-# )
+h1_S1_results <- bake(
+  file = paste0('model1/', rl_dir, 'S1_sims.rds'), {
+
+    # Create the model
+    s1 <- haiti1_joint(vacscen = "id1")
+
+    # Set model parameters that need to be adjusted
+    depts <- 10
+    h1_par_names <- names(p1)
+    h1_params_temp <- c(p1, rep(0.0, 5 * depts))
+    names(h1_params_temp) <- c(
+      h1_par_names,
+      paste0("S", 1:depts, "_0"),
+      paste0("E", 1:depts, "_0"),
+      paste0("I", 1:depts, "_0"),
+      paste0("A", 1:depts, "_0"),
+      paste0("R", 1:depts, "_0")
+    )
+    coef(s1) <- h1_params_temp  # Set model parameters
+
+    # Get samples from filtering distribution for Scenario 2 model:
+    s1_pf <- pfilter(s1, save.state = TRUE, Np = h1_scen_NP)
+    end_states <- saved_states(s1_pf)
+    end_states <- end_states[[length(end_states)]]
+
+    # project vacc scenario, with filtering dist, and model.
+    h1_S1_sims <- project_from_filter(mod = s1, end_states = end_states, nsims = h1_scen_sims)
+
+    results <- list()
+    results$mod1_V4_sims <- agg_mod1_sims(h1_S1_sims)
+    results$mod1_V4_probs <- get_elimProbs(h1_S1_sims, model = 1)
+
+    results
+  },
+  timing = FALSE
+)
 @
 
-<<Load Model 3 Vacc Scenarios, message=FALSE, include=FALSE>>=
-NP_BPF <- switch(RUN_LEVEL, 50, 200, 2000)
-NSIM   <- switch(RUN_LEVEL, 10,  50, 1000)
+<<Simulate Model 3 Vacc Scenarios, message=FALSE, include=FALSE>>=
+NP_BPF <- switch(RUN_LEVEL, 20, 200, 2000)
+NSIM   <- switch(RUN_LEVEL, 5,  50, 1000)
 
-h3_bpf_end_stats <- readRDS("model3/run_level_3/h3_bpf_end_states.rds")
-# h3_bpf_end_states <- bake(
-#   file = paste0("model3/", rl_dir, "h3_bpf_end_states.rds"),
-#   expr = {
-#     coef(h3Spat) <- p3
-#     h3_bpf <- bpfilter(h3Spat, Np = NP_BPF, block_size = 1, save_states = TRUE)
-#     ss <- h3_bpf@saved.states
-#     ss[[length(ss)]]
-#   },
-#   timing = FALSE
-# )
+h3_bpf_end_states <- bake(
+  file = paste0("model3/", rl_dir, "h3_bpf_end_states.rds"),
+  expr = {
+    coef(h3Spat) <- p3
+    h3_bpf <- bpfilter(h3Spat, Np = NP_BPF, block_size = 1, save_states = TRUE)
+    ss <- h3_bpf@saved.states
+    ss[[length(ss)]]
+  },
+  timing = FALSE
+)
 
-mod3_V0_res <- readRDS("model3/run_level_3/mod3_V0_res.rds")
-# mod3_V0_res <- bake(
-#   file = paste0("model3/", rl_dir, "mod3_V0_res.rds"), {
-#
-#     # Create a list to store results
-#     h3_V0_res <- list()
-#
-#     # Get "noVacc" scenario parameters
-#     h3_S0_par <- get_model3_vacc_scenario_params(scenario = "noVacc")
-#     coef(h3Spat) <- p3
-#     coef(h3Spat)[names(h3_S0_par)] <- h3_S0_par
-#
-#     # Using parameters and filtered distribution, project system
-#     h3_V0_sims <- project_from_filter(
-#       h3Spat, end_states = h3_bpf_end_states, covarGen = project_rain,
-#       nsims = NSIM, seed = 6897154
-#     )
-#
-#     # Store nationally aggregated results
-#     h3_V0_res$mod3_V0_sims <- agg_mod3_sims(h3_V0_sims)
-#     h3_V0_res$mod3_V0_probs <- get_elimProbs(h3_V0_sims, model = 3)
-#
-#     # For the supplement material, save quantiles of the Susceptible individuals
-#     h3_V0_res$SQuants <- h3_V0_sims %>%
-#       mutate(
-#         date = as.Date(lubridate::round_date(lubridate::date_decimal(time), unit = 'day'))
-#       ) %>%
-#       group_by(unitname, date) %>%
-#       mutate(
-#         pop = h3Spat@params[paste0("H", which(first(unitname) == unit_names(h3Spat)))]
-#       ) %>%
-#       summarize(
-#         Q025 = quantile((S + VSd + VSdd + VSdd_alt + VSd_alt) / pop, probs = 0.025),
-#         Q50 = quantile((S + VSd + VSdd + VSdd_alt + VSd_alt) / pop, probs = 0.5),
-#         Q975 = quantile((S + VSd + VSdd + VSdd_alt + VSd_alt) / pop, probs = 0.975)
-#       ) %>%
-#       ungroup() %>%
-#       rename(dep = unitname)
-#
-#     # Return results
-#     h3_V0_res
-#
-#   }
-# )
+mod3_V0_res <- bake(
+  file = paste0("model3/", rl_dir, "mod3_V0_res.rds"), {
 
-mod3_V1_res <- readRDS("model3/run_level_3/mod3_V1_res.rds")
-# mod3_V1_res <- bake(
-#   file = paste0("model3/", rl_dir, "mod3_V1_res.rds"), {
-#
-#     # Create a list to store results
-#     h3_V1_res <- list()
-#
-#     # Get "noVacc" scenario parameters
-#     h3_V1_par <- get_model3_vacc_scenario_params(scenario = "2dep")
-#     coef(h3Spat) <- p3
-#     coef(h3Spat)[names(h3_V1_par)] <- h3_V1_par
-#
-#     # Using parameters and filtered distribution, project system
-#     h3_V1_sims <- project_from_filter(
-#       h3Spat, end_states = h3_bpf_end_states, covarGen = project_rain,
-#       nsims = NSIM, seed = 6897154
-#     )
-#
-#     # Store nationally aggregated results
-#     h3_V1_res$mod3_V1_sims <- agg_mod3_sims(h3_V1_sims)
-#     h3_V1_res$mod3_V1_probs <- get_elimProbs(h3_V1_sims, model = 3)
-#
-#     # Return results
-#     h3_V1_res
-#
-#   }
-# )
+    # Create a list to store results
+    h3_V0_res <- list()
 
-mod3_V2_res <- readRDS("model3/run_level_3/mod3_V2_res.rds")
-# mod3_V2_res <- bake(
-#   file = paste0("model3/", rl_dir, "mod3_V2_res.rds"), {
-#
-#     # Create a list to store results
-#     h3_V2_res <- list()
-#
-#     # Get "noVacc" scenario parameters
-#     h3_V2_par <- get_model3_vacc_scenario_params(scenario = "3dep")
-#     coef(h3Spat) <- p3
-#     coef(h3Spat)[names(h3_V2_par)] <- h3_V2_par
-#
-#     # Using parameters and filtered distribution, project system
-#     h3_V2_sims <- project_from_filter(
-#       h3Spat, end_states = h3_bpf_end_states, covarGen = project_rain,
-#       nsims = NSIM, seed = 6897154
-#     )
-#
-#     # Store nationally aggregated results
-#     h3_V2_res$mod3_V2_sims <- agg_mod3_sims(h3_V2_sims)
-#     h3_V2_res$mod3_V2_probs <- get_elimProbs(h3_V2_sims, model = 3)
-#
-#     # Return results
-#     h3_V2_res
-#   }
-# )
+    # Get "noVacc" scenario parameters
+    h3_S0_par <- get_model3_vacc_scenario_params(scenario = "noVacc")
+    coef(h3Spat) <- p3
+    coef(h3Spat)[names(h3_S0_par)] <- h3_S0_par
 
-mod3_V3_res <- readRDS("model3/run_level_3/mod3_V3_res.rds")
-# mod3_V3_res <- bake(
-#   file = paste0("model3/", rl_dir, "mod3_V3_res.rds"), {
-#
-#     # Create a list to store results
-#     h3_V3_res <- list()
-#
-#     # Get "noVacc" scenario parameters
-#     h3_V3_par <- get_model3_vacc_scenario_params(scenario = "slowNation")
-#     coef(h3Spat) <- p3
-#     coef(h3Spat)[names(h3_V3_par)] <- h3_V3_par
-#
-#     # Using parameters and filtered distribution, project system
-#     h3_V3_sims <- project_from_filter(
-#       h3Spat, end_states = h3_bpf_end_states, covarGen = project_rain,
-#       nsims = NSIM, seed = 6897154
-#     )
-#
-#     # Store nationally aggregated results
-#     h3_V3_res$mod3_V3_sims <- agg_mod3_sims(h3_V3_sims)
-#     h3_V3_res$mod3_V3_probs <- get_elimProbs(h3_V3_sims, model = 3)
-#
-#     # Return results
-#     h3_V3_res
-#
-#   }
-# )
+    # Using parameters and filtered distribution, project system
+    h3_V0_sims <- project_from_filter(
+      h3Spat, end_states = h3_bpf_end_states, covarGen = project_rain,
+      nsims = NSIM, seed = 6897154
+    )
 
-mod3_V4_res <- readRDS("model3/run_level_3/mod3_V4_res.rds")
-# mod3_V4_res <- bake(
-#   file = paste0("model3/", rl_dir, "mod3_V4_res.rds"), {
-#
-#     # Create a list to store results
-#     h3_V4_res <- list()
-#
-#     # Get "noVacc" scenario parameters
-#     h3_V4_par <- get_model3_vacc_scenario_params(scenario = "fastNation")
-#     coef(h3Spat) <- p3
-#     coef(h3Spat)[names(h3_V4_par)] <- h3_V4_par
-#
-#     # Using parameters and filtered distribution, project system
-#     h3_V4_sims <- project_from_filter(
-#       h3Spat, end_states = h3_bpf_end_states, covarGen = project_rain,
-#       nsims = NSIM, seed = 6897154
-#     )
-#
-#     # Store nationally aggregated results
-#     h3_V4_res$mod3_V4_sims <- agg_mod3_sims(h3_V4_sims)
-#     h3_V4_res$mod3_V4_probs <- get_elimProbs(h3_V4_sims, model = 3)
-#
-#     # Return results
-#     h3_V4_res
-#
-#   }
-# )
+    # Store nationally aggregated results
+    h3_V0_res$mod3_V0_sims <- agg_mod3_sims(h3_V0_sims)
+    h3_V0_res$mod3_V0_probs <- get_elimProbs(h3_V0_sims, model = 3)
+
+    # For the supplement material, save quantiles of the Susceptible individuals
+    h3_V0_res$SQuants <- h3_V0_sims %>%
+      mutate(
+        date = as.Date(lubridate::round_date(lubridate::date_decimal(time), unit = 'day'))
+      ) %>%
+      group_by(unitname, date) %>%
+      mutate(
+        pop = h3Spat@params[paste0("H", which(first(unitname) == unit_names(h3Spat)))]
+      ) %>%
+      summarize(
+        Q025 = quantile((S + VSd + VSdd + VSdd_alt + VSd_alt) / pop, probs = 0.025),
+        Q50 = quantile((S + VSd + VSdd + VSdd_alt + VSd_alt) / pop, probs = 0.5),
+        Q975 = quantile((S + VSd + VSdd + VSdd_alt + VSd_alt) / pop, probs = 0.975)
+      ) %>%
+      ungroup() %>%
+      rename(dep = unitname)
+
+    # Return results
+    h3_V0_res
+  }
+)
+
+mod3_V1_res <- bake(
+  file = paste0("model3/", rl_dir, "mod3_V1_res.rds"), {
+
+    # Create a list to store results
+    h3_V1_res <- list()
+
+    # Get "noVacc" scenario parameters
+    h3_V1_par <- get_model3_vacc_scenario_params(scenario = "2dep")
+    coef(h3Spat) <- p3
+    coef(h3Spat)[names(h3_V1_par)] <- h3_V1_par
+
+    # Using parameters and filtered distribution, project system
+    h3_V1_sims <- project_from_filter(
+      h3Spat, end_states = h3_bpf_end_states, covarGen = project_rain,
+      nsims = NSIM, seed = 6897154
+    )
+
+    # Store nationally aggregated results
+    h3_V1_res$mod3_V1_sims <- agg_mod3_sims(h3_V1_sims)
+    h3_V1_res$mod3_V1_probs <- get_elimProbs(h3_V1_sims, model = 3)
+
+    # Return results
+    h3_V1_res
+  }
+)
+
+mod3_V2_res <- bake(
+  file = paste0("model3/", rl_dir, "mod3_V2_res.rds"), {
+
+    # Create a list to store results
+    h3_V2_res <- list()
+
+    # Get "noVacc" scenario parameters
+    h3_V2_par <- get_model3_vacc_scenario_params(scenario = "3dep")
+    coef(h3Spat) <- p3
+    coef(h3Spat)[names(h3_V2_par)] <- h3_V2_par
+
+    # Using parameters and filtered distribution, project system
+    h3_V2_sims <- project_from_filter(
+      h3Spat, end_states = h3_bpf_end_states, covarGen = project_rain,
+      nsims = NSIM, seed = 6897154
+    )
+
+    # Store nationally aggregated results
+    h3_V2_res$mod3_V2_sims <- agg_mod3_sims(h3_V2_sims)
+    h3_V2_res$mod3_V2_probs <- get_elimProbs(h3_V2_sims, model = 3)
+
+    # Return results
+    h3_V2_res
+  }
+)
+
+mod3_V3_res <- bake(
+  file = paste0("model3/", rl_dir, "mod3_V3_res.rds"), {
+
+    # Create a list to store results
+    h3_V3_res <- list()
+
+    # Get "noVacc" scenario parameters
+    h3_V3_par <- get_model3_vacc_scenario_params(scenario = "slowNation")
+    coef(h3Spat) <- p3
+    coef(h3Spat)[names(h3_V3_par)] <- h3_V3_par
+
+    # Using parameters and filtered distribution, project system
+    h3_V3_sims <- project_from_filter(
+      h3Spat, end_states = h3_bpf_end_states, covarGen = project_rain,
+      nsims = NSIM, seed = 6897154
+    )
+
+    # Store nationally aggregated results
+    h3_V3_res$mod3_V3_sims <- agg_mod3_sims(h3_V3_sims)
+    h3_V3_res$mod3_V3_probs <- get_elimProbs(h3_V3_sims, model = 3)
+
+    # Return results
+    h3_V3_res
+  }
+)
+
+mod3_V4_res <- bake(
+  file = paste0("model3/", rl_dir, "mod3_V4_res.rds"), {
+
+    # Create a list to store results
+    h3_V4_res <- list()
+
+    # Get "noVacc" scenario parameters
+    h3_V4_par <- get_model3_vacc_scenario_params(scenario = "fastNation")
+    coef(h3Spat) <- p3
+    coef(h3Spat)[names(h3_V4_par)] <- h3_V4_par
+
+    # Using parameters and filtered distribution, project system
+    h3_V4_sims <- project_from_filter(
+      h3Spat, end_states = h3_bpf_end_states, covarGen = project_rain,
+      nsims = NSIM, seed = 6897154
+    )
+
+    # Store nationally aggregated results
+    h3_V4_res$mod3_V4_sims <- agg_mod3_sims(h3_V4_sims)
+    h3_V4_res$mod3_V4_probs <- get_elimProbs(h3_V4_sims, model = 3)
+
+    # Return results
+    h3_V4_res
+  }
+)
 @
 
 Simulations from probabilistic models (Models~1 and~3) represent possible trajectories of the dynamic system under the scientific assumptions of the models.

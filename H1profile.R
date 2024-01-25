@@ -1,15 +1,52 @@
 # Fitting profiles for Haiti 1.
 #
-# The fit_haiti1 function is a very simple helper that will take as input
-# some starting parameters, and hyperparameters for the IF2 algorithm, and
+# ********
+# NOTE:
+#
+#   If you would like to run this code but have never used the `batchtools` R
+#   package, then we strongly recommend completing both Examples 1 and 2 from
+#   the batchtools vignette, by first installing the `batchtools` package and
+#   running: `vignette('batchtools')`, or visiting:
+#
+#         https://mllg.github.io/batchtools/articles/batchtools.html
+#
+# WARNING:
+#
+#   This script was ran using a high-performance computing cluster. In total,
+#   the RUN_LEVEL == 3 version of this script took TODO compute hours. Partial
+#   results can be obtained by lowering the required computational effort
+#   (params: NP, NMIF, nprof, NP_EVAL, NREPS_EVAL), which can be done by
+#   reducing the RUN_LEVEL to 2 or 1, or alternatively by manually changing
+#   these values.
+# ********
+#
+# The haitipkg::fit_haiti1 function is a very simple helper that will take as
+# input some starting parameters, and hyperparameters for the IF2 algorithm, and
 # will return parameter estimates along with corresponding estimates of their
 # log-likelihoods.
 #
 # In this script we will use this function to do a profile likelihood search
-# of all model parameters using the batchtools package. To do this, we will
+# of all model parameters using the `batchtools` package. To do this, we will
 # create a grid of parameter values, and submit jobs where each job will use
 # a row from the grid as a starting point to fit the model.
-
+#
+# The number of rows in the grid (which is the `final_pars` object that is
+# created using a for-loop over the profile parameters) correspond to the total
+# number of jobs that will be submitted using `batchtools`. Each job takes
+# roughly the same amount of time to compute, and hence the run-time complexity
+# is linear with respect to the total number of jobs. The total number of jobs
+# can be controlled by either (1) changing the number of variables to profile
+# over (2) changing the number of unique values for each profile parameter (3)
+# changing the number of points per profile point.
+#
+# The time-complexity of each job is roughly linear in the parameters NP, and
+# NMIF. The fitting algorithm (IF2) has a computational complexity that is
+# linear with these parameters, and the fitting procedure takes the majority
+# of the time for each job. The model fit is evaluated in each job using the
+# particle filter algorithm, which has a computational complexity that is
+# linear in NP_EVAL and NREPS_EVAL, so modifying these parameters will also
+# have an effect on the total computational effort required, but is typically
+# much less than the effort used to fit the model.
 
 # Load Packages -----------------------------------------------------------
 
@@ -254,3 +291,50 @@ submitJobs(
       chunk = 1:(round(nrow(final_pars) / 3))
    ), resources = resources1
 )
+
+# Get Results -------------------------------------------------------------
+
+# You can check the status of the jobs (how many are queued, how many have
+# started, how many have finished, and how many have errors / ran out of time)
+# by running:
+#
+# getJobStatus()
+#
+# You can ensure that you won't summarize the results until everything has
+# finished by running:
+#
+# waitForJobs()
+#
+# Because there are many long jobs, however, it may not be the best idea to do
+# this interactively. Instead, it's wise to periodically check on the status
+# of the jobs when you think they may have finished. Therefore if you would
+# like to check on your results after closing your R session, you need to
+# re-load your registry (after opening up a new R-session in the same
+# working directory that was used to create the registry) using:
+#
+# library(batchtools)
+#
+# RUN_LEVEL = 3  # Or adjust RUN_LEVEL as needed.
+# reg = loadRegistry(paste0('model1/profileReg_RL', RUN_LEVEL))
+# getStatus()
+#
+# Once all of the jobs are finished, we can summarize the results using:
+#
+# h1_profile_results = unwrap(reduceResultsDataTable())
+# h1_pars = unwrap(getJobPars())
+# h1_results = ijoin(h1_pars, h1_profile_results)
+#
+# saveRDS(
+#   h1_results,
+#   paste0('model1/run_level_', RUN_LEVEL, '/', 'h1_profiles.rds')
+# )
+#
+# We can also get information about each job, which can be helpful to pick the
+# size of each run level and to estimate the cost of the RUN_LEVEL_3 search.
+# For example, we can see the total / average computational time of all of the
+# jobs by running:
+#
+# h1_stats <- unwrap(getJobStatus())
+# h1_stats <- ijoin(h1_pars, h1_stats)
+#
+# summary(h1_stats$time.running |> as.numeric())  # unit of measurement is seconds
