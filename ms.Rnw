@@ -541,10 +541,13 @@ These decisions should be informed by data on the epidemic as well as current un
 Such decisions can be posed as statistical questions about scientifically motivated dynamic models.
 Thus, we encounter the methodological task of building credible, data-informed decisions based on stochastic, partially observed, nonlinear dynamic models.
 This necessitates addressing the tradeoff between biological fidelity and model simplicity, and the reality of misspecification for models at all levels of complexity.
-\ei{I'VE RE-WRITTEN HERE, LOOKING TO BE MORE SPECIFIC ABOUT THE GOALS AND CONTRIBUTION OF THE PAPER.}
-We assess current methodological approaches to these issues via a case study of the 2010-2019 cholera epidemic in Haiti.
+\eic{I'VE RE-WRITTEN HERE, LOOKING TO BE MORE SPECIFIC ABOUT THE GOALS AND CONTRIBUTION OF THE PAPER.}
+\old{As a case study, we consider the 2010-2019 cholera epidemic in Haiti.
+We study three dynamic models developed by expert teams to advise on vaccination policies.
+We assess previous methods used for fitting and evaluating these models, and we develop data analysis strategies leading to improved statistical fit.}
+\new{We assess current methodological approaches to these issues via a case study of the 2010-2019 cholera epidemic in Haiti.
 We consider three dynamic models developed by expert teams to advise on vaccination policies.
-We evaluate previous methods used for fitting these models, and we demonstrate modified data analysis strategies leading to improved statistical fit.
+We evaluate previous methods used for fitting these models, and we demonstrate modified data analysis strategies leading to improved statistical fit.}
 Specifically, we present approaches to diagnosis of model misspecification, development of alternative models, and computational improvements in optimization, in the context of likelihood-based inference on nonlinear dynamic systems.
 Our workflow is reproducible and extendable, facilitating future investigations of this disease system.
 
@@ -573,17 +576,19 @@ Questions of interest include: What indications should we look for in the data t
 What diagnostic tests and model variations can and should be considered in the course of the data analysis?
 What are the possible trade-offs of increasing model complexity, such as the inclusion of interactions across spatial units?
 
-This case study investigates the use of dynamic models and spatiotemporal data to inform public health policy in the context of the cholera outbreak in Haiti, which started in 2010.
-Various dynamic models were developed to study this outbreak: searching PubMed with keywords ``Haiti, cholera, model'' we obtained 20 deterministic models \cite{kirpich16,kirpich17,andrews11,botelho21,fitzgibbon20,eisenberg13,rinaldo12,chao11,date11,lin19,collins21,akman15,trevisin22,mavian20,collins14,kelly16,capone15,bengtsson15,mari15,gatto12} and 8 stochastic models \cite{tuite11,mukandavire13,lewnard16,kunkel17,sallah17,azman12,kuhn14,azman15}.
-Here we focus on a multi-group modeling exercise by Lee et al.~\cite{lee20} in which four expert modeling teams developed models to the same dataset with the goal of comparing conclusions on the feasibility of eliminating cholera by a vaccination campaign.
+This case study investigates the use of dynamic models and spatiotemporal data to inform \old{a policy decision} \new{public health policy} in the context of the cholera outbreak in Haiti, which started in 2010.
+\old{We build on a multi-group modeling exercise by Lee et al. [1] in which four expert modeling teams developed models to the same dataset with the goal of comparing conclusions on the feasibility of eliminating cholera by a vaccination campaign}.
+\old{The data that were used for this study, and that is the subject of our reanalysis, is displayed in Fig.~[1].}
+\new{Various dynamic models were developed to study this outbreak: searching PubMed with keywords ``Haiti, cholera, model'' we obtained 20 deterministic models \cite{kirpich16,kirpich17,andrews11,botelho21,fitzgibbon20,eisenberg13,rinaldo12,chao11,date11,lin19,collins21,akman15,trevisin22,mavian20,collins14,kelly16,capone15,bengtsson15,mari15,gatto12} and 8 stochastic models \cite{tuite11,mukandavire13,lewnard16,kunkel17,sallah17,azman12,kuhn14,azman15}.
+Here we focus on a multi-group modeling exercise by Lee et al.~\cite{lee20} in which four expert modeling teams developed models to the same dataset with the goal of comparing conclusions on the feasibility of eliminating cholera by a vaccination campaign.}
 Model~1 is stochastic and describes cholera at the national level;
 Model~2 is deterministic with spatial structure, and includes transmission via contaminated water;
 Model~3 is stochastic with spatial structure, and accounts for measured rainfall.
 Model~4 has an agent-based construction, featuring considerable mechanistic detail but limited ability to calibrate these details to data.
-These modeling strategies were selected by \cite{li20} to represent the range of approaches used in the research community.
+\new{These modeling strategies were selected by \cite{li20} to represent the range of approaches used in the research community.}
 We focus on Models~1--3, as the strengths and weaknesses of the agent-based modeling approach \cite{tracy18} are outside the scope of this article.
 \eic{In addition, agent-based models were less widely used [NO OTHERS SHOW UP IN OUR LITERATURE REVIEW???].}
-The data that were used for this study, and that is the subject of our reanalysis, are displayed in Fig.~\ref{fig:CholeraData}.
+\new{The data that were used for this study, and that is the subject of our reanalysis, are displayed in Fig.~\ref{fig:CholeraData}.}
 
 \begin{figure}[!h]
 <<Plot_Reported_Cases, echo=FALSE, fig.height=3.5>>=
@@ -629,11 +634,11 @@ This improved ability may result in more accurate forecasts and facilitates the 
 Based on this retrospective analysis, we offer suggestions on fitting mechanistic models to dynamic systems for future studies.
 
 
-%% IT SEEMS THIS PARAGRAPH IS DEPRECATED IN FAVOR OF CITING THESE REFERENCES WEHRE APPROPRIAT
-%% While this work is focused on the models proposed by Lee et al.~\cite{lee20}, our suggestions have broader relevance.
-%% To investigate the extent to which \cite{lee20} is typical of the substantial body of work on Haiti cholera dynamics, we performed a literature review by searching PubMed with keywords: Haiti, cholera, model.
-%% The search resulted in 66 papers, of which 32 used dynamic models to describe the cholera epidemic in Haiti.
-%% The models make various choices on the dichotomies considered by Lee et al.~\cite{lee20}; deterministic versus stochastic; compartment model versus agent-based; aggregated versus spatially explicit.
+%% IT SEEMS THIS PARAGRAPH IS DEPRECATED IN FAVOR OF CITING THESE REFERENCES WHERE APPROPRIATE
+\old{While this work is focused on the models proposed by Lee et al.~[1], our suggestions have broader relevance.
+To investigate the extent to which [1] is typical of the substantial body of work on Haiti cholera dynamics, we performed a literature review by searching PubMed with keywords: Haiti, cholera, model.
+The search resulted in 66 papers, of which 32 used dynamic models to describe the cholera epidemic in Haiti.
+The models make various choices on the dichotomies considered by Lee et al.~[1]; deterministic versus stochastic; compartment model versus agent-based; aggregated versus spatially explicit.}
 
 We proceed by introducing the general modeling scheme employed by Models~1--3 and provide details of each individual model;
 we then describe how each model is calibrated to data, and present a systematic approach to examining and refining these models.
@@ -1535,12 +1540,12 @@ Calibrating model parameters to observed data does not guarantee that the result
 However, the congruency between the model and observed data serves as a proxy for the congruency between the model and the true underlying dynamic system.
 As such, it is desirable to obtain the best possible fit of the proposed mechanistic structure to the observed data.
 
-In this article we follow \cite{lee20} by calibrating the parameters of each of our models using maximizing the likelihood, as described in Eq.~\myeqref{eq:likedef}.
+In this article we \old{calibrate} \new{follow \cite{lee20} by calibrating} the parameters of each of our models \old{by maximizing the likelihood} \new{using maximum likelihood}, as described in Eq.~\myeqref{eq:likedef}.
 The likelihood for each of the fitted models---and the corresponding AIC values for model comparisons that include an adjustment for the number of calibrated parameters---is provided in Table~\ref{tab:likes}.
 In the following subsections we describe in detail our approach to calibrating the three proposed mechanistic models to observed cholera incidence data.
 \eic{I'VE STARTED TO PUT IN SOME DISCUSSION OF BAYESIAN METHODS HERE, THOUGH IT COULD ALSO GO IN THE DISCUSSION}
-The main alternative to maximum likelihood estimation is Bayesian inference via Markov chain Monte Carlo, used to analyze the Haiti cholera epidemic by \cite{andrews11,rinaldo12,lewnard16,trevisin22,sallah17,azman12,kuhn14,mari15,gatto12}.
-Alternatively, some investigations obtained parameters from previous sources without calibrating to data.
+\new{The main alternative to maximum likelihood estimation is Bayesian inference via Markov chain Monte Carlo, used to analyze the Haiti cholera epidemic by \cite{andrews11,rinaldo12,lewnard16,trevisin22,sallah17,azman12,kuhn14,mari15,gatto12}.
+Alternatively, some investigations obtained parameters from previous sources without calibrating to data.}
 
 \begin{table}[!h]
 \centering
