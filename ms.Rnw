@@ -548,14 +548,15 @@ We assess previous methods used for fitting and evaluating these models, and we 
 \new{We assess current methodological approaches to these issues via a case study of the 2010-2019 cholera epidemic in Haiti.
 We consider three dynamic models developed by expert teams to advise on vaccination policies.
 We evaluate previous methods used for fitting these models, and we demonstrate modified data analysis strategies leading to improved statistical fit.}
-Specifically, we present approaches to diagnosis of model misspecification, development of alternative models, and computational improvements in optimization, in the context of likelihood-based inference on nonlinear dynamic systems.
+Specifically, we present approaches \old{to diagnosis of model misspecification, development of alternative models, and computational improvements in optimization, in the context of likelihood-based inference on nonlinear dynamic systems.} \new{of diagnosing model misspecification, which facilitates the development of model improvements.
+We further demonstrate the usefulness of recent advancements in likelihood optimization for high-dimensional nonlinear dynamic models, resulting in increased concurrence between high dimensional models and observed incidence data.}
 Our workflow is reproducible and extendable, facilitating future investigations of this disease system.
 
 \section*{Author summary}
 Quantitative understanding of infectious disease transmission dynamics relies upon mathematical models informed by scientific knowledge and relevant data.
 The models aim to provide a statistical description of the trajectory of an epidemic and its uncertainty, together with a representation of the underlying biological mechanisms.
 Evaluation of success at these goals is necessary in order for a model to provide a reliable tool for guiding evidence-based public policy interventions.
-In this article, we discuss common modeling decisions that may not provide an adequate statistical explanation of the data, and we show that attention to statistical fit can lead to more accurate policy evaluations.
+In this article, we discuss common modeling decisions that may not provide an adequate statistical explanation of the data, and we show that attention to statistical fit can lead to more accurate policy \old{evaluations} \new{recommendations}.
 We do this by conducting a re-analysis of the 2010 cholera outbreak in Haiti.
 Our analysis presents methodology for diagnosing how well a model describes observed data, and provides careful justification of valid conclusions from the fitted model.
 Objective measures are used to benchmark model fit; when these are combined with reproducibility, a framework emerges for continual improvement when revisiting the data and models.
@@ -563,6 +564,8 @@ Our data analysis workflow is supported by recent advances in algorithms, softwa
 However, inference for high-dimensional systems remains a methodological challenge.
 One of the models under consideration involves spatially coupled stochastic meta-populations, and we demonstrate how a recently developed algorithm permits likelihood-based inference and model diagnostics in this setting.
 We contend that raising the currently accepted standards of infectious disease modeling will result in a greater ability of scientists and policy makers to understand and respond to future infectious disease outbreaks.
+\TODO{I think we can and should directly state something here that we discuss with the reviewers: the article has both educational purposes, arguing how a data analysis using dynamic models should happen, and as an in-depth analysis of cholera in Haiti.}
+\new{This analysis serves both as a pedagogical...}
 
 \linenumbers
 
@@ -586,9 +589,12 @@ Model~2 is deterministic with spatial structure, and includes transmission via c
 Model~3 is stochastic with spatial structure, and accounts for measured rainfall.
 Model~4 has an agent-based construction, featuring considerable mechanistic detail but limited ability to calibrate these details to data.
 \new{These modeling strategies were selected by \cite{li20} to represent the range of approaches used in the research community.}
+\jwc{I think the citation above is incorrect? Should it be lee20, not li20?}.
 We focus on Models~1--3, as the strengths and weaknesses of the agent-based modeling approach \cite{tracy18} are outside the scope of this article.
-\eic{In addition, agent-based models were less widely used [NO OTHERS SHOW UP IN OUR LITERATURE REVIEW???].}
+\new{In addition, agent-based models were less widely used, the agent based model of \cite{lee20} being the only model of this class that was found in our literature review.}
 \new{The data that were used for this study, and that is the subject of our reanalysis, are displayed in Fig.~\ref{fig:CholeraData}.}
+
+\new{\editMechModels}
 
 \begin{figure}[!h]
 <<Plot_Reported_Cases, echo=FALSE, fig.height=3.5>>=
@@ -623,7 +629,7 @@ While OCV is accepted as a safe and effective tool for controlling the spread of
 Advances in OCV technology and vaccine availability, however, raised the possibility of planning a national vaccination program \cite{lee20}.
 In the study, certain data were shared between the groups, including demography and vaccination history; vaccine efficacy was also fixed at a shared value between groups.
 Beyond this, the groups made autonomous decisions on what to include and exclude from their models.
-The groups largely adhered to existing guidelines for creating models to inform policy \cite{behrend20,saltelli20} and, despite their autonomy, obtained a consensus that an extensive nationwide vaccination campaign would be necessary to eliminate cholera from Haiti.
+The groups largely adhered to existing guidelines for creating models to inform policy \cite{behrend20,saltelli20} and, despite their autonomy, obtained a consensus that an extensive nationwide vaccination campaign would be necessary to eliminate cholera from Haiti. \TODO{How? This statement should be epanded or re-evaluated.}
 Their forecasts, however, were inconsistent with the prolonged period with no confirmed cholera cases between February, 2019 and September, 2022 \cite{trevisin22}.
 Though cholera has recently reemerged in Haiti \cite{rubin22,PAHO23}, the inability to accurately forecast cholera incidence from 2019-2022---while diligently adhering to existing scientific standards for infectious disease modeling---demonstrates that existing standards of disease modeling and forecasting may be insufficient.
 
@@ -642,7 +648,8 @@ The models make various choices on the dichotomies considered by Lee et al.~[1];
 
 We proceed by introducing the general modeling scheme employed by Models~1--3 and provide details of each individual model;
 we then describe how each model is calibrated to data, and present a systematic approach to examining and refining these models.
-We then use improved model fits to project cholera incidence in Haiti under various vaccination scenarios considered by Lee et al.~\cite{lee20}.
+\new{Specifically, we focus on how to develop and test variations to these proposed models, as well as diagnosing the models once they have been assimilated to incidence reports.} \jwc{make a statement about fitting Model 3 (stochastic meta-pop) here?}
+We then use \new{the} improved model fits to project cholera incidence in Haiti under various vaccination scenarios considered by Lee et al.~\cite{lee20}.
 Finally, we conclude with a discussion of the results.
 
 <<Load Model1 Params, echo=FALSE, message=FALSE, include=FALSE>>=
@@ -1061,9 +1068,8 @@ Models that focus on learning relationships between variables in a dataset are c
 The danger in using forecasting techniques which rely on associative models to predict the consequence of interventions is called the Lucas critique in an econometric context.
 Lucas et al.~\cite{lucas76} pointed out that it is naive to predict the effects of an intervention on a given system based entirely on historical associations.
 To successfully predict the effect of an intervention, a model should therefore both provide a quantitative explanation of existing data and should have a causal interpretation: a manipulation of the system should correspond quantitatively with the corresponding change to the model.
-This motivates the development of mechanistic models, which provides a statistical fit to the available data while also supporting a causal interpretation. \jwc{This paragraph and the one below seem to go well together, so perhaps this is a natural place to put this new paragraph.}
-
-\new{\editMechModels}
+This motivates the development of mechanistic models, which provides a statistical fit to the available data while also supporting a causal interpretation.
+\jwc{Maybe right here is another place for the new paragraph on mechanistic models?}
 
 The four mechanistic models of Lee et al.~\cite{lee20} were deliberately developed with limited coordination.
 This allows us to treat the models as fairly independently developed expert approaches to understanding cholera transmission.
@@ -1649,8 +1655,12 @@ Lee et al.~\cite{lee20} implemented Model~1 by fitting two distinct phases: an e
 We similarly allow the re-estimation of process and measurement overdispersion parameters ($\sigmaProc^2$ and $\obsOverdispersion$), and require that the latent Markov process $X(t)$ carry over from one phase into the next.
 The resulting 95\% confidence interval for $\transmissionTrend$ is $(\Sexpr{myround(mcap_results$ci[1], digits = 3)}, \Sexpr{myround(mcap_results$ci[2], digits = 3)})$, with the full results displayed in Fig.~\ref{fig:betat}.
 These results are suggestive that the inclusion of a trend in the transmission rate improves the quantitative ability of Model~1 to describe the observed data.
-\new{The maximum likelihood estimate for the trend corresponds with a \Sexpr{paste0(myround(100 - 100*exp(mcap_results$mle * 430/215), 1), '\\%')} reduction to the transmission rate over the course of the outbreak, with a $95\%$ confidence interval (\Sexpr{paste0(rev(myround(100 - 100*exp(mcap_results$ci * 430/215), 1)), collapse = ', ', sep = '\\%')}) for the overall reduction in transmission.}.
+\new{The maximum likelihood estimate for $\transmissionTrend$ corresponds with a \Sexpr{paste0(myround(100 - 100*exp(mcap_results$mle * 430/215), 1), '\\%')} reduction to the transmission rate over the course of the outbreak, with a $95\%$ confidence interval (\Sexpr{paste0(rev(myround(100 - 100*exp(mcap_results$ci * 430/215), 1)), collapse = ', ', sep = '\\%')}) for the overall reduction in transmission.}
 The reported results for Model~1 in the remainder of this article were obtained with the inclusion of the parameter $\transmissionTrend$.
+
+\new{This example demonstrates the type of model variation that should be considered in the course of a data analysis: the model variation---the addition of a trend in transmission rate---has a plausible scientific justification, and is easily testable using likelihood based inference methods and observed data.
+This class of model variations are commonly considered in epidemiological modeling \cite{lemaitre19,fitzgibbon20,eisenberg13,rinaldo12,kunkel17}} , \new{but their adaptation are sometimes based on subjective assessments \cite{fitzgibbon20,eisenberg13,kunkel17}} \TODO{get citations}.
+\jwc{Alternatively, we could emphasize the importance of considering model variations, and cite studies from the literature review that only considered a single model, or only reported their final chosen model. Although models that were not ultimately selected are not as important, a discussion of which models you tried and why you didn't use them can be beneficial to future researchers who may want to consider similar variations in the future. I got to article 35 checking for those with multiple models considered.}
 
 \begin{figure}[!h]
 \centering
@@ -1686,8 +1696,12 @@ As for any analysis of observational data, we must be alert to the possibility o
 For a covariate, this shows up in a similar way to regression analysis: the covariate under investigation could be a proxy for some other unmodeled or unmeasured covariate.
 For a mechanism, the model feature could in principle explain the data by helping to account for some different unmodeled phenomenon.
 The statistical evidence of a trend in transmission rate in this model could be explained by any trending variable (such as hygiene improvements, or changes in population behavior), resulting in confounding from collinear covariates.
-Alternatively, the trend could be attributed to a decreasing reporting rate rather than decreasing transmission rate, resulting in confounded mechanisms.
-The robust statistical conclusion is that a model which allows for change fits better than one which does not---we argue that a decreasing transmission rate is a plausible way to explain this, but the incidence data themselves do not provide enough information to pin down the mechanism.
+\jwc{HERE'S SOME INITIAL THOUGHTS ON HOW TO CLARIFY THIS FOR THE REVIEWER}.
+\old{Alternatively, the trend could be attributed to a decreasing reporting rate rather than decreasing transmission rate, resulting in confounded mechanisms.}
+\new{Because we only have access to incidence data, the decrease in observed cases over the course of the outbreak may alternatively be attributed to a trend in other model parameters, such as a decrease in the reporting rate over time.
+This results in confounded mechanisms, as likelihood-based comparisons of a model that permits a change in reporting rate against a model that permits a change in transmission rate may not yield definitive results.}
+The robust statistical conclusion is that a model which allows for change fits better than one which does not\old{---we argue that a decreasing transmission rate is a plausible way to explain this}, but the incidence data themselves \old{do} \new{may} not provide enough information to pin down the mechanism.
+\new{In this case study, we argue that a decreasing transmission rate is a plausible way to explain the decrease in cases over time \cite{rebaudet19CATI,rebaudet21,michel19}; there is little scientific evidence to support a decrease in reporting rate, as the rate of testing increased throughout this time period.} \TODO{cite: Wasn't there a study we thought demonstrated the testing effort increased}?
 
 We implemented Model~1 using the \code{pomp} package \cite{king16}, relying heavily on the \code{pomp} source code provided by Lee et al.~\cite{lee20}.
 Both analyses used the \code{mif2} implementation of the IF2 algorithm to estimate $\paramVec$ by maximum likelihood.
@@ -1875,6 +1889,7 @@ This algorithm extends the work of Ning and Ionides \cite{ning21ibpf}, who provi
 The IBPF algorithm enables us to directly estimate the parameters of models describing high-dimensional partially-observed nonlinear dynamic systems via likelihood maximization.
 The ability to directly estimate parameters of Model~3 is responsible for the large increase in model likelihoods reported in Table~\ref{tab:likes}.
 Simulations from the fitted model are displayed in Fig.~\ref{fig:h3spatsims}.
+\jwc{Should there be more added / said to this paragraph, to demonstrate the novelty of being able to fit a model like Model 3? Maybe add a paragraph between the first and second paragraphs of this sub-section.}
 
 <<Model 3 SpatPOMP Sims, echo=FALSE>>=
 
@@ -1967,6 +1982,8 @@ In this section, we discuss some tools for diagnosing mechanistic models with th
 To do this, we will rely on the quantitative ability of the model to match the observed data, which we call the model's {\it goodness-of-fit}, with the guiding principle that a model which cannot adequately describe observed data may not be reliable for useful purposes.
 Goodness-of-fit may provide evidence supporting the causal interpretation of one model versus another, but cannot by itself rule out the possibility of alternative explanations.
 
+
+\jwc{Should we make benchmark modeling a sub-section of model-diagnostics? I think this could (A) add some organization to the paper so that readers / reviewers can clearly see how benchmarks help answer the question we posed: what indications should we look for in data to assess trustworthiness of data (B) further emphasize the importance of benchmarks, which is something the reviewers seemed to have found useful. }
 One common approach to assess a mechanistic model's goodness-of-fit is to compare simulations from the fitted model to the observed data.
 Visual inspection may indicate defects in the model, or may  suggest that the observed data are a plausible realization of the fitted model.
 While visual comparisons can be informative, they provide only a weak and informal measure of the goodness-of-fit of a model.
@@ -2581,8 +2598,17 @@ We therefore do not provide probability of elimination estimates under Model~2, 
 
 \section*{Discussion}\label{sec:discussion}
 
-The ongoing global COVID-19 pandemic has provided a clear example on how government policy may be affected by the conclusions of scientific models \cite{saltelli20}.
-This article demonstrates that fitting appropriate scientific models to guide policy is a challenging statistical task.
+The ongoing global COVID-19 pandemic has provided a clear example on how government policy may be affected by the conclusions of \old{scientific} \new{mathematical} models \cite{saltelli20}.
+\old{This article demonstrates that fitting appropriate scientific models to guide policy is a challenging statistical task.}
+\new{Despite their importance, creating realistic, data-informed models that can be used to reliably and accurately influence policy is a challenging task.
+In this article, we demonstrate that increasing the standards of mathematical modeling of ecological system can improve our ability to use models to understand the dynamics of a complex, non-linear system, and make data informed inferences on such systems.
+We suggest a greater effort be placed on evaluating dynamic models that will be used to make inference on a system.
+Specifically, we argue that researchers can and should look for indications in available data in order to assess whether model based inferences are trustworthy.
+Here, we suggest that this can be done by comparing fitted models to a suitable statistical benchmark, and verifying that model outcomes---including estimated model parameters, latent states, and seasonal trends---make sense in the context of the system in question.}
+
+\new{In the context of our cholera case study, we demonstrate the importance of model diagnostics by using them to improve model fits, resulting in more reliable conclusions.
+We compared the Models 1--3 of \cite{lee20} to simple statistical benchmarks, which enabled us to find deficiencies in the models that could be improved.
+In the case of Model 3, the process of comparing a fitted model to a benchmark and investigating why the model did not describe the data as well as a simple linear benchmark}
 In our case study, we found that additional attention to statistical details could have resulted in improved statistical fits to the observed incidence data, leading to improvements in the accuracy of the resulting policy guidance.
 We used the same data and models, and even much of the same code, as Lee et al.~\cite{lee20}, and yet ended up with drastically different conclusions.
 We acknowledge the benefit of hindsight: our demonstration of a statistically principled route to obtain better-fitting models resulting in more robust insights does not rule out the possibility of discovering other models that fit well yet predict poorly.
