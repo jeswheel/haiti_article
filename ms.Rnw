@@ -2598,51 +2598,61 @@ We therefore do not provide probability of elimination estimates under Model~2, 
 
 \section*{Discussion}\label{sec:discussion}
 
-The ongoing global COVID-19 pandemic has provided a clear example on how government policy may be affected by the conclusions of \old{scientific} \new{mathematical} models \cite{saltelli20}.
+The ongoing global COVID-19 pandemic has \old{provided a clear example on} \new{demonstrated} how government policy may be affected by the \old{conclusions of scientific models} \new{inferences drawn from mathematical modeling} \cite{saltelli20}.
 \old{This article demonstrates that fitting appropriate scientific models to guide policy is a challenging statistical task.}
-\new{Despite their importance, creating scientifically plausible, data-informed models that can be used to reliably gain insight into a dynamic system is a challenging task.
-In this article, we demonstrate that increasing the standards used for the mathematical modeling of ecological systems can improve our ability to use models to understand the dynamics of a complex, non-linear system, and make data informed inferences.
-We suggest a greater effort be placed on evaluating dynamic models that will be used to make inference on a system.
-Specifically, we argue that researchers can and should look for indications in available data in order to assess whether model based inferences are trustworthy.
-Here, we show that this can be done by comparing fitted models to a suitable statistical benchmark, and verifying that model outcomes---including estimated model parameters, latent states, and seasonal trends---make sense in the context of the system in question.}
+\new{However, developing credible models---which are supported by data and can lend insights into a dynamic system---remains a challenging task.
+In this article, we demonstrate that increasing the current standards of mathematical modeling of ecological systems can increase our capacity to make sense of a complex, nonlinear system's dynamics and make data-driven inferences.
+We suggest devoting more effort to assess dynamic models intended for system inference.
+Explicitly, we urge researchers to search for indications in available data that quantify the reliability of model-based inferences.
+We illustrate that this can be achieved by comparing fitted models to a suitable statistical benchmark and verifying that model outcomes---including estimated parameters, latent states, and seasonal trends---are justified in the system context.}
 
-\new{In the cholera case study, we demonstrate the importance of model diagnostics by using them to improve model fits, resulting in more reliable conclusions.
-We compared the Models 1--3 of \cite{lee20} to simple statistical benchmarks, which enabled us to find deficiencies in the models that could be improved.
-In the case of Model~3, the process of comparing a fitted model to a benchmark and investigating why the model did not describe the data as well as its benchmark helped us recognize that the model could not adequately explain the increase in cholera transmission that resulted from Hurricane Matthew, leading us to propose a model alteration.
-Because Model~1 outperformed its benchmark model, we were able to confidently inspect implications from the fitted model; here we found that the seasonality term of Model~1 closely follows seasonal rainfall patterns in Haiti, both confirming previously held beliefs about the importance of rainfall as a driver of cholera infection, as well as bolstering our confidence that Model~1 captures important dynamics of the cholera outbreak.}
+\new{In our cholera case study, we highlight the importance of model diagnostics; they are instrumental in enhancing model fits, thus leading to more trustworthy conclusions.
+We compared the Models 1--3 of \cite{lee20} to simple statistical benchmarks, enabling us to identify deficiencies in the models that could be improved.
+In the case of Model~3, comparing a fitted model to a benchmark and then following up by questioning why the model did not describe the data as efficiently as its benchmark helped us discern that the model fell short in explaining the surge in cholera transmission following Hurricane Matthew.
+This led us to suggest a model modification.
+Because Model~1 outperformed its benchmark model, we were able to confidently scrutinize the implications of the fitted model.
+We found that the seasonality term of Model~1 closely mirrors the seasonal rainfall patterns in Haiti, reaffirming alternative evidence of the importance of rainfall as a driver of cholera infection and bolstering our confidence in Model~1's ability to capture the critical dynamics of the cholera outbreak. }
 
-\new{In any study using dynamic models, more than one model framework---or model variation---should be considered, tested, and reported.
-In our literature review of modeling cholera in Haiti, only a few papers that used mechanistic models reported more than a single model variation. (TODO: Cite).
-We recognize the possibility that a study that reports only a single model may have considered others and reported only the model that they used for the final analysis; details about models that were tried but not used can be of great benefit to the scientific community, however, as they may help future researchers to avoid frameworks that have previously been shown to be less favorable.}
+\new{In any study involving dynamic models, it is important to consider, test, and present more than one model framework or variant.
+In our review of the literature featuring cholera modeling in Haiti, we found that only a handful of papers that utilized mechanistic models reported more than a single model variation. (TODO: Cite).
+We acknowledged the possibility that a study reporting merely a single model may have explored others and only reported the one used in the final analysis.
+However, divulging details about the models that were considered, but not used, may greatly benefit the broader scientific community.
+These details may guide future researchers to avoid model variations that have previously demonstrated to perform poorly on incidence data.
+Furthermore, it can enhance confidence in the reported model's ability to describe the system under investigation.
+This confidence stems from the demonstrated evidence that the chosen model offers a better description of the observed data compared to other reasonable model alternatives.}
 
-\new{While likelihood based inference enables researchers to chose between any model that is evaluated on the same dataset using a metric like AIC, nested model variations are particularly useful as they enable formal statistical testing of the nested features.
-In the cholera case study, we demonstrate the benefit of this type of model variation in each of the three models.
-In Model~1, we tested the inclusion of a trend in transmission rate over time; in Model~2, we considered adding an additional phase parameter, which enables a shift in the seasonal peaks of cholera infections; in Model~3, we included additional parameters such as the Hurricane Matthew related parameters.
-In each of these cases, we found strong statistical evidence that favored these model variations over their more simple counterparts.}
+\new{Likelihood based inference enables researchers to choose between any model that is evaluated on the same dataset using a metric like AIC.
+Nested model variations are particularly useful as they enable formal statistical testing of the nested features.
+The cholera case study demonstrated the advantage of such a model variation in all three models.
+For instance, we tested the inclusion of a trend in transmission rate over time in Model~1; in Model~2, we considered adding an additional phase parameter, which enables a shift in the seasonal peaks of cholera infections; in Model~3, we included additional parameters such as those associated with Hurricane Matthew.
+In all these cases, we found strong statistical evidence in favor of these model variations over their simpler counterparts.}
 
 \new{Another important consideration when fitting a mechanistic model to a dynamic system is the complexity of the model.
 Mathematical models necessarily simplify complex dynamical systems in order to make inference possible.
-Decisions about which aspects of a system to include in a model and which to exclude can have significant impacts on model based conclusions, but can be tested under a likelihood-based framework.
-Common modeling decisions include deterministic vs stochastic modeling, and whether or not to include a meta-population structure.
-Model benchmarks can be useful in determining the level of modeling complexity to use, allowing researchers to calibrate the relative performance of a model of any given complexity against a better understood statistical model.}
+Decision-making about which features of a system need to be incorporated in a model and which should be excluded can significantly influence the model-based conclusions.
+However, these decisions can be tested using a likelihood-based framework.
+Standard model decisions cover deterministic versus stochastic modeling and the decision to include or exclude a meta-population structure.
+Model benchmarks can assist in determining the level of complexity to be used in the model, enabling researchers to gauge a model's relative performance against a better-understood statistical model.}
 
-\new{The three models in this case study each represent a unique combination of decisions of model complexity.
-Model~3 provides an interesting example in that it is both stochastic and has a meta-population structure. This class of models is notoriously difficult to perform likelihood based inference on (TODO: Cite).
-Here we demonstrate how this class of model can be calibrated to incidence data using the novel IBPF algorithm.
-This case study demonstrates the potential benefit of this algorithm, as it is one of the examples that uses this algorithm.
-}
+\new{The three models in this case study offer a unique combination of decisions of model complexity.
+Model~3 provides an interesting example in that it is both stochastic and has a meta-population structure, making it challenging to draw likelihood-based inferences.
+In this paper, we demonstrated how this model class could be calibrated to incidence data using the innovative IBPF algorithm.
+One of only a few examples of fitting a model with this level of complexity, this case study exemplifies the algorithm's potential benefits and provides an example for future researchers on a possible approach to fitting a high-dimensional non-linear model.}
 
-In our case study, we found that additional attention to statistical details could have resulted in improved statistical fits to the observed incidence data, leading to improvements in the accuracy of the resulting policy guidance.
-We used the same data and models, and even much of the same code, as Lee et al.~\cite{lee20}, and yet ended up with drastically different conclusions.
-\new{Specifically, each of the re-calibrated models predict that cholera would disappear from Haiti with moderate probably.
-While new cases of cholera have since been detected in Haiti, this conclusion is more consistent with the prolonged absence of cholera cases that occurred from 2019-2022.}
+In our case study, we found that additional attention to statistical details could have resulted in \old{improved} \new{an enhanced} statistical fit to the observed incidence data\old{, leading to improvements in the accuracy of the resulting policy guidance.} \new{This would have improved the accuracy of the policy guidance resulting from the study.}
+\old{We used the same data and models, and even much of the same code, as Lee et al.~[29], and yet ended up with drastically different conclusions.}
+\new{We used the same data, models, and much of the same code used by Lee et al.~\cite{lee20}, but we arrived at drastically different conclusions.}
+\new{Specifically, each of the re-calibrated models predicted with moderate probability that cholera would disappear from Haiti.
+Although there have been new cases of cholera in Haiti, this conclusion aligns more with the prolonged absence of cholera cases from 2019-2022.}
 We acknowledge the benefit of hindsight: our demonstration of a statistically principled route to obtain better-fitting models resulting in more robust insights does not rule out the possibility of discovering other models that fit well yet predict poorly.
 
-Inference for mechanistic time series models offers opportunities for understanding and controlling complex dynamic systems.
+\old{Inference for mechanistic time series} \new{Mechanistic} models offer opportunities for understanding and controlling complex dynamic systems.
 This case study has investigated issues requiring attention when applying powerful new statistical techniques that can enable statistically efficient inference for a general class of partially observed Markov process models.
-Researchers should check that the computationally intensive numerical calculations are carried out adequately.
-Comparison against benchmarks and alternative model specifications should be considered to evaluate the statistical goodness-of-fit.
-Once that is accomplished, care is required to assess what causal conclusions can properly be inferred given the possibility of alternative explanations consistent with the data.
+\old{Researchers should check that the computationally intensive numerical calculations are carried out adequately.}
+\new{Researchers should ensure that intensive numerical calculations are adequately executed.}
+\old{Comparison against benchmarks and alternative model specifications should be considered to evaluate the statistical goodness-of-fit.}
+\new{Using benchmarks and alternative model specifications to assess statistical goodness-of-fit should also should be common practice.}
+Once \old{that is accomplished} \new{a model has been adequately callibrated to data}, care is required to assess what causal conclusions can properly be inferred given the possibility of alternative explanations consistent with the data.
 Studies that combine model development with thoughtful data analysis, supported by a high standard of reproducibility, build knowledge about the system under investigation.
 Cautionary warnings about the difficulties inherent in understanding complex systems \cite{saltelli20,ioannidis20,ganusov16} should motivate us to follow best practices in data analysis, rather than avoiding the challenge.
 
