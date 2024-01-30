@@ -541,15 +541,14 @@ These decisions should be informed by data on the epidemic as well as current un
 Such decisions can be posed as statistical questions about scientifically motivated dynamic models.
 Thus, we encounter the methodological task of building credible, data-informed decisions based on stochastic, partially observed, nonlinear dynamic models.
 This necessitates addressing the tradeoff between biological fidelity and model simplicity, and the reality of misspecification for models at all levels of complexity.
-\eic{I'VE RE-WRITTEN HERE, LOOKING TO BE MORE SPECIFIC ABOUT THE GOALS AND CONTRIBUTION OF THE PAPER.}
 \old{As a case study, we consider the 2010-2019 cholera epidemic in Haiti.
 We study three dynamic models developed by expert teams to advise on vaccination policies.
 We assess previous methods used for fitting and evaluating these models, and we develop data analysis strategies leading to improved statistical fit.}
 \new{We assess current methodological approaches to these issues via a case study of the 2010-2019 cholera epidemic in Haiti.
 We consider three dynamic models developed by expert teams to advise on vaccination policies.
 We evaluate previous methods used for fitting these models, and we demonstrate modified data analysis strategies leading to improved statistical fit.}
-Specifically, we present approaches \old{to diagnosis of model misspecification, development of alternative models, and computational improvements in optimization, in the context of likelihood-based inference on nonlinear dynamic systems.} \new{of diagnosing model misspecification, which facilitates the development of model improvements.
-We further demonstrate the usefulness of recent advancements in likelihood optimization for high-dimensional nonlinear dynamic models, resulting in increased concurrence between high dimensional models and observed incidence data.}
+Specifically, we present approaches to diagnosis of model misspecification \old{, development of alternative models, and computational improvements in optimization, in the context of likelihood-based inference on nonlinear dynamic systems.} \new{and the consequent development of improved models.
+We further demonstrate the utility of recent advances in likelihood maximization for high-dimensional nonlinear dynamic models, enabling likelihood-based inference for high-dimensional models of spatiotemporal incidence data.}
 Our workflow is reproducible and extendable, facilitating future investigations of this disease system.
 
 \section*{Author summary}
@@ -2614,6 +2613,7 @@ Because Model~1 outperformed its benchmark model, we were able to confidently sc
 We found that the seasonality term of Model~1 closely mirrors the seasonal rainfall patterns in Haiti, reaffirming alternative evidence of the importance of rainfall as a driver of cholera infection and bolstering our confidence in Model~1's ability to capture the critical dynamics of the cholera outbreak. }
 
 \new{In any study involving dynamic models, it is important to consider, test, and present more than one model framework or variant.
+\eic{I'M NOT SURE THIS IS A CONCLUSION. LEE ET AL STUDIED MULTIPLE MODELS BECAUSE THAT WAS THE GOAL OF THAT PAPER. MOST OTHER PAPERS STUDY ONE MODEL. WE WOULD LIKE RESULTS FROM DIFFERENT PAPERS TO HAVE OBJECTIVE MEASURES OF FIT THAT CAN BE COMPARED BETWEEN PAPERS, BUT I DON'T THINK WE WANT TO SAY THAT ALL PAPERS HAVE TO ANALYZE MANY MODELS.}
 In our review of the literature featuring cholera modeling in Haiti, we found that only a handful of papers that utilized mechanistic models reported more than a single model variation. (TODO: Cite).
 We acknowledged the possibility that a study reporting merely a single model may have explored others and only reported the one used in the final analysis.
 However, divulging details about the models that were considered, but not used, may greatly benefit the broader scientific community.
