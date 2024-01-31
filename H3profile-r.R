@@ -89,7 +89,7 @@ shared_param_names <- c(
   "epsilon", "k"
 )
 
-prof_params <- shared_param_names
+prof_params <- 'r'
 
 best_pars <- final_pars
 prof_vars <- c()
