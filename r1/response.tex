@@ -186,6 +186,13 @@ However, a subsequent manuscript addresses [4,5] more directly \cite{li23} and s
 3.  Fig 2. Model parameters. I think this should be ``Table 1"?
 }
 
+While Fig 2 really is a table, here we are following PLOS Computational Biology Submission guidelines (\url{https://journals.plos.org/ploscompbiol/s/tables}):
+\begin{quote}
+If the table has a very complex structure or contains graphics, the safest solution is to make it into a figure. Export the table as a TIFF, and cite and re-label it as a figure.
+\end{quote}
+The Table in this case is necessarily complex, as we are trying to put all comparable model parameters from three seperate models into a single table.
+If the journal requests that we make this into a table rather than a figure we are happy to comply.
+
 \report{4.
     ``and $z \in 1:Z$ describes hypothetical vaccination programs" It would help to give an example of the different vaccine programs here. E.g. does this mean the number of doses the individual has received, or differences in the vaccine administered?
 }
@@ -193,6 +200,8 @@ However, a subsequent manuscript addresses [4,5] more directly \cite{li23} and s
 \report{5.
   Eq 6 and line 1: I think the notation for the asymptomatic fraction might be clearer and more consistent with the other models if you used $f_z(t)$ instead of $\vartheta_z(t)$. In fact, this is the notation used in the table in Figure 2.
 }
+
+Thank you for this suggestion, we have made this change.
 
 \report{6.
   Line 198: Reference for where value of $v_{rate}$ comes from.
@@ -226,9 +235,6 @@ For reference, the maxmum likelihood estimate of the parameter corresponds with 
 }
 
 Our views align with the referee's comments, and we have rewritten the article to make this clearer.
-
-WE COULD ADD THE SUBMITTED PDF TO THE REVISION REPO SO WE CAN CHECK LINE NUMBERS.
-
 
 \report{12.  [I THINK THIS MEANS LINES 553-556, ASSUMING THE NUMBERING MATCHES]
   Lines 53-56: I push back against this point. The models assume an exponential distribution for vaccine-derived immunity. Assuming a mean duration of 10 years, the proportion of individuals who remain immune 9 years after vaccination is . Even for much larger durations of immunity a non-negligible fraction of the population will lose immunity after 9 years, e.g. $e^{-9/10}\approx 0.41$. I therefore don't expect values for the duration of immunity around 10 years to ``effectively result in the same model dynamics".

@@ -374,7 +374,7 @@ submitJobs(resources = resources1)
 # library(batchtools)
 #
 # RUN_LEVEL = 3  # Or adjust RUN_LEVEL as needed.
-# reg = loadRegistry(paste0('model3/profileReg_RL', RUN_LEVEL))
+# reg = loadRegistry(paste0('model3/profileReg_r_RL', RUN_LEVEL))
 # getStatus()
 #
 # Once all of the jobs are finished, we can summarize the results using:

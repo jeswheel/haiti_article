@@ -67,4 +67,6 @@ effort to create the make file in this case.
 
 ### TODO: 
 
-Nothing to do! 
+- [ ] re-write this README with updated instructions about batchtools. 
+- [ ] `si/calibrateMod3.Rnw` needs to be re-factored for the new way of fitting Model 3.
+

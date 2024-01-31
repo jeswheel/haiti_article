@@ -549,14 +549,15 @@ We assess previous methods used for fitting and evaluating these models, and we 
 We consider three dynamic models developed by expert teams to advise on vaccination policies.
 We evaluate previous methods used for fitting these models, and we demonstrate modified data analysis strategies leading to improved statistical fit.}
 Specifically, we present approaches \old{to diagnosis of model misspecification, development of alternative models, and computational improvements in optimization, in the context of likelihood-based inference on nonlinear dynamic systems.} \new{of diagnosing model misspecification, which facilitates the development of model improvements.
-We further demonstrate the usefulness of recent advancements in likelihood optimization for high-dimensional nonlinear dynamic models, resulting in increased concurrence between high dimensional models and observed incidence data.}
-Our workflow is reproducible and extendable, facilitating future investigations of this disease system.
+We further demonstrate the usefulness of recent advancements in likelihood optimization for high-dimensional nonlinear dynamic models, which enable improved consistency between high dimensional models and observed incidence data.}
+\old{Our workflow is} \new{The presented case study is} reproducible and extendable, facilitating future investigations of this disease system.
 
 \section*{Author summary}
 Quantitative understanding of infectious disease transmission dynamics relies upon mathematical models informed by scientific knowledge and relevant data.
 The models aim to provide a statistical description of the trajectory of an epidemic and its uncertainty, together with a representation of the underlying biological mechanisms.
 Evaluation of success at these goals is necessary in order for a model to provide a reliable tool for guiding evidence-based public policy interventions.
-In this article, we discuss common modeling decisions that may not provide an adequate statistical explanation of the data, and we show that attention to statistical fit can lead to more accurate policy \old{evaluations} \new{recommendations}.
+\old{In this article, we discuss common modeling decisions that may not provide an adequate statistical explanation of the data, and we show that attention to statistical fit can lead to more accurate policy evaluations}.
+\new{In this article, we use an in-depth case study to motivate general procedures for fitting mathematical models to time series data, while explaining how these procedures help to address limitations of previous approaches.}
 We do this by conducting a re-analysis of the 2010 cholera outbreak in Haiti.
 Our analysis presents methodology for diagnosing how well a model describes observed data, and provides careful justification of valid conclusions from the fitted model.
 Objective measures are used to benchmark model fit; when these are combined with reproducibility, a framework emerges for continual improvement when revisiting the data and models.
@@ -564,8 +565,6 @@ Our data analysis workflow is supported by recent advances in algorithms, softwa
 However, inference for high-dimensional systems remains a methodological challenge.
 One of the models under consideration involves spatially coupled stochastic meta-populations, and we demonstrate how a recently developed algorithm permits likelihood-based inference and model diagnostics in this setting.
 We contend that raising the currently accepted standards of infectious disease modeling will result in a greater ability of scientists and policy makers to understand and respond to future infectious disease outbreaks.
-\TODO{I think we can and should directly state something here that we discuss with the reviewers: the article has both educational purposes, arguing how a data analysis using dynamic models should happen, and as an in-depth analysis of cholera in Haiti.}
-\new{This analysis serves both as a pedagogical...}
 
 \linenumbers
 
@@ -1370,10 +1369,10 @@ Per-capita transition rates are given in Eqs.~\myeqref{model1:SE}-\myeqref{model
 \mu_{S_{\vaccCounter}E_{\vaccCounter}} &=& \lambda(t),
 \\
 \label{model1:EI}
-\mu_{E_{\vaccCounter}I_{\vaccCounter}} &=& \muEI\big(1-\vaccineEfficacy_\vaccCounter(t)\big),
+\mu_{E_{\vaccCounter}I_{\vaccCounter}} &=& \muEI\big(1-\symptomFrac_\vaccCounter(t)\big),
 \\
 \label{model1:EA}
-\mu_{E_{\vaccCounter}A_{\vaccCounter}} &=& \muEI\, \vaccineEfficacy_\vaccCounter(t),
+\mu_{E_{\vaccCounter}A_{\vaccCounter}} &=& \muEI\, \symptomFrac_\vaccCounter(t),
 \\
 \label{model1:toR}
 \mu_{I_{\vaccCounter}R_{\vaccCounter}} &=& \mu_{A_{\vaccCounter}R_{\vaccCounter}} = \muIR,
@@ -1398,7 +1397,7 @@ Thus, $\mu_{A\demography}$ is a rate of exiting the study population from compar
 In Model~1, the advantage afforded to vaccinated individuals is an increased probability that an infection is asymptomatic.
 Conditional on infection status, vaccinated individuals are also less infectious than their non-vaccinated counterparts by a rate of $\asymptomRelativeInfect = 0.05$ in Eq.~\eqref{model1:lambda}.
 In Eqs.~\myeqref{model1:EA} and~\myeqref{model1:EI} the asymptomatic ratio for non-vaccinated individuals is set $\symptomFrac_0(t)=0$, so that the asymptomatic route is reserved for vaccinated individuals.
-For $\vaccCounter\in\seq{1}{\vaccClass}$, the vaccination cohort $\vaccCounter$ is assigned a time $\tau_{\vaccCounter}$, and we take $\vaccineEfficacy_\vaccCounter(t) = c \, \vaccineEfficacy^*(t-\tau_{\vaccCounter})$
+For $\vaccCounter\in\seq{1}{\vaccClass}$, the vaccination cohort $\vaccCounter$ is assigned a time $\tau_{\vaccCounter}$, and we take $\symptomFrac_\vaccCounter(t) = c \, \vaccineEfficacy^*(t-\tau_{\vaccCounter})$
 where $\vaccineEfficacy^*(t)$ is efficacy at time $t$ since vaccination for adults, taken from \cite{lee20}, Table~S4, and $c=\big(1-(1-0.4688)\times 0.11\big)$ is a correction to allow for reduced efficacy in the 11\% of the population aged under 5 years.
 Single and double vaccine doses were modeled by changing the waning of protection; protection was modeled as equal between single and double dose until 52 weeks after vaccination, at which point the single dose becomes ineffective.
 
@@ -2014,7 +2013,7 @@ where $\mathrm{E}\big(Y_n|Y_{n - 1}\big) = \NBintercept + \NBar Y_{n-1}$, and $\
 In the case where the case counts are large, an alternative benchmark recommended by He et al.~\cite{he10} is a log-linear Gaussian ARMA model;
 the theory and practice of ARMA models is well developed, and these linear models are appropriate on a log scale due to the exponential growth and decay characteristic of biological dynamics.
 We chose to use the auto regressive negative binomial model, however, because the large number of weeks with zero recorded cholera cases in department level data makes a benchmark based on a continuous distribution problematic.
-Likelihoods of Models~1--3 and their respective ARMA benchmark models are provided in Table~\ref{tab:likes}.
+Likelihoods of Models~1--3 and their respective \old{ARMA} benchmark models are provided in Table~\ref{tab:likes}.
 
 It should be universal practice to present measures of goodness of fit for published models, and mechanistic models should be compared against benchmarks.
 In our literature review of the Haiti cholera epidemic, no non-mechanistic benchmark models were considered in any of the 32 papers that used dynamic models to describe cholera in order to obtain scientific conclusions.
