@@ -547,7 +547,7 @@ We assess previous methods used for fitting and evaluating these models, and we 
 \new{We assess current methodological approaches to these issues via a case study of the 2010-2019 cholera epidemic in Haiti.
 We consider three dynamic models developed by expert teams to advise on vaccination policies.
 We evaluate previous methods used for fitting these models, and we demonstrate modified data analysis strategies leading to improved statistical fit.}
-Specifically, we present approaches to diagnosis of model misspecification \old{, development of alternative models, and computational improvements in optimization, in the context of likelihood-based inference on nonlinear dynamic systems.} \new{and the consequent development of improved models.
+Specifically, we present approaches of diagnosing model misspecification \old{, development of alternative models, and computational improvements in optimization, in the context of likelihood-based inference on nonlinear dynamic systems.} \new{and the consequent development of improved models.
 We further demonstrate the utility of recent advances in likelihood maximization for high-dimensional nonlinear dynamic models, enabling likelihood-based inference for high-dimensional models of spatiotemporal incidence data.}
 Our workflow is reproducible and extendable, facilitating future investigations of this disease system.
 
@@ -1990,6 +1990,7 @@ Alternative forms of model validation should therefore be used in conjunction wi
 
 Another approach is to compare a quantitative measure of the model fit (such as MSE, predictive accuracy, or model likelihood) among all proposed models.
 These comparisons, which provide insight into how each model performs relative to the others, are quite common \cite{rinaldo12,sallah17}.
+\TODO{Add citations from lit-review.}
 To calibrate relative measures of fit, it is useful to compare against a model that has well-understood statistical ability to fit data, and we call this model a {\it benchmark}.
 Standard statistical models, interpreted as associative models without requiring any mechanistic interpretation of their parameters, provide suitable benchmarks.
 Examples include linear regression, auto regressive moving average time series models, or even independent and identically distributed measurements.
@@ -2040,6 +2041,7 @@ Specifically, we examine the results of fitting the flexible cubic spline term i
 The cubic splines permit flexible estimation of seasonality in the force of infection, $\transmission(t)$.
 Fig.~\ref{fig:h1SeasRain} shows that the estimated seasonal transmission rate $\transmission$ mimics the rainfall dynamics in Haiti, despite Model~1 not having access to rainfall data.
 This is consistent with previous studies finding that rainfall played an important role in cholera transmission in Haiti \cite{lemaitre19,eisenberg13}.
+\TODO{Citations from lit-review}.
 The estimated seasonality also features an increased transmission rate during the fall, which was noticed at an earlier stage of the epidemic \cite{rinaldo12}; the high transmission rate in the fall may also be a result of the increase transmission that occurred in the fall of 2016, when hurricane Matthew struck Haiti \cite{ferreirai16}.
 
 <<Get Model 1 Seasonality>>=
@@ -2119,6 +2121,7 @@ For any model-based inference, it is important to recognize and assess the model
 In epidemiological studies, for example, quantitative understanding of individual-level processes may not perfectly match model parameters that were fit to population-level case counts, even when the model provides a strong statistical fit \cite{he10}.
 This makes direct interpretation of estimated parameters delicate.
 
+\TODO{Rethink this paragraph.}
 Our case study provides an example of this in the parameter estimate for the duration of natural immunity due to cholera infection, $\muRS^{-1}$.
 Under the framework of Model~2, the best estimate for this parameter is $\Sexpr{signif(1/h2_fit$h2_params["sigma"],3)} \, \mathrm{yr}$, suggesting that individuals have effectively permanent immunity to cholera once infected.
 To interpret this result, we bear in mind that the data ranged from 2010-2019, and therefore estimates of immunity longer than $10\, \mathrm{yr}$---the upper end of previous estimates of natural immunity \cite{king08}---effectively result in the same model dynamics.
@@ -2144,11 +2147,12 @@ Forecasts are an attempt to provide an accurate estimate of the future state of 
 Forecasts from mechanistic models that are compatible with current scientific understanding may also provide estimates of the future effects of potential interventions.
 Further, they may enable real-time testing of new scientific hypotheses \cite{lewis22}.
 
+\TODO{Re-phrase this paragraph, as suggested by one of the reviewers.}
 Recent information about a dynamic system should be more relevant for a forecast than older information.
 This assertion may seem self-evident, but it is not the case for deterministic models, for which the initial conditions together with the parameters are sufficient for forecasting, and so recent data do not have special importance.
 Epidemiological forecasts based on deterministic models are not uncommon in practice, despite their limitations \cite{king15}.
 That may explain why Lee et al.~\cite{lee20} chose to obtain forecasts by simulating the calibrated models forward from initial conditions.
-We obtain forecasts by simulating future values using latent states that are consistent with the most recent observations; this is done by drawing latent states at the last observation time ($t_N$) from the filtering distribution $f_{\bm{X}_N|\bm{Y}_{1:N}}(\bm{x}_{N} | \bm{y}^*_{1:N} ; \hat\paramVec)$.
+\new{For Models~1 and 3---which are non-deterministic---}we obtain forecasts by simulating future values using latent states that are consistent with the most recent observations; this is done by drawing latent states at the last observation time ($t_N$) from the filtering distribution $f_{\bm{X}_N|\bm{Y}_{1:N}}(\bm{x}_{N} | \bm{y}^*_{1:N} ; \hat\paramVec)$.
 The decision not to do this partially explains the unsuccessful forecasts of Lee et al.~\cite{lee20}: their Table~S7 shows that the subset of their simulations which were consistent with observing zero cases in 2019 also accurately predicted the prolonged absence of detected cholera.
 
 Uncertainty in just a single parameter can lead to drastically different forecasts \cite{saltelli20}.
