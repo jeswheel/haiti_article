@@ -1,0 +1,507 @@
+\documentclass[11pt]{article}
+
+\input{inputs/header}
+
+\setcounter{tocdepth}{1}
+
+<<packages, include=FALSE>>=
+library(tidyverse)
+library(pomp)
+library(haitipkg)
+library(spatPomp)
+library(doParallel)
+library(doRNG)
+library(knitr)
+library(latex2exp)
+
+options(
+  scipen = 2,
+  help_type = "html",
+  stringsAsFactors = FALSE,
+  continue = "+  ",
+  width = 70,
+  useFancyQuotes = FALSE,
+  reindent.spaces = 2,
+  xtable.comment = FALSE
+)
+
+opts_chunk$set(
+  tidy.opts=list(
+    keep.blank.line=FALSE
+  ),
+  comment="",
+  fig.path = 'figure/',
+  echo=FALSE,
+  fig.align="center",
+  dev="pdf",
+  dev.args=list(
+    bg="transparent",
+    pointsize=9
+  )
+)
+
+if (!dir.exists("../model3/si")) {
+  dir.create("../model3/si", recursive = TRUE)
+}
+@
+
+\begin{document}
+
+%%%%%%%%%% START
+
+\section{Confidence Intervals for Model Parameters}\label{sec:ci}
+
+In this section we provide confidence intervals for all model parameters, excluding those that take unique values for each spatial unit.
+For each model and parameter, we use profile log-likelihoods to obtain confidence intervals. TODO: Cite.
+Due to the non-linear and stochastic nature of Models~1 and 3, exact evaluation of the profile log-likelihood is unattainable.
+Instead, the log-likelihood at each point of the profile is estimated using via Monte-Carlo based particle filter methods.
+We therefore obtain confidence intervals for the parameters of Model~1 and Model~3 using the Monte Carlo adjust profile (MCAP) algorithm. TODO: Cite.
+
+\subsection{Model~1 parameters}
+
+<<Load Model 1 Confidence Intervals, include=FALSE, message=FALSE, echo=FALSE>>=
+H1_profiles <- readRDS("../model1/run_level_3/h1_profiles.rds")
+
+# TAKEN FROM STACK OVERFLOW:
+# https://stackoverflow.com/a/44958156
+midcut<-function(x,from,to,by) {
+  ## cut the data into bins...
+  x=cut(x,seq(from,to,by),include.lowest=T)
+  ## make a named vector of the midpoints, names=binnames
+  vec=seq(from+by/2,to-by/2,by)
+  names(vec)=levels(x)
+  ## use the vector to map the names of the bins to the midpoint values
+  unname(vec[x])
+}
+
+prof_params <- c(
+  'betat', 'tau_epi', 'tau_end', 'rho', 'nu', 'sig_sq_epi',
+  'sig_sq_end', 'E_0', 'I_0', 'beta1', 'beta2', 'beta3',
+  'beta4', 'beta5', 'beta6'
+)
+
+H1_profiles_long <- H1_profiles %>%
+  select(prof_var, logLik, logLik_se, all_of(prof_params), -E_0, -I_0, -tau_end, -tau_epi, -rho) %>%
+  pivot_longer(
+    cols = -c(prof_var, logLik, logLik_se),
+    names_to = 'variable',
+    values_to = 'value'
+  ) %>%
+  filter(variable == prof_var) %>%
+  group_by(prof_var, value) %>%
+  slice_max(order_by = logLik, n = 1)
+
+# Tau done on log-scale
+H1_long_tau <- H1_profiles %>%
+  select(prof_var, logLik, logLik_se, tau_end, tau_epi) %>%
+  pivot_longer(
+    cols = -c(prof_var, logLik, logLik_se),
+    names_to = 'variable',
+    values_to = 'value'
+  ) %>%
+  filter(value <= 1e+12) %>%
+  mutate(value = log(value)) %>%
+  filter(variable == prof_var) %>%
+  group_by(prof_var, value) %>%
+  slice_max(order_by = logLik, n = 1)
+
+H1_long_rho <- H1_profiles %>%
+  select(prof_var, logLik, logLik_se, rho) %>%
+  pivot_longer(
+    cols = -c(prof_var, logLik, logLik_se),
+    names_to = 'variable',
+    values_to = 'value'
+  ) %>%
+  filter(value > 0.15) %>%
+  filter(variable == prof_var) %>%
+  group_by(prof_var, value) %>%
+  slice_max(order_by = logLik, n = 1)
+
+# E_0, I_0 need to be treated slightly differently
+H1_E0_I0_long <- H1_profiles %>%
+  select(prof_var, logLik, logLik_se, E_0, I_0) %>%
+  pivot_longer(
+    cols = -c(prof_var, logLik, logLik_se),
+    names_to = 'variable',
+    values_to = 'value'
+  ) %>%
+  filter(variable == prof_var) %>%
+  mutate(value = value * 10911819) %>%
+  mutate(value = midcut(value, from = -499, to = 24501, by = 1000)) %>%
+  # mutate(value = value / 10911819) %>% 
+  group_by(prof_var, value) %>%
+  slice_max(order_by = logLik, n = 1)
+
+H1_profiles_long <- bind_rows(H1_profiles_long, H1_E0_I0_long, H1_long_tau, H1_long_rho)
+@
+
+<<Create H1 Profile CIs>>=
+all_mcaps <- list()
+all_ci <- list()
+for (p in prof_params) {
+  
+  mcap_tmp <- mcap(
+    logLik = H1_profiles_long %>% filter(prof_var == p) %>% pull(logLik),
+    parameter = H1_profiles_long %>% filter(prof_var == p) %>% pull(value)
+  )
+  
+  all_mcaps[[p]] <- mcap_tmp
+  tmp_ci <- mcap_tmp$ci
+  names(tmp_ci) <- c("lower", "upper")
+  
+  all_ci[[p]] <- c(tmp_ci, 'mle' = mcap_tmp$mle)
+}
+
+all_mcaps <- purrr::map_df(
+  prof_params,
+  function(x) all_mcaps[[x]]$fit %>% mutate(prof_var = x)
+)
+
+all_ci <- all_ci |> as.data.frame() |> t() |> as.data.frame()
+all_ci$prof_var <- rownames(all_ci)
+
+H1_profiles %>% slice_max(order_by = logLik) %>% 
+  select(logLik, all_of(prof_params)) %>% 
+  mutate(E_0 = E_0 * 10911819, I_0 = I_0 * 10911819,
+         tau_epi = log(tau_epi), tau_end = log(tau_end)) %>%
+  pivot_longer(
+    cols = -logLik,
+    names_to = 'prof_var',
+    values_to = 'value'
+  ) -> mles
+@
+
+\begin{figure}[ht]
+<<m1Profs, fig.height=4.6, fig.width=5.8, echo=FALSE, warning=FALSE, message=FALSE>>=
+# Create a mapping between department names and what should be shown in figures
+h1_plots <- list()
+for (i in 1:length(prof_params)) {
+  p = prof_params[i]
+  if (p == 'betat') {
+    my_lab <- TeX('$\\zeta')
+  } else if (grepl('^beta[[:digit:]]$', p)) {
+    num <- gsub('^beta', '', p)
+    my_lab <- TeX(paste0('$\\beta_', num, '$'))
+  } else if (p == 'E_0') {
+    my_lab <- TeX('$E_0(0)$')
+  } else if (p == 'I_0') {
+    my_lab <- TeX('$I_0(0)$')
+  } else if (p == 'nu' || p == 'rho') {
+    my_lab <- TeX(paste0('$\\', p, '$'))
+  } else if (p == 'sig_sq_epi') {
+    my_lab <- TeX('$\\sigma$: Epidemic')
+  } else if (p == 'sig_sq_end') {
+    my_lab <- TeX('$\\sigma$: Endemic')
+  } else if (p == 'tau_end') {
+    my_lab <- TeX('$\\log(\\psi)$: Endemic')
+  } else if (p == 'tau_epi') {
+    my_lab <- TeX('$\\log(\\psi)$: Epidemic')
+  }
+  
+  gg_tmp <- ggplot() +
+    geom_point(
+      data = H1_profiles_long %>% filter(prof_var == p), 
+      aes(x = value, y = logLik)
+    ) +
+    geom_line(
+      data = all_mcaps %>% filter(prof_var == p), 
+      aes(x = parameter, y = smoothed), 
+      col = 'blue'
+    ) +
+    # geom_line(data = all_mcaps, aes(x = parameter, y = quadratic), col = 'red') +
+    geom_vline(
+      data = all_ci %>% filter(prof_var == p), 
+      aes(xintercept = lower), linetype = 'dashed'
+    ) +
+    geom_vline(
+      data = all_ci %>% filter(prof_var == p), 
+      aes(xintercept = upper), 
+      linetype = 'dashed'
+    ) +
+    geom_vline(
+      data = all_ci %>% filter(prof_var == p), 
+      aes(xintercept = mle), col = 'blue'
+    ) +
+    # This code chunk below will plot the MLE along with the smoothed marginal 
+    # MLEs and the confidence interval. 
+    # geom_point(
+    #   data = mles %>% filter(prof_var == p), 
+    #   aes(x = value, y = logLik), col = 'red'
+    # ) +
+    labs(y = 'Log-Likelihood', title = my_lab) +
+    theme(
+      axis.text = element_text(size = 8),
+      axis.title = element_text(size = 10)
+    ) +
+    theme_bw() +
+    scale_y_continuous(limits = c(-2770, max(H1_profiles$logLik))) + 
+    theme(
+      axis.title.x = element_blank(), 
+      plot.title = element_text(
+        hjust = 0.5, size = 8, margin = margin(t = 0, unit = "pt")
+        ),
+      axis.title.y = element_text(size = 8),
+      axis.text.y = element_text(size = 7),
+      axis.text.x = element_text(size = 6.5),
+      plot.margin = margin(5.5, 3, 0, -1, unit = 'pt')
+    )
+  
+  if (p == 'E_0') {
+    gg_tmp <- gg_tmp + 
+      scale_x_continuous(breaks = c(0, round(all_ci[p, 'upper'])))
+  } else if (p == 'I_0') {
+    gg_tmp <- gg_tmp + 
+      scale_x_continuous(
+        breaks = c(round(all_ci[p, 'lower']), round(all_ci[p, 'upper']))
+      )
+  } else if (p == 'nu') {
+    gg_tmp <- gg_tmp + 
+      scale_x_continuous(breaks = c(0.9, 0.95, 1.0))
+  }
+  
+  if (i %in% seq(1, 16, 4)) {
+    h1_plots[[i]] <- gg_tmp
+  } else {
+    h1_plots[[i]] <- gg_tmp + theme(
+      axis.text.y = element_blank(), axis.ticks.y = element_blank(),
+      axis.title.y = element_blank()
+      )
+  }
+}
+
+cowplot::plot_grid(
+  plotlist = h1_plots,
+  align = 'h', ncol = 4,
+  rel_widths = c(1.25, 1, 1, 1)
+)
+@
+\caption{\label{m1Profs}MCAP confidence intervals for Model 1 parameters.}
+\end{figure}
+
+<<Load Model 2 Confidence Intervals, include=FALSE, message=FALSE, echo=FALSE>>=
+NULL
+@
+
+<<Load Model 3 Profiles, include=FALSE, message=FALSE, echo=FALSE>>=
+H3_profiles1 <- readRDS('../model3/run_level_3/h3_profiles.rds') %>% 
+  filter(prof_var == 'std_W')
+H3_profiles2 <- readRDS("../model3/run_level_3/h3_profiles2.rds")
+H3_profiles3 <- readRDS("../model3/run_level_3/h3_profiles3.rds")
+
+H3_MLE_evals <- readRDS('../model3/run_level_3/h3_MLE_eval.rds')
+
+H3_profiles <- bind_rows(H3_profiles1, H3_profiles2, H3_profiles3)
+
+prof_params <- unique(H3_profiles$prof_var)
+
+H3_profiles_long <- H3_profiles %>%
+  select(prof_var, logLik, logLik_se, all_of(paste0(prof_params, '1'))) %>%
+  rename_with(~ sub("1$", "", .x)) %>%
+  select(-epsilon, -XthetaA) %>% 
+  pivot_longer(
+    cols = -c(prof_var, logLik, logLik_se),
+    names_to = 'variable',
+    values_to = 'value'
+  ) %>%
+  filter(variable == prof_var) %>%
+  group_by(prof_var, value) %>%
+  slice_max(order_by = logLik, n = 1)
+
+H3_remaining_long <- H3_profiles %>% 
+  select(prof_var, logLik, logLik_se, epsilon1, XthetaA1) %>% 
+  rename(epsilon = epsilon1, XthetaA = XthetaA1) %>% 
+  mutate(XthetaA = sqrt(XthetaA)) %>%
+  mutate(epsilon = epsilon^2) %>%
+  pivot_longer(
+    cols = -c(prof_var, logLik, logLik_se),
+    names_to = 'variable',
+    values_to = 'value'
+  ) %>%
+  filter(variable == prof_var) %>%
+  group_by(prof_var, value) %>%
+  slice_max(order_by = logLik, n = 2)
+
+H3_profiles_long <- bind_rows(
+  H3_profiles_long, H3_remaining_long
+)
+@
+
+<<Create Confidence intervals>>=
+all_mcaps <- list()
+all_ci <- list()
+for (p in prof_params) {
+  
+  mcap_tmp <- mcap(
+    logLik = H3_profiles_long %>% filter(prof_var == p) %>% pull(logLik),
+    parameter = H3_profiles_long %>% filter(prof_var == p) %>% pull(value),
+    span = case_when(
+      p == 'r' ~ 1,
+      p == 'XthetaA' ~ 0.7,
+      TRUE ~ 0.75
+    )
+  )
+  
+  all_mcaps[[p]] <- mcap_tmp
+  tmp_ci <- mcap_tmp$ci
+  names(tmp_ci) <- c("lower", "upper")
+  
+  all_ci[[p]] <- c(tmp_ci, 'mle' = mcap_tmp$mle)
+}
+
+all_mcaps <- purrr::map_df(
+  prof_params,
+  function(x) all_mcaps[[x]]$fit %>% mutate(prof_var = x)
+)
+
+all_ci <- all_ci |> as.data.frame() |> t() |> as.data.frame()
+all_ci$prof_var <- rownames(all_ci)
+
+# Transform epsilong (rho) to natural scale
+all_ci <- all_ci %>% 
+  mutate(
+    lower = case_when(
+      prof_var == 'epsilon' ~ sqrt(lower), 
+      # prof_var == 'XthetaA' ~ lower^2,
+      TRUE ~ lower
+    ),
+    upper = case_when(
+      prof_var == 'epsilon' ~ sqrt(upper), 
+      # prof_var == 'XthetaA' ~ upper^2,
+      TRUE ~ upper
+    ),
+    mle = case_when(
+      prof_var == 'epsilon' ~ sqrt(mle), 
+      # prof_var == 'XthetaA' ~ mle^2,
+      TRUE ~ mle
+    )
+  )
+
+all_mcaps <- all_mcaps %>% 
+  mutate(
+    parameter = case_when(
+      prof_var == 'epsilon' ~ sqrt(parameter), 
+      # prof_var == 'XthetaA' ~ parameter^2,
+      TRUE ~ parameter
+      )
+  )
+
+H3_profiles_long <- H3_profiles_long %>% 
+  mutate(
+    value = case_when(
+      prof_var == 'epsilon'~ sqrt(value), 
+      # prof_var == 'XthetaA' ~ value^2,
+      TRUE ~ value
+    )
+  )
+
+# This chunk of code returns the MLE for model 3
+H3_MLE_evals %>%
+  slice_max(order_by = logLik, n = 1) %>%
+  select(logLik, all_of(paste0(prof_params, '1'))) %>%
+  rename_with(~ sub("1$", "", .x)) %>%
+  mutate(XthetaA = sqrt(XthetaA)) %>%
+  pivot_longer(
+    cols = -c(logLik),
+    names_to = 'prof_var',
+    values_to = 'value'
+  ) -> mles
+@
+
+\begin{figure}[ht]
+<<m3Profs, fig.height=4.6, fig.width=5.8, echo=FALSE, warning=FALSE, message=FALSE>>=
+h3_plots <- list()
+for (i in 1:length(prof_params)) {
+  p = prof_params[i]
+  if (p == 'mu_B') {
+    my_lab <- TeX('$\\zeta')
+  } else if (p == 'XthetaA') {
+    my_lab <- TeX('$\\sqrt{\\epsilon_W}$')
+  } else if (p == 'thetaI') {
+    my_lab <- TeX('$\\mu_W$')
+  } else if (p == 'lambdaR') {
+    my_lab <- TeX('$a$')
+  } else if (p == 'r') {
+    my_lab <- TeX('$r$')
+  } else if (p == 'std_W') {
+    my_lab <- TeX('$\\sigma$')
+  } else if (p == 'epsilon') {
+    my_lab <- TeX('$\\rho$')
+  } else if (p == 'k') {
+    my_lab <- TeX('$\\psi$')
+  }
+  
+  gg_tmp <- ggplot() +
+    geom_point(
+      data = H3_profiles_long %>% filter(prof_var == p), 
+      aes(x = value, y = logLik)
+    ) +
+    geom_line(
+      data = all_mcaps %>% filter(prof_var == p), 
+      aes(x = parameter, y = smoothed), 
+      col = 'blue'
+    ) +
+    # geom_line(data = all_mcaps, aes(x = parameter, y = quadratic), col = 'red') +
+    geom_vline(
+      data = all_ci %>% filter(prof_var == p), 
+      aes(xintercept = lower), linetype = 'dashed'
+    ) +
+    geom_vline(
+      data = all_ci %>% filter(prof_var == p), 
+      aes(xintercept = upper), 
+      linetype = 'dashed'
+    ) +
+    geom_vline(
+      data = all_ci %>% filter(prof_var == p), 
+      aes(xintercept = mle), col = 'blue'
+    ) +
+    # This commented out code below will plot the MLE along with the confidence 
+    # intervals for the given parameter. 
+    # geom_point(
+    #   data = mles %>% filter(prof_var == p),
+    #   aes(x = value, y = logLik), col = 'red'
+    # ) +
+    labs(y = 'Log-Likelihood', title = my_lab) +
+    theme(
+      axis.text = element_text(size = 8),
+      axis.title = element_text(size = 10)
+    ) +
+    theme_bw() +
+    # scale_y_continuous(limits = c(-17450, max(H3_profiles$logLik))) + 
+    scale_y_continuous(limits = c(-17450, max(H3_MLE_evals$logLik))) +
+    theme(
+      axis.title.x = element_blank(), 
+      plot.title = element_text(
+        hjust = 0.5, size = 8, margin = margin(t = 0, unit = "pt")
+        ),
+      axis.title.y = element_text(size = 8),
+      axis.text.y = element_text(size = 7),
+      axis.text.x = element_text(size = 6.5),
+      plot.margin = margin(5.5, 3, 0, -1, unit = 'pt')
+    ) + 
+    theme(legend.position = 'none')
+  
+  if (i %in% seq(1, 9, 3)) {
+    h3_plots[[i]] <- gg_tmp
+  } else {
+    h3_plots[[i]] <- gg_tmp + theme(
+      axis.text.y = element_blank(), axis.ticks.y = element_blank(),
+      axis.title.y = element_blank()
+      )
+  }
+}
+
+cowplot::plot_grid(
+  plotlist = h3_plots,
+  align = 'h', ncol = 3,
+  rel_widths = c(1.25, 1, 1, 1)
+)
+@
+\caption{\label{m1Profs}MCAP confidence intervals for Model 1 parameters.}
+\end{figure}
+
+%%%%%%%%%% END
+
+\bibliography{../bib-haiti}
+
+\end{document}
+
