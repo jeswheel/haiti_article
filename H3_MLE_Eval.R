@@ -14,7 +14,7 @@
 # WARNING:
 #
 #   This script was ran using a high-performance computing cluster. In total,
-#   the RUN_LEVEL == 3 version of this script took TODO compute hours. Partial
+#   the RUN_LEVEL == 3 version of this script took 320 compute hours. Partial
 #   results can be obtained by lowering the required computational effort
 #   (params: NP, NBPF, nprof, NP_EVAL, NREPS_EVAL), which can be done by
 #   reducing the RUN_LEVEL to 2 or 1, or alternatively by manually changing
@@ -244,6 +244,9 @@ ades <- list(
 addExperiments(prob.designs = pdes, algo.designs = ades)
 
 # Submit Jobs -------------------------------------------------------------
+
+# The maximum run-time of the 168 jobs was 2.20 hours, with a mean time of 
+# 1.91 hours
 
 resources1 <- list(account = 'stats_dept1', walltime = '3:00:00', memory = '5000m', ncpus = 1)
 submitJobs(resources = resources1)
