@@ -4,7 +4,7 @@
 #SBATCH --mail-user=jeswheel@umich.edu
 #SBATCH --mail-type=BEGIN,END,FAIL
 
-#SBATCH --account=ionides2
+#SBATCH --account=stats_dept1
 #SBATCH --partition=standard
 
 #SBATCH --nodes=1
@@ -12,10 +12,10 @@
 #SBATCH --cpus-per-task=1
 
 ## 5GB/cpu is the basic share
-#SBATCH --mem-per-cpu=2GB
+#SBATCH --mem-per-cpu=1GB
 
 ## wall time hours:minutes:seconds
-#SBATCH --time=6-00:00:00
+#SBATCH --time=05:00:00
 
 ###   Load software modules
 
