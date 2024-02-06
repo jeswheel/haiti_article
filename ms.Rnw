@@ -803,11 +803,12 @@ if (RUN_LEVEL != 3 && file.exists("model3/run_level_3/h3_MLE_eval.rds")) {
   stop(paste0("Missing file: `model3/", rl_dir, 'h3_MLE_eval.rds`;\nThe file can be obtained by running the script `H3_MLE_Eval.R`.'))
 }
 
+# TODO: Remove
 # haiti3_fit contains ll estimate for many parameter sets, so we want to find
 # the highest value
-mod3_ll <- h3_prof %>%
-  slice_max(order_by = logLik, n = 1) %>%
-  pull(logLik)
+# mod3_ll <- h3_prof %>%
+#   slice_max(order_by = logLik, n = 1) %>%
+#   pull(logLik)
 @
 
 <<Create Model Objects,echo=FALSE,eval=TRUE, include=FALSE, message=FALSE>>=
@@ -873,7 +874,8 @@ mod1_n_params <- length(
 mod1_aic <- 2 * mod1_n_params - 2 * mod1_ll
 
 # model 3 AIC
-mod3_aic <- 2 * mod3_n_params - 2 * mod3_ll
+# TODO: Remove
+# mod3_aic <- 2 * mod3_n_params - 2 * mod3_ll
 
 # Calculate likelihood via block-particle filter
 mod3_eval_res <- bake(
@@ -912,6 +914,8 @@ mod3_eval_res <- bake(
   timing = FALSE
 )
 
+mod3_ll <- mod3_eval_res$ll[1]
+mod3_aic <- 2 * mod3_n_params - 2 * mod3_ll
 mod3_eval_res$subset_aic <- 2 * mod3_n_params - 2 * mod3_eval_res$subset_ll['se']
 
 rm(NREPS_EVAL, NP_EVAL)
@@ -1669,7 +1673,7 @@ This class of model variations are commonly considered in epidemiological modeli
 ggplot() +
   geom_point(data = h1_prof_res, aes(x = betat, y = logLik)) +
   geom_line(data = beta_t_mcap_results$fit, aes(x = parameter, y = smoothed), col = 'blue') +
-  geom_line(data = beta_t_mcap_results$fit, aes(x = parameter, y = quadratic), col = 'red') +
+  # geom_line(data = beta_t_mcap_results$fit, aes(x = parameter, y = quadratic), col = 'red') +
   geom_vline(xintercept = beta_t_mcap_results$ci[1], linetype = 'dashed') +
   geom_vline(xintercept = beta_t_mcap_results$ci[2], linetype = 'dashed') +
   geom_vline(xintercept = beta_t_mcap_results$mle, col = 'blue') +
