@@ -669,8 +669,8 @@ h1_prof_res <- h1_prof %>%
   group_by(betat) %>%
   summarize(logLik = max(logLik))
 
-# TODO: This is used later in figure 2 (TODO)
-mcap_results <- pomp::mcap(h1_prof_res$logLik, h1_prof_res$betat, span = 1)
+# TODO: update this comment: This is used later in figure 2 (TODO)
+beta_t_mcap_results <- pomp::mcap(h1_prof_res$logLik, h1_prof_res$betat, span = 1)
 
 # Find the set of parameters that correspond to the maximum likelihood
 p1 <- h1_prof %>%
@@ -786,20 +786,20 @@ mod3_n_params <- length(c(
 ))
 
 # Load the file containing profiles of Model 1 Parameters.
-if (RUN_LEVEL != 3 && file.exists("model3/run_level_3/h3_profiles.rds")) {
+if (RUN_LEVEL != 3 && file.exists("model3/run_level_3/h3_MLE_eval.rds")) {
 
   # If RUN_LEVEL != 3, and RUN_LEVEL == 3 results exist, just load the RL3
   # results.
-  h3_prof <- readRDS("model3/run_level_3/h3_profiles.rds")
-} else if (file.exists(paste0('model3/', rl_dir, 'h3_profiles.rds'))) {
+  h3_prof <- readRDS("model3/run_level_3/h3_MLE_eval.rds")
+} else if (file.exists(paste0('model3/', rl_dir, 'h3_MLE_eval.rds'))) {
 
   # If the `model3/run_level_<RUN_LEVEL>/h3_profiles.rds` file exists, load it
-  h3_prof <- readRDS(paste0('model3/', rl_dir, 'h3_profiles.rds'))
+  h3_prof <- readRDS(paste0('model3/', rl_dir, 'h3_MLE_eval.rds'))
 } else {
 
   # Otherwise (missing RL3 file, and the corresponding <RUN_LEVEL> file):
   # Throw an error, letting users know how to create the file.
-  stop(paste0("Missing file: `model3/", rl_dir, 'h3_profiles.rds`;\nThe file can be obtained by running the script `H3profile.R`'))
+  stop(paste0("Missing file: `model3/", rl_dir, 'h3_MLE_eval.rds`;\nThe file can be obtained by running the script `H3_MLE_Eval.R`.'))
 }
 
 # haiti3_fit contains ll estimate for many parameter sets, so we want to find
@@ -1651,9 +1651,9 @@ We perform a statistical test to determine whether or not the data indicate the 
 To do this, we perform a profile-likelihood search on the parameter $\transmissionTrend$ and obtain a $95\%$ confidence interval via a Monte Carlo Adjusted Profile (MCAP) \cite{ionides17}.
 Lee et al.~\cite{lee20} implemented Model~1 by fitting two distinct phases: an epidemic phase from October 2010 through March 2015, and an endemic phase from March 2015 onward.
 We similarly allow the re-estimation of process and measurement overdispersion parameters ($\sigmaProc^2$ and $\obsOverdispersion$), and require that the latent Markov process $X(t)$ carry over from one phase into the next.
-The resulting 95\% confidence interval for $\transmissionTrend$ is $(\Sexpr{myround(mcap_results$ci[1], digits = 3)}, \Sexpr{myround(mcap_results$ci[2], digits = 3)})$, with the full results displayed in Fig.~\ref{fig:betat}.
+The resulting 95\% confidence interval for $\transmissionTrend$ is $(\Sexpr{myround(beta_t_mcap_results$ci[1], digits = 3)}, \Sexpr{myround(beta_t_mcap_results$ci[2], digits = 3)})$, with the full results displayed in Fig.~\ref{fig:betat}.
 These results are suggestive that the inclusion of a trend in the transmission rate improves the quantitative ability of Model~1 to describe the observed data.
-\new{The maximum likelihood estimate for $\transmissionTrend$ corresponds with a \Sexpr{paste0(myround(100 - 100*exp(mcap_results$mle * 430/215), 1), '\\%')} reduction to the transmission rate over the course of the outbreak, with a $95\%$ confidence interval (\Sexpr{paste0(rev(myround(100 - 100*exp(mcap_results$ci * 430/215), 1)), collapse = ', ', sep = '\\%')}) for the overall reduction in transmission.}
+\new{The maximum likelihood estimate for $\transmissionTrend$ corresponds with a \Sexpr{paste0(myround(100 - 100*exp(beta_t_mcap_results$mle * 430/215), 1), '\\%')} reduction to the transmission rate over the course of the outbreak, with a $95\%$ confidence interval (\Sexpr{paste0(rev(myround(100 - 100*exp(beta_t_mcap_results$ci * 430/215), 1)), collapse = ', ', sep = '\\%')}) for the overall reduction in transmission.}
 The reported results for Model~1 in the remainder of this article were obtained with the inclusion of the parameter $\transmissionTrend$.
 
 \new{This example demonstrates the type of model variation that should be considered in the course of a data analysis: the model variation---the addition of a trend in transmission rate---has a plausible scientific justification, and is easily testable using likelihood based inference methods and observed data.
@@ -1665,11 +1665,11 @@ This class of model variations are commonly considered in epidemiological modeli
 <<Beta_trend_Figure, fig.height=2.4, fig.width=3.6, fig.align='center'>>=
 ggplot() +
   geom_point(data = h1_prof_res, aes(x = betat, y = logLik)) +
-  geom_line(data = mcap_results$fit, aes(x = parameter, y = smoothed), col = 'blue') +
-  geom_line(data = mcap_results$fit, aes(x = parameter, y = quadratic), col = 'red') +
-  geom_vline(xintercept = mcap_results$ci[1], linetype = 'dashed') +
-  geom_vline(xintercept = mcap_results$ci[2], linetype = 'dashed') +
-  geom_vline(xintercept = mcap_results$mle, col = 'blue') +
+  geom_line(data = beta_t_mcap_results$fit, aes(x = parameter, y = smoothed), col = 'blue') +
+  geom_line(data = beta_t_mcap_results$fit, aes(x = parameter, y = quadratic), col = 'red') +
+  geom_vline(xintercept = beta_t_mcap_results$ci[1], linetype = 'dashed') +
+  geom_vline(xintercept = beta_t_mcap_results$ci[2], linetype = 'dashed') +
+  geom_vline(xintercept = beta_t_mcap_results$mle, col = 'blue') +
   labs(x = "Log-Linear Trend in Transmission", y = 'Log Likelihood') +
   theme(axis.text = element_text(size = 8),
         axis.title = element_text(size = 10))
@@ -1683,7 +1683,7 @@ The blue curve is the MCAP, the vertical blue line indicates the MLE, and the ve
 
 <<clean Up of Betat data, echo=FALSE, message=FALSE, include=FALSE, warning=FALSE>>=
 suppressWarnings(
-  rm(h1_prof_res, mcap_results)
+  rm(h1_prof_res, beta_t_mcap_results)
 )
 gc()
 @
