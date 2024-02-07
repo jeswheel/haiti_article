@@ -65,17 +65,17 @@ prof_vars <- c()
 for (pp in prof_params) {
 
   if (pp == 'Mu') {
-    prof_values <- seq(6750, 13000, length.out = 30)
+    prof_values <- seq(6520, 14750, length.out = 30)
   } else if (pp == "Beta") {
-    prof_values <- seq((.Machine$double.eps)^(1/5), (6.5e-05)^(1/5), length.out = 50)^5
+    prof_values <- seq((.Machine$double.eps)^(1/5), 0.095, length.out = 50)^5
   } else if (pp == "BetaW") {
-    prof_values <- seq(1, 1.2, length.out = 30)
+    prof_values <- seq(1.04, 1.155, length.out = 30)
   } else if (pp == "v") {
-    prof_values <- seq(1.225, 1.44, length.out = 25)
+    prof_values <- seq(1.265, 1.375, length.out = 30)
   } else if (pp == "sigma") {
-    prof_values <- seq((.Machine$double.eps)^(1/5), (2e-03)^(1/5), length.out = 50)^5
+    prof_values <- seq((.Machine$double.eps)^(1/5), 0.29, length.out = 50)^5
   } else if (pp == "phase") {
-    prof_values <- seq(6.5, 7.9, length.out = 30)
+    prof_values <- seq(7.01, 7.5, length.out = 30)
   }
 
   prof_cols <- matrix(rep(prof_values, each = n_starts), ncol = 1)
@@ -262,7 +262,7 @@ submitJobs(
 #
 # saveRDS(
 #   h2_results,
-#   'model2/h2_profiles.rds')
+#   'model2/h2_profiles.rds'
 # )
 #
 # We can also get information about each job, which can be helpful to pick the
