@@ -33,36 +33,39 @@ library(pomp)
 library(spatPomp)
 library(subplex)
 
-
 # Create Experiment Registry ----------------------------------------------
 
 reg <- makeExperimentRegistry(
-  file.dir ='model2/profileAll',
+  file.dir ='model2/profileInit',
   seed = 739164,
   packages = c("spatPomp", 'haitipkg', 'pomp')
 )
 
 # More than one start could be considered, but our preliminary results 
 # suggest that only one is needed. 
-n_starts <- 1
+n_starts <- 3
 
 # Create Profile Design Matrix --------------------------------------------
 
 set.seed(22446688)
 h2 <- haiti2(cutoff = 10000, measure = "log")
 
+# prof_params <- c(
+#   "Mu",
+#   "Beta",
+#   "BetaW",
+#   "v",
+#   "sigma",
+#   "phase",
+#   paste0("InitInfected", 1:10),
+#   'Delta',
+#   'Rho', 
+#   'redmu', 
+#   'AlphaS'
+# )
+
 prof_params <- c(
-  "Mu",
-  "Beta",
-  "BetaW",
-  "v",
-  "sigma",
-  "phase",
-  paste0("InitInfected", 1:10),
-  'Delta',
-  'Rho', 
-  'redmu', 
-  'AlphaS'
+  paste0("InitInfected", 1:10)
 )
 
 final_pars <- coef(h2)
@@ -82,24 +85,24 @@ for (pp in prof_params) {
   } else if (pp == "phase") {
     prof_values <- seq(6.5, 7.9, length.out = 30)
   } else if (pp == 'InitInfected1') {
-    prof_values <- seq(5000, 40000, length.out = 50)
+    prof_values <- seq(5000, 15000, length.out = 50)
   } else if (pp == 'InitInfected2') {
     prof_values <- seq(1000, 7000, length.out = 40)
-  } else if (pp == "initInfected 3") {
+  } else if (pp == "InitInfected3") {
     prof_values <- seq(0.5, 1000, length.out = 30)
-  } else if (pp == "initInfected 4") {
+  } else if (pp == "InitInfected4") {
     prof_values <- seq(0.5, 1000, length.out = 30)
-  } else if (pp == "initInfected 5") {
+  } else if (pp == "InitInfected5") {
     prof_values <- seq(0.5, 1500, length.out = 30)
-  } else if (pp == "initInfected 6") {
+  } else if (pp == "InitInfected6") {
     prof_values <- seq(0.5, 1000, length.out = 30)
-  } else if (pp == "initInfected 7") {
+  } else if (pp == "InitInfected7") {
     prof_values <- seq(0.5, 1000, length.out = 30)
-  } else if (pp == "initInfected 8") {
+  } else if (pp == "InitInfected8") {
     prof_values <- seq(1000, 5000, length.out = 40)
-  } else if (pp == "initInfected 9") {
+  } else if (pp == "InitInfected9") {
     prof_values <- seq(0.5, 1000, length.out = 30)
-  } else if (pp == "initInfected 10") {
+  } else if (pp == "InitInfected10") {
     prof_values <- seq(0.5, 1000, length.out = 30)
   } else if (pp == 'Delta') {
     prof_values <- seq(1, 30, 1)
@@ -329,8 +332,8 @@ resources2 <- list(
   memory = '1000m', ncpus = 1
 )
 
-submitJobs(ids = 1:350, resources = resources1)
-submitJobs(ids = 351:740, resources = resources2)
+# submitJobs(ids = 1:350, resources = resources1)
+submitJobs(resources = resources2)
 
 # Get Results -------------------------------------------------------------
 
