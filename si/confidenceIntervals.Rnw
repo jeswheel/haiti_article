@@ -53,7 +53,7 @@ if (!dir.exists("../model3/si")) {
 
 In this section we provide confidence intervals for all model parameters, excluding those that take unique values for each spatial unit.
 For each model and parameter, we use profile log-likelihoods to obtain confidence intervals. TODO: Cite.
-Due to the non-linear and stochastic nature of Models~1 and 3, exact evaluation of the profile log-likelihood is unattainable.
+Due to the non-linear and stochastic nature of Models~1 and 3, exact evaluations of the profile log-likelihood are difficult to obtain.
 Instead, the log-likelihood at each point of the profile is estimated using via Monte-Carlo based particle filter methods.
 We therefore obtain confidence intervals for the parameters of Model~1 and Model~3 using the Monte Carlo adjust profile (MCAP) algorithm. TODO: Cite.
 
@@ -172,7 +172,7 @@ H1_profiles %>% slice_max(order_by = logLik) %>%
 @
 
 \begin{figure}[ht]
-<<m1Profs, fig.height=4.6, fig.width=5.8, echo=FALSE, warning=FALSE, message=FALSE>>=
+<<m1Profs, fig.height=5, fig.width=6, echo=FALSE, warning=FALSE, message=FALSE>>=
 # Create a mapping between department names and what should be shown in figures
 h1_plots <- list()
 for (i in 1:length(prof_params)) {
@@ -279,8 +279,251 @@ cowplot::plot_grid(
 \end{figure}
 
 <<Load Model 2 Confidence Intervals, include=FALSE, message=FALSE, echo=FALSE>>=
-NULL
+h2_profiles <- readRDS("../model2/h2_profiles.rds") %>% as.data.frame()
+
+prof_params <- c(
+  "Mu",
+  "BetaW",
+  "v",
+  "phase",
+  "Beta",
+  "sigma"
+)
+
+h2_plots <- list()
+for (i in 1:length(prof_params)) {
+  p = prof_params[i]
+  if (p == 'Mu') {
+    my_lab <- TeX('$\\mu_W')
+  } else if (p == 'Beta') {
+    my_lab <- TeX('$\\beta$')
+  } else if (p == 'BetaW') {
+    my_lab <- TeX('$\\beta_W$')
+  } else if (p == 'v') {
+    my_lab <- TeX("$\\psi")
+  } else if (p == 'sigma') {
+    my_lab <- TeX('$\\mu_{\\text{RS}}$')
+  } else if (p == 'phase') {
+    my_lab <- TeX('$\\phi')
+  }
+  
+  if (p == 'Beta') {
+    tmp_df_beta <- h2_profiles %>% 
+      filter(prof_var == 'Beta') %>% 
+      # filter(logLik >= -21965) %>%
+      arrange(p)
+    
+    vals_beta <- tmp_df_beta[, 'Beta']^(1/5)
+    
+    profile_like_beta <- splinefun(x = vals_beta, y = tmp_df_beta[, 'logLik'])
+    # max_profile <- optimize(profile_like, interval = range(vals), maximum = TRUE)
+    max_profile_beta <- max(h2_profiles$logLik)
+    threshold_beta <- max_profile_beta - 1.92
+    plot_threshold_beta <- max_profile_beta - 6
+    profile_roots_beta <- function(x) {profile_like_beta(x) - threshold_beta}
+    plot_limits_beta <- function(x) {profile_like_beta(x) - plot_threshold_beta}
+    
+    upper_bound_beta <- uniroot(
+      profile_roots_beta, 
+      interval = c(vals_beta[which.max(tmp_df_beta$logLik)], max(vals_beta))
+    )$root
+    
+    max_x_beta <- uniroot(
+      plot_limits_beta, 
+      interval = c(0, 7e-06^(1/5))
+    )$root
+    
+    gg_tmp_beta <- ggplot() + 
+      geom_point(
+        data = tmp_df_beta %>% filter(prof_var == p) %>% filter(Beta <= max_x_beta^5),
+        aes(x = Beta, y = logLik)
+      ) + 
+      geom_function(fun = function(x) profile_like_beta(x^(1/5))) + 
+      geom_vline(xintercept = upper_bound_beta^5, linetype = 'dashed') + 
+      geom_vline(xintercept = 0, col = 'blue') + 
+      labs(y = 'Log-Likelihood', title = my_lab) + 
+      theme(
+        axis.text = element_text(size = 8),
+        axis.title = element_text(size = 10)
+      ) +
+      theme_bw() +
+      scale_y_continuous(limits = c(max_profile_beta-6, max_profile_beta)) +
+      scale_x_continuous(limits = c(0, max_x_beta^5)) +
+      theme(
+        axis.title.x = element_blank(), 
+        plot.title = element_text(
+          hjust = 0.5, size = 8, margin = margin(t = 0, unit = "pt")
+        ),
+        axis.title.y = element_text(size = 8),
+        axis.text.y = element_text(size = 7),
+        axis.text.x = element_text(size = 6.5),
+        plot.margin = margin(5.5, 3, 0, -1, unit = 'pt')
+      )
+    
+    if (i %in% c(1, 4)) {
+      h2_plots[['beta']] <- gg_tmp_beta
+    } else {
+      h2_plots[['beta']] <- gg_tmp_beta + theme(
+        axis.text.y = element_blank(), axis.ticks.y = element_blank(),
+        axis.title.y = element_blank()
+      )
+    }
+    
+  } else if (p == 'sigma') {
+    tmp_df_sigma <- h2_profiles %>% 
+      filter(prof_var == 'sigma') %>% 
+      # filter(logLik >= -21965) %>%
+      arrange(p)
+    
+    vals_sigma <- tmp_df_sigma[, 'sigma']^(1/5)
+    
+    profile_like_sigma <- splinefun(x = vals_sigma, y = tmp_df_sigma[, 'logLik'])
+    # max_profile <- optimize(profile_like, interval = range(vals), maximum = TRUE)
+    max_profile_sigma <- max(h2_profiles$logLik)
+    threshold_sigma <- max_profile_sigma - 1.92
+    plot_threshold_sigma <- max_profile_sigma - 6
+    profile_roots_sigma <- function(x) {profile_like_sigma(x) - threshold_sigma}
+    plot_limits_sigma <- function(x) {profile_like_sigma(x) - plot_threshold_sigma}
+    
+    upper_bound_sigma <- uniroot(
+      profile_roots_sigma, 
+      interval = c(vals_sigma[which.max(tmp_df_sigma$logLik)], max(vals_sigma))
+    )$root
+    
+    max_x_sigma <- uniroot(
+      plot_limits_sigma, 
+      interval = c(0, 0.0022^(1/5))
+    )$root
+    
+    gg_tmp_sigma <- ggplot() + 
+      geom_point(
+        data = tmp_df_sigma %>% filter(prof_var == 'sigma') %>% filter(sigma <= max_x_sigma^5),
+        aes(x = sigma, y = logLik)
+      ) + 
+      geom_function(fun = function(x) profile_like_sigma(x^(1/5))) + 
+      geom_vline(xintercept = upper_bound_sigma^5, linetype = 'dashed') + 
+      geom_vline(xintercept = 0, col = 'blue') + 
+      labs(y = 'Log-Likelihood', title = my_lab) + 
+      theme(
+        axis.text = element_text(size = 8),
+        axis.title = element_text(size = 10)
+      ) +
+      theme_bw() +
+      scale_y_continuous(limits = c(max_profile_sigma-6, max_profile_sigma)) +
+      scale_x_continuous(limits = c(0, max_x_sigma^5)) +
+      theme(
+        axis.title.x = element_blank(), 
+        plot.title = element_text(
+          hjust = 0.5, size = 8, margin = margin(t = 0, unit = "pt")
+        ),
+        axis.title.y = element_text(size = 8),
+        axis.text.y = element_text(size = 7),
+        axis.text.x = element_text(size = 6.5),
+        plot.margin = margin(5.5, 3, 0, -1, unit = 'pt')
+      )
+    
+    if (i %in% c(1, 4)) {
+      h2_plots[['sigma']] <- gg_tmp_sigma
+    } else {
+      h2_plots[['sigma']] <- gg_tmp_sigma + theme(
+        axis.text.y = element_blank(), axis.ticks.y = element_blank(),
+        axis.title.y = element_blank()
+      )
+    }
+    
+  } else {
+    tmp_df <- h2_profiles %>% 
+      filter(prof_var == p) %>% 
+      # filter(logLik >= -21957.26 - 4) %>%
+      arrange(p)
+    
+    vals <- tmp_df[, p]
+    
+    profile_like <- splinefun(x = tmp_df[, p], y = tmp_df[, 'logLik'])
+    max_profile <- optimize(profile_like, interval = range(vals), maximum = TRUE)
+    threshold <- max_profile$objective - 1.92
+    plot_threshold <- max_profile$objective - 6
+    profile_roots <- function(x) {profile_like(x) - threshold}
+    plot_limits <- function(x) {profile_like(x) - plot_threshold}
+    
+    lower_bound <- uniroot(
+      profile_roots, 
+      interval = c(min(vals), max_profile$maximum)
+    )$root
+    
+    upper_bound <- uniroot(
+      profile_roots, 
+      interval = c(vals[which.max(tmp_df$logLik)], max(vals))
+    )$root
+    
+    add_piece <- c(
+      'Mu' = 3000, 'BetaW' = 0.3, 'phase' = 0.2, v = 0.5 
+    )
+    
+    max_x <- uniroot(
+      plot_limits, 
+      interval = c(max_profile$maximum, max(vals) + add_piece[p])
+    )$root
+    
+    min_x <- uniroot(
+      plot_limits, 
+      interval = c(min(vals) - add_piece[p], max_profile$maximum)
+    )$root
+    
+    gg_tmp <- ggplot() + 
+      geom_point(
+        data = h2_profiles %>% 
+          filter(prof_var == p) %>% 
+          filter(.data[[p]] <= max_x & .data[[p]] >= min_x) ,
+        aes(x = .data[[p]], y = logLik)
+      ) + 
+      geom_function(fun = profile_like) + 
+      geom_vline(xintercept = lower_bound, linetype = 'dashed') + 
+      geom_vline(xintercept = upper_bound, linetype = 'dashed') + 
+      geom_vline(xintercept = max_profile$maximum, col = 'blue') + 
+      labs(y = 'Log-Likelihood', title = my_lab) + 
+      theme(
+        axis.text = element_text(size = 8),
+        axis.title = element_text(size = 10)
+      ) +
+      theme_bw() +
+      # scale_y_continuous(limits = c(-21963, -21957)) + 
+      scale_y_continuous(limits = c(max(h2_profiles$logLik)-6, max(h2_profiles$logLik))) +
+      scale_x_continuous(limits = c(min_x, max_x)) + 
+      theme(
+        axis.title.x = element_blank(), 
+        plot.title = element_text(
+          hjust = 0.5, size = 8, margin = margin(t = 0, unit = "pt")
+        ),
+        axis.title.y = element_text(size = 8),
+        axis.text.y = element_text(size = 7),
+        axis.text.x = element_text(size = 6.5),
+        plot.margin = margin(5.5, 3, 0, -1, unit = 'pt')
+      )
+    
+    if (i %in% c(1, 4)) {
+      h2_plots[[p]] <- gg_tmp
+    } else {
+      h2_plots[[p]] <- gg_tmp + theme(
+        axis.text.y = element_blank(), axis.ticks.y = element_blank(),
+        axis.title.y = element_blank()
+      )
+    }
+  }
+}
 @
+
+\begin{figure}[ht]
+<<m2Profs, fig.height=3, fig.width=5, echo=FALSE, warning=FALSE, message=FALSE>>=
+cowplot::plot_grid(
+  plotlist = h2_plots, ncol = 3,
+  align = 'h',
+  rel_widths = c(1.15, 1, 1)
+)
+@
+\caption{\label{m2Profs}MCAP confidence intervals for Model 2 parameters.}
+\end{figure}
+
 
 <<Load Model 3 Profiles, include=FALSE, message=FALSE, echo=FALSE>>=
 H3_profiles1 <- readRDS('../model3/run_level_3/h3_profiles.rds') %>% 
@@ -466,8 +709,8 @@ for (i in 1:length(prof_params)) {
       axis.title = element_text(size = 10)
     ) +
     theme_bw() +
-    # scale_y_continuous(limits = c(-17450, max(H3_profiles$logLik))) + 
-    scale_y_continuous(limits = c(-17450, max(H3_MLE_evals$logLik))) +
+    scale_y_continuous(limits = c(-17450, max(H3_profiles$logLik))) +
+    # scale_y_continuous(limits = c(-17450, max(H3_MLE_evals$logLik))) +
     theme(
       axis.title.x = element_blank(), 
       plot.title = element_text(
@@ -496,7 +739,7 @@ cowplot::plot_grid(
   rel_widths = c(1.25, 1, 1, 1)
 )
 @
-\caption{\label{m1Profs}MCAP confidence intervals for Model 1 parameters.}
+\caption{\label{m3Profs}MCAP confidence intervals for Model 1 parameters.}
 \end{figure}
 
 %%%%%%%%%% END

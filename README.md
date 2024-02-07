@@ -69,4 +69,5 @@ effort to create the make file in this case.
 
 - [ ] re-write this README with updated instructions about batchtools. 
 - [ ] `si/calibrateMod3.Rnw` needs to be re-factored for the new way of fitting Model 3.
+- [ ] Fix labels for confidence interval plots for models 2 and 3. 
 
