@@ -42,6 +42,8 @@ reg <- makeExperimentRegistry(
   packages = c("spatPomp", 'haitipkg', 'pomp')
 )
 
+# More than one start could be considered, but our preliminary results 
+# suggest that only one is needed. 
 n_starts <- 1
 
 # Create Profile Design Matrix --------------------------------------------
