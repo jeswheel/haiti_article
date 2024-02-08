@@ -582,16 +582,16 @@ This case study investigates the use of dynamic models and spatiotemporal data t
 \old{The data that were used for this study, and that is the subject of our reanalysis, is displayed in Fig.~[1].}
 \new{Various dynamic models were developed to study this outbreak: searching PubMed with keywords ``Haiti, cholera, model'' we obtained 22 studies that utilized deterministic models \cite{lee20,tuite11,andrews11,botelho21,fitzgibbon20,eisenberg13,rinaldo12,chao11,date11,lin19,abrams13,collins21,akman15,trevisin22,mavian20,collins14,kelly16,capone15,leung22,mari15,gatto12,kuhn14}
 and 11 studies that used stochastic models \cite{kirpich16,lee20,pasetto18,mukandavire13,kirpich17,lewnard16,kunkel17,mukandavire15,sallah17,azman12,azman15}.
-Incidence data on the outbreak were available at various spatial scales, which resulted with 17 studies that considered spatially explicit dynamic models \cite{lee20,tuite11,pasetto18,fitzgibbon20,eisenberg13,rinaldo12,chao11,abrams13,trevisin22,sallah17,collins14,kelly16,azman12,leung22,kuhn14,mari15,gatto12}.
+Incidence data on the outbreak are available at various spatial scales, motivating 17 studies in our literature review to consider spatially explicit dynamic models \cite{lee20,tuite11,pasetto18,fitzgibbon20,eisenberg13,rinaldo12,chao11,abrams13,trevisin22,sallah17,collins14,kelly16,azman12,leung22,kuhn14,mari15,gatto12}.
 Here we focus on a multi-group modeling exercise by Lee et al.~\cite{lee20} in which four expert modeling teams developed models to the same dataset with the goal of comparing conclusions on the feasibility of eliminating cholera by a vaccination campaign.}
 Model~1 is stochastic and describes cholera at the national level;
 Model~2 is deterministic with spatial structure, and includes transmission via contaminated water;
 Model~3 is stochastic with spatial structure, and accounts for measured rainfall.
 Model~4 has an agent-based construction, featuring considerable mechanistic detail but limited ability to calibrate these details to data.
-\new{These modeling strategies were selected by \cite{lee20} to represent the range of approaches used in the research community.}
+\new{These modeling strategies were selected by \cite{lee20} to represent the range of approaches used in the research community}
 We focus on Models~1--3, as the strengths and weaknesses of the agent-based modeling approach \cite{tracy18} are outside the scope of this article.
 \new{In addition, agent-based models were less widely used, the agent based model of \cite{lee20} being the only model of this class that was found in our literature review.}
-\new{The data that were used in \cite{lee20}, and that is the subject of our reanalysis, are displayed in Fig.~\ref{fig:CholeraData}.}
+\new{The data that were used in \cite{lee20}, and that we reanalyze, are displayed in Fig.~\ref{fig:CholeraData}.}
 
 \begin{figure}[!h]
 <<Plot_Reported_Cases, echo=FALSE, fig.height=3.5>>=
@@ -624,11 +624,12 @@ The four independent teams were given the task of estimating the
 potential effect of prospective oral cholera vaccine (OCV) programs.
 While OCV is accepted as a safe and effective tool for controlling the spread of cholera, the global stockpile of OCV doses remains limited \cite{pezzoli20}.
 Advances in OCV technology and vaccine availability, however, raised the possibility of planning a national vaccination program \cite{lee20}.
-In the study, certain data were shared between the groups, including demography and vaccination history; vaccine efficacy was also fixed at a shared value between groups.
+\new{The possibility of controling the Haiti cholera outbreak via OCV was considered by various research groups.} \TODO{Citations}. 
+In the \new{Lee et al.~\cite{lee20}} study, certain data were shared between the groups, including demography and vaccination history; vaccine efficacy was also fixed at a shared value between groups.
 Beyond this, the groups made autonomous decisions on what to include and exclude from their models.
-The groups largely adhered to existing guidelines for creating models to inform policy \cite{behrend20,saltelli20} and, despite their autonomy, obtained a consensus that an extensive nationwide vaccination campaign would be necessary to eliminate cholera from Haiti. \TODO{How? This statement should be epanded or re-evaluated.}
+\old{The groups largely adhered to existing guidelines for creating models to inform policy [35, 36] and, d}\new{D}espite their autonomy, \new{the four independent teams} obtained a consensus that an extensive nationwide vaccination campaign would be necessary to eliminate cholera from Haiti.
 Their forecasts, however, were inconsistent with the prolonged period with no confirmed cholera cases between February, 2019 and September, 2022 \cite{trevisin22}.
-Though cholera has recently reemerged in Haiti \cite{rubin22,PAHO23}, the inability to accurately forecast cholera incidence from 2019-2022---while diligently adhering to existing scientific standards for infectious disease modeling---demonstrates that existing standards of disease modeling and forecasting may be insufficient.
+Though cholera has recently reemerged in Haiti \cite{rubin22,PAHO23}, the inability to accurately forecast cholera incidence from 2019-2022\old{---while diligently adhering to existing scientific standards for infectious disease modeling---demonstrates that existing standards of disease modeling and forecasting may be insufficient.} \new{prompts us to consider retrospectively what may have been done differently in order to obtain more reliable conclusions.}
 
 The discrepancy between the model-based conclusions of Lee et al.~\cite{lee20} and the prolonged absence of cholera in Haiti has been debated \cite{francois20,rebaudetComment20,henrys20,leeReply20}.
 Suggested origins of this discrepancy include the use of unrealistic models \cite{rebaudetComment20} and unrealistic criteria for cholera elimination \cite{henrys20}.
@@ -636,14 +637,17 @@ We find a more nuanced conclusion: attention to methodological details in model 
 This improved ability may result in more accurate forecasts and facilitates the exploration of model assumptions.
 Based on this retrospective analysis, we offer suggestions on fitting mechanistic models to dynamic systems for future studies.
 
-\new{\editMechModels}
-
 %% IT SEEMS THIS PARAGRAPH IS DEPRECATED IN FAVOR OF CITING THESE REFERENCES WHERE APPROPRIATE
 \old{While this work is focused on the models proposed by Lee et al.~[1], our suggestions have broader relevance.
 To investigate the extent to which [1] is typical of the substantial body of work on Haiti cholera dynamics, we performed a literature review by searching PubMed with keywords: Haiti, cholera, model.
 The search resulted in 66 papers, of which 32 used dynamic models to describe the cholera epidemic in Haiti.
 The models make various choices on the dichotomies considered by Lee et al.~[1]; deterministic versus stochastic; compartment model versus agent-based; aggregated versus spatially explicit.}
 
+\new{\editModelingGuidanceFirst}
+
+\new{\editModelingGuidanceSecond}
+
+\new{Our recommendations are presented in the context of a case study, with the goal of demonstrating how careful adherence to statistical principles may result in improved model fits.}
 We proceed by introducing the general modeling scheme employed by Models~1--3 and provide details of each individual model;
 we then describe how each model is calibrated to data, and present a systematic approach to examining and refining these models.
 \new{Specifically, we focus on how to develop and test variations of the proposed models, as well as diagnosing the models once they have been assimilated to incidence reports.
@@ -1075,6 +1079,8 @@ This motivates the development of mechanistic models, which provides a statistic
 \new{Despite their limited ability to project the effect of interventions on a system, associative models can be effectively used to make inference on an certain features of a system. 
 In our literature review, there were 14 studies that used associative models to describe various aspects of the cholera epidemic \cite{hulland19,moise20,piarroux11,matias17,eisenberg13,rebaudet19CATI,ivers15,raila17,cuneo17,charles14,richterman19,richterman19inverse,bengtsson15,li16adjusting}.}
 
+\jwc{This doesn't quite feel like the right place for this either, but I can't seem to pin down exactly where that would be yet. Perhaps the discussion?}
+\new{\editMechModels}
 
 The four mechanistic models of Lee et al.~\cite{lee20} were deliberately developed with limited coordination.
 This allows us to treat the models as fairly independently developed expert approaches to understanding cholera transmission.
@@ -1558,8 +1564,7 @@ In this article we \old{calibrate} \new{follow \cite{lee20} by calibrating} the 
 The likelihood for each of the fitted models---and the corresponding AIC values for model comparisons that include an adjustment for the number of calibrated parameters---is provided in Table~\ref{tab:likes}.
 In the following subsections we describe in detail our approach to calibrating the three proposed mechanistic models to observed cholera incidence data.
 \eic{I'VE STARTED TO PUT IN SOME DISCUSSION OF BAYESIAN METHODS HERE, THOUGH IT COULD ALSO GO IN THE DISCUSSION}
-\new{The main alternative to maximum likelihood estimation is Bayesian inference via Markov chain Monte Carlo, used to analyze the Haiti cholera epidemic by \cite{andrews11,pasetto18,rinaldo12,lewnard16,trevisin22,sallah17,azman12,kuhn14,mari15,gatto12}.
-Alternatively, some investigations obtained parameters from previous sources without calibrating to data.}
+\new{The main alternative to maximum likelihood estimation is Bayesian inference via Markov chain Monte Carlo, used to analyze the Haiti cholera epidemic by \cite{andrews11,pasetto18,rinaldo12,lewnard16,trevisin22,sallah17,azman12,kuhn14,mari15,gatto12}.}
 
 \begin{table}[!h]
 \centering
@@ -2621,14 +2626,14 @@ This led us to suggest a model modification.
 Because Model~1 outperformed its benchmark model, we were able to confidently scrutinize the implications of the fitted model.
 We found that the seasonality term of Model~1 closely mirrors the seasonal rainfall patterns in Haiti, reaffirming alternative evidence of the importance of rainfall as a driver of cholera infection and bolstering our confidence in Model~1's ability to capture the critical dynamics of the cholera outbreak. }
 
-\new{In any study involving dynamic models, it is important to consider, test, and present more than one model framework or variant.
-\eic{I'M NOT SURE THIS IS A CONCLUSION. LEE ET AL STUDIED MULTIPLE MODELS BECAUSE THAT WAS THE GOAL OF THAT PAPER. MOST OTHER PAPERS STUDY ONE MODEL. WE WOULD LIKE RESULTS FROM DIFFERENT PAPERS TO HAVE OBJECTIVE MEASURES OF FIT THAT CAN BE COMPARED BETWEEN PAPERS, BUT I DON'T THINK WE WANT TO SAY THAT ALL PAPERS HAVE TO ANALYZE MANY MODELS.}
-In our review of the literature featuring cholera modeling in Haiti, we found that only a handful of papers that utilized mechanistic models reported more than a single model variation. (TODO: Cite).
-We acknowledged the possibility that a study reporting merely a single model may have explored others and only reported the one used in the final analysis.
-However, divulging details about the models that were considered, but not used, may greatly benefit the broader scientific community.
-These details may guide future researchers to avoid model variations that have previously demonstrated to perform poorly on incidence data.
-Furthermore, it can enhance confidence in the reported model's ability to describe the system under investigation.
-This confidence stems from the demonstrated evidence that the chosen model offers a better description of the observed data compared to other reasonable model alternatives.}
+% \new{In any study involving dynamic models, it is important to consider, test, and present more than one model framework or variant.
+% \eic{I'M NOT SURE THIS IS A CONCLUSION. LEE ET AL STUDIED MULTIPLE MODELS BECAUSE THAT WAS THE GOAL OF THAT PAPER. MOST OTHER PAPERS STUDY ONE MODEL. WE WOULD LIKE RESULTS FROM DIFFERENT PAPERS TO HAVE OBJECTIVE MEASURES OF FIT THAT CAN BE COMPARED BETWEEN PAPERS, BUT I DON'T THINK WE WANT TO SAY THAT ALL PAPERS HAVE TO ANALYZE MANY MODELS.}
+% In our review of the literature featuring cholera modeling in Haiti, we found that only a handful of papers that utilized mechanistic models reported more than a single model variation. (TODO: Cite).
+% We acknowledged the possibility that a study reporting merely a single model may have explored others and only reported the one used in the final analysis.
+% However, divulging details about the models that were considered, but not used, may greatly benefit the broader scientific community.
+% These details may guide future researchers to avoid model variations that have previously demonstrated to perform poorly on incidence data.
+% Furthermore, it can enhance confidence in the reported model's ability to describe the system under investigation.
+% This confidence stems from the demonstrated evidence that the chosen model offers a better description of the observed data compared to other reasonable model alternatives.}
 
 \new{Likelihood based inference enables researchers to choose between any model that is evaluated on the same dataset using a metric like AIC.
 Nested model variations are particularly useful as they enable formal statistical testing of the nested features.
