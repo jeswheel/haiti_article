@@ -34,6 +34,10 @@
 
 \newcommand\code[1]{\texttt{#1}}
 \newcommand\paramVec{\theta}
+
+\newcommand\seq[2]{{#1}\!:\!{#2}}
+\newcommand\vaccClass{Z}
+\newcommand\vaccCounter{z}
 \input{../edits.tex}
 %\usepackage[sectionbib]{natbib}
 
@@ -124,8 +128,6 @@ jeswheel@umich.edu
   This major concern can be resolved in two ways, both of which seem acceptable to me, either a) reframe the paper as a more general series of recommendations for how to better perform statistical inference on time series data using mechanistic models (including a longer introduction and discussion of existing methodological deficiencies) or b) perform a more in-depth analysis and commentary on cholera in Haiti (some of which has already been done but is buried in supplementary information files that are only briefly mentioned in the main text, e.g. S5).
 }
 
-WE CAN TRIM DOWN THE RESPONSE LATER. HERE ARE SOME INITIAL BRAINSTORMING THOUGHTS.
-
 Thanks for the feedback on the framing of our contribution.
 The original goal of our manuscript was to combine the two foci identified by the referee:
 we use an in-depth case study to motivate general procedures for fitting mathematical models to time series data, while explaining how these procedures help to address limitations of previous approaches.
@@ -135,10 +137,10 @@ Since our approach is predicated on the possibility of carrying out some nontriv
 The referee would prefer us to emphasize one of these foci, and this feedback has helped us see how readers might find themselves struggling to orient themselves while reading the manuscript.
 We agree that the ``educational'' purpose of the paper is primary to the specific conclusions about the Haiti cholera epidemic.
 However, the validity of our reanalysis of the Haiti data and models provides critical support to our methodological points.
-\TODO{For the revision, we have edited the abstract and introduction to make explicit how the case study fits into the overall goals of the paper.}
+For the revision, we have edited the abstract and introduction to make explicit how the case study fits into the overall goals of the paper.
 \TODO{In the methods and results sections, we have made explicit how the decisions about what to present in the main text and in the supplement relate to these goals.}
 In the discussion, we return from the concrete consideration of the case study, placing it back in the more general setting of inferring complex dynamics from time series data.
-\TODO{In the revision, we have added more signposts to help the reader see how the points that arise in the discussion generalize the corresponding points arising in the case study.}
+In the revision, we have added more signposts to help the reader see how the points that arise in the discussion generalize the corresponding points arising in the case study.
 
 \report{
   I found the methodology used to be well-suited to addressing the aims of the paper.
@@ -148,15 +150,26 @@ In the discussion, we return from the concrete consideration of the case study, 
   Overall, I found the paper interesting and informative, but a little unfocused. I expect with some heavy rewriting in places (especially the introduction and discussion), the paper will be acceptable for publication in PLoS Computational Biology. I do not anticipate the authors having to perform additional computational analysis.
 }
 
+Thank you for this feedback.
+We have made substantial changes to the abstract, author summary, and introduction in order to make the focus of the paper more clear. 
+We have also done a nearly complete rewritting of the discussion section. 
+Specifically, though the content and arguments made remain the same, we specifically point out ways that our case study demonstrates the usefulness of our general suggestions for model based inference of dynamic systems. 
+
 \report{
   \textbf{\underline{Abstract}}
 
   The authors state they ``develop data analysis strategies leading to improved statistical fit." It's not clear to me exactly what novel strategies have been developed, it seems the authors exclusively use pre-existing techniques from the literature. This is fine, if the focus of the paper is either a) pedagogical or b) on understanding a specific disease system (cholera in Haiti). If any methods are novel, this should be more clearly stated.
 }
 
-Fitting models 1 and 2 does not require any methodological innovation. Model 3 has a stochastic spatiotemporal partially-observed structure that leads to methodological challenges. \cite{lee20} made some approximations to avoid carrying out inference for the full coupled system. We show some consequences of those approximations, taking advantage of a newly developed method which has not yet been applied in the context of scientific investigations. So, although the method is not entirely new, its applicability to this task is novel.
-\TODO{We have clarified this in the manuscript WHERE?}
+Fitting models 1 and 2 does not require any methodological innovation. Model 3 has a stochastic spatiotemporal partially-observed structure that leads to methodological challenges. \cite{lee20} made some approximations to avoid carrying out inference for the full coupled system. We show some consequences of those approximations, taking advantage of a newly developed method which has not yet been applied in the context of scientific investigations. So, although the method is not entirely new, its applicability to this task is novel. 
+Additional commentary to this point has been added in the abstract, introduction, and \TODO{the subsection on fitting Model 3}. 
 
+We have further modified the statement in the abstract that led to this confusion. Rather than stating that we ``develop data analysis strategies leading to improved statistical fit", we now say: 
+
+\article{We assess current methodological approaches to these issues via a case study of the 2010-2019 cholera epidemic in Haiti. We consider three dynamic models developed by expert teams to advise on vaccination policies. We evaluate previous methods used for fitting these models, and we demonstrate modified data analysis strategies leading to improved statistical fit. Speficially, we present appraoches of diagnosing model misspecification and the consequent development of improved models. We futher demonstrate the utility of recent advances in likelihood maximization for high-dimensional nonlinear dynamic models, enabling likelihood-based inference for high-dimensional models for spatiotemporal incidence data.}
+
+% We have clarified this in the abstract and introduction by mentioning that we demonstrate the utility of recent advances in likelihood maximization for high-dimensional nonlinear dynamic models. 
+% \TODO{Furthermore, we have added additional commentary that clearly indicates that although this case study is among the first to use the nov
 
 \report{
   \textbf{\underline{Introduction}}
@@ -165,22 +178,29 @@ Fitting models 1 and 2 does not require any methodological innovation. Model 3 h
 }
 
 That statement arose in the author summary, where references are not expected.
-However, we appreciate that the point should be expanded on, and we have done so in the revision \TODO{}.
-We have cited \cite{he10,stocks20,li23} for examples demonstrating situations where overdispersed dynamic noise is present, and \cite{king15} for an investigation of the statistical limitations of fitting deterministic models to data.
+However, we appreciate that the point should be expanded on, and we have done so in the revision. Specifically, we cite papers from the literature review we performed on the use of dynamic models for analyzing the Haiti cholera oubreak. The literature review was previously mentioned, but citations from the review were not made. Furthermore we modified the quoted statement in the author summary to be the following: 
+
+\article{we use an in-depth case study to motivate general procedures for fitting mathematical models to time series data, while explaining how these procedures help to address limitations of previous approaches.}
+
+Among the most common mistakes in mechanistic modeling, in our opinion, is not properly assessing / evaluating a fitted model. 
+We originally tried to make this point by having an entire section dedicated to model diagnostics, though we admit that the connection between the statement in the author summary and a section later in the article was not clear. 
+\TODO{We have addressed this by adding sign-posts to references and suggestions back to this statement, and other similar statements in the abtract / introduction.} 
+We have also added citations to \cite{he10,stocks20} \TODO{and \cite{li23}} for examples demonstrating situations where overdispersed dynamic noise is present, and \cite{king15} for an investigation of the statistical limitations of fitting deterministic models to data.
 
 
 \report{2.
   Given the focus of the paper on how to better perform inference, explicitly commenting on what are the ``existing guidelines for creating models to inform policy [4, 5]". It would then also be helpful in the discussion to comment on how the recommendations of this study extend these pre-existing guidelines.
 }
 
-We have added some material in the discussion connecting our results to the stated goals of the paper from the abstract and introduction.
-We could have gone further and discussed in more detail the relationship to the references [4, 5], following this recommendation.
-However, a subsequent manuscript addresses [4,5] more directly \cite{li23} and so we have referred the reader to that paper (currently available on arXiv) for additional discussion of this point.
+We have added two paragraphs in the introduction discussing how recommendations we make in this article fit in the broader category of papers that make recommendations on fitting mechanistic models to dynamic systems. This includes discussing these two papers that we originally cited in more detail, as well as other articles on similar topics: 
 
-\eic{IF THE P0INTS OF 4, 5 CAN BE CONNECTED DIRECTLY TO THIS DATA ANALYSIS, WE OUGHT TO BE ABLE TO DISCUSS THAT WITHOUT CONFLICTING WITH LI23. WE SHOULD PROBABLY RE-READ THESE REFERENCES AND FIGURE IT OUT.}
+\article{\editModelingGuidanceFirst}
 
-\eic{ANOTHER IDEA: WE CAN VIEW OUR PAPER AND LI23 AS SYNERGISTIC RATHER THAN IN COMPETITION. WE COULD EVEN TALK ABOUT HOW THAT DIFFERENT SETTING (COVID, WITH AN EMPHASIS ON SPATIOTEMPORAL MODELING AND COMPARING PRIMARILY WITH ENSEMBLE FILTER METHODS) LEADS TO SIMILAR CONCLUSIONS TO HAITI CHOLERA. FROM THAT PERSPECTIVE, THE PAPERS STRENGTHEN EACH OTHER. AS LONG AS BOTH LISTS OF RECOMMENDATIONS ARE FIRMLY TIED TO THE RESPECTIVE DATA ANALYSES, IT SHOULD BE A STRENGTH NOT A WEAKNESS IF THEY OVERLAP. BUT IF WE GO THAT ROUTE WE'LL HAVE TO EXPLAIN THIS CONVINCINGLY.}
+\article{\indent\editModelingGuidanceSecond}
 
+We have also added some material in the discussion connecting our results to the stated goals of the paper from the abstract and introduction.
+We could have gone further and discussed in more detail the relationship to the references \cite{behrend20,saltelli20}, following your recommendation.
+However, our newly added reference \cite{li23} more directly addresses \cite{behrend20,saltelli20} and so we have referred the reader to that paper (currently available on arXiv) for additional discussion of this point.
 
 \report{
   \textbf{\underline{Methods}}
@@ -199,6 +219,12 @@ If the journal requests that we make this into a table rather than a figure we a
     ``and $z \in 1:Z$ describes hypothetical vaccination programs" It would help to give an example of the different vaccine programs here. E.g. does this mean the number of doses the individual has received, or differences in the vaccine administered?
 }
 
+It could be either of the above, though in the analysis we only consider compartments based on the vaccination scenarios outlined in the Forecasts section. 
+For Model~1, the assumption made by Lee et al.~\cite{lee20}, and reused in our analysis, is that the added dynamics of the vaccination compartments is an increased probability that an infection is asymptomatic, as described in a paragraph that follows the quoted text. 
+a clause has been added to this sentence in order to clarify this point: 
+
+\article{Here, $\vaccCounter=0$ corresponds to unvaccinated individuals, and $\vaccCounter \in \seq{1}{\vaccClass}$ describes hypothetical vaccination programs, where each program $\vaccCounter$ indexes differences in both the number of doses administered (one versus two doses per individual) and the round of vaccine administration.}
+
 \report{5.
   Eq 6 and line 1: I think the notation for the asymptomatic fraction might be clearer and more consistent with the other models if you used $f_z(t)$ instead of $\vartheta_z(t)$. In fact, this is the notation used in the table in Figure 2.
 }
@@ -209,15 +235,31 @@ Thank you for this suggestion, we have made this change.
   Line 198: Reference for where value of $v_{rate}$ comes from.
 }
 
+This parameter comes from Lee et al.~\cite{lee20}, and the only details that they provide is a subscript comment in one of their tables (S13) in their supplement: ``$v_{rate}$ was chosen to mimic the distribution of infections in Haiti". 
+They do not, however, list it as a parameter that was ``fit" in the same table, making it unclear where the value comes from. 
+Presumably, it was chosen somewhat subjectively based on their understanding of cholera dynamics in Haiti, because in order to obtain a fit for their model they had to have fixed the value at something without actually estimating it, and perhaps only considered a very small set of possible values. Notably, this parameter can mathematically be estimated like all other parameters in the model, but their specific implementation of Model~2 does not permit its estimation. 
+Parameters that are partially estimated via subjective measures is outside the scope of our article, so to avoid this the revised manuscript simply reads: 
+
+\article{$v_{\mathrm{rate}}= 10^{-12} \,\mbox{km$^2$yr$^{-1}$}$ was fixed at the value used by \cite{lee20}.}
+
 \report{7.
   Usually, vaccine efficacy = 1 implies the vaccine completely blocks transmission and 0 implies no effect. In model 2 the definition of vaccine efficacy (lines 200-205 and Eq 14) implies the opposite. I suggest re-parameterising the model, or renaming the variable. For what its worth, models 1 and 3 seem to follow the usual convention.
 }
+
+This change has been made. 
 
 \report{8.
   I found the commentary on comparing fitted mechanistic models to a (statistical) benchmark model to be informative and helpful. I was wondering if the authors had any comments on whether (or not) to directly compare the AIC values of the different fitted models directly. Am I right in thinking this should be possible for models 2 and 3 given (I think) they are fitted to the same data? Model 1 is fitted to a different data set, which I understand makes such a comparison impossible.
 }
 
-\TODO{This is right, as long as there are not any initialization issues...}
+It is correct that models fit to the same datasets can be directly compared using the AIC values. Models~2 and 3 are not fit to the same datasets, however, due to the way Model~3 is initialized. To initialize the latent states of Model~3, Lee et al~\cite{lee20} used approximately $60\%$ of the available data as ``burn-in" observations to initialize latent states. According to their supplement, this was done primarily because they believed the dynamics from the start of the outbreak were significantly different enough from the dynamics at the end of the outbreak to suggest that two seperate models would be needed to appropriately describe the data. 
+We feel that a properly designed and calibrated model should be able to explain the entire dynamics of the outbreak, including the change from what Lee et al~\cite{lee20} referred to as the ``epidemic" and ``endemic" periods of the outbreak. 
+
+One possible approach to re-analyzing their model would then be to fit all available observations; this would make Models~2 and 3 directly comparable, but would require a significant change to Model~3 itself, as the initialization model used by Lee et al~\cite{lee20} requires a ``burn-in" period. One of our goals, however, was to demonstrate that the models provided by Lee et al.~\cite{lee20} were not the issue, and a complete refactorization of the initialization could potentially contradict this objective. Therefore instead we decided to substantially shrink the ``burn-in" period to only the first three available observations, which corresponds to a natural change in the observations themselves \cite{barzilay13}. These details are available in the Initial Values section in the supplement material.
+
+In short, though models that are fit to the same dataset are directly comparable using AIC, this is not the case for Models~2 and 3, as the first few observations in the dataset were not considered likelihood evalution of Model~3. This also explains the slight discrepency in AIC for the benchmark models of these two models (Table 2). Without going into too much detail in the main article, we added the following sentence to clarify this point: 
+
+\article{Models that are fit to the same datasets can be directly compared using AIC values, making it a useful tool to compare to benchmark models. Though Models~2 and 3 are both fit to department level incidence reports, their AIC values are not directly comparable due to the way Model~3 initializes latent states, which is described in detail in Sec. S5 of the supplement.}
 
 \report{9.
   Lines 308-309: Isn't this a log-linear trend in the transmission rate?
@@ -236,7 +278,17 @@ For reference, the maxmum likelihood estimate of the parameter corresponds with 
   I might have misunderstood it slightly, but I don't entirely follow the reasoning of lines 340-346. It seems that two different claims are being made: A) the model can’t identify which mechanism underlies a trend in $\beta(t)$ and B) the model can't definitively state there is a trend in $\beta(t)$ compared with some other time-varying parameter (e.g. reporting probability). For model 1, I agree with the authors that claims A and B are valid. What I take issue with is the final statement, which seems to be stronger and apply to both claims and mechanistic models more generally: ``we argue that a decreasing transmission rate is a plausible way to explain this, but the incidence data themselves do not provide enough information to pin down the mechanism." I agree that the ``incidence data themselves" (which I take to imply ``without additional covariates data") make claim A valid regardless of the model. However, I don’t think claim B holds regardless of the model. By changing model 1 to include time variation in the reporting rate I don't see \emph{a priori} why the ``the incidence data themselves" might not provide enough information to distinguish between time variation in transmission compared with time variation in reporting without the need for additional data. The deficiency is in model 1 rather than the information content of the data. I suggest the authors rework the paragraph to make the reasoning clearer.
 }
 
-Our views align with the referee's comments, and we have rewritten the article to make this clearer.
+Our views align with the referee's comments, and we have rewritten the article to make this clearer. The revised paragraph is now: 
+
+\article{If a mechanistic model including a feature (such as a representation of a mechanism, or the inclusion of a covariate) fits better than mechanistic models without that feature, and also has competitive fit compared to associative benchmarks, this may be taken as evidence supporting the scientific relevance of the feature.
+As for any analysis of observational data, we must be alert to the possibility of confounding.
+For a covariate, this shows up in a similar way to regression analysis: the covariate under investigation could be a proxy for some other unmodeled or unmeasured covariate.
+For a mechanism, the model feature could in principle explain the data by helping to account for some different unmodeled phenomenon.} 
+
+\article{The statistical evidence of a trend in transmission rate in this model could be explained by any trending variable (such as hygiene improvements, or changes in population behavior), resulting in confounding from collinear covariates.
+Because we only have access to incidence data, the decrease in observed cases over the course of the outbreak may alternatively be attributed to a trend in other model parameters, such as a decrease in the reporting rate over time.
+This results in confounded mechanisms, as likelihood-based comparisons of a model that permits a change in reporting rate against a model that permits a change in transmission rate may not yield definitive results. In such a case, the robust statistical conclusion is that a model which allows for change fits better than one which does not, but the incidence data themselves may not provide enough information to pin down the mechanism.
+In this case study, we did not explicitly test if the incidence data favor a trend in transmission over a trend in reporting rate. We argue that a decreasing transmission rate is a plausible way to explain the decrease in cases over time, as there is alternative evidence that supports this model \cite{rebaudet19CATI,rebaudet21,michel19}. Additionally there is little scientific evidence to support a decrease in reporting rate (for example, see Figure~1 of \cite{rebaudet21}).}
 
 \report{12.  [I THINK THIS MEANS LINES 553-556, ASSUMING THE NUMBERING MATCHES]
   Lines 53-56: I push back against this point. The models assume an exponential distribution for vaccine-derived immunity. Assuming a mean duration of 10 years, the proportion of individuals who remain immune 9 years after vaccination is . Even for much larger durations of immunity a non-negligible fraction of the population will lose immunity after 9 years, e.g. $e^{-9/10}\approx 0.41$. I therefore don't expect values for the duration of immunity around 10 years to ``effectively result in the same model dynamics".
@@ -251,6 +303,8 @@ The qualitative comparison we had in mind was the regime with short immunity whe
 
 13. In contrast with the introduction, which almost exclusively focuses on cholera in Haiti, the discussion only mentions it once, briefly: ``We used the same data and models, and even much of the same code, as Lee et al. [1], and yet ended up with drastically different conclusions." It would help the reader to have those discrepancies summarised. It would be helpful to summarise the recommendations the authors make attempting to fit mechanistic models to time series data (even as a list). Along similar lines, it would be helpful to present a more concise summary of what the ``more accurate policy evaluations" found by using the approaches outlined in this study.
 }
+
+The revised version of the paper contains significant edits to the introduction and discussion sections that we feel address this concern. 
 
 \report{
   \textbf{underline{Typos}}
@@ -294,9 +348,10 @@ While the arguments provided throughout the article are well-articulated, there 
 
 The referee's suggestions have led to the addition of various references in the revision.
 For the particular issue of black box versus white box models, we have included the following paragraph
-\TODO{where?} \jwc{How does the Materials and Methods: Mechanistic models for disease modeling sub-section sound?}
 
 \article{\editMechModels}
+
+This addition is intended to compliment the discussion about mechanistic (white-box) vs associative (black-box) models that was provided at the start of the ``Materials and methods" section. 
 
 \report{
 \textbf{\underline{2. Limitations}}
@@ -309,6 +364,7 @@ The referee raises several points in this paragraph, and we consider them one at
 We agree that adding to model complexity has costs, including loss of identifability.
 AIC and other formal statistical methods can assess whether the additional complexity is justified by a sufficiently large improvement of statistical fit. Identifiability and model simplicity have practical scientific value which goes beyond their statistical role in reducing generalization error and hence improving out-of-fit predictions. This is a variation on the issue of ``statistical significance versus practical significance" familiar from introductory statistics textbooks.
 \eic{HOW DOES THIS PLAY OUT IN THE MS? HOW DO WE CLARIFY IT?}
+\jwc{It doesn't immediately come into play in our analysis a lot, so it might be good to point to a reference suce as saltelli19, who has a sketch of what they believe on dynamic modeling: adding model complexity is good because it becomes more realistic, but too much complexity results in more ``propogation error"}
 
 Moving from an ODE model to a stochastic model may not involve any additional parameters, if only demographic stochasticity is included.
 Generally, it is advisable to consider the possibility of over-dispersed variation on the transmission rate \cite{breto09,he10} leading to one extra parameter compared to a deterministic model.

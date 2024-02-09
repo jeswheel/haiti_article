@@ -548,7 +548,7 @@ We assess previous methods used for fitting and evaluating these models, and we 
 We consider three dynamic models developed by expert teams to advise on vaccination policies.
 We evaluate previous methods used for fitting these models, and we demonstrate modified data analysis strategies leading to improved statistical fit.}
 Specifically, we present approaches of diagnosing model misspecification \old{, development of alternative models, and computational improvements in optimization, in the context of likelihood-based inference on nonlinear dynamic systems.} \new{and the consequent development of improved models.
-We further demonstrate the utility of recent advances in likelihood maximization for high-dimensional nonlinear dynamic models, enabling likelihood-based inference for high-dimensional models of spatiotemporal incidence data.}
+We further demonstrate the utility of recent advances in likelihood maximization for high-dimensional nonlinear dynamic models, enabling likelihood-based inference for high-dimensional models for spatiotemporal incidence data.}
 Our workflow is reproducible and extendable, facilitating future investigations of this disease system.
 
 \section*{Author summary}
@@ -1359,7 +1359,7 @@ For this reason, we provide flow chart diagrams for Models~1--3 in supplement fi
 \subsubsection*{Model~1}
 \label{sec:model1}
 The latent state vector $\bm{X}(t) = \big(S_{\vaccCounter}(t),  E_{\vaccCounter}(t), I_{\vaccCounter}(t), A_{\vaccCounter}(t), R_{\vaccCounter}(t), \vaccCounter \in 0:\vaccClass\big)$ describes susceptible, latent (exposed), infected (and symptomatic), asymptomatic, and recovered individuals in vaccine cohort $\vaccCounter$ at time $t$.
-Here, $\vaccCounter=0$ corresponds to unvaccinated individuals, and $\vaccCounter \in \seq{1}{\vaccClass}$ describes hypothetical vaccination programs.
+Here, $\vaccCounter=0$ corresponds to unvaccinated individuals, and $\vaccCounter \in \seq{1}{\vaccClass}$ describes hypothetical vaccination programs\new{, where each program $\vaccCounter$ indexes differences in both the number of doses administered (one versus two doses per individual) and the round of vaccine administration.}
 The force of infection is
 \begin{equation}
 \label{model1:lambda}
@@ -1445,7 +1445,7 @@ Individuals move from department $u$ to $v$ at rate $T_{uv}$, and aquatic choler
 The nonzero transition rates are
 \begin{eqnarray}
 \label{model2:mu_SE}
-\mu_{S_{u\vaccCounter}E_{u\vaccCounter}} &=& \vaccineEfficacy_\vaccCounter \, \lambda,
+\mu_{S_{u\vaccCounter}E_{u\vaccCounter}} &=& \new{(1 - \vaccineEfficacy_\vaccCounter) \, \lambda_u(t)},
 \\
 \label{model2:mu_EI}
 \mu_{E_{u\vaccCounter}I_{u\vaccCounter}} &=& \symptomFrac\muEI, \quad \mu_{E_{u\vaccCounter}A_{u\vaccCounter}} = (1-\symptomFrac)\muEI,
@@ -1480,10 +1480,10 @@ In Eq.~\myeqref{model2:transport} the spatial coupling is specified by a gravity
 T_{u\varv} = v_{\mathrm{rate}} \times \frac{\mathrm{Pop}_u \mathrm{Pop}_{\varv}}{D_{u\varv}^2},
 \end{equation}
 where $\mathrm{Pop}_u$ is the mean population for department $u$,
-$D_{u\varv}$ is a distance measure estimating average road distance between randomly chosen members of each population, and $v_{\mathrm{rate}}= 10^{-12} \,\mbox{km$^2$yr$^{-1}$}$  was treated as a fixed constant.
+$D_{u\varv}$ is a distance measure estimating average road distance between randomly chosen members of each population, and $v_{\mathrm{rate}}= 10^{-12} \,\mbox{km$^2$yr$^{-1}$}$ \old{was treated as a fixed constant.}\new{was fixed at the value used by \cite{lee20}.}
 In Eq.~\myeqref{model2:water_transport}, $T^W_{u\varv}$ is a measure of river flow between departments.
 The unit of $W_u(t)$ is cells per ml, with dose response modeled via a saturation constant of $\Wsat$ in Eq.~\myeqref{model2:lambda}.
-In Eq.~\myeqref{model2:mu_SE}, $\vaccineEfficacy_\vaccCounter$ denotes the vaccine efficacy for each vaccination campaign $\vaccCounter \in \vaccClass$, with $\vaccineEfficacy_0 = 1$, $\vaccineEfficacy_1 = 1 - 0.429 \childReduce$, $\vaccineEfficacy_2 = 1 - 0.519 \childReduce$, $\vaccineEfficacy_3 = 1 - 0.429$, and $\vaccineEfficacy_4 = 1 - 0.519$
+In Eq.~\myeqref{model2:mu_SE}, $\vaccineEfficacy_\vaccCounter$ denotes the vaccine efficacy for each vaccination campaign $\vaccCounter \in \vaccClass$, with \old{$\vaccineEfficacy_0 = 1$, $\vaccineEfficacy_1 = 1 - 0.429 \childReduce$, $\vaccineEfficacy_2 = 1 - 0.519 \childReduce$, $\vaccineEfficacy_3 = 1 - 0.429$, and $\vaccineEfficacy_4 = 1 - 0.519$} \new{$\vaccineEfficacy_0 = 0$, $\vaccineEfficacy_1 = 0.429 \childReduce$, $\vaccineEfficacy_2 = 0.519 \childReduce$, $\vaccineEfficacy_3 = 0.429$, and $\vaccineEfficacy_4 = 0.519$}
 Here, $\childReduce = 0.4688$ represents the reduced efficacy of the vaccination for children under the age of five years, and the values $0.429$ and $0.519$ are the median effectiveness of one and two doses over their effective period respectively, according to Table S4 in the supplement material of Lee et al.~\cite{lee20}.
 Because vaccine efficacy remains constant, individuals in this model transition from a vaccinated compartment to the susceptible compartment at the end of the vaccine coverage period.
 
@@ -1546,7 +1546,7 @@ Specifically, we set $I_{u0}(0) = \frac{y^*_{1u}}{\reportRate(\muDeath + \choler
 all other compartments that represent population counts are set to zero at time $t_0$.
 For each unit $u$ with zero case counts at time $t_1$, this initialization scheme results in having zero individuals in the Infected and Asymptomatic compartments, as well as having no bacteria in the aquatic reservoir.
 In reality, it is plausible that some bacteria or infected individuals were present in unit $u$ but went unreported.
-Therefore, for departments with zero case counts in week 1, we consider estimating the number of infected individuals rather then treating this value as a constant (see supplement Sec.~S5 for more details).
+Therefore, for departments with zero case counts in week 1, we \old{consider estimating}\new{estimate} the number of infected individuals rather then treating this value as a constant (see supplement Sec.~S5 for more details).
 Finally, reported cholera cases are modeled using a negative binomial measurement model with mean equal to a fraction ($\reportRate$) of individuals in each unit who develop symptoms and seek healthcare
 (see Sec.~S3.3 of the supplement).
 
@@ -1563,7 +1563,6 @@ As such, it is desirable to obtain the best possible fit of the proposed mechani
 In this article we \old{calibrate} \new{follow \cite{lee20} by calibrating} the parameters of each of our models \old{by maximizing the likelihood} \new{using maximum likelihood}, as described in Eq.~\myeqref{eq:likedef}.
 The likelihood for each of the fitted models---and the corresponding AIC values for model comparisons that include an adjustment for the number of calibrated parameters---is provided in Table~\ref{tab:likes}.
 In the following subsections we describe in detail our approach to calibrating the three proposed mechanistic models to observed cholera incidence data.
-\eic{I'VE STARTED TO PUT IN SOME DISCUSSION OF BAYESIAN METHODS HERE, THOUGH IT COULD ALSO GO IN THE DISCUSSION}
 \new{The main alternative to maximum likelihood estimation is Bayesian inference via Markov chain Monte Carlo, used to analyze the Haiti cholera epidemic by \cite{andrews11,pasetto18,rinaldo12,lewnard16,trevisin22,sallah17,azman12,kuhn14,mari15,gatto12}.}
 
 \begin{table}[!h]
@@ -1667,10 +1666,7 @@ The resulting 95\% confidence interval for $\transmissionTrend$ is $(\Sexpr{myro
 These results are suggestive that the inclusion of a trend in the transmission rate improves the quantitative ability of Model~1 to describe the observed data.
 \new{The maximum likelihood estimate for $\transmissionTrend$ corresponds with a \Sexpr{paste0(myround(100 - 100*exp(beta_t_mcap_results$mle * 430/215), 1), '\\%')} reduction to the transmission rate over the course of the outbreak, with a $95\%$ confidence interval of (\Sexpr{paste0(rev(myround(100 - 100*exp(beta_t_mcap_results$ci * 430/215), 1)), collapse = ', ', sep = '\\%')}) for the overall reduction in transmission.}
 The reported results for Model~1 in the remainder of this article were obtained with the inclusion of the parameter $\transmissionTrend$.
-
-\new{This example demonstrates the type of model variation that should be considered in the course of a data analysis: the model variation---the addition of a trend in transmission rate---has a plausible scientific justification, and is easily testable using likelihood based inference methods and observed data.
-This class of model variations are commonly considered in epidemiological modeling \cite{lemaitre19,fitzgibbon20,eisenberg13,rinaldo12,kunkel17}} , \new{but their adaptation are sometimes based on subjective assessments \cite{fitzgibbon20,eisenberg13,kunkel17}} \TODO{get citations}.
-\jwc{Alternatively, we could emphasize the importance of considering model variations, and cite studies from the literature review that only considered a single model, or only reported their final chosen model. Although models that were not ultimately selected are not as important, a discussion of which models you tried and why you didn't use them can be beneficial to future researchers who may want to consider similar variations in the future. I got to article 35 checking for those with multiple models considered.}
+\new{This example demonstrates the type of model variation that should be considered in the course of a data analysis: the model variation---the addition of a trend in transmission rate---has a plausible scientific justification, and is easily testable using likelihood based inference methods and observed data.}
 
 \begin{figure}[!h]
 \centering
@@ -1705,13 +1701,13 @@ If a mechanistic model including a feature (such as a representation of a mechan
 As for any analysis of observational data, we must be alert to the possibility of confounding.
 For a covariate, this shows up in a similar way to regression analysis: the covariate under investigation could be a proxy for some other unmodeled or unmeasured covariate.
 For a mechanism, the model feature could in principle explain the data by helping to account for some different unmodeled phenomenon.
+
+
 The statistical evidence of a trend in transmission rate in this model could be explained by any trending variable (such as hygiene improvements, or changes in population behavior), resulting in confounding from collinear covariates.
-\jwc{HERE'S SOME INITIAL THOUGHTS ON HOW TO CLARIFY THIS FOR THE REVIEWER}.
 \old{Alternatively, the trend could be attributed to a decreasing reporting rate rather than decreasing transmission rate, resulting in confounded mechanisms.}
 \new{Because we only have access to incidence data, the decrease in observed cases over the course of the outbreak may alternatively be attributed to a trend in other model parameters, such as a decrease in the reporting rate over time.
-This results in confounded mechanisms, as likelihood-based comparisons of a model that permits a change in reporting rate against a model that permits a change in transmission rate may not yield definitive results.}
-The robust statistical conclusion is that a model which allows for change fits better than one which does not\old{---we argue that a decreasing transmission rate is a plausible way to explain this}, but the incidence data themselves \old{do} \new{may} not provide enough information to pin down the mechanism.
-\new{In this case study, we argue that a decreasing transmission rate is a plausible way to explain the decrease in cases over time \cite{rebaudet19CATI,rebaudet21,michel19}; there is little scientific evidence to support a decrease in reporting rate, as the rate of testing increased throughout this time period.} \TODO{cite: Wasn't there a study we thought demonstrated the testing effort increased}?
+This results in confounded mechanisms, as likelihood-based comparisons of a model that permits a change in reporting rate against a model that permits a change in transmission rate may not yield definitive results. In such a case, t}\old{T}he robust statistical conclusion is that a model which allows for change fits better than one which does not\old{---we argue that a decreasing transmission rate is a plausible way to explain this}, but the incidence data themselves \old{do} \new{may} not provide enough information to pin down the mechanism.
+\new{In this case study, we did not explicitly test if the incidence data favor a trend in transmission over a trend in reporting rate. We argue that a decreasing transmission rate is a plausible way to explain the decrease in cases over time, as there is alternative evidence that supports this model \cite{rebaudet19CATI,rebaudet21,michel19}. Additionally there is little scientific evidence to support a decrease in reporting rate (for example, see Figure~1 of \cite{rebaudet21}).}
 
 We implemented Model~1 using the \code{pomp} package \cite{king16}, relying heavily on the \code{pomp} source code provided by Lee et al.~\cite{lee20}.
 Both analyses used the \code{mif2} implementation of the IF2 algorithm to estimate $\paramVec$ by maximum likelihood.
@@ -2025,7 +2021,9 @@ where $\mathrm{E}\big(Y_n|Y_{n - 1}\big) = \NBintercept + \NBar Y_{n-1}$, and $\
 In the case where the case counts are large, an alternative benchmark recommended by He et al.~\cite{he10} is a log-linear Gaussian ARMA model;
 the theory and practice of ARMA models is well developed, and these linear models are appropriate on a log scale due to the exponential growth and decay characteristic of biological dynamics.
 We chose to use the auto regressive negative binomial model, however, because the large number of weeks with zero recorded cholera cases in department level data makes a benchmark based on a continuous distribution problematic.
-Likelihoods of Models~1--3 and their respective \old{ARMA} benchmark models are provided in Table~\ref{tab:likes}.
+Log-likelihoods and AIC values of Models~1--3 and of their respective \old{ARMA} benchmark models are provided in Table~\ref{tab:likes}.
+\new{Models that are fit to the same datasets can be directly compared using AIC values, making it a useful tool to compare to benchmark models. Though Models~2 and 3 are both fit to department level incidence reports, their AIC values are not directly comparable due to the way Model~3 initializes latent states, which is described in detail in Sec. S5 of the supplement.}
+
 
 It should be universal practice to present measures of goodness of fit for published models, and mechanistic models should be compared against benchmarks.
 In our literature review of the Haiti cholera epidemic, no non-mechanistic benchmark models were considered in any of the 32 papers that used dynamic models to describe cholera in order to obtain scientific conclusions.
@@ -2132,7 +2130,7 @@ For any model-based inference, it is important to recognize and assess the model
 In epidemiological studies, for example, quantitative understanding of individual-level processes may not perfectly match model parameters that were fit to population-level case counts, even when the model provides a strong statistical fit \cite{he10}.
 This makes direct interpretation of estimated parameters delicate.
 
-\TODO{Rethink this paragraph.}
+\TODO{The profile confidence interval for the parameter suggests that the true estimate should be zero, but it was unable to get this value due to the parameter transformation. Should we manually set the value to zero? This result will also affect this paragraph, but only in ways that we already anticipated with the estimate close to zero.}
 Our case study provides an example of this in the parameter estimate for the duration of natural immunity due to cholera infection, $\muRS^{-1}$.
 Under the framework of Model~2, the best estimate for this parameter is $\Sexpr{signif(1/h2_fit$h2_params["sigma"],3)} \, \mathrm{yr}$, suggesting that individuals have effectively permanent immunity to cholera once infected.
 To interpret this result, we bear in mind that the data ranged from 2010-2019, and therefore estimates of immunity longer than $10\, \mathrm{yr}$---the upper end of previous estimates of natural immunity \cite{king08}---effectively result in the same model dynamics.
