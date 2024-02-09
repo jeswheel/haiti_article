@@ -9,6 +9,7 @@
 \newcommand\vsp{\vspace{2mm}}
 
 \usepackage{fullpage}
+\usepackage{bm}
 
 \usepackage{amsmath,amsthm}
 
@@ -32,6 +33,7 @@
 \usepackage{color}
 
 \newcommand\code[1]{\texttt{#1}}
+\newcommand\paramVec{\theta}
 \input{../edits.tex}
 %\usepackage[sectionbib]{natbib}
 
@@ -492,9 +494,20 @@ A hyphen has been added for all instances of the phrase: ``model-based".
   18. Lines 599-601. ``The decision not to do this partially explains the unsuccessful forecasts of Lee et al. [1]: their Table S7 shows that the subset of their simulations which were consistent with observing zero cases in 2019 also accurately predicted the prolonged absence of detected cholera". The fragment before the colon says that Lee was unsuccessful. However, the fragment after the colon says that was in part successful. Please clarify.
 }
 
+In their article, Lee et al.~\cite{lee20} only presented forecasts that were based on simulations from initial conditions. These forecasts were generally inconsistent with the absence of cholera cases from 2019-2022, and do not account for recent evidence of cholera dynamics. In their supplement material, however, they provide a table (S7) in which they show that if they condition the simulations on most recent data (0 cases from 2019-2020), their forecasts predict cholera elimination. This second effort that was only presented in the supplement material is more consistent with what we suggest is correct practice: forecasts of a system should start using latent states that are consistent with available data. We have expanded this argument in order to clarify this point: 
+
+\article{\editForecastOne}
+
+\article{\editForecastTwo}
+
 \report{
   19. Line 631. Since Model 1 accounts for infections at the national level, how are scenarios V1 and V2 handled?
 }
+
+We followed the same approach as Lee et al.~\cite{lee20}, which was requiring that the same number of vaccinations are administered at the national level as they would have been in the spatially-explicit vaccination campaigns. 
+The following sentence has been added to clarify this: 
+
+\article{\editModVacc}
 
 \bibliography{../bib-haiti.bib,../bib-lit.bib}
 

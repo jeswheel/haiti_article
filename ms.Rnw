@@ -2158,13 +2158,11 @@ Forecasts are an attempt to provide an accurate estimate of the future state of 
 Forecasts from mechanistic models that are compatible with current scientific understanding may also provide estimates of the future effects of potential interventions.
 Further, they may enable real-time testing of new scientific hypotheses \cite{lewis22}.
 
-\TODO{Re-phrase this paragraph, as suggested by one of the reviewers.}
-Recent information about a dynamic system should be more relevant for a forecast than older information.
-This assertion may seem self-evident, but it is not the case for deterministic models, for which the initial conditions together with the parameters are sufficient for forecasting, and so recent data do not have special importance.
-Epidemiological forecasts based on deterministic models are not uncommon in practice, despite their limitations \cite{king15}.
-That may explain why Lee et al.~\cite{lee20} chose to obtain forecasts by simulating the calibrated models forward from initial conditions.
-\new{For Models~1 and 3---which are non-deterministic---}we obtain forecasts by simulating future values using latent states that are consistent with the most recent observations; this is done by drawing latent states at the last observation time ($t_N$) from the filtering distribution $f_{\bm{X}_N|\bm{Y}_{1:N}}(\bm{x}_{N} | \bm{y}^*_{1:N} ; \hat\paramVec)$.
-The decision not to do this partially explains the unsuccessful forecasts of Lee et al.~\cite{lee20}: their Table~S7 shows that the subset of their simulations which were consistent with observing zero cases in 2019 also accurately predicted the prolonged absence of detected cholera.
+\old{Recent information about a dynamic system should be more relevant for a forecast than older information. This assertion may seem self-evident, but it is not the case for deterministic models, for which the initial conditions together with the parameters are sufficient for forecasting, and so recent data do not have special importance. Epidemiological forecasts based on deterministic models are not uncommon in practice, despite their limitations [34]. That may explain why Lee et al.~[1] chose to obtain forecasts by simulating the calibrated models forward from initial conditions. We obtain forecasts by simulating future values using latent states that are consistent with the most recent observations; this is done by drawing latent states at the last observation time ($t_N$) from the filtering distribution $f_{\bm{X}_N|\bm{Y}_{1:N}}(\bm{x}_{N} | \bm{y}^*_{1:N} ; \hat\paramVec)$. The decision not to do this partially explains the unsuccessful forecasts of Lee et al.~[1]: their Table~S7 shows that the subset of their simulations which were consistent with observing zero cases in 2019 also accurately predicted the prolonged absence of detected cholera.}
+
+\new{\editForecastOne}
+
+\new{\editForecastTwo}
 
 Uncertainty in just a single parameter can lead to drastically different forecasts \cite{saltelli20}.
 Therefore, parameter uncertainty should also be considered when obtaining model forecasts to influence policy.
@@ -2546,7 +2544,8 @@ mod3_V4_res <- bake(
 @
 
 Simulations from probabilistic models (Models~1 and~3) represent possible trajectories of the dynamic system under the scientific assumptions of the models.
-Estimates of the probability of cholera elimination can therefore be obtained as the proportion of simulations from these models that result in cholera elimination.
+\new{\editModVacc}
+Estimates of the probability of cholera elimination can therefore be obtained as the proportion of simulations from these models that result in cholera elimination. 
 The results of these projections are summarized in Figs. \ref{fig:elimProbs}.
 
 <<Compute Elimination Probs, echo=FALSE>>=
@@ -2619,39 +2618,15 @@ We suggest devoting more effort to assess dynamic models intended for system inf
 Explicitly, we urge researchers to search for indications in available data that quantify the reliability of model-based inferences.
 We illustrate that this can be achieved by comparing fitted models to a suitable statistical benchmark and verifying that model outcomes---including estimated parameters, latent states, and seasonal trends---are justified in the system context.}
 
-\new{In our cholera case study, we highlight the importance of model diagnostics; they are instrumental in enhancing model fits, thus leading to more trustworthy conclusions.
-We compared the Models 1--3 of \cite{lee20} to simple statistical benchmarks, enabling us to identify deficiencies in the models that could be improved.
-In the case of Model~3, comparing a fitted model to a benchmark and then following up by questioning why the model did not describe the data as efficiently as its benchmark helped us discern that the model fell short in explaining the surge in cholera transmission following Hurricane Matthew.
-This led us to suggest a model modification.
-Because Model~1 outperformed its benchmark model, we were able to confidently scrutinize the implications of the fitted model.
-We found that the seasonality term of Model~1 closely mirrors the seasonal rainfall patterns in Haiti, reaffirming alternative evidence of the importance of rainfall as a driver of cholera infection and bolstering our confidence in Model~1's ability to capture the critical dynamics of the cholera outbreak. }
+\new{\editDiscussionOne}
 
-% \new{In any study involving dynamic models, it is important to consider, test, and present more than one model framework or variant.
-% \eic{I'M NOT SURE THIS IS A CONCLUSION. LEE ET AL STUDIED MULTIPLE MODELS BECAUSE THAT WAS THE GOAL OF THAT PAPER. MOST OTHER PAPERS STUDY ONE MODEL. WE WOULD LIKE RESULTS FROM DIFFERENT PAPERS TO HAVE OBJECTIVE MEASURES OF FIT THAT CAN BE COMPARED BETWEEN PAPERS, BUT I DON'T THINK WE WANT TO SAY THAT ALL PAPERS HAVE TO ANALYZE MANY MODELS.}
-% In our review of the literature featuring cholera modeling in Haiti, we found that only a handful of papers that utilized mechanistic models reported more than a single model variation. (TODO: Cite).
-% We acknowledged the possibility that a study reporting merely a single model may have explored others and only reported the one used in the final analysis.
-% However, divulging details about the models that were considered, but not used, may greatly benefit the broader scientific community.
-% These details may guide future researchers to avoid model variations that have previously demonstrated to perform poorly on incidence data.
-% Furthermore, it can enhance confidence in the reported model's ability to describe the system under investigation.
-% This confidence stems from the demonstrated evidence that the chosen model offers a better description of the observed data compared to other reasonable model alternatives.}
+\new{\editDiscussionTwo}
 
-\new{Likelihood based inference enables researchers to choose between any model that is evaluated on the same dataset using a metric like AIC.
-Nested model variations are particularly useful as they enable formal statistical testing of the nested features.
-The cholera case study demonstrated the advantage of such a model variation in all three models.
-For instance, we tested the inclusion of a trend in transmission rate over time in Model~1; in Model~2, we considered adding an additional phase parameter, which enables a shift in the seasonal peaks of cholera infections; in Model~3, we included additional parameters such as those associated with Hurricane Matthew.
-In all these cases, we found strong statistical evidence in favor of these model variations over their simpler counterparts.}
+\new{\editDiscussionThree}
 
-\new{Another important consideration when fitting a mechanistic model to a dynamic system is the complexity of the model.
-Mathematical models necessarily simplify complex dynamical systems in order to make inference possible.
-Decision-making about which features of a system need to be incorporated in a model and which should be excluded can significantly influence the model-based conclusions.
-However, these decisions can be tested using a likelihood-based framework.
-Standard model decisions cover deterministic versus stochastic modeling and the decision to include or exclude a meta-population structure.
-Model benchmarks can assist in determining the level of complexity to be used in the model, enabling researchers to gauge a model's relative performance against a better-understood statistical model.}
+\new{\editDiscussionFour}
 
-\new{The three models in this case study offer a unique combination of decisions of model complexity.
-Model~3 provides an interesting example in that it is both stochastic and has a meta-population structure, making it challenging to draw likelihood-based inferences.
-In this paper, we demonstrated how this model class could be calibrated to incidence data using the innovative IBPF algorithm.
-One of only a few examples of fitting a model with this level of complexity, this case study exemplifies the algorithm's potential benefits and provides an example for future researchers on a possible approach to fitting a high-dimensional non-linear model.}
+\new{\editDiscussionFive}
 
 In our case study, we found that additional attention to statistical details could have resulted in \old{improved} \new{an enhanced} statistical fit to the observed incidence data\old{, leading to improvements in the accuracy of the resulting policy guidance.} \new{This would have improved the accuracy of the policy guidance resulting from the study.}
 \old{We used the same data and models, and even much of the same code, as Lee et al.~[29], and yet ended up with drastically different conclusions.}
