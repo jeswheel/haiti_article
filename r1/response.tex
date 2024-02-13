@@ -38,6 +38,7 @@
 \newcommand\seq[2]{{#1}\!:\!{#2}}
 \newcommand\vaccClass{Z}
 \newcommand\vaccCounter{z}
+\newcommand\muRS{\mu_{RS}}
 \input{../edits.tex}
 %\usepackage[sectionbib]{natbib}
 
@@ -285,17 +286,25 @@ As for any analysis of observational data, we must be alert to the possibility o
 For a covariate, this shows up in a similar way to regression analysis: the covariate under investigation could be a proxy for some other unmodeled or unmeasured covariate.
 For a mechanism, the model feature could in principle explain the data by helping to account for some different unmodeled phenomenon.} 
 
-\article{The statistical evidence of a trend in transmission rate in this model could be explained by any trending variable (such as hygiene improvements, or changes in population behavior), resulting in confounding from collinear covariates.
-Because we only have access to incidence data, the decrease in observed cases over the course of the outbreak may alternatively be attributed to a trend in other model parameters, such as a decrease in the reporting rate over time.
-This results in confounded mechanisms, as likelihood-based comparisons of a model that permits a change in reporting rate against a model that permits a change in transmission rate may not yield definitive results. In such a case, the robust statistical conclusion is that a model which allows for change fits better than one which does not, but the incidence data themselves may not provide enough information to pin down the mechanism.
-In this case study, we did not explicitly test if the incidence data favor a trend in transmission over a trend in reporting rate. We argue that a decreasing transmission rate is a plausible way to explain the decrease in cases over time, as there is alternative evidence that supports this model \cite{rebaudet19CATI,rebaudet21,michel19}. Additionally there is little scientific evidence to support a decrease in reporting rate (for example, see Figure~1 of \cite{rebaudet21}).}
+\article{The statistical evidence of a trend in transmission rate in this model could be explained by any trending variable (such as hygiene improvements, or changes in population behavior), resulting in confounding from collinear covariates. Because we only have access to incidence data, the decrease in observed cases over the course of the outbreak may alternatively be attributed to a trend in other model parameters, such as a decrease in the reporting rate over time.
+This results in confounded mechanisms, as one may not formally test all possible ways to include a trending parameter. In such a case, the robust statistical conclusion is that a model which allows for change fits better than one which does not. Because the incidence data themselves may not provide enough information to pin down the mechanism, a strongly supported conclusion should avoid ruling out untested hypotheses. In this case study, we did not explicitly test if the incidence data favor a trend in transmission over a trend in reporting rate. We argue that a decreasing transmission rate is a plausible way to explain the decrease in cases over time, as there is alternative evidence that supports this model \cite{rebaudet19CATI,rebaudet21,michel19}. Additionally, there is little scientific evidence to support a decrease in reporting rate (for example, see Figure~1 of \cite{rebaudet21}).}
 
-\report{12.  [I THINK THIS MEANS LINES 553-556, ASSUMING THE NUMBERING MATCHES]
-  Lines 53-56: I push back against this point. The models assume an exponential distribution for vaccine-derived immunity. Assuming a mean duration of 10 years, the proportion of individuals who remain immune 9 years after vaccination is . Even for much larger durations of immunity a non-negligible fraction of the population will lose immunity after 9 years, e.g. $e^{-9/10}\approx 0.41$. I therefore don't expect values for the duration of immunity around 10 years to ``effectively result in the same model dynamics".
+\report{12.
+  Lines 553-556: I push back against this point. The models assume an exponential distribution for vaccine-derived immunity. Assuming a mean duration of 10 years, the proportion of individuals who remain immune 9 years after vaccination is . Even for much larger durations of immunity a non-negligible fraction of the population will lose immunity after 9 years, e.g. $e^{-9/10}\approx 0.41$. I therefore don't expect values for the duration of immunity around 10 years to ``effectively result in the same model dynamics".
 }
 
 The qualitative comparison we had in mind was the regime with short immunity where many people become infected multiple times during the ten year epidemic, allowing multiple epidemic peaks due to susceptible replenishment.
-\TODO{We have reworded the sentence to avoid making too strong a claim about 10yr immunity being a precise point where the dynamics transition to a regime where reinfection events become negligible.}
+We have reworded the sentence to avoid making too strong a claim about 10yr immunity being a precise point where the dynamics transition to a regime where reinfection events become negligible. 
+The revised paragraph is provided below. 
+
+\article{Our case study provides an example of this in the parameter estimate for the duration of natural immunity due to cholera infection, $\muRS^{-1}$.
+Under the framework of Model~2, the best estimate for this parameter is $1.4 \times 10^{11} \, \mathrm{yr}$, suggesting that individuals have effectively permanent immunity to cholera once infected.
+Rather than interpreting this as scientific evidence that individuals have permanent immunity from cholera, this result suggests that Model~2 favors a regime where reinfection events are a negligble part of the dynamics.
+The depletion of susceptible individuals may be attributed to confounding mechanisms---such as localized vaccination programs and non-pharmaceutical interventions that reduce cholera transmission \cite{trevisin22, rebaudet21}---that were not accounted for in the model.
+Perhaps the best interpretation of the estimated parameter, then, is that under the modeling framework that was used, the model most adequately describes the observed data by having a steady decrease in the number of susceptible individuals.
+The weak statistical fit of Model~2 compared to a log-linear benchmark (see Table~2) cautions us against drawing quantitative conclusions from this model.
+A model that has a poor statistical fit may nevertheless provide a useful conceptual framework for thinking about the system under investigation.
+However, a claim that the model has been validated against data should be reserved for situations where the model provides a statistical fit that is competitive against alternative explanations.}
 
 
 \report{
@@ -307,7 +316,7 @@ The qualitative comparison we had in mind was the regime with short immunity whe
 The revised version of the paper contains significant edits to the introduction and discussion sections that we feel address this concern. 
 
 \report{
-  \textbf{underline{Typos}}
+  \textbf{\underline{Typos}}
 
   Eq. 1: Is there a missing star on $y_{1:N}$ on the right-hand-side?
 }
@@ -363,20 +372,23 @@ The referee raises several points in this paragraph, and we consider them one at
 
 We agree that adding to model complexity has costs, including loss of identifability.
 AIC and other formal statistical methods can assess whether the additional complexity is justified by a sufficiently large improvement of statistical fit. Identifiability and model simplicity have practical scientific value which goes beyond their statistical role in reducing generalization error and hence improving out-of-fit predictions. This is a variation on the issue of ``statistical significance versus practical significance" familiar from introductory statistics textbooks.
-\eic{HOW DOES THIS PLAY OUT IN THE MS? HOW DO WE CLARIFY IT?}
-\jwc{It doesn't immediately come into play in our analysis a lot, so it might be good to point to a reference suce as saltelli19, who has a sketch of what they believe on dynamic modeling: adding model complexity is good because it becomes more realistic, but too much complexity results in more ``propogation error"}
 
 Moving from an ODE model to a stochastic model may not involve any additional parameters, if only demographic stochasticity is included.
 Generally, it is advisable to consider the possibility of over-dispersed variation on the transmission rate \cite{breto09,he10} leading to one extra parameter compared to a deterministic model.
 In the context of cholera dynamics, \cite{lemaitre19} found a substantial improvement in model fit by including stochasticity, involving one over-dispersion parameter.
 \cite{stocks20} found similar results, favoring a stochastic dynamic model with over-dispersion, when investigating transmission dynamics of a different enteric pathogen, rotavirus.
 In other contexts, \cite{king15} noted various scientific advantages for including stochasticity in the model; it is undoubtedly part of the biological dynamics, and its omission can lead to over-confident predictions.
+
 In our study, we find that the deterministic model (model 2) has poor statistical fit.
 This can lead to a risk of identifying spurious scientific phenomena: additional deterministic complexity added to the model may help to describe unmodeled stochastic phenomena present in the data, and may therefore spuriously be assessed as a highly statistically significant model improvement.
+We see some evidence of this in our analysis.
+Aside from not being stochastic, the mechanistic structure of Model~2 is far more complex than the other two models considered in our study; we also see the most clear cases of spurious scientific findings, as some estimated parameters favor regions of the parameter space that we would not expect scientifically (see the added supplement material for confidence intervals of model parameters). 
+This may partially explain the choice of Lee et al~\cite{lee20} to consider a scientifically unjustifiable jump in latent state values from their epidemic to endemic periods: without this additional flexibility, Model~2 cannot adequately describe cholera dynamics in Haiti while keeping parameter values in scientifically plausible ranges. 
+From our experience, this type of a result is quite common: for a deterministic model to adequately account for unmodeled features of a dynamic system, parameters that are estimated are often forced to unexpected regions of the parameter space.
+Adding stochasticity to the model often fixes this issue by capturing unmodeled features in the inherent stochasticity of the model rather than in estimated parameters. 
 
 The decision on whether to choose Markov chain Monte Carlo (MCMC) methods is not fully aligned with the decision on whether to include stochasticity in the model.
-In our literature review, of the 9 previous Haiti cholera investigations including stochastic dynamic models \cite{tuite11,mukandavire13,lewnard16,kunkel17,sallah17,azman12,kuhn14,azman15,lee20}, four of them carried out inference via MCMC \cite{lewnard16,sallah17,azman12,kuhn14}.
-\eic{WHAT SORTS OF MCMC ALGORITHMS DID THEY USE?}
+In our literature review, of the 12 previous Haiti cholera investigations including stochastic dynamic models \cite{kirpich17,lee20,pasett018,mukandavire13,kirpich16,lewnard16,kunkel17,mukandavire15,sallah17,azman12,azman15}, four of them carried out inference via MCMC \cite{pasetto18,lewnard16,sallah17,azman12}.
 We agree with the referee that MCMC is more routine for determinstic models than for stochastic models, and advanced MCMC methods such as Hamiltonian Monte Carlo become more readily applicable.
 Sequential Monte Carlo (SMC) was used for only two of the investigations in our literature review \cite{lee20,azman15}.
 In principle, MCMC methods can be applied for inference in over-dispersed stochastic dynamic models via so-called particle MCMC (PMCMC) \cite{andrieu10}.
@@ -386,11 +398,14 @@ In this case, identifiability is generally addressed via profile likelihood meth
 \TODO{We have included some additional sentences to address these comments in the discussion section of the revision.}
 
 We acknowledge the existence of useful mathematical tools for studying ODE models, their identifiability and stability and limiting properties.
-Stochastic dynamic models can be reduced to a deterministic model (a so-called determinsitic skeleton) which can usefully be analyzed to help understand the stochastic dynamics \cite{coulson04}.
+Perhaps one example demonstrating the usefulness of ODE models is the Lee et al.~\cite{lee20} study: of the four models considered, the forecasts from Model~2 were most consistent with the actual cholera situation in Haiti. 
+Despite their inability to describe incidence data, deterministic models can do a good job at detecting overal trends, like the gradual decline of cholera cases in Haiti. 
+This, coupled with the ease in fitting ODEs to data, makes ODEs a useful tool to gain preliminary insight on a dynamic system. 
+Furthermore, stochastic dynamic models can be reduced to a deterministic model (a so-called determinsitic skeleton) which can usefully be analyzed to help understand the stochastic dynamics \cite{coulson04}.
 We therefore encourage the use of ODE analysis tools whether or not a stochastic model is adopted.
 We have not followed that approach in the current manuscript.
 
-In summary, maximum likelihood (ML) inference via SMC nowaways provides a fairly well estabilished alternative to Bayesian MCMC inference. ML appears to be methodologically more convenient for stochastic dynamic models with overdispersion. When analyzing long epidemiological datasets, this stochasticity appears to be important for statistical model fit. That alone is not enough to show that models with overdispersed stochastic dynamics are scientifically preferable. However, discovery of a  model feature which generates a large improvement in statistcal fit from adding one more parameter is typically treated as scientific evidence favoring the inclusion of that feature in a scientific model for the phenomenon.
+In summary, maximum likelihood (ML) inference via SMC nowadays provides a fairly well estabilished alternative to Bayesian MCMC inference. ML appears to be methodologically more convenient for stochastic dynamic models with overdispersion. When analyzing long epidemiological datasets, this stochasticity appears to be important for statistical model fit. That alone is not enough to show that models with overdispersed stochastic dynamics are scientifically preferable. However, discovery of a  model feature which generates a large improvement in statistcal fit from adding one more parameter is typically treated as scientific evidence favoring the inclusion of that feature in a scientific model for the phenomenon.
 
 \report{
 Moreover, Monte Carlo methods, such as the Particle Filter and, by extension, Iterated Filtering, aim to approximate integrals (the posterior or filtering distributions). However, one cannot take for granted that these methods provide accurate descriptions of these targets without proper validation. In more ‘traditional’ MCMC methods, diagnostics like the potential scale reduction factor and effective sample size play a crucial role in the inference process. Unsatisfactory values of these diagnostics render inferences unreliable, often necessitating model reformulation. In contrast, in the literature on POMP models (including this paper), diagnostics are tangentially mentioned. Users (like me) sometimes face uncertainty about whether the lack of fit is due to model misspecification or problems with the Monte Carlo algorithm exploring the parameter space.
@@ -445,6 +460,18 @@ However, these additional results are worthwhile extension to our analysis and w
   I find that the conclusions are somewhat disconnected from the introduction and abstract, which state that the paper presents a methodology to diagnose model misspecification, develop alternative models, and make computational improvements. It would improve readability to include a summary in this section. Specifically, link each contribution to a particular example. For instance, in the case of model 1, computational improvements increased the log-likelihood. In short, connect the findings more explicitly to the research question and stated goals.
 }
 
+We have added several paragraphs in the discussion to address this point. These paragraphs are listed below for reference.
+
+\article{\editDiscussionOne}
+
+\article{\editDiscussionTwo}
+
+\article{\editDiscussionThree}
+
+\article{\editDiscussionFour}
+
+\article{\editDiscussionFive}
+
 \report{
   \textbf{\underline{Minor Comments:}}
 }
@@ -453,13 +480,32 @@ However, these additional results are worthwhile extension to our analysis and w
   1. In the author summary, this part is hard to follow: ``and provides careful justification of valid conclusions from the fitted model. Objective measures are used to benchmark model fit; when these are combined with reproducibility, a framework emerges for continual improvement when revisiting the data and models." Please rephrase.
 }
 
+The previous statement has been changed to the following: 
+
+\article{Our analysis presents methodology for diagnosing how well a model describes observed data. Objective measures are used to evaluate model fit; when objective measures of the goodness-of-fit of a model are combined with reproducibility, a framework emerges for continual improvement to model based inference when revisiting the data. This framework promotes scientific discovery and bolsters model-based policy recommendations by simplifying the process for researchers to build off of previous results.}
+
 \report{
   2. Lines 1-8. Please add more citations.
 }
 
+\TODO{Add citations based for this paragraph, given below}
+
+Regulation of biological populations is a fundamental topic in epidemiology, ecology, fisheries and agriculture.
+Population dynamics may be nonlinear and stochastic, with the resulting complexities compounded by incomplete understanding of the underlying biological mechanisms and by partial observability of the system variables.
+Quantitative models for these dynamic systems offer potential for designing effective control measures.
+Developing and testing models for dynamic systems, and assessing their fitness for guiding policy, is a challenging statistical task.
+Questions of interest include: What indications should we look for in the data to assess whether the model-based inferences are trustworthy?
+What diagnostic tests and model variations can and should be considered in the course of the data analysis?
+What are the possible trade-offs of increasing model complexity, such as the inclusion of interactions across spatial units?
+
 \report{
   3. Line 36. Can you be explicit about what the forecasts predicted? Did the models predict a rise in cases?
 }
+
+This statement has been modified to include more details. It now reads: 
+
+\article{Despite their autonomy, the four independent teams obtained a consensus that an extensive nationwide vaccination campaign would be necessary to eliminate cholera from Haiti. They also provided a range for the forecasted number of cumulative cases from February 2019 to Februaruy 2024 based on model simulations, with median estimates from each model measured in hundreds of thousands.
+These forecasts are inconsistent with the prolonged period with no confirmed cholera cases between February, 2019 and September, 2022 \cite{trevisin22}.}
 
 \report{
   4. Line 42. Add hyphen: ``Model-based conclusions".
@@ -471,56 +517,88 @@ A hyphen has been added for all instances of the phrase: ``model-based".
   5. Lines 67-78. Add more citations.
 }
 
+It is difficult to directly add citations as suggested, as the text that was contained in lines 67-78 was original thought or argued in \cite{lucas76}, which was already cited. However, we appreciate the point that an improved discussion about the role of mechanistic vs associative modeling would be beneficial, and would be strengthened by other opinions / evidence on the topic. 
+
+To that effect, we have modified the original text to be more clear that the definitions of \emph{associative} versus \emph{mechanistic} models are our own, as the precise difference between these may be different in alternative contexts. 
+Furthermore, we provide references from our literature review that demonstrate the usefulness of associative models in some cases, whereas we typically focus on the benefits of mechanistic models in the article. 
+Finally, we added a paragraph that includes a discussion and references on mechanistic / associative modeling, which also addresses the concerns of Reviewer 1. This paragraph contains several citations, and is included below for reference. 
+
+\article{\editMechModels}
+
 \report{
   6. Please add uncertainty intervals to the estimated parameters in Table 1. If necessary, consider splitting the table into two or including this additional information in the supplementary material. I suggest this update because there is an indication of unidentifiability when parameter estimates are fairly broad.
 }
 
+Due to the size and complexity of the table we have elected to put uncertainty estimates elsewhere. Specifically, have created an additional supplement material document that outlines how confidence intervals are obtained, along with tables and figures that show parameter uncertainty estimates. In the caption for Table~1, we include a reference to this supplement material. \TODO{finish this supplement material}. 
+
 \report{
   7. In line 159, it is stated that ``$\upsilon^\star(t)$ is efficacy at time $t$ since vaccination for adults" and then ``single and double vaccine doses were modeled by changing the waning of protection; protection was modeled as equal between single and double dose until 52 weeks after vaccination, at which point the single dose becomes ineffective". I examined the reference from which this function is based but found only a numeric table. Please provide the equation of this function or a detailed description in the supplementary information. It would be beneficial for readers to understand how to model this complex feature.
 }
+
+The table you found is the function $\upsilon^\star(t)$, as that is what is used by each of their models. Lee et al~\cite{lee20} provide a smoothed version of this function in Figure~2 (B), but the actual function implemented by each of their models (and consequently, our models) is the numeric table itself; in this sense, the smoothed function they show in Figure~2 (B) is an approximation of the true vaccination function that they use, which is provided in Table S4 in their supplement material. 
+
+According to Lee et al~\cite{lee20}, this function was obtained by ``fitting a log-linear weighted regression model to the raw data from a published meta-analysis on killed OCV efficacy against medically attended culter-confirmed cholera (figure 2, appendix 3 p 6) \cite{bi17}". Aside from this statement, they provided limited details on how they came up with this function. Because of this, we unfortunately can't provide much more additional information other than the statement that was already included in our article: 
+
+\article{$\upsilon^\star(t)$ is efficacy at time $t$ since vaccination for adults, taken from \cite{lee20}, Table S4, ...}
 
 \report{
   8. Lines 209-211. In model 2, an incidence measurement is employed to configure a prevalence compartment. As the authors may know, initial values severely condition the dynamics of a model. Please explain this decision. Is it because that was the approach followed in the original formulation (Lee at al's paper)?
 }
 
 Our starting point was the formulation of \cite{lee20}.
-Judging by the referee's comment, they will not be suprised to learn that this structure led to difficulties in some situations. \TODO{}
+Judging by the referee's comment, they will not be suprised to learn that this structure led to difficulties in some situations. 
+We did consider the effect of not calibrating initial values. 
+Unsurprisingly, fitting initial values results in a quantitative improvement to model-fit, measured by AIC, but we also found that this had negligable qualitative effects on model-based conclusions. 
+We have included additional material in the supplement for Initialization Models that demonstrates this. 
 
 \report{
   9. Lines 245-247. Same comment as before. What’s the justification for assuming incidence measurements as the basis for prevalence states? What are the risks?
 }
 
-The cholera pathogen was recently introduced to Haiti, which facilitates the specification of initial conditions.
-The goals of inferring initial prevalence is to reduce the number of parameters.
+% The cholera pathogen was recently introduced to Haiti, which facilitates the specification of initial conditions.
+Our experience with mechanistic modeling reflects that of the reviewer: calibrating initial values often results in improved dynamics. 
+As such, we would recommend calibrating initial values in most cases; here, doing so may constitute a major change from the initialization model used by Lee et al.~\cite{lee20}.
+Because one of our goals was to demonstrate that the models of \cite{lee20} were alone not responsible for their poor forecasts, we elected to use the same initialization approach to the extent possible. 
+
+The goals of inferring initial prevalence is to reduce the number of parameters. 
 The risk is that the form of this assumption could have substantial effects on the dynamics, and hence on the consequences of the analysis.
-Our approaches to addressing this issue involve: (i) looking at residual diagnostic plots to assess time points at which the model is misspecified; (ii) if the initial values seem problematic, calculate the room for improvement by estimating the initial values as free parameters.
-
-
+In our supplement material, we described our approach to addressing this issue: (i) looking at conditional log-likelihoods to assess time points at which the model is misspecified; (ii) if the initial values seem problematic, calculate the room for improvement by estimating the initial values as free parameters.
+We found that enforcing model dynamics for initial states worked well for many of the departments, but was problematic for departments where this resulted in zero counts in Infected, Asymptomatic, and Bacterial compartments, leading to the estimation of initial counts of Infected individuals in two departments (Grand'Anse and Nippes). Initial values for Asymptomatic and Bacterial compartments were then obtained by enforcing the dynamics of the model using the estimates for Infected individuals, as described in the supplement material. 
 
 \report{
   10. Line 262. ``deterministic Model 2 is a degenerate case of a stochastic model". Please explain why or provide a reference.
 }
 
+The text has been modified to add additional clarity. The text now reads: 
+
+\article{deterministic Model~2 is a special case of a Markov processes solving a stochastic differential equation in the limit as the noise parameter goes to zero.}
+
 \report{
   11. Lines 260-274. Please add more citations.
 }
+
+We have added a citation to \cite{king16}, which discusses POMP models and their implementation. 
 
 \report{
   12. Lines 343-345. This sentence is key for this paper, but it’s hard to follow: ``The robust statistical conclusion is that a model which allows for change fits better than one which does not—we argue that a decreasing transmission rate is a plausible way to explain this, but the incidence data themselves do not provide enough information to pin down the mechanism". Please rephrase.
 }
 
-This is similar to point 11 of referee 1. LET'S DISCUSS THIS. Our point is that there are many other ways one might include time-varying effects in the model, and a strongly supported conclusion should avoid ruling out untested hypotheses.  We can say that the best available model with trending parameters is statistically superior to the best available model with time-constant parameters. This frames the evidence in a way that avoids asserting clear support for any one particular way of modeling this effect.
+This suggestion is similar to one posed by Reviewer 1. We have made substantial edits to the paragraph that included this statement that clarifies our point:
 
-R1 mentioned the possibility of reporting rate decreasing instead. I'M TRYING TO RECALL OUR REASONING THAT MODEL 3 IN LEE ET AL OVER-EMPHASIZED THIS. APART FROM THE POSSIBILITY OF A CASE DEFINITION CHANGE, ONE MIGHT EXPECT REPORTING RATE TO INCREASE?
-
+\article{The statistical evidence of a trend in transmission rate in this model could be explained by any trending variable (such as hygiene improvements, or changes in population behavior), resulting in confounding from collinear covariates. Because we only have access to incidence data, the decrease in observed cases over the course of the outbreak may alternatively be attributed to a trend in other model parameters, such as a decrease in the reporting rate over time.
+This results in confounded mechanisms, as one may not formally test all possible ways to include a trending parameter. In such a case, the robust statistical conclusion is that a model which allows for change fits better than one which does not. Because the incidence data themselves may not provide enough information to pin down the mechanism, a strongly supported conclusion should avoid ruling out untested hypotheses. In this case study, we did not explicitly test if the incidence data favor a trend in transmission over a trend in reporting rate. We argue that a decreasing transmission rate is a plausible way to explain the decrease in cases over time, as there is alternative evidence that supports this model \cite{rebaudet19CATI,rebaudet21,michel19}. Additionally, there is little scientific evidence to support a decrease in reporting rate (for example, see Figure~1 of \cite{rebaudet21}).}
 
 \report{
   13. Line 357. ``Determining the necessary computational effort needed to maximize model likelihoods and acting accordingly" How do we determine the necessary computational effort?
 }
 
+\TODO{Add citations to papers that do a good job discussing specific diagnostics (maybe leneary Malaria plos comp bio paper, and li23. Then we can also make a small mention of run levels: SMC + IF2 based methods scale linearly, so try first with small number of computations to help roughly evaluate what computational effort is needed.}
+
 \report{
   14. Please add the predicted intervals to Fig 4. I would like to see the effect of the log-normal measurement model.
 }
+
+\TODO{saltelli had a paper about sensitivity analysis, check this and maybe cite / use it.}
 
 \report{
   15. Lines 513-515. Please clarify the comparison between disaggregated models and a benchmark. Let’s say I have spatial units 1 and 2, for which I have observations y1 and y2. Should I fit the disaggregated mechanistic model to y1 and y2 simultaneously (as usual) but keep a record of the individual log-likelihoods (log-lik y1 and log-lik y2). In parallel, fit the benchmark independently to y1 and y2, and then compare by log-likelihoods or information criteria by spatial unit.

@@ -558,8 +558,9 @@ Evaluation of success at these goals is necessary in order for a model to provid
 \old{In this article, we discuss common modeling decisions that may not provide an adequate statistical explanation of the data, and we show that attention to statistical fit can lead to more accurate policy evaluations}.
 \new{In this article, we use an in-depth case study to motivate general procedures for fitting mathematical models to time series data, while explaining how these procedures help to address limitations of previous approaches.}
 We do this by conducting a re-analysis of the 2010 cholera outbreak in Haiti.
-Our analysis presents methodology for diagnosing how well a model describes observed data, and provides careful justification of valid conclusions from the fitted model.
-Objective measures are used to benchmark model fit; when these are combined with reproducibility, a framework emerges for continual improvement when revisiting the data and models.
+Our analysis presents methodology for diagnosing how well a model describes observed data\new{.}\old{, and provides careful justification of valid conclusions from the fitted model.}
+Objective measures are used to \old{benchmark} \new{evaluate} model fit; when \old{these}\new{objective measures of the goodness-of-fit of a model} are combined with reproducibility, a framework emerges for continual improvement \new{to model based inference} when revisiting the data\old{ and models}.
+\new{This framework promotes scientific discovery and bolsters model-based policy recommendations by simplifying the process for researchers to build off of previous results.}
 Our data analysis workflow is supported by recent advances in algorithms, software and hardware, which facilitate statistical fitting of nonlinear stochastic dynamic models to observed incidence data.
 However, inference for high-dimensional systems remains a methodological challenge.
 One of the models under consideration involves spatially coupled stochastic meta-populations, and we demonstrate how a recently developed algorithm permits likelihood-based inference and model diagnostics in this setting.
@@ -627,8 +628,9 @@ Advances in OCV technology and vaccine availability, however, raised the possibi
 \new{The possibility of controling the Haiti cholera outbreak via OCV was considered by various research groups.} \TODO{Citations}. 
 In the \new{Lee et al.~\cite{lee20}} study, certain data were shared between the groups, including demography and vaccination history; vaccine efficacy was also fixed at a shared value between groups.
 Beyond this, the groups made autonomous decisions on what to include and exclude from their models.
-\old{The groups largely adhered to existing guidelines for creating models to inform policy [35, 36] and, d}\new{D}espite their autonomy, \new{the four independent teams} obtained a consensus that an extensive nationwide vaccination campaign would be necessary to eliminate cholera from Haiti.
-Their forecasts, however, were inconsistent with the prolonged period with no confirmed cholera cases between February, 2019 and September, 2022 \cite{trevisin22}.
+\old{The groups largely adhered to existing guidelines for creating models to inform policy [35, 36] and, d}\new{D}espite their autonomy, \new{the four independent teams} obtained a consensus that an extensive nationwide vaccination campaign would be necessary to eliminate cholera from Haiti. 
+\new{They also provided a range for the forecasted number of cumulative cases from February 2019 to Februaruy 2024 based on model simulations, with median estimates from each model measured in hundreds of thousands.}
+\old{Their forecasts, however, were} \new{These forecasts are} inconsistent with the prolonged period with no confirmed cholera cases between February, 2019 and September, 2022 \cite{trevisin22}.
 Though cholera has recently reemerged in Haiti \cite{rubin22,PAHO23}, the inability to accurately forecast cholera incidence from 2019-2022\old{---while diligently adhering to existing scientific standards for infectious disease modeling---demonstrates that existing standards of disease modeling and forecasting may be insufficient.} \new{prompts us to consider retrospectively what may have been done differently in order to obtain more reliable conclusions.}
 
 The discrepancy between the model-based conclusions of Lee et al.~\cite{lee20} and the prolonged absence of cholera in Haiti has been debated \cite{francois20,rebaudetComment20,henrys20,leeReply20}.
@@ -1071,7 +1073,7 @@ mod3_lee_coupled_partial_aic <- 2 * lee3_results$n_params - 2 * lee3_results$sub
 
 \section*{Materials and methods}
 \subsection*{Mechanistic models for disease modeling}
-Models that focus on learning relationships between variables in a dataset are called {\it associative}, whereas models that incorporate a known scientific property of the system are called {\it causal} or {\it mechanistic}.
+\new{In this article, we refer to} models that focus on learning relationships between variables in a dataset \new{as} \old{are called} {\it associative}, whereas models that incorporate a known scientific property of the system \old{are called} \new{we call} {\it causal} or {\it mechanistic}.
 The danger in using forecasting techniques which rely on associative models to predict the consequence of interventions is called the Lucas critique in an econometric context.
 Lucas et al.~\cite{lucas76} pointed out that it is naive to predict the effects of an intervention on a given system based entirely on historical associations.
 To successfully predict the effect of an intervention, a model should therefore both provide a quantitative explanation of existing data and should have a causal interpretation: a manipulation of the system should correspond quantitatively with the corresponding change to the model.
@@ -1255,8 +1257,8 @@ Mixing exponent
 \\
 \hline
 \raggedright Process noise (wk\textsuperscript{1/2})
-  & \raggedright $\sigmaProc = (\Sexpr{myround(sqrt(p1["sig_sq_epi"]),2)},
-  \Sexpr{myround(sqrt(p1["sig_sq_end"]),2)})^*$
+  & \raggedright $\sigmaProc = (\Sexpr{myround(p1["sig_sq_epi"],2)},
+  \Sexpr{myround(p1["sig_sq_end"],2)})^*$
   & \multirow{2}{*}{\eqref{model1:lambda}}
   & \multirow{2}{*}{\missing}
   &
@@ -1552,11 +1554,11 @@ Finally, reported cholera cases are modeled using a negative binomial measuremen
 
 \subsection*{Model Fitting}\label{sec:model_fitting}
 
-Each of the three models considered in this study describes cholera dynamics as a partially observed Markov process (POMP), with the understanding that the deterministic Model~2 is a degenerate case of a stochastic model.
+Each of the three models considered in this study describes cholera dynamics as a partially observed Markov process (POMP) \cite{king16}, with the understanding that the deterministic Model~2 is a \old{degenerate case of a stochastic model} \new{special case of a Markov processes solving a stochastic differential equation in the limit as the noise parameter goes to zero.}
 Each model is indexed by a parameter vector, $\paramVec$, and different values of $\paramVec$ can result in qualitative differences in the predicted behavior of the system.
 Therefore, the choice of $\paramVec$ used to make inference about the system can greatly affect model-based conclusions.
 Elements of $\paramVec$ can be fixed at a constant value based on scientific understanding of the system, but parameters can also be calibrated to data by maximizing a measure of congruency between the observed data and the model's mechanistic structure.
-Calibrating model parameters to observed data does not guarantee that the resulting model successfully approximates real-world mechanisms, since the model description of the dynamic system may be incorrect and do not change as the model is calibrated to data.
+Calibrating model parameters to observed data does not guarantee that the resulting model successfully approximates real-world mechanisms, since the model description of the dynamic system may be incorrect and \old{do} \new{does} not change as the model is calibrated to data.
 However, the congruency between the model and observed data serves as a proxy for the congruency between the model and the true underlying dynamic system.
 As such, it is desirable to obtain the best possible fit of the proposed mechanistic structure to the observed data.
 
@@ -1706,8 +1708,8 @@ For a mechanism, the model feature could in principle explain the data by helpin
 The statistical evidence of a trend in transmission rate in this model could be explained by any trending variable (such as hygiene improvements, or changes in population behavior), resulting in confounding from collinear covariates.
 \old{Alternatively, the trend could be attributed to a decreasing reporting rate rather than decreasing transmission rate, resulting in confounded mechanisms.}
 \new{Because we only have access to incidence data, the decrease in observed cases over the course of the outbreak may alternatively be attributed to a trend in other model parameters, such as a decrease in the reporting rate over time.
-This results in confounded mechanisms, as likelihood-based comparisons of a model that permits a change in reporting rate against a model that permits a change in transmission rate may not yield definitive results. In such a case, t}\old{T}he robust statistical conclusion is that a model which allows for change fits better than one which does not\old{---we argue that a decreasing transmission rate is a plausible way to explain this}, but the incidence data themselves \old{do} \new{may} not provide enough information to pin down the mechanism.
-\new{In this case study, we did not explicitly test if the incidence data favor a trend in transmission over a trend in reporting rate. We argue that a decreasing transmission rate is a plausible way to explain the decrease in cases over time, as there is alternative evidence that supports this model \cite{rebaudet19CATI,rebaudet21,michel19}. Additionally there is little scientific evidence to support a decrease in reporting rate (for example, see Figure~1 of \cite{rebaudet21}).}
+This results in confounded mechanisms, as one may not formally test all possible ways to include a trending parameter. In such a case, t}\old{T}he robust statistical conclusion is that a model which allows for change fits better than one which does not.\old{---we argue that a decreasing transmission rate is a plausible way to explain this, but} \new{Because} the incidence data themselves \old{do} \new{may} not provide enough information to pin down the mechanism\new{, a strongly supported conclusion should avoid ruling out untested hypotheses.}
+\new{In this case study, we did not explicitly test if the incidence data favor a trend in transmission over a trend in reporting rate. We argue that a decreasing transmission rate is a plausible way to explain the decrease in cases over time, as there is alternative evidence that supports this model \cite{rebaudet19CATI,rebaudet21,michel19}. Additionally, there is little scientific evidence to support a decrease in reporting rate (for example, see Figure~1 of \cite{rebaudet21}).}
 
 We implemented Model~1 using the \code{pomp} package \cite{king16}, relying heavily on the \code{pomp} source code provided by Lee et al.~\cite{lee20}.
 Both analyses used the \code{mif2} implementation of the IF2 algorithm to estimate $\paramVec$ by maximum likelihood.
@@ -2130,11 +2132,11 @@ For any model-based inference, it is important to recognize and assess the model
 In epidemiological studies, for example, quantitative understanding of individual-level processes may not perfectly match model parameters that were fit to population-level case counts, even when the model provides a strong statistical fit \cite{he10}.
 This makes direct interpretation of estimated parameters delicate.
 
-\TODO{The profile confidence interval for the parameter suggests that the true estimate should be zero, but it was unable to get this value due to the parameter transformation. Should we manually set the value to zero? This result will also affect this paragraph, but only in ways that we already anticipated with the estimate close to zero.}
 Our case study provides an example of this in the parameter estimate for the duration of natural immunity due to cholera infection, $\muRS^{-1}$.
 Under the framework of Model~2, the best estimate for this parameter is $\Sexpr{signif(1/h2_fit$h2_params["sigma"],3)} \, \mathrm{yr}$, suggesting that individuals have effectively permanent immunity to cholera once infected.
-To interpret this result, we bear in mind that the data ranged from 2010-2019, and therefore estimates of immunity longer than $10\, \mathrm{yr}$---the upper end of previous estimates of natural immunity \cite{king08}---effectively result in the same model dynamics.
-The depletion of susceptible individuals may also be attributed to confounding mechanisms---such as localized vaccination programs and non-pharmaceutical interventions that reduce cholera transmission \cite{trevisin22, rebaudet21}---that were not accounted for in the model.
+\new{Rather than interpreting this as scientific evidence that individuals have permanent immunity from cholera, this result suggests that Model~2 favors a regime where reinfection events are a negligble part of the dynamics.}
+\old{To interpret this result, we bear in mind that the data ranged from 2010-2019, and therefore estimates of immunity longer than $10\, \mathrm{yr}$---the upper end of previous estimates of natural immunity [101]---effectively result in the same model dynamics.}
+The depletion of susceptible individuals may \old{also} be attributed to confounding mechanisms---such as localized vaccination programs and non-pharmaceutical interventions that reduce cholera transmission \cite{trevisin22, rebaudet21}---that were not accounted for in the model.
 Perhaps the best interpretation of the estimated parameter, then, is that under the modeling framework that was used, the model most adequately describes the observed data by having a steady decrease in the number of susceptible individuals.
 The weak statistical fit of Model~2 compared to a log-linear benchmark (see Table~\ref{tab:likes}) cautions us against drawing quantitative conclusions from this model.
 A model that has a poor statistical fit may nevertheless provide a useful conceptual framework for thinking about the system under investigation.
