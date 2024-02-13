@@ -900,6 +900,9 @@ mod3_eval_res <- bake(
     ll <- logLik(h3_bpf)
     results$ll <- logmeanexp(ll[!is.na(ll)], se = TRUE)
 
+    u_cond_ll <- t(sapply(h3_bpf, function(x) rowSums(x@block.cond.loglik)))
+    results$u_cond_ll <- apply(u_cond_ll, 2, logmeanexp, se = TRUE)
+    
     ### Get likelihood for subset of the data
 
     # Find appropriate sub-set
