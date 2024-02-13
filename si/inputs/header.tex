@@ -215,7 +215,29 @@
 \renewcommand\thefigure{S-\arabic{figure}}
 \renewcommand\thetable{S-\arabic{table}}
 \renewcommand\thesection{S\arabic{section}}
+% \renewcommand\thesection{\makebox[0.8em][l]{S}\arabic{section}}
 \renewcommand\theequation{S\arabic{equation}}
 \renewcommand\theprop{S\arabic{prop}}
 \renewcommand\thelemma{S\arabic{lemma}}
 \renewcommand\thealgocf{S\arabic{algocf}}
+
+\makeatletter
+\renewcommand*\l@section[2]{%
+  \ifnum \c@tocdepth >\z@
+    \addpenalty\@secpenalty
+    % Space for the number
+    \setlength\@tempdima{2.3em}%
+    \begingroup
+      \parindent \z@ \rightskip \@pnumwidth
+      \parfillskip -\@pnumwidth
+      % No bold in ToC
+      \leavevmode \bfseries
+      \advance\leftskip\@tempdima
+      \hskip -\leftskip
+      % Insert "S" before the section number
+      #1\nobreak\hfil \nobreak\hb@xt@\@pnumwidth{\hss #2}\par
+      \addvspace{1.15em}% Adjust space after each entry (double space)
+    \endgroup
+  \fi}
+% Similar redefinition can be done for \l@subsection if needed.
+\makeatother
