@@ -111,13 +111,15 @@ Alternative representations that may be helpful in understanding the models expl
 
 \input{inputs/measurementModels}
 
-\input{inputs/initialValues}
+\input{initialValuesOut}
 
 \input{calibrateMod3Out}
 
 \clearpage
 
 \input{ReplicateLee20Out}
+
+\input{confidenceIntervalsOut}
 
 \input{inputs/paramUncertainty}
 

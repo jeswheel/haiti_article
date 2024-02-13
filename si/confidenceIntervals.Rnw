@@ -15,7 +15,7 @@ library(knitr)
 library(latex2exp)
 
 options(
-  scipen = 2,
+  scipen = 0,
   help_type = "html",
   stringsAsFactors = FALSE,
   continue = "+  ",
@@ -43,6 +43,20 @@ opts_chunk$set(
 if (!dir.exists("../model3/si")) {
   dir.create("../model3/si", recursive = TRUE)
 }
+
+myround <- function(x, digits = 1) {
+  # taken from the broman package
+  if (digits < 1)
+    stop("This is intended for the case digits >= 1.")
+  if (length(digits) > 1) {
+    digits <- digits[1]
+    warning("Using only digits[1]")
+  }
+  tmp <- sprintf(paste("%.", digits, "f", sep = ""), x)
+  zero <- paste0("0.", paste(rep("0", digits), collapse = ""))
+  tmp[tmp == paste0("-", zero)] <- zero
+  tmp
+}
 @
 
 \begin{document}
@@ -52,12 +66,18 @@ if (!dir.exists("../model3/si")) {
 \section{Confidence Intervals for Model Parameters}\label{sec:ci}
 
 In this section we provide confidence intervals for all model parameters, excluding those that take unique values for each spatial unit.
-For each model and parameter, we use profile log-likelihoods to obtain confidence intervals. TODO: Cite.
+For each model and parameter, we use principles of profile likelihood to obtain confidence intervals \cite{pawitan01}.
 Due to the non-linear and stochastic nature of Models~1 and 3, exact evaluations of the profile log-likelihood are difficult to obtain.
 Instead, the log-likelihood at each point of the profile is estimated using via Monte-Carlo based particle filter methods.
-We therefore obtain confidence intervals for the parameters of Model~1 and Model~3 using the Monte Carlo adjust profile (MCAP) algorithm. TODO: Cite.
+We therefore obtain confidence intervals for the parameters of Model~1 and Model~3 using the Monte Carlo adjust profile (MCAP) algorithm \cite{ionides17}.
+
+In each subsection, we provide figures that show the curvature of the profile log-likelihood near the MLE (Figures~\ref{fig:m1Profs}--\ref{fig:m3Profs}). 
+In these figures, the parameter values are shown on the transformed scale in which the profile was calculated. 
 
 \subsection{Model~1 parameters}
+
+Parameter estimates for Model~1, along with the MCAP confidence intervals for the estimate, are given in Table~\ref{tab:mod1CI}. 
+Figure~\ref{fig:m1Profs} displays the Monte Carlo evaluations of the profile likelihood values, obtained using a particle filter. 
 
 <<Load Model 1 Confidence Intervals, include=FALSE, message=FALSE, echo=FALSE>>=
 H1_profiles <- readRDS("../model1/run_level_3/h1_profiles.rds")
@@ -160,7 +180,7 @@ all_mcaps <- purrr::map_df(
 all_ci <- all_ci |> as.data.frame() |> t() |> as.data.frame()
 all_ci$prof_var <- rownames(all_ci)
 
-H1_profiles %>% slice_max(order_by = logLik) %>% 
+h1_mles <- H1_profiles %>% slice_max(order_by = logLik) %>% 
   select(logLik, all_of(prof_params)) %>% 
   mutate(E_0 = E_0 * 10911819, I_0 = I_0 * 10911819,
          tau_epi = log(tau_epi), tau_end = log(tau_end)) %>%
@@ -168,7 +188,7 @@ H1_profiles %>% slice_max(order_by = logLik) %>%
     cols = -logLik,
     names_to = 'prof_var',
     values_to = 'value'
-  ) -> mles
+  )
 @
 
 \begin{figure}[ht]
@@ -225,7 +245,7 @@ for (i in 1:length(prof_params)) {
     # This code chunk below will plot the MLE along with the smoothed marginal 
     # MLEs and the confidence interval. 
     # geom_point(
-    #   data = mles %>% filter(prof_var == p), 
+    #   data = h1_mles %>% filter(prof_var == p), 
     #   aes(x = value, y = logLik), col = 'red'
     # ) +
     labs(y = 'Log-Likelihood', title = my_lab) +
@@ -275,11 +295,127 @@ cowplot::plot_grid(
   rel_widths = c(1.25, 1, 1, 1)
 )
 @
-\caption{\label{m1Profs}MCAP confidence intervals for Model 1 parameters.}
+\caption{\label{fig:m1Profs}MCAP confidence intervals for Model 1 parameters.}
 \end{figure}
+
+\begin{table}[!h]
+\centering
+\caption{\label{tab:mod1CI}Model~1 parameter estimates and their corresponding confidence intervals, obtained via the MCAP algorithm.}
+\vspace{2mm}
+\begin{tabular}{|c|c|c|c|}
+\hline
+\textbf{Mechanism} & \textbf{Parameter} & \textbf{MLE} & $\bm{95\%}$ \textbf{Confidence Interval}
+\\
+\hline
+\hline
+
+ Seasonality & $\transmissionTrend$ & $\Sexpr{myround(h1_mles %>% filter(prof_var == 'betat') %>% pull(value), 3)}$
+   &
+  $(\Sexpr{myround(all_ci %>% filter(prof_var == 'betat') %>% pull(lower), 3)}, \Sexpr{myround(all_ci %>% filter(prof_var == 'betat') %>% pull(upper), 3)})$ 
+\\
+\hline
+
+ Seasonality & $\transmission_1$ & $\Sexpr{myround(h1_mles %>% filter(prof_var == 'beta1') %>% pull(value), 3)}$
+   &
+  $(\Sexpr{myround(all_ci %>% filter(prof_var == 'beta1') %>% pull(lower), 3)}, \Sexpr{myround(all_ci %>% filter(prof_var == 'beta1') %>% pull(upper), 3)})$ 
+\\
+\hline
+
+ Seasonality & $\transmission_2$ & $\Sexpr{myround(h1_mles %>% filter(prof_var == 'beta2') %>% pull(value), 3)}$
+   &
+  $(\Sexpr{myround(all_ci %>% filter(prof_var == 'beta2') %>% pull(lower), 3)}, \Sexpr{myround(all_ci %>% filter(prof_var == 'beta2') %>% pull(upper), 3)})$ 
+\\
+\hline
+
+ Seasonality & $\transmission_3$ & $\Sexpr{myround(h1_mles %>% filter(prof_var == 'beta3') %>% pull(value), 3)}$
+   &
+  $(\Sexpr{myround(all_ci %>% filter(prof_var == 'beta3') %>% pull(lower), 3)}, \Sexpr{myround(all_ci %>% filter(prof_var == 'beta3') %>% pull(upper), 3)})$ 
+\\
+\hline
+
+ Seasonality & $\transmission_4$ & $\Sexpr{myround(h1_mles %>% filter(prof_var == 'beta4') %>% pull(value), 3)}$
+   &
+  $(\Sexpr{myround(all_ci %>% filter(prof_var == 'beta4') %>% pull(lower), 3)}, \Sexpr{myround(all_ci %>% filter(prof_var == 'beta4') %>% pull(upper), 3)})$ 
+\\
+\hline
+
+ Seasonality & $\transmission_5$ & $\Sexpr{myround(h1_mles %>% filter(prof_var == 'beta5') %>% pull(value), 3)}$
+   &
+  $(\Sexpr{myround(all_ci %>% filter(prof_var == 'beta5') %>% pull(lower), 3)}, \Sexpr{myround(all_ci %>% filter(prof_var == 'beta5') %>% pull(upper), 3)})$ 
+\\
+\hline
+
+ Seasonality & $\transmission_6$ & $\Sexpr{myround(h1_mles %>% filter(prof_var == 'beta6') %>% pull(value), 3)}$
+   &
+  $(\Sexpr{myround(all_ci %>% filter(prof_var == 'beta6') %>% pull(lower), 3)}, \Sexpr{myround(all_ci %>% filter(prof_var == 'beta6') %>% pull(upper), 3)})$ 
+\\
+\hline
+
+ Observation Variance & $\obsOverdispersion: \mathrm{Epi}$ & $\Sexpr{myround(h1_mles %>% filter(prof_var == 'tau_epi') %>% pull(value) %>% exp(), 3)}$
+   &
+  $(\Sexpr{myround(all_ci %>% filter(prof_var == 'tau_epi') %>% pull(lower) %>% exp(), 3)}, \Sexpr{myround(all_ci %>% filter(prof_var == 'tau_epi') %>% pull(upper) %>% exp(), 3)})$ 
+\\
+\hline
+
+ Observation Variance & $\obsOverdispersion: \mathrm{End}$ & $\Sexpr{myround(h1_mles %>% filter(prof_var == 'tau_end') %>% pull(value) %>% exp(), 3)}$
+   &
+  $(\Sexpr{myround(all_ci %>% filter(prof_var == 'tau_end') %>% pull(lower) %>% exp(), 3)}, \Sexpr{myround(all_ci %>% filter(prof_var == 'tau_end') %>% pull(upper) %>% exp(), 3)})$ 
+\\
+\hline
+
+  Reporting Rate & $\reportRate$ & $\Sexpr{myround(h1_mles %>% filter(prof_var == 'rho') %>% pull(value), 3)}$
+   &
+  $(\Sexpr{myround(all_ci %>% filter(prof_var == 'rho') %>% pull(lower), 3)}, \Sexpr{myround(all_ci %>% filter(prof_var == 'rho') %>% pull(upper), 3)})$ 
+\\
+\hline
+
+  Mixing Exponent & $\mixExponent$ & $\Sexpr{myround(h1_mles %>% filter(prof_var == 'nu') %>% pull(value), 3)}$
+   &
+  $(\Sexpr{myround(all_ci %>% filter(prof_var == 'nu') %>% pull(lower), 3)}, \Sexpr{myround(all_ci %>% filter(prof_var == 'nu') %>% pull(upper), 3)})$ 
+\\
+\hline
+
+  Process noise & $\sigmaProc: \mathrm{Epi}$ & $\Sexpr{myround(h1_mles %>% filter(prof_var == 'sig_sq_epi') %>% pull(value), 3)}$
+   &
+  $(\Sexpr{myround(all_ci %>% filter(prof_var == 'sig_sq_epi') %>% pull(lower), 3)}, \Sexpr{myround(all_ci %>% filter(prof_var == 'sig_sq_epi') %>% pull(upper), 3)})$ 
+\\
+\hline
+
+  Process noise & $\sigmaProc: \mathrm{End}$ & $\Sexpr{myround(h1_mles %>% filter(prof_var == 'sig_sq_end') %>% pull(value), 3)}$
+   &
+  $(\Sexpr{myround(all_ci %>% filter(prof_var == 'sig_sq_end') %>% pull(lower), 3)}, \Sexpr{myround(all_ci %>% filter(prof_var == 'sig_sq_end') %>% pull(upper), 3)})$ 
+\\
+\hline
+
+  Initial Values & $I_{0}(0)$ & $\Sexpr{round(h1_mles %>% filter(prof_var == 'I_0') %>% pull(value))}$
+   &
+  $(\Sexpr{round(all_ci %>% filter(prof_var == 'I_0') %>% pull(lower))}, \Sexpr{round(all_ci %>% filter(prof_var == 'I_0') %>% pull(upper))})$ 
+\\
+\hline
+
+  Initial Values & $E_{0}(0)$ & $\Sexpr{round(h1_mles %>% filter(prof_var == 'E_0') %>% pull(value))}$
+   &
+  $(\Sexpr{round(all_ci %>% filter(prof_var == 'E_0') %>% pull(lower))}, \Sexpr{round(all_ci %>% filter(prof_var == 'E_0') %>% pull(upper))})$ 
+\\
+\hline
+
+\end{tabular}
+\end{table}
+
+\subsection{Model~2 parameters}
+
+Parameter estimates for Model~2, along with the profile likelihood confidence intervals for each estimate, are given in Table~\ref{tab:mod2CI}. 
+Figure~\ref{fig:m2Profs} displays the profile log-likelihood curve near the MLE. 
+In Table~\ref{tab:mod2CI}, the confidence interval for $\muRS^{-1}$, the duration of natural immunity due to cholera infection, is arbitrarily large (going to infinity). 
+This is possible because the parameter that was estimated was $\muRS$, and the true MLE for this parameter is zero (see Figure~\ref{fig:m2Profs}). 
+This suggests that the fitted model favors a regime where reinfection events are not possible. 
+Similarly, the MLE for the parameter $\transmission$, which controls the amount of cholera transmission from human to human, is zero. 
+Because Model~2 fails to describe the incidence data as well as a simple statistical benchmark, we must be careful to not interpret these results as evidence that reinfections and human-to-human infection events do not occur.
+Instead, we may consider this as additional evidence of model mispecification. 
 
 <<Load Model 2 Confidence Intervals, include=FALSE, message=FALSE, echo=FALSE>>=
 h2_profiles <- readRDS("../model2/h2_profiles.rds") %>% as.data.frame()
+h2_mles <- readRDS("../model2/model2_fit.rds")$h2_params
 
 prof_params <- c(
   "Mu",
@@ -290,19 +426,25 @@ prof_params <- c(
   "sigma"
 )
 
+h2_plots_lb <- numeric(length(prof_params))
+h2_plots_ub <- numeric(length(prof_params))
+
+names(h2_plots_lb) <- prof_params
+names(h2_plots_ub) <- prof_params
+
 h2_plots <- list()
 for (i in 1:length(prof_params)) {
   p = prof_params[i]
   if (p == 'Mu') {
     my_lab <- TeX('$\\mu_W')
   } else if (p == 'Beta') {
-    my_lab <- TeX('$\\beta$')
+    my_lab <- TeX('$\\beta^{1/5}$')
   } else if (p == 'BetaW') {
     my_lab <- TeX('$\\beta_W$')
   } else if (p == 'v') {
     my_lab <- TeX("$\\psi")
   } else if (p == 'sigma') {
-    my_lab <- TeX('$\\mu_{\\text{RS}}$')
+    my_lab <- TeX('$\\mu^{1/5}_{RS}$')
   } else if (p == 'phase') {
     my_lab <- TeX('$\\phi')
   }
@@ -336,10 +478,12 @@ for (i in 1:length(prof_params)) {
     gg_tmp_beta <- ggplot() + 
       geom_point(
         data = tmp_df_beta %>% filter(prof_var == p) %>% filter(Beta <= max_x_beta^5),
-        aes(x = Beta, y = logLik)
+        aes(x = Beta^(1/5), y = logLik)
       ) + 
-      geom_function(fun = function(x) profile_like_beta(x^(1/5))) + 
-      geom_vline(xintercept = upper_bound_beta^5, linetype = 'dashed') + 
+      geom_function(fun = profile_like_beta) + 
+      # geom_function(fun = function(x) profile_like_beta(x^(1/5))) + 
+      # geom_vline(xintercept = upper_bound_beta^5, linetype = 'dashed') + 
+      geom_vline(xintercept = upper_bound_beta, linetype = 'dashed') +
       geom_vline(xintercept = 0, col = 'blue') + 
       labs(y = 'Log-Likelihood', title = my_lab) + 
       theme(
@@ -348,7 +492,8 @@ for (i in 1:length(prof_params)) {
       ) +
       theme_bw() +
       scale_y_continuous(limits = c(max_profile_beta-6, max_profile_beta)) +
-      scale_x_continuous(limits = c(0, max_x_beta^5)) +
+      # scale_x_continuous(limits = c(0, max_x_beta^5)) +
+      scale_x_continuous(limits = c(0, max_x_beta)) + 
       theme(
         axis.title.x = element_blank(), 
         plot.title = element_text(
@@ -359,6 +504,9 @@ for (i in 1:length(prof_params)) {
         axis.text.x = element_text(size = 6.5),
         plot.margin = margin(5.5, 3, 0, -1, unit = 'pt')
       )
+    
+    h2_plots_lb['Beta'] <- 0
+    h2_plots_ub['Beta'] <- upper_bound_beta^5
     
     if (i %in% c(1, 4)) {
       h2_plots[['beta']] <- gg_tmp_beta
@@ -398,10 +546,12 @@ for (i in 1:length(prof_params)) {
     gg_tmp_sigma <- ggplot() + 
       geom_point(
         data = tmp_df_sigma %>% filter(prof_var == 'sigma') %>% filter(sigma <= max_x_sigma^5),
-        aes(x = sigma, y = logLik)
+        aes(x = sigma^{1/5}, y = logLik)
       ) + 
-      geom_function(fun = function(x) profile_like_sigma(x^(1/5))) + 
-      geom_vline(xintercept = upper_bound_sigma^5, linetype = 'dashed') + 
+      # geom_function(fun = function(x) profile_like_sigma(x^(1/5))) + 
+      # geom_vline(xintercept = upper_bound_sigma^5, linetype = 'dashed') + 
+      geom_function(fun = profile_like_sigma) + 
+      geom_vline(xintercept = upper_bound_sigma, linetype = 'dashed') + 
       geom_vline(xintercept = 0, col = 'blue') + 
       labs(y = 'Log-Likelihood', title = my_lab) + 
       theme(
@@ -410,7 +560,8 @@ for (i in 1:length(prof_params)) {
       ) +
       theme_bw() +
       scale_y_continuous(limits = c(max_profile_sigma-6, max_profile_sigma)) +
-      scale_x_continuous(limits = c(0, max_x_sigma^5)) +
+      # scale_x_continuous(limits = c(0, max_x_sigma^5)) +
+      scale_x_continuous(limits = c(0, max_x_sigma)) +
       theme(
         axis.title.x = element_blank(), 
         plot.title = element_text(
@@ -421,6 +572,9 @@ for (i in 1:length(prof_params)) {
         axis.text.x = element_text(size = 6.5),
         plot.margin = margin(5.5, 3, 0, -1, unit = 'pt')
       )
+    
+    h2_plots_lb['sigma'] <- 0
+    h2_plots_ub['sigma'] <- upper_bound_sigma^5
     
     if (i %in% c(1, 4)) {
       h2_plots[['sigma']] <- gg_tmp_sigma
@@ -469,6 +623,9 @@ for (i in 1:length(prof_params)) {
       plot_limits, 
       interval = c(min(vals) - add_piece[p], max_profile$maximum)
     )$root
+    
+    h2_plots_lb[p] <- lower_bound
+    h2_plots_ub[p] <- upper_bound
     
     gg_tmp <- ggplot() + 
       geom_point(
@@ -521,9 +678,66 @@ cowplot::plot_grid(
   rel_widths = c(1.15, 1, 1)
 )
 @
-\caption{\label{m2Profs}MCAP confidence intervals for Model 2 parameters.}
+\caption{\label{fig:m2Profs}MCAP confidence intervals for Model 2 parameters.}
 \end{figure}
 
+\begin{table}[!h]
+\centering
+\caption{\label{tab:mod2CI}Model~2 parameter estimates and their corresponding confidence intervals, obtained via profile likelihood.}
+\vspace{2mm}
+\begin{tabular}{|c|c|c|c|}
+\hline
+\textbf{Mechanism} & \textbf{Parameter} & \textbf{MLE} & $\bm{95\%}$ \textbf{Confidence Interval}
+\\
+\hline
+\hline
+
+ Human to water shedding & $\Wshed$ & $\Sexpr{myround(h2_mles['Mu'], 1)}$
+   &
+  $(\Sexpr{myround(h2_plots_lb['Mu'], 1)}, \Sexpr{myround(h2_plots_ub['Mu'], 1)})$ 
+\\
+\hline
+
+ Water to Human Infection & $\beta_W$ & $\Sexpr{myround(h2_mles['BetaW'], 3)}$
+   &
+  $(\Sexpr{myround(h2_plots_lb['BetaW'], 3)}, \Sexpr{myround(h2_plots_ub['BetaW'], 3)})$ 
+\\
+\hline
+
+ Observation Variance & $\obsOverdispersion$ & $\Sexpr{myround(h2_mles['v'], 3)}$
+   &
+  $(\Sexpr{myround(h2_plots_lb['v'], 3)}, \Sexpr{myround(h2_plots_ub['v'], 3)})$ 
+\\
+\hline
+
+ Seasonality & $\phaseParm$ & $\Sexpr{myround(h2_mles['phase'], 3)}$
+   &
+  $(\Sexpr{myround(h2_plots_lb['phase'], 3)}, \Sexpr{myround(h2_plots_ub['phase'], 3)})$ 
+\\
+\hline
+
+Human to Human Infection & $\transmission$ & $\Sexpr{signif(h2_mles['Beta'], 3)}$\textsuperscript{*}
+   &
+  $[0, \Sexpr{signif(h2_plots_ub['Beta'], 3)})$ 
+\\
+\hline
+
+Immunity (yr) & $\muRS^{-1}$ & $\Sexpr{signif(1/h2_mles['sigma'], 3)}$\textsuperscript{*}
+   &
+  $(\Sexpr{signif(1/h2_plots_ub['sigma'], 3)}, \inf)$ 
+\\
+\hline
+
+\end{tabular}
+\begin{flushleft} 
+\textsuperscript{*}As evident in Figure~\ref{fig:m2Profs}, the true MLE for these parameters is $0$ and $\infty$, respectively; this value could not be obtained numerically due to the parameter transformation applied to the parameter for the model fitting processes.
+\end{flushleft}
+\end{table}
+
+\subsection{Model~3 parameters}
+
+Parameter estimates for Model~3, along with the MCAP confidence intervals for the estimate, are given in Table~\ref{tab:mod3CI}. 
+Figure~\ref{fig:m3Profs} displays the Monte Carlo evaluations of the profile likelihood values, obtained using a particle filter. 
 
 <<Load Model 3 Profiles, include=FALSE, message=FALSE, echo=FALSE>>=
 H3_profiles1 <- readRDS('../model3/run_level_3/h3_profiles.rds') %>% 
@@ -540,6 +754,7 @@ prof_params <- unique(H3_profiles$prof_var)
 H3_profiles_long <- H3_profiles %>%
   select(prof_var, logLik, logLik_se, all_of(paste0(prof_params, '1'))) %>%
   rename_with(~ sub("1$", "", .x)) %>%
+  mutate(mu_B = mu_B / 52) %>% 
   select(-epsilon, -XthetaA) %>% 
   pivot_longer(
     cols = -c(prof_var, logLik, logLik_se),
@@ -638,7 +853,7 @@ H3_profiles_long <- H3_profiles_long %>%
   )
 
 # This chunk of code returns the MLE for model 3
-H3_MLE_evals %>%
+h3_mles <- H3_MLE_evals %>%
   slice_max(order_by = logLik, n = 1) %>%
   select(logLik, all_of(paste0(prof_params, '1'))) %>%
   rename_with(~ sub("1$", "", .x)) %>%
@@ -647,7 +862,7 @@ H3_MLE_evals %>%
     cols = -c(logLik),
     names_to = 'prof_var',
     values_to = 'value'
-  ) -> mles
+  )
 @
 
 \begin{figure}[ht]
@@ -656,7 +871,7 @@ h3_plots <- list()
 for (i in 1:length(prof_params)) {
   p = prof_params[i]
   if (p == 'mu_B') {
-    my_lab <- TeX('$\\zeta')
+    my_lab <- TeX('$\\delta_W$')
   } else if (p == 'XthetaA') {
     my_lab <- TeX('$\\sqrt{\\epsilon_W}$')
   } else if (p == 'thetaI') {
@@ -700,7 +915,7 @@ for (i in 1:length(prof_params)) {
     # This commented out code below will plot the MLE along with the confidence 
     # intervals for the given parameter. 
     # geom_point(
-    #   data = mles %>% filter(prof_var == p),
+    #   data = h3_mles %>% filter(prof_var == p),
     #   aes(x = value, y = logLik), col = 'red'
     # ) +
     labs(y = 'Log-Likelihood', title = my_lab) +
@@ -739,8 +954,70 @@ cowplot::plot_grid(
   rel_widths = c(1.25, 1, 1, 1)
 )
 @
-\caption{\label{m3Profs}MCAP confidence intervals for Model 1 parameters.}
+\caption{\label{fig:m3Profs}MCAP confidence intervals for Model 3 parameters.}
 \end{figure}
+
+\begin{table}[!h]
+\centering
+\caption{\label{tab:mod3CI}Model~3 parameter estimates and their corresponding confidence intervals, obtained via the MCAP algorithm.}
+\vspace{2mm}
+\begin{tabular}{|c|c|c|c|}
+\hline
+\textbf{Mechanism} & \textbf{Parameter} & \textbf{MLE} & $\bm{95\%}$ \textbf{Confidence Interval}
+\\
+\hline
+\hline
+
+ Process Noise & $\sigmaProc$ & $\Sexpr{myround(h3_mles %>% filter(prof_var == 'std_W') %>% pull(value), 3)}$
+   &
+  $(\Sexpr{myround(all_ci %>% filter(prof_var == 'std_W') %>% pull(lower), 3)}, \Sexpr{myround(all_ci %>% filter(prof_var == 'std_W') %>% pull(upper), 3)})$ 
+\\
+\hline
+
+ Water Survival (wk) & $\Wremoval^{-1}$ & $\Sexpr{myround(52 / (h3_mles %>% filter(prof_var == 'mu_B') %>% pull(value)), 3)}$
+   &
+  $(\Sexpr{myround(1 / (all_ci %>% filter(prof_var == 'mu_B') %>% pull(upper)), 3)}, \Sexpr{myround(1 / (all_ci %>% filter(prof_var == 'mu_B') %>% pull(lower)), 3)})$ 
+\\
+\hline
+
+ Human to Water Shedding & $\Wshed$ & $\Sexpr{signif(h3_mles %>% filter(prof_var == 'thetaI') %>% pull(value), 3)}$
+   &
+  $(\Sexpr{signif(all_ci %>% filter(prof_var == 'thetaI') %>% pull(lower), 3)}, \Sexpr{signif(all_ci %>% filter(prof_var == 'thetaI') %>% pull(upper), 3)})$ 
+\\
+\hline
+
+ Asymptotic Shedding & $\asymptomRelativeShed$ & $\Sexpr{myround((h3_mles %>% filter(prof_var == 'XthetaA') %>% pull(value))^2, 3)}$
+   &
+  $(\Sexpr{myround((all_ci %>% filter(prof_var == 'XthetaA') %>% pull(lower))^2, 1)}, \Sexpr{myround((all_ci %>% filter(prof_var == 'XthetaA') %>% pull(upper))^2, 3)})$ 
+\\
+\hline
+
+ Seasonality & $\seasAmplitude$ & $\Sexpr{myround(h3_mles %>% filter(prof_var == 'lambdaR') %>% pull(value), 3)}$
+   &
+  $(\Sexpr{myround(all_ci %>% filter(prof_var == 'lambdaR') %>% pull(lower), 3)}, \Sexpr{myround(all_ci %>% filter(prof_var == 'lambdaR') %>% pull(upper), 3)})$ 
+\\
+\hline
+
+ Seasonality & $\rainfallExponent$ & $\Sexpr{myround(h3_mles %>% filter(prof_var == 'r') %>% pull(value), 3)}$
+   &
+  $(\Sexpr{myround(all_ci %>% filter(prof_var == 'r') %>% pull(lower), 3)}, \Sexpr{myround(all_ci %>% filter(prof_var == 'r') %>% pull(upper), 3)})$ 
+\\
+\hline
+
+ Reporting Rate & $\reportRate$ & $\Sexpr{myround(h3_mles %>% filter(prof_var == 'epsilon') %>% pull(value), 3)}$
+   &
+  $(\Sexpr{myround(all_ci %>% filter(prof_var == 'epsilon') %>% pull(lower), 3)}, \Sexpr{myround(all_ci %>% filter(prof_var == 'epsilon') %>% pull(upper), 3)})$ 
+\\
+\hline
+
+ Observation Variance & $\obsOverdispersion$ & $\Sexpr{myround(h3_mles %>% filter(prof_var == 'k') %>% pull(value), 3)}$
+   &
+  $(\Sexpr{myround(all_ci %>% filter(prof_var == 'k') %>% pull(lower), 3)}, \Sexpr{myround(all_ci %>% filter(prof_var == 'k') %>% pull(upper), 3)})$ 
+\\
+\hline
+
+\end{tabular}
+\end{table}
 
 %%%%%%%%%% END
 
