@@ -1084,7 +1084,6 @@ This motivates the development of mechanistic models, which provides a statistic
 \new{Despite their limited ability to project the effect of interventions on a system, associative models can be effectively used to make inference on an certain features of a system. 
 In our literature review, there were 14 studies that used associative models to describe various aspects of the cholera epidemic \cite{hulland19,moise20,piarroux11,matias17,eisenberg13,rebaudet19CATI,ivers15,raila17,cuneo17,charles14,richterman19,richterman19inverse,bengtsson15,li16adjusting}.}
 
-\jwc{This doesn't quite feel like the right place for this either, but I can't seem to pin down exactly where that would be yet. Perhaps the discussion?}
 \new{\editMechModels}
 
 The four mechanistic models of Lee et al.~\cite{lee20} were deliberately developed with limited coordination.
@@ -1880,9 +1879,11 @@ Model~3 describes cholera dynamics in Haiti using a metapopulation model, where 
 The decision to address metapopulation dynamics using a spatially explicit model, rather than to aggregate over space, is double-edged.
 Evidence for the former approach has been provided in previous studies \cite{king15}, including the specific case of heterogeneity between Haitian departments in cholera transmission \cite{collins14}.
 However, a legitimate preference for simplicity can support a decision to consider nationally aggregated models \cite{saltelli20,green15}.
+
+\new{\editMetaPop}
+
 One issue that arises when fitting spatially explicit models is that parameter estimation techniques based on the particle filter become computationally intractable as the number of spatial units increases.
 This is a result of the approximation error of particle filters growing exponentially in the dimension of the model \cite{rebeschini15,park20}.
-
 To avoid the approximation error present in high-dimensional models, Lee et al.~\cite{lee20} simplified the problem of estimating the parameters of Model~3 by creating an approximate version of the model where the units are independent given the observed data.
 Reducing a spatially coupled model to individual units in this fashion requires special treatment of any interactive mechanisms between spatial units, such as found in Eq.~\myeqref{eq:model3:foi}.
 Because the simplified, spatially-decoupled version of Model~3 implemented in \cite{lee20} relies on the observed cholera cases, the calibrated model cannot readily be used to obtain forecasts.
@@ -1895,12 +1896,11 @@ as parameters that maximize the likelihood of the decoupled model almost certain
 These two concerns may explain the unrealistic forecasts and low likelihood of Model~3 of Lee et al.~\cite{lee20} (see Table~\ref{tab:likes}).
 
 At the time Lee et al.~\cite{lee20} conducted their study, there was no known algorithm that could readily be used to maximize the likelihood of an arbitrary meta-population POMP model with coupled spatial dynamics, which justifies the spatial decoupling approximation that was used to calibrate model parameters.
-For our analysis, we calibrate the parameters of the spatially coupled version of Model~3 using the iterated block particle filter (IBPF) algorithm \cite{ionides22}.
+For our analysis, we calibrate the parameters of the spatially coupled version of Model~3 using the \old{iterated block particle filter (IBPF)} \new{IBPF} algorithm \cite{ionides22}.
 This algorithm extends the work of Ning and Ionides \cite{ning21ibpf}, who provided theoretic justification for the version of the algorithm that only estimates unit-specific parameters.
 The IBPF algorithm enables us to directly estimate the parameters of models describing high-dimensional partially-observed nonlinear dynamic systems via likelihood maximization.
 The ability to directly estimate parameters of Model~3 is responsible for the large increase in model likelihoods reported in Table~\ref{tab:likes}.
 Simulations from the fitted model are displayed in Fig.~\ref{fig:h3spatsims}.
-\jwc{Should there be more added / said to this paragraph, to demonstrate the novelty of being able to fit a model like Model 3? Maybe add a paragraph between the first and second paragraphs of this sub-section.}
 
 <<Model 3 SpatPOMP Sims, echo=FALSE>>=
 
@@ -1993,8 +1993,6 @@ In this section, we discuss some tools for diagnosing mechanistic models with th
 To do this, we will rely on the quantitative ability of the model to match the observed data, which we call the model's {\it goodness-of-fit}, with the guiding principle that a model which cannot adequately describe observed data may not be reliable for useful purposes.
 Goodness-of-fit may provide evidence supporting the causal interpretation of one model versus another, but cannot by itself rule out the possibility of alternative explanations.
 
-
-\jwc{Should we make benchmark modeling a sub-section of model-diagnostics? I think this could (A) add some organization to the paper so that readers / reviewers can clearly see how benchmarks help answer the question we posed: what indications should we look for in data to assess trustworthiness of data (B) further emphasize the importance of benchmarks, which is something the reviewers seemed to have found useful. }
 One common approach to assess a mechanistic model's goodness-of-fit is to compare simulations from the fitted model to the observed data.
 Visual inspection may indicate defects in the model, or may  suggest that the observed data are a plausible realization of the fitted model.
 While visual comparisons can be informative, they provide only a weak and informal measure of the goodness-of-fit of a model.
