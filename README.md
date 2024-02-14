@@ -53,7 +53,7 @@ named `submission/paramTab.pdf`.
 I can then convert this to a `.tiff` by running `make submission/paramTab.tiff`. 
 
 Finally, it is necessary to manually change the table -> figure in the 
-`submission/ms-submission/tex` file, and reference the table as a figure. 
+`submission/ms-submission.tex` file, and reference the table as a figure. 
 
 ### ArXiv submission
 
