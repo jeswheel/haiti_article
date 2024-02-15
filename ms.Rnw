@@ -625,10 +625,10 @@ The four independent teams were given the task of estimating the
 potential effect of prospective oral cholera vaccine (OCV) programs.
 While OCV is accepted as a safe and effective tool for controlling the spread of cholera, the global stockpile of OCV doses remains limited \cite{pezzoli20}.
 Advances in OCV technology and vaccine availability, however, raised the possibility of planning a national vaccination program \cite{lee20}.
-\new{The possibility of controling the Haiti cholera outbreak via OCV was considered by various research groups.} \TODO{Citations}. 
+\new{The possibility of controlling the Haiti cholera outbreak via OCV was considered by various research groups \cite{ivers17,andrews11,walton11,matias17,chao11,fung13,date11,leung22,azman15}}.
 In the \new{Lee et al.~\cite{lee20}} study, certain data were shared between the groups, including demography and vaccination history; vaccine efficacy was also fixed at a shared value between groups.
 Beyond this, the groups made autonomous decisions on what to include and exclude from their models.
-\old{The groups largely adhered to existing guidelines for creating models to inform policy [35, 36] and, d}\new{D}espite their autonomy, \new{the four independent teams} obtained a consensus that an extensive nationwide vaccination campaign would be necessary to eliminate cholera from Haiti. 
+\old{The groups largely adhered to existing guidelines for creating models to inform policy [35, 36] and, d}\new{D}espite their autonomy, \new{the four independent teams} obtained a consensus that an extensive nationwide vaccination campaign would be necessary to eliminate cholera from Haiti.
 \new{They also provided a range for the forecasted number of cumulative cases from February 2019 to Februaruy 2024 based on model simulations, with median estimates from each model measured in hundreds of thousands.}
 \old{Their forecasts, however, were} \new{These forecasts are} inconsistent with the prolonged period with no confirmed cholera cases between February, 2019 and September, 2022 \cite{trevisin22}.
 Though cholera has recently reemerged in Haiti \cite{rubin22,PAHO23}, the inability to accurately forecast cholera incidence from 2019-2022\old{---while diligently adhering to existing scientific standards for infectious disease modeling---demonstrates that existing standards of disease modeling and forecasting may be insufficient.} \new{prompts us to consider retrospectively what may have been done differently in order to obtain more reliable conclusions.}
@@ -676,7 +676,7 @@ h1_prof_res <- h1_prof %>%
   group_by(betat) %>%
   summarize(logLik = max(logLik))
 
-# TODO: update this comment: This is used later in figure 2 (TODO)
+# This is used later in figure 2
 beta_t_mcap_results <- pomp::mcap(h1_prof_res$logLik, h1_prof_res$betat, span = 1)
 
 # Find the set of parameters that correspond to the maximum likelihood
@@ -808,13 +808,6 @@ if (RUN_LEVEL != 3 && file.exists("model3/run_level_3/h3_MLE_eval.rds")) {
   # Throw an error, letting users know how to create the file.
   stop(paste0("Missing file: `model3/", rl_dir, 'h3_MLE_eval.rds`;\nThe file can be obtained by running the script `H3_MLE_Eval.R`.'))
 }
-
-# TODO: Remove
-# haiti3_fit contains ll estimate for many parameter sets, so we want to find
-# the highest value
-# mod3_ll <- h3_prof %>%
-#   slice_max(order_by = logLik, n = 1) %>%
-#   pull(logLik)
 @
 
 <<Create Model Objects,echo=FALSE,eval=TRUE, include=FALSE, message=FALSE>>=
@@ -879,10 +872,6 @@ mod1_n_params <- length(
 )
 mod1_aic <- 2 * mod1_n_params - 2 * mod1_ll
 
-# model 3 AIC
-# TODO: Remove
-# mod3_aic <- 2 * mod3_n_params - 2 * mod3_ll
-
 # Calculate likelihood via block-particle filter
 mod3_eval_res <- bake(
   file = paste0('model3/', rl_dir, 'mod3_eval_res.rds'), {
@@ -902,7 +891,7 @@ mod3_eval_res <- bake(
 
     u_cond_ll <- t(sapply(h3_bpf, function(x) rowSums(x@block.cond.loglik)))
     results$u_cond_ll <- apply(u_cond_ll, 2, logmeanexp, se = TRUE)
-    
+
     ### Get likelihood for subset of the data
 
     # Find appropriate sub-set
@@ -1073,18 +1062,18 @@ mod3_lee_coupled_aic <- 2 * lee3_results$n_params - 2 * lee3_results$all_ll_eval
 mod3_lee_coupled_partial_aic <- 2 * lee3_results$n_params - 2 * lee3_results$sub_ll_eval
 @
 
-
 \section*{Materials and methods}
 \subsection*{Mechanistic models for disease modeling}
+
+\new{\editMechModels}
+
 \new{In this article, we refer to} models that focus on learning relationships between variables in a dataset \new{as} \old{are called} {\it associative}, whereas models that incorporate a known scientific property of the system \old{are called} \new{we call} {\it causal} or {\it mechanistic}.
 The danger in using forecasting techniques which rely on associative models to predict the consequence of interventions is called the Lucas critique in an econometric context.
 Lucas et al.~\cite{lucas76} pointed out that it is naive to predict the effects of an intervention on a given system based entirely on historical associations.
 To successfully predict the effect of an intervention, a model should therefore both provide a quantitative explanation of existing data and should have a causal interpretation: a manipulation of the system should correspond quantitatively with the corresponding change to the model.
 This motivates the development of mechanistic models, which provides a statistical fit to the available data while also supporting a causal interpretation.
-\new{Despite their limited ability to project the effect of interventions on a system, associative models can be effectively used to make inference on an certain features of a system. 
+\new{Despite their limited ability to project the effect of interventions on a system, associative models can be effectively used to make inference on an certain features of a system.
 In our literature review, there were 14 studies that used associative models to describe various aspects of the cholera epidemic \cite{hulland19,moise20,piarroux11,matias17,eisenberg13,rebaudet19CATI,ivers15,raila17,cuneo17,charles14,richterman19,richterman19inverse,bengtsson15,li16adjusting}.}
-
-\new{\editMechModels}
 
 The four mechanistic models of Lee et al.~\cite{lee20} were deliberately developed with limited coordination.
 This allows us to treat the models as fairly independently developed expert approaches to understanding cholera transmission.
@@ -1718,7 +1707,10 @@ Both analyses used the \code{mif2} implementation of the IF2 algorithm to estima
 One change we made in the statistical analysis that led to larger model likelihoods was increasing the computational effort in the numerical maximization.
 While IF2 enables parameter estimation for a large class of models, the theoretic ability to maximize the likelihood depends on asymptotics in both the number of particles and the number of filtering iterations.
 Many Monte Carlo replications are then required to quantify and further reduce the error.
-The large increase in the log-likelihood for Model~1 (see Table~\ref{tab:likes}) can primarily be attributed to increasing the computational effort in fitting the model; this result highlights the importance of carefully determining the necessary computational effort needed to maximize model likelihoods and acting accordingly.
+The large increase in the log-likelihood for Model~1 (see Table~\ref{tab:likes}) can primarily be attributed to increasing the computational effort in fitting the model.
+This result highlights the importance of carefully determining the necessary computational effort needed to maximize model likelihoods and acting accordingly.
+\TODO{Possibly add more citations to the diagnostics part, maybe li23, laneri10 (Forcing Versus Feedback: Epidemic Malaria and Monsoon Rains in Northwest India)}
+\new{In this case study, this was done by performing standard diagnostics for the IF2 and particle filter algorithms \cite{king16}. Given the considerable computational costs of simulation-based algorithms, we find it useful to perform an initial assessment using hyperparameter values that enable relatively quick calculations. The insights obtained from this preliminary analysis help in accurately determining the amount of computation that is required to achieve reliable outcomes.}
 Simulations from the initial conditions of our fitted model are plotted against the observed incidence data in Fig.~\ref{fig:mod1fit}.
 
 \begin{figure}[!h]
@@ -2001,7 +1993,6 @@ Alternative forms of model validation should therefore be used in conjunction wi
 
 Another approach is to compare a quantitative measure of the model fit (such as MSE, predictive accuracy, or model likelihood) among all proposed models.
 These comparisons, which provide insight into how each model performs relative to the others, are quite common \cite{rinaldo12,sallah17}.
-\TODO{Add citations from lit-review.}
 To calibrate relative measures of fit, it is useful to compare against a model that has well-understood statistical ability to fit data, and we call this model a {\it benchmark}.
 Standard statistical models, interpreted as associative models without requiring any mechanistic interpretation of their parameters, provide suitable benchmarks.
 Examples include linear regression, auto regressive moving average time series models, or even independent and identically distributed measurements.
@@ -2546,7 +2537,7 @@ mod3_V4_res <- bake(
 
 Simulations from probabilistic models (Models~1 and~3) represent possible trajectories of the dynamic system under the scientific assumptions of the models.
 \new{\editModVacc}
-Estimates of the probability of cholera elimination can therefore be obtained as the proportion of simulations from these models that result in cholera elimination. 
+Estimates of the probability of cholera elimination can therefore be obtained as the proportion of simulations from these models that result in cholera elimination.
 The results of these projections are summarized in Figs. \ref{fig:elimProbs}.
 
 <<Compute Elimination Probs, echo=FALSE>>=
@@ -2628,6 +2619,8 @@ We illustrate that this can be achieved by comparing fitted models to a suitable
 \new{\editDiscussionFour}
 
 \new{\editDiscussionFive}
+
+\new{\editDiscussionSix}
 
 In our case study, we found that additional attention to statistical details could have resulted in \old{improved} \new{an enhanced} statistical fit to the observed incidence data\old{, leading to improvements in the accuracy of the resulting policy guidance.} \new{This would have improved the accuracy of the policy guidance resulting from the study.}
 \old{We used the same data and models, and even much of the same code, as Lee et al.~[29], and yet ended up with drastically different conclusions.}
