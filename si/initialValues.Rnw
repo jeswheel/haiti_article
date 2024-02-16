@@ -177,7 +177,7 @@ The AIC of this alternative approach is $\Sexpr{myround(mod2_newInit_AIC, 1)}$, 
 This alternative initialization approach results in quantitative improvement to the model-fit, but does not result in qualitative differences in the conclusions made using this model. Figure~\ref{fig:h2InitialTraj} displays the trajectory of the model with this alternate initialization model. 
 Table~\ref{tab:InitValues} gives the estimated initial values. 
 The estimated value of the latent state is similar to the fixed value in Artibonite and Centre, where the largest number of cases are present at the start of the epidemic. 
-Because of this, the qualitative dynamics do not differ by much when the parameters are estimated versus held constant, despite the improvement in model fit, measured by AIC. 
+Because of this, the qualitative dynamics do not differ by much when the parameters are estimated versus held constant, despite the improvement in model fit measured by AIC. 
 
 <<Get H2 trajectories, include=FALSE, echo=FALSE, message=FALSE>>=
 
@@ -270,7 +270,7 @@ ggplot() +
 {\figTitle Simulated trajectory of alternate initialization of Model~2.}
 The black line shows the nationally aggregated weekly cholera incidence data.
 The blue curve from 2012-2019 is the trajectory of the calibrated version of Model~2.
-Compare to Fig.~4 of the main article.}
+Compare to Fig.~4 of the article.}
 \end{figure}
 
 \begin{table}[!h]

@@ -572,8 +572,8 @@ We contend that raising the currently accepted standards of infectious disease m
 
 Regulation of biological populations is a fundamental topic in epidemiology, ecology, fisheries and agriculture.
 Population dynamics may be nonlinear and stochastic, with the resulting complexities compounded by incomplete understanding of the underlying biological mechanisms and by partial observability of the system variables.
-Quantitative models for these dynamic systems offer potential for designing effective control measures.
-Developing and testing models for dynamic systems, and assessing their fitness for guiding policy, is a challenging statistical task.
+Quantitative models for these dynamic systems offer potential for designing effective control measures \new{\cite{vandermeer13,he10}}.
+Developing and testing models for dynamic systems, and assessing their fitness for guiding policy, is a challenging statistical task \new{\cite{king16}}.
 Questions of interest include: What indications should we look for in the data to assess whether the model-based inferences are trustworthy?
 What diagnostic tests and model variations can and should be considered in the course of the data analysis?
 What are the possible trade-offs of increasing model complexity, such as the inclusion of interactions across spatial units?
@@ -1305,6 +1305,7 @@ Reporting rate
 \begin{flushleft} References to the relevant equation are given in parentheses.
 Parameters that were fixed and not calibrated using the data are indicated with $\fixed$; all fixed parameters values were chosen to match the fixed parameter values of \cite{lee20}.
 Parameters that were added during our re-analysis and were not considered by Lee et al. are indicated with $^*$.
+\new{Confidence intervals for model parameters are given in Supplement S8.}
 Translations back into the notation of \cite{lee20} are given in \nameref{S1_Table}.
 \end{flushleft}
 \end{adjustwidth}
@@ -1709,7 +1710,7 @@ While IF2 enables parameter estimation for a large class of models, the theoreti
 Many Monte Carlo replications are then required to quantify and further reduce the error.
 The large increase in the log-likelihood for Model~1 (see Table~\ref{tab:likes}) can primarily be attributed to increasing the computational effort in fitting the model.
 This result highlights the importance of carefully determining the necessary computational effort needed to maximize model likelihoods and acting accordingly.
-\TODO{Possibly add more citations to the diagnostics part, maybe li23, laneri10 (Forcing Versus Feedback: Epidemic Malaria and Monsoon Rains in Northwest India)}
+% \TODO{Possibly add more citations to the diagnostics part, maybe li23, laneri10 (Forcing Versus Feedback: Epidemic Malaria and Monsoon Rains in Northwest India), pons-salort18}
 \new{In this case study, this was done by performing standard diagnostics for the IF2 and particle filter algorithms \cite{king16}. Given the considerable computational costs of simulation-based algorithms, we find it useful to perform an initial assessment using hyperparameter values that enable relatively quick calculations. The insights obtained from this preliminary analysis help in accurately determining the amount of computation that is required to achieve reliable outcomes.}
 Simulations from the initial conditions of our fitted model are plotted against the observed incidence data in Fig.~\ref{fig:mod1fit}.
 
@@ -2012,6 +2013,8 @@ Because of this, we use a simple negative binomial model with an auto regressive
 Y_n|Y_{n - 1} \sim \text{NB}\big(\NBintercept + \NBar Y_{n-1}, \NBsize \big),
 \end{eqnarray}
 where $\mathrm{E}\big(Y_n|Y_{n - 1}\big) = \NBintercept + \NBar Y_{n-1}$, and $\Var\big(Y_n|Y_{n - 1}\big) = \mathrm{E}\big(Y_n|Y_{n - 1}\big) + \mathrm{E}\big(Y_n|Y_{n - 1}\big)^2 / \NBsize$.
+\new{To obtain a benchmark for models with a meta-population structure, we fit independent auto-regressive negative binomial models to each spatial unit. Under the assumption of independence, the log-likelihood of the benchmark on the entire collection of data can be obtained by summing up the log-likelihood for each independent model. In general, a spatially explicit model may not have well-defined individual log-likelihoods, and therefore comparisons to benchmarks should be made at the level of the joint model.}
+
 In the case where the case counts are large, an alternative benchmark recommended by He et al.~\cite{he10} is a log-linear Gaussian ARMA model;
 the theory and practice of ARMA models is well developed, and these linear models are appropriate on a log scale due to the exponential growth and decay characteristic of biological dynamics.
 We chose to use the auto regressive negative binomial model, however, because the large number of weeks with zero recorded cholera cases in department level data makes a benchmark based on a continuous distribution problematic.
@@ -2139,7 +2142,7 @@ However, strong statistical fit does not guarantee a correct causal structure: i
 A causal interpretation is strengthened by corroborative evidence.
 For example, reconstructed latent variables (such as numbers of susceptible and recovered individuals) should make sense in the context of alternative measurements of these variables \cite{grad12}.
 In the context of our case study, by reconstructing the latent states of Model~3, we notice that the calibrated model favors higher levels of cholera transmission than what was typically observed in the incidence data (\nameref{S_mod3cal}).
-This result hints at the possibility of model mispecification, and should prompt us to be sceptical of the reliability of forecasts from this model.
+This result hints at the possibility of model mispecification, and should prompt us to be \old{sceptical} \new{skeptical} of the reliability of forecasts from this model.
 Similarly, parameters that have been calibrated to data should make sense in the context of alternative lines of evidence about the phenomena being modeled, while making allowance for the possibility that the interpretations of parameters may vary when modeling across differing spatial scales.
 
 \section*{Results}

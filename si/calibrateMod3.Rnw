@@ -772,8 +772,6 @@ h3_final_mod_pars <- readRDS("../model3/run_level_3/h3_MLE_eval.rds") %>%
   select(-(job.id:logLik_se)) %>%
   unlist()
 
-
-
 # h3_final_results <- readRDS("../model3/run_level_3/haiti3_fit.rds")
 
 # Save best_m as index for the model parameters with the best likelihood.
@@ -811,24 +809,30 @@ bpf_final3_out <- bake(
   seed = 432235
 )
 
+unitLikesM3_final <- readRDS("../model3/run_level_3/mod3_eval_res.rds")[['u_cond_ll']] %>%
+  t() %>% 
+  as_tibble() %>% 
+  rename(ll_est = est, ll_se = se) %>% 
+  mutate(unit = 1:10) %>% 
+  select(unit, ll_est, ll_se)
 
 # Get repeated estimates of unit log-likelihoods
-unitLikesM3 <- best_mod %>%
-  pivot_longer(
-    cols = -which,
-    names_to = "unit",
-    names_prefix = "V",
-    values_to = "logLik"
-  ) %>%
-  select(-which) %>%
-  group_by(unit) %>%
-  summarize(
-    ll_est = pomp::logmeanexp(logLik),
-    ll_se = pomp::logmeanexp(logLik, se = TRUE)[2]
-  ) %>%
-  ungroup() %>%
-  mutate(unit = as.numeric(unit)) %>%
-  arrange(unit)
+# unitLikesM3 <- best_mod %>%
+#   pivot_longer(
+#     cols = -which,
+#     names_to = "unit",
+#     names_prefix = "V",
+#     values_to = "logLik"
+#   ) %>%
+#   select(-which) %>%
+#   group_by(unit) %>%
+#   summarize(
+#     ll_est = pomp::logmeanexp(logLik),
+#     ll_se = pomp::logmeanexp(logLik, se = TRUE)[2]
+#   ) %>%
+#   ungroup() %>%
+#   mutate(unit = as.numeric(unit)) %>%
+#   arrange(unit)
 
 # # A tibble: 10 × 3
  #    unit ll_est ll_se
@@ -842,12 +846,12 @@ unitLikesM3 <- best_mod %>%
  # 7     7 -1615. 0.633
 
 # Combine model likelihood table to benchmarks
-bench_M3_joined <- dplyr::left_join(
-  x = unitLikesM3,
+bench_M3_joined_final <- dplyr::left_join(
+  x = unitLikesM3_final,
   y = unitLikes_bench,
   by = "unit"
 ) %>%
-  select(-se) %>%
+  select(-ll_se) %>%
   mutate(unit = as.character(unit)) %>%
   pivot_longer(
     cols = -unit,
@@ -856,12 +860,12 @@ bench_M3_joined <- dplyr::left_join(
   ) %>%
   mutate(unit = paste0(unit, ": ", deps[as.numeric(unit)]))
 
-bench_diffs <- dplyr::left_join(
-  x = unitLikesM3,
+bench_diffs_final <- dplyr::left_join(
+  x = unitLikesM3_final,
   y = unitLikes_bench,
   by = "unit"
 ) %>%
-  rename(ll_mod3 = est, ll_bench = ll) %>%
+  rename(ll_mod3 = ll_est, ll_bench = ll) %>%
   mutate(unit = unlist(myLabeller(unit)),
          ll_diff = ll_mod3 - ll_bench) %>%
   arrange(ll_diff)
@@ -870,19 +874,20 @@ bench_diffs <- dplyr::left_join(
 @
 
 We refit Model~3 after introducing these hurricane-related parameters using the same successive search scheme described above.
-The resulting model has a log-likelihood value of $\Sexpr{round(max(h3_final_results$search2$logLiks$logLik), 1)}$.
+The resulting model has a log-likelihood value of $\Sexpr{round(readRDS("../model3/run_level_3/mod3_eval_res.rds")[['ll']]['est'], 1)}$.
 The addition of the Hurricane parameters seems to have resulted in a dramatic increase in conditional likelihoods around and after October 2016, as seen in Fig.~\ref{fig:finalCondLL}.
-The inclusion of these parameters resulted in an overall increase of $\Sexpr{round(max(h3_final_results$search2$logLiks$logLik) - max(haiti3_sub_fit$search2$logLiks$logLik), 1)}$ log-likelihood units.
+The inclusion of these parameters resulted in an overall increase of $\Sexpr{round(readRDS("../model3/run_level_3/mod3_eval_res.rds")[['ll']]['est'] - max(haiti3_sub_fit$search2$logLiks$logLik), 1)}$ log-likelihood units.
 Such a large difference in log-likelihoods is well beyond the threshold of statistical uncertainty determined by Wilks' theorem, suggesting that the data highly favor the inclusion of the additional parameters.
 
 <<finalModel3BPF, echo=FALSE, message=FALSE, include=FALSE>>=
 
-# Set the model parameters to the best results from previous search
-coef(h3)[names(best_params)] <- best_params
 
 # block particle filter to get conditional log-likelihoods.
 bpf_final3_out <- bake(
   file = "../model3/si/h3_final_bpf_cond_ll.rds", {
+    
+    # Set the model parameters to the best results from previous search
+    coef(h3)[names(h3_final_mod_pars)] <- h3_final_mod_pars
 
     results <- list()
 
@@ -939,7 +944,7 @@ Because the cholera transmission in individual departments likely depends on the
 
 \begin{figure}[!ht]
 <<finalUnitLLFig, fig.height=3, fig.width=5.5, echo=FALSE>>=
-ggplot(bench_M3_joined, aes(x = ll, y = reorder(unit, ll))) +
+ggplot(bench_M3_joined_final, aes(x = ll, y = reorder(unit, ll))) +
   geom_point(aes(col = type)) +
   ylab("Unit") +
   xlab("Log Likelihood") +
@@ -954,7 +959,7 @@ ggplot(bench_M3_joined, aes(x = ll, y = reorder(unit, ll))) +
 \end{figure}
 
 The difference in log-likelihoods between Model~3 and its benchmark model for each individual units suggests that Model~3 has a relatively poor fit for the four units with the most sustained cholera transmission.
-The simple four parameter benchmark has a higher likelihood than Model~3 for the \Sexpr{bench_diffs$unit[1]} and \Sexpr{bench_diffs$unit[2]} departments, and also has log-likelihoods only a few units smaller than Model~3 for units \Sexpr{bench_diffs$unit[3]} and \Sexpr{bench_diffs$unit[4]}.
+The simple four parameter benchmark has a higher likelihood than Model~3 for the \Sexpr{bench_diffs$unit[1]} and \Sexpr{bench_diffs$unit[2]} departments, and also has log-likelihoods only a few units smaller than Model~3 for the departments \Sexpr{bench_diffs$unit[3]} and \Sexpr{bench_diffs$unit[4]}.
 This is particularly worrisome given that these four departments account for more than $\Sexpr{floor(100 * sum(mod3_cases[, c(bench_diffs$unit[1:4])], na.rm = TRUE) / sum(mod3_cases, na.rm = TRUE))}\%$ of the total number of reported cholera cases.
 
 \subsection{Examining the Hidden States of the Calibrated Model}
@@ -971,7 +976,8 @@ Fig.~\ref{fig:h3Sus} shows the percentage of individuals that are in the suscept
 simulations from Model~3 under initial conditions are displayed in red; simulations from the filtering distribution of model are displayed in blue.
 This figure shows that simulations from initial conditions tends to result in a much more rapid depletion of susceptible individuals at the start of the epidemic than simulations from the filtering distribution, suggesting the calibrated model has a propensity to predict larger outbreaks than what is typically seen in the data.
 This also appears true in later stages of the time period of observed data, where the data suggests that there is a replenishment of the susceptible compartment, but the Model simulations typically retain a smaller proportion of susceptible individuals.
-This result demonstrates that the calibrated model favors a more rapid growth in cholera cases than what is typically seen in the observed data, which explains why the model fails to predict the absence of cases between February, 2019 and October, 2022.
+This result demonstrates that the calibrated model favors a more rapid growth in cholera cases than what is typically seen in the observed data. 
+This, coupled with the fact that the model fails to beat a simple statistical benchmark on data on the four departments that experienced the majority of observed cholera cases, suggests that one should be careful when making inference using this model.
 
 <<h3SusFigSetup, echo=FALSE, message=FALSE, include=FALSE>>=
 
@@ -982,6 +988,9 @@ This result demonstrates that the calibrated model favors a more rapid growth in
 #  (3) Obtain quantiles for the Susceptible pool from the simulations.
 init_conditions_results <- bake(
   file = "../model3/si/InitSimsQuants.rds", {
+    
+    # Set the model parameters to the best results from previous search
+    coef(h3)[names(h3_final_mod_pars)] <- h3_final_mod_pars
 
     results <- list()  # To return final output of bake
 
@@ -1069,7 +1078,8 @@ mod3_V0_initcond_res <- bake(
     # Get "noVacc" scenario parameters
     h3_S0_par <- get_model3_vacc_scenario_params(scenario = "noVacc")
     h3Spat <- h3
-    p3 <- best_params
+    p3 <- h3_final_mod_pars
+    
     coef(h3Spat) <- p3
     coef(h3Spat)[names(h3_S0_par)] <- h3_S0_par
 
@@ -1079,7 +1089,7 @@ mod3_V0_initcond_res <- bake(
     # Using parameters and end state values, obtain projections
     h3_V0_sims <- project_from_filter(
       h3Spat, end_states = h3_bpf_end_states, covarGen = project_rain,
-      nsims = 1000, seed = 184697
+      nsims = 500, seed = 184697
     )
 
     # Store nationally aggregated results
