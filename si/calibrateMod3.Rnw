@@ -959,8 +959,8 @@ ggplot(bench_M3_joined_final, aes(x = ll, y = reorder(unit, ll))) +
 \end{figure}
 
 The difference in log-likelihoods between Model~3 and its benchmark model for each individual units suggests that Model~3 has a relatively poor fit for the four units with the most sustained cholera transmission.
-The simple four parameter benchmark has a higher likelihood than Model~3 for the \Sexpr{bench_diffs$unit[1]} and \Sexpr{bench_diffs$unit[2]} departments, and also has log-likelihoods only a few units smaller than Model~3 for the departments \Sexpr{bench_diffs$unit[3]} and \Sexpr{bench_diffs$unit[4]}.
-This is particularly worrisome given that these four departments account for more than $\Sexpr{floor(100 * sum(mod3_cases[, c(bench_diffs$unit[1:4])], na.rm = TRUE) / sum(mod3_cases, na.rm = TRUE))}\%$ of the total number of reported cholera cases.
+The simple four parameter benchmark has a higher likelihood than Model~3 for the \Sexpr{bench_diffs_final$unit[1]} and \Sexpr{bench_diffs_final$unit[2]} departments, and also has log-likelihoods only a few units smaller than Model~3 for the departments \Sexpr{bench_diffs_final$unit[3]} and \Sexpr{bench_diffs_final$unit[4]}.
+This is particularly worrisome given that these four departments account for more than $\Sexpr{floor(100 * sum(mod3_cases[, c(bench_diffs_final$unit[1:4])], na.rm = TRUE) / sum(mod3_cases, na.rm = TRUE))}\%$ of the total number of reported cholera cases.
 
 \subsection{Examining the Hidden States of the Calibrated Model}
 
