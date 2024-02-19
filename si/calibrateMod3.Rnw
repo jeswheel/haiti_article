@@ -935,7 +935,7 @@ t(bpf_final3_out$block.cond.loglik) %>%
 \end{figure}
 
 Now that the model with additional parameters has been calibrated to the incidence data, we plot the conditional log-likelihood of each department compared to a benchmark model in Fig.~\ref{fig:finalUnitLL}.
-Interestingly, the difference in log-likelihoods between Model~3 and the benchmark model is smallest in the departments \Sexpr{bench_diffs$unit[1]}, \Sexpr{bench_diffs$unit[2]}, \Sexpr{bench_diffs$unit[3]} and \Sexpr{bench_diffs$unit[4]}.
+Interestingly, the difference in log-likelihoods between Model~3 and the benchmark model is smallest in the departments \Sexpr{bench_diffs_final$unit[1]}, \Sexpr{bench_diffs_final$unit[2]}, \Sexpr{bench_diffs_final$unit[3]} and \Sexpr{bench_diffs_final$unit[4]}.
 Each of these departments also exhibited the most sustained cholera transmission, defined by having the fewest number of weeks with no recorded cholera cases.
 Specifically, these four departments have zero cholera cases recorded in less than $4\%$ of the available data, and all remaining departments---except for Nord-Ouest, which has approximately $9.5\%$ of cases that are zeros and also exhibits the next smallest difference in log-likelihoods---have zero cases recorded in at least $14\%$ of the available weekly data.
 This result suggests that the quantitative advantage Model~3 has over its respective benchmark is primarily due to the model's ability to describe a resurgence of cases after a department records a week of zero cholera cases.
