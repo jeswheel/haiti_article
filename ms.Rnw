@@ -1843,10 +1843,27 @@ mod2_VaccScenarios <- bake(
 <<Mod2Fit_and_Scenarios_Figure, fig.height=1.9, fig.width=4.8, fig.align='center'>>=
 ggplot() +
   geom_line(data = h2_traj, aes(x = date, y = Ctotal + 1), col = 'blue') +
+  geom_ribbon(
+    data = h2_traj, 
+    aes(
+      x = date, 
+      ymin = (Ctotal + 1) * exp(-1.96*h2_fit$h2_params['v']),
+      ymax = (Ctotal + 1) * exp(1.96*h2_fit$h2_params['v'])
+    ), alpha = 0.5
+  ) + 
   geom_line(data = true_agg_cases, aes(x = date, y = ReportedAll + 1)) +
-  geom_line(data = filter(mod2_VaccScenarios$all_trajs,
-                          year >= max(h2_traj$year)),
-            aes(x = as.Date(date), y = ReportedCases + 1, color = scenario)) +
+  geom_line(
+    data = filter(mod2_VaccScenarios$all_trajs, year >= max(h2_traj$year)),
+    aes(x = as.Date(date), y = ReportedCases + 1, color = scenario)
+  ) +
+  geom_ribbon(
+    data = filter(mod2_VaccScenarios$all_trajs, year >= max(h2_traj$year)) %>% filter(scenario == 'V0'),
+    aes(
+      x = as.Date(date),
+      ymin = pmax((ReportedCases + 1) * exp(-1.96*h2_fit$h2_params['v']), 1),
+      ymax = pmax((ReportedCases + 1) * exp(1.96*h2_fit$h2_params['v']), 1)
+    ), linetype = 'dashed', alpha = 0.3
+  ) + 
   theme(axis.title.x = element_blank(),
         legend.title = element_blank(),
         axis.title.y = element_text(size = 9),
@@ -1864,7 +1881,7 @@ ggplot() +
 {\figTitle Simulated trajectory of Model~2.}
 The black line shows the nationally aggregated weekly cholera incidence data.
 The blue curve from 2012-2019 is the trajectory of the calibrated version of Model~2.
-Projections under the various vaccination scenarios, which are discussed in detail in the  {\bf Forecasts} subsection are also included.}
+Projections under the various vaccination scenarios, which are discussed in detail in the  {\bf Forecasts} subsection are also included. The gray ribbons represent a $95\%$ interval obtained from the log-normal measurement model. To avoid over-plotting, measurement variance is only plotted for the V0 vaccination scenario.}
 \end{figure}
 
 \subsubsection*{Calibrating Model~3 Parameters}\label{sec:fit3}

@@ -688,10 +688,12 @@ Due to the novelty of this algorithm, there does not exist published examples th
 
 \cite{lee20} were only able to estimate model parameters to a simplified version of Model~3 on a subset of the available data, as no method existed at the time of their publication to fit a fully coupled meta-population model to disease incidence data.
 Building on their results, we fit the fully coupled version of Model~3 to nearly all available data, reserving only a few observations to use to calibrate the initial conditions of the model (see the previous section for more details).
-In order to properly maximize the model likelihood, we found that it was necessary to use multiple searches for the MLE, periodically pruning away less successful searches.
-The first collection of searches was performed by obtaining initial values for the parameters by uniformly sampling values from a predefined hypercube.
+To maximize model likelihoods, we relied on parameter estimates obtained via the profile-likelihood confidence intervals provided in section S8.
+Prior to obtaining estimates via the profile likelihood search, we found that it was necessary to use multiple searches for the MLE, periodically pruning away less successful searches.
+The first collection of searches is performed by obtaining initial values for the parameters by uniformly sampling values from a predefined hypercube.
 A subsequent refinement search used parameter values corresponding to the largest model likelihoods as starting parameter values.
 The need for multiple searches does not appear to be uncommon, as a similar approach was used by \cite{ionides22}.
+While computationally inefficient, profile likelihoods proved to be an effective alternative to maximizing model likelihoods without the need to apply this multistage heuristic. 
 
 We use the technique described above to fit the fully coupled version of Model~3 proposed by \cite{lee20}.
 The maximum likelihood we obtained after two rounds of searching was $\Sexpr{round(max(haiti3_sub_fit$search2$logLiks$logLik))}$, which is higher than the benchmark model ($\Sexpr{round(sum(unitLikes_bench$ll))}$).
@@ -772,17 +774,6 @@ h3_final_mod_pars <- readRDS("../model3/run_level_3/h3_MLE_eval.rds") %>%
   select(-(job.id:logLik_se)) %>%
   unlist()
 
-# h3_final_results <- readRDS("../model3/run_level_3/haiti3_fit.rds")
-
-# Save best_m as index for the model parameters with the best likelihood.
-# Then, save the model parameter values and the likelihood evaluations
-# best_m <- which.max(h3_final_results$search2$logLiks$logLik)
-# best_params <- h3_final_results$search2$params[best_m, ]
-# all_liks <- as.data.frame(h3_final_results$search2$likMat)
-# all_liks$which <- rep(1:72, each = 18)
-# best_mod <- dplyr::filter(all_liks, which == best_m)
-
-
 # Change model parameters to the best set of parameters from previous
 # search
 coef(h3)[names(h3_final_mod_pars)] <- h3_final_mod_pars
@@ -816,35 +807,6 @@ unitLikesM3_final <- readRDS("../model3/run_level_3/mod3_eval_res.rds")[['u_cond
   mutate(unit = 1:10) %>% 
   select(unit, ll_est, ll_se)
 
-# Get repeated estimates of unit log-likelihoods
-# unitLikesM3 <- best_mod %>%
-#   pivot_longer(
-#     cols = -which,
-#     names_to = "unit",
-#     names_prefix = "V",
-#     values_to = "logLik"
-#   ) %>%
-#   select(-which) %>%
-#   group_by(unit) %>%
-#   summarize(
-#     ll_est = pomp::logmeanexp(logLik),
-#     ll_se = pomp::logmeanexp(logLik, se = TRUE)[2]
-#   ) %>%
-#   ungroup() %>%
-#   mutate(unit = as.numeric(unit)) %>%
-#   arrange(unit)
-
-# # A tibble: 10 × 3
- #    unit ll_est ll_se
- #   <dbl>  <dbl> <dbl>
- # 1     1 -2122. 0.221
- # 2     2 -2135. 0.419
- # 3     3 -1529. 0.882
- # 4     4 -1134. 0.501
- # 5     5 -1902. 0.213
- # 6     6 -1423. 0.303
- # 7     7 -1615. 0.633
-
 # Combine model likelihood table to benchmarks
 bench_M3_joined_final <- dplyr::left_join(
   x = unitLikesM3_final,
@@ -870,7 +832,6 @@ bench_diffs_final <- dplyr::left_join(
          ll_diff = ll_mod3 - ll_bench) %>%
   arrange(ll_diff)
 
-# floor(100 * sum(mod3_cases[, c(bench_diffs$unit[1:4])], na.rm = TRUE) / sum(mod3_cases, na.rm = TRUE))
 @
 
 We refit Model~3 after introducing these hurricane-related parameters using the same successive search scheme described above.
@@ -880,7 +841,6 @@ The inclusion of these parameters resulted in an overall increase of $\Sexpr{rou
 Such a large difference in log-likelihoods is well beyond the threshold of statistical uncertainty determined by Wilks' theorem, suggesting that the data highly favor the inclusion of the additional parameters.
 
 <<finalModel3BPF, echo=FALSE, message=FALSE, include=FALSE>>=
-
 
 # block particle filter to get conditional log-likelihoods.
 bpf_final3_out <- bake(

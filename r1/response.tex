@@ -597,31 +597,33 @@ In this case study, this was done by performing standard diagnostics for the IF2
   14. Please add the predicted intervals to Fig 4. I would like to see the effect of the log-normal measurement model.
 }
 
-We intentionally do not include predictive intervals in Fig~4. There are several reasons for this, one of which is mentioned in the article:
+We have added prediction intervals due to the error in the log-normal measurement model. 
 
-\article{In this analysis, we do not construct forecasts accounting for parameter uncertainty as our focus is on the estimation and diagnosis of mechanistic models.
-Furthermore, we use the projections from a single point estimate to highlight the deficiency of deterministic models that the only variability in model projections is a result of parameter uncertainty, which can lead to over-confidence in forecasts \cite{king15}.}
-
-\jwc{Below are some thoughts I had. We don't have to include all / any of this, but I thought it was something to think about on the topic of parameter uncertainty}
-
-Parameter uncertainty in model forecasts is an important topic, one that we would have liked to have addressed in our article but felt that we could not since the article is already becoming longer than one would expect in this journal. 
-In our literature review of dynamic models for cholera in Haiti, and our experience with literature with dynamic modeling outside of this problem, the most common approaches to accounting for parameter uncertainty are the following: 
-
-\begin{itemize}
-  \item Maximum likelihood etimation theory states that under certain conditions, the difference between the MLE and the generating model parameter is asymptoticly normally distributed with mean zero and variance determined by the inverse Fisher information matrix. Many numeric optimization techniques often approximate the curvature of the likelihood surface, thereby Fisher information matrix.
-  This can then be used to obtain approximate confidence intervals using the asymptotic distribution of the MLE and the approximation to Fisher's information matrix. While mathematically and computationally convinient, the validity of these confidence intervals depends on asymptotics and assumptions that are often not appropriate for non-linear models. In fact, there is evidence that these types of confidence intervals are often far too narrow even in the most idealistic cases for dynamic models: linear Gaussian models fit with a large number of observations \cite{wheeler23}. 
-  Because of this, confidence regions created in this way likely too narrow, resulting in over-confidence in parameter estimates. 
-  \item Alternatively, it is common to account for parameter uncertainty by performing a sensitivity analysis. This is often done when parameters were selected via non-likelihood based approaches, but our review contained instances (e.g. \cite{lee20}) where this was done even if parameters were calibrated by maximizing likelihoods. 
-  To perform a sensitivity anaylsis, researchers typically pick ranges of parameter estimates, creating a hypercube from which they obtain sample parameter values. 
-  The bounds of this hypercube, however, are often obtained using approximations of Fisher's Information Matrix (the deficiencies of which are mentioned above), or by some non-data driven approach. 
-  For example, bounds are often selected by arbitrarily adding / subtracting a percentage of the estimated parameter (where the bounds can be either larger or smaller than what should be used), or by using parameter estimates from other studies (in which case the parameter estimates may not make sense in the context of the model and data being considered, again resulting in intervals that may be arbitrarily wide or narrow).
-  A persistent theme with all of the above approaches is that they enable researchers to effectively pick the level of uncertainty to present in their reports. 
-  \item Sampling parameters from a Bayesian posterior.  For many researchers, this may be one of the primary reasons they prefer Baysian methods over maximum likelihood estimates, as these methods do have an advantage in accounting for parameter uncertainty.
-  Bayesian methods to estimate model parameters may not be possible for all scientific models of interest. We have been made aware of recent work that demonstrates cases where the authors would like to have a posterior distribution for their model, but the scientific model they propose is unable to be calibrated using state-of-the-art Bayesian approaches; they therefore use IF2 to obtain parameter estimates that result in good behaviour of particle filters, and then arbitrarily select a uniform distribution centered around the MLE as a prior distribution to Bayesian methods (e.g. \cite{smith22,rivera22}). This approach is related to Empirical Bayes, where the prior distribution is selected using information in the available data. We propose something similar in our supplement material, but our proposition does not require additional runs of pMCMC which can be computationally expensive. 
-  One drawback of our proposed Empirical Bayes approach is that when the Monte Carlo variance in likelihood evaluation is high, it is possible that the posterior mass function has the majority of its mass assigned to only a few parameter sets.
-\end{itemize}
-
-A full investigation / discussion on parameter uncertainty is outside of the scope of this article. 
+% We intentionally do not include predictive intervals in Fig~4. There are several reasons for this, one of which is mentioned in the article:
+% 
+% \article{In this analysis, we do not construct forecasts accounting for parameter uncertainty as our focus is on the estimation and diagnosis of mechanistic models.
+% Furthermore, we use the projections from a single point estimate to highlight the deficiency of deterministic models that the only variability in model projections is a result of parameter uncertainty, which can lead to over-confidence in forecasts \cite{king15}.}
+% 
+% \jwc{Below are some thoughts I had. We don't have to include all / any of this, but I thought it was something to think about on the topic of parameter uncertainty}
+% 
+% Parameter uncertainty in model forecasts is an important topic, one that we would have liked to have addressed in our article but felt that we could not since the article is already becoming longer than one would expect in this journal. 
+% In our literature review of dynamic models for cholera in Haiti, and our experience with literature with dynamic modeling outside of this problem, the most common approaches to accounting for parameter uncertainty are the following: 
+% 
+% \begin{itemize}
+%   \item Maximum likelihood etimation theory states that under certain conditions, the difference between the MLE and the generating model parameter is asymptoticly normally distributed with mean zero and variance determined by the inverse Fisher information matrix. Many numeric optimization techniques often approximate the curvature of the likelihood surface, thereby Fisher information matrix.
+%   This can then be used to obtain approximate confidence intervals using the asymptotic distribution of the MLE and the approximation to Fisher's information matrix. While mathematically and computationally convinient, the validity of these confidence intervals depends on asymptotics and assumptions that are often not appropriate for non-linear models. In fact, there is evidence that these types of confidence intervals are often far too narrow even in the most idealistic cases for dynamic models: linear Gaussian models fit with a large number of observations \cite{wheeler23}. 
+%   Because of this, confidence regions created in this way likely too narrow, resulting in over-confidence in parameter estimates. 
+%   \item Alternatively, it is common to account for parameter uncertainty by performing a sensitivity analysis. This is often done when parameters were selected via non-likelihood based approaches, but our review contained instances (e.g. \cite{lee20}) where this was done even if parameters were calibrated by maximizing likelihoods. 
+%   To perform a sensitivity anaylsis, researchers typically pick ranges of parameter estimates, creating a hypercube from which they obtain sample parameter values. 
+%   The bounds of this hypercube, however, are often obtained using approximations of Fisher's Information Matrix (the deficiencies of which are mentioned above), or by some non-data driven approach. 
+%   For example, bounds are often selected by arbitrarily adding / subtracting a percentage of the estimated parameter (where the bounds can be either larger or smaller than what should be used), or by using parameter estimates from other studies (in which case the parameter estimates may not make sense in the context of the model and data being considered, again resulting in intervals that may be arbitrarily wide or narrow).
+%   A persistent theme with all of the above approaches is that they enable researchers to effectively pick the level of uncertainty to present in their reports. 
+%   \item Sampling parameters from a Bayesian posterior.  For many researchers, this may be one of the primary reasons they prefer Baysian methods over maximum likelihood estimates, as these methods do have an advantage in accounting for parameter uncertainty.
+%   Bayesian methods to estimate model parameters may not be possible for all scientific models of interest. We have been made aware of recent work that demonstrates cases where the authors would like to have a posterior distribution for their model, but the scientific model they propose is unable to be calibrated using state-of-the-art Bayesian approaches; they therefore use IF2 to obtain parameter estimates that result in good behaviour of particle filters, and then arbitrarily select a uniform distribution centered around the MLE as a prior distribution to Bayesian methods (e.g. \cite{smith22,rivera22}). This approach is related to Empirical Bayes, where the prior distribution is selected using information in the available data. We propose something similar in our supplement material, but our proposition does not require additional runs of pMCMC which can be computationally expensive. 
+%   One drawback of our proposed Empirical Bayes approach is that when the Monte Carlo variance in likelihood evaluation is high, it is possible that the posterior mass function has the majority of its mass assigned to only a few parameter sets.
+% \end{itemize}
+% 
+% A full investigation / discussion on parameter uncertainty is outside of the scope of this article. 
 
 \report{
   15. Lines 513-515. Please clarify the comparison between disaggregated models and a benchmark. Let’s say I have spatial units 1 and 2, for which I have observations y1 and y2. Should I fit the disaggregated mechanistic model to y1 and y2 simultaneously (as usual) but keep a record of the individual log-likelihoods (log-lik y1 and log-lik y2). In parallel, fit the benchmark independently to y1 and y2, and then compare by log-likelihoods or information criteria by spatial unit.
