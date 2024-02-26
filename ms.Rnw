@@ -547,7 +547,7 @@ We assess previous methods used for fitting and evaluating these models, and we 
 \new{We assess current methodological approaches to these issues via a case study of the 2010-2019 cholera epidemic in Haiti.
 We consider three dynamic models developed by expert teams to advise on vaccination policies.
 We evaluate previous methods used for fitting these models, and we demonstrate modified data analysis strategies leading to improved statistical fit.}
-Specifically, we present approaches of diagnosing model misspecification \old{, development of alternative models, and computational improvements in optimization, in the context of likelihood-based inference on nonlinear dynamic systems.} \new{and the consequent development of improved models.
+Specifically, we present approaches for diagnosing model misspecification \old{, development of alternative models, and computational improvements in optimization, in the context of likelihood-based inference on nonlinear dynamic systems.} \new{and the consequent development of improved models.
 We further demonstrate the utility of recent advances in likelihood maximization for high-dimensional nonlinear dynamic models, enabling likelihood-based inference for high-dimensional models for spatiotemporal incidence data.}
 Our workflow is reproducible and extendable, facilitating future investigations of this disease system.
 
@@ -560,7 +560,7 @@ Evaluation of success at these goals is necessary in order for a model to provid
 We do this by conducting a re-analysis of the 2010 cholera outbreak in Haiti.
 Our analysis presents methodology for diagnosing how well a model describes observed data\new{.}\old{, and provides careful justification of valid conclusions from the fitted model.}
 Objective measures are used to \old{benchmark} \new{evaluate} model fit; when \old{these}\new{objective measures of the goodness-of-fit of a model} are combined with reproducibility, a framework emerges for continual improvement \new{to model based inference} when revisiting the data\old{ and models}.
-\new{This framework promotes scientific discovery and bolsters model-based policy recommendations by simplifying the process for researchers to build off of previous results.}
+\new{This framework promotes scientific discovery and supports model-based policy recommendations by simplifying the process for researchers to build off of previous results.}
 Our data analysis workflow is supported by recent advances in algorithms, software and hardware, which facilitate statistical fitting of nonlinear stochastic dynamic models to observed incidence data.
 However, inference for high-dimensional systems remains a methodological challenge.
 One of the models under consideration involves spatially coupled stochastic meta-populations, and we demonstrate how a recently developed algorithm permits likelihood-based inference and model diagnostics in this setting.
@@ -645,9 +645,9 @@ To investigate the extent to which [1] is typical of the substantial body of wor
 The search resulted in 66 papers, of which 32 used dynamic models to describe the cholera epidemic in Haiti.
 The models make various choices on the dichotomies considered by Lee et al.~[1]; deterministic versus stochastic; compartment model versus agent-based; aggregated versus spatially explicit.}
 
-\new{\editModelingGuidanceFirst}
+\new{\editModelingGuidance}
 
-\new{\editModelingGuidanceSecond}
+% \new{\editModelingGuidanceSecond}
 
 \new{Our recommendations are presented in the context of a case study, with the goal of demonstrating how careful adherence to statistical principles may result in improved model fits.}
 We proceed by introducing the general modeling scheme employed by Models~1--3 and provide details of each individual model;
@@ -1693,9 +1693,8 @@ gc()
 
 If a mechanistic model including a feature (such as a representation of a mechanism, or the inclusion of a covariate) fits better than mechanistic models without that feature, and also has competitive fit compared to associative benchmarks, this may be taken as evidence supporting the scientific relevance of the feature.
 As for any analysis of observational data, we must be alert to the possibility of confounding.
-For a covariate, this shows up in a similar way to regression analysis: the covariate under investigation could be a proxy for some other unmodeled or unmeasured covariate.
-For a mechanism, the model feature could in principle explain the data by helping to account for some different unmodeled phenomenon.
-
+For a covariate, this shows up in a similar way to regression analysis: the covariate under investigation could be a proxy for some other unmodeled \new{phenomenon} or unmeasured covariate.
+\old{For a mechanism, the model feature could in principle explain the data by helping to account for some different unmodeled phenomenon.}
 
 The statistical evidence of a trend in transmission rate in this model could be explained by any trending variable (such as hygiene improvements, or changes in population behavior), resulting in confounding from collinear covariates.
 \old{Alternatively, the trend could be attributed to a decreasing reporting rate rather than decreasing transmission rate, resulting in confounded mechanisms.}
@@ -2030,7 +2029,7 @@ Because of this, we use a simple negative binomial model with an auto regressive
 Y_n|Y_{n - 1} \sim \text{NB}\big(\NBintercept + \NBar Y_{n-1}, \NBsize \big),
 \end{eqnarray}
 where $\mathrm{E}\big(Y_n|Y_{n - 1}\big) = \NBintercept + \NBar Y_{n-1}$, and $\Var\big(Y_n|Y_{n - 1}\big) = \mathrm{E}\big(Y_n|Y_{n - 1}\big) + \mathrm{E}\big(Y_n|Y_{n - 1}\big)^2 / \NBsize$.
-\new{To obtain a benchmark for models with a meta-population structure, we fit independent auto-regressive negative binomial models to each spatial unit. Under the assumption of independence, the log-likelihood of the benchmark on the entire collection of data can be obtained by summing up the log-likelihood for each independent model. In general, a spatially explicit model may not have well-defined individual log-likelihoods, and therefore comparisons to benchmarks should be made at the level of the joint model.}
+\new{\editSpatBench}
 
 In the case where the case counts are large, an alternative benchmark recommended by He et al.~\cite{he10} is a log-linear Gaussian ARMA model;
 the theory and practice of ARMA models is well developed, and these linear models are appropriate on a log scale due to the exponential growth and decay characteristic of biological dynamics.
@@ -2145,7 +2144,7 @@ In epidemiological studies, for example, quantitative understanding of individua
 This makes direct interpretation of estimated parameters delicate.
 
 Our case study provides an example of this in the parameter estimate for the duration of natural immunity due to cholera infection, $\muRS^{-1}$.
-Under the framework of Model~2, the best estimate for this parameter is $\Sexpr{signif(1/h2_fit$h2_params["sigma"],3)} \, \mathrm{yr}$, suggesting that individuals have effectively permanent immunity to cholera once infected.
+Under the framework of Model~2, the best estimate for this parameter is $\Sexpr{signif(1/h2_fit$h2_params["sigma"],3)} \, \mathrm{yr}$, suggesting that individuals have \old{effectively} permanent immunity to cholera once infected.
 \new{Rather than interpreting this as scientific evidence that individuals have permanent immunity from cholera, this result suggests that Model~2 favors a regime where reinfection events are a negligble part of the dynamics.}
 \old{To interpret this result, we bear in mind that the data ranged from 2010-2019, and therefore estimates of immunity longer than $10\, \mathrm{yr}$---the upper end of previous estimates of natural immunity [101]---effectively result in the same model dynamics.}
 The depletion of susceptible individuals may \old{also} be attributed to confounding mechanisms---such as localized vaccination programs and non-pharmaceutical interventions that reduce cholera transmission \cite{trevisin22, rebaudet21}---that were not accounted for in the model.
