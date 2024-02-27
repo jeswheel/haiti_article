@@ -548,7 +548,7 @@ We assess previous methods used for fitting and evaluating these models, and we 
 We consider three dynamic models developed by expert teams to advise on vaccination policies.
 We evaluate previous methods used for fitting these models, and we demonstrate modified data analysis strategies leading to improved statistical fit.}
 Specifically, we present approaches for diagnosing model misspecification \old{, development of alternative models, and computational improvements in optimization, in the context of likelihood-based inference on nonlinear dynamic systems.} \new{and the consequent development of improved models.
-We further demonstrate the utility of recent advances in likelihood maximization for high-dimensional nonlinear dynamic models, enabling likelihood-based inference for high-dimensional models for spatiotemporal incidence data.}
+Additionally, we demonstrate the utility of recent advances in likelihood maximization for high-dimensional nonlinear dynamic models, enabling likelihood-based inference for high-dimensional models for spatiotemporal incidence data.}
 Our workflow is reproducible and extendable, facilitating future investigations of this disease system.
 
 \section*{Author summary}
@@ -556,9 +556,8 @@ Quantitative understanding of infectious disease transmission dynamics relies up
 The models aim to provide a statistical description of the trajectory of an epidemic and its uncertainty, together with a representation of the underlying biological mechanisms.
 Evaluation of success at these goals is necessary in order for a model to provide a reliable tool for guiding evidence-based public policy interventions.
 \old{In this article, we discuss common modeling decisions that may not provide an adequate statistical explanation of the data, and we show that attention to statistical fit can lead to more accurate policy evaluations}.
-\new{In this article, we use an in-depth case study to motivate general procedures for fitting mathematical models to time series data, while explaining how these procedures help to address limitations of previous approaches.}
-We do this by conducting a re-analysis of the 2010 cholera outbreak in Haiti.
-Our analysis presents methodology for diagnosing how well a model describes observed data\new{.}\old{, and provides careful justification of valid conclusions from the fitted model.}
+\new{In this article, we conduct a re-analysis of the 2010 cholera outbreak in Haiti. We use this case study to investigate current procedures for fitting mathematical models to time series data, while identifying limitations of these methodologies and proposing remedies.}
+\new{We present} \old{Our analysis presents} methodology for diagnosing how well a model describes observed data\new{.}\old{, and provides careful justification of valid conclusions from the fitted model.}
 Objective measures are used to \old{benchmark} \new{evaluate} model fit; when \old{these}\new{objective measures of the goodness-of-fit of a model} are combined with reproducibility, a framework emerges for continual improvement \new{to model based inference} when revisiting the data\old{ and models}.
 \new{This framework promotes scientific discovery and supports model-based policy recommendations by simplifying the process for researchers to build off of previous results.}
 Our data analysis workflow is supported by recent advances in algorithms, software and hardware, which facilitate statistical fitting of nonlinear stochastic dynamic models to observed incidence data.
@@ -581,7 +580,7 @@ What are the possible trade-offs of increasing model complexity, such as the inc
 This case study investigates the use of dynamic models and spatiotemporal data to inform \old{a policy decision} \new{public health policy} in the context of the cholera outbreak in Haiti, which started in 2010.
 \old{We build on a multi-group modeling exercise by Lee et al. [1] in which four expert modeling teams developed models to the same dataset with the goal of comparing conclusions on the feasibility of eliminating cholera by a vaccination campaign}.
 \old{The data that were used for this study, and that is the subject of our reanalysis, is displayed in Fig.~[1].}
-\new{Various dynamic models were developed to study this outbreak: searching PubMed with keywords ``Haiti, cholera, model'' we obtained 22 studies that utilized deterministic models \cite{lee20,tuite11,andrews11,botelho21,fitzgibbon20,eisenberg13,rinaldo12,chao11,date11,lin19,abrams13,collins21,akman15,trevisin22,mavian20,collins14,kelly16,capone15,leung22,mari15,gatto12,kuhn14}
+\new{Various dynamic models were developed to study this outbreak: searching PubMed with keywords ``Haiti, cholera, model'' we obtained 22 studies that utilized deterministic mechanistic dynamic models \cite{lee20,tuite11,andrews11,botelho21,fitzgibbon20,eisenberg13,rinaldo12,chao11,date11,lin19,abrams13,collins21,akman15,trevisin22,mavian20,collins14,kelly16,capone15,leung22,mari15,gatto12,kuhn14}
 and 11 studies that used stochastic models \cite{kirpich16,lee20,pasetto18,mukandavire13,kirpich17,lewnard16,kunkel17,mukandavire15,sallah17,azman12,azman15}.
 Incidence data on the outbreak are available at various spatial scales, motivating 17 studies in our literature review to consider spatially explicit dynamic models \cite{lee20,tuite11,pasetto18,fitzgibbon20,eisenberg13,rinaldo12,chao11,abrams13,trevisin22,sallah17,collins14,kelly16,azman12,leung22,kuhn14,mari15,gatto12}.
 Here we focus on a multi-group modeling exercise by Lee et al.~\cite{lee20} in which four expert modeling teams developed models to the same dataset with the goal of comparing conclusions on the feasibility of eliminating cholera by a vaccination campaign.}
@@ -1305,7 +1304,7 @@ Reporting rate
 \begin{flushleft} References to the relevant equation are given in parentheses.
 Parameters that were fixed and not calibrated using the data are indicated with $\fixed$; all fixed parameters values were chosen to match the fixed parameter values of \cite{lee20}.
 Parameters that were added during our re-analysis and were not considered by Lee et al. are indicated with $^*$.
-\new{Confidence intervals for model parameters are given in Supplement S8.}
+\new{Confidence intervals for model parameters are given in supplement~S8.}
 Translations back into the notation of \cite{lee20} are given in \nameref{S1_Table}.
 \end{flushleft}
 \end{adjustwidth}
@@ -1317,7 +1316,7 @@ The observation at time $t_n$ is modeled by the random vector $\bm{Y}_n$.
 While the latent process exists between observation times, the value of the latent state at observations times is of particular interest.
 We therefore write $\bm{X}_n = \bm{X}(t_n)$ to denote the value of the latent process at the $n$th observation time, and $\bm{X}_{1:N}$ is the collection of latent state values for all observed time points.
 The observable random variables $\bm{Y}_{1:N}$ are assumed to be conditionally independent given $\bm{X}_{0:N}$.
-Together, with the density for the initial value of the latent state $\bm{X}_{0} = \bm{X}(t_0)$, each model assumes a joint density $f_{\bm{X}_{0:N}, \bm{Y}_{1:N}}\big(\bm{x}_{0:N}, \bm{y}_{1:N};\paramVec\big)$, where $\paramVec$ is a parameter vector that indexes the model.
+Together, with the density for the initial value of the latent state $\bm{X}_{0} = \bm{X}(t_0)$, each model \new{defines} \old{assumes} a joint density $f_{\bm{X}_{0:N}, \bm{Y}_{1:N}}\big(\bm{x}_{0:N}, \bm{y}_{1:N};\paramVec\big)$, where $\paramVec$ is a parameter vector that indexes the model.
 The observed data $\bm{y}_{1:N}^*$, along with the unobserved true value of the latent state, are modeled as a realization of this joint distribution.
 
 Because of the probabilistic nature of both the unobserved latent state and the observable random variables, it is possible to consider various marginal and conditional densities of these two jointly random vectors.
@@ -1658,7 +1657,7 @@ Lee et al.~\cite{lee20} implemented Model~1 by fitting two distinct phases: an e
 We similarly allow the re-estimation of process and measurement overdispersion parameters ($\sigmaProc^2$ and $\obsOverdispersion$), and require that the latent Markov process $X(t)$ carry over from one phase into the next.
 The resulting 95\% confidence interval for $\transmissionTrend$ is $(\Sexpr{myround(beta_t_mcap_results$ci[1], digits = 3)}, \Sexpr{myround(beta_t_mcap_results$ci[2], digits = 3)})$, with the full results displayed in Fig.~\ref{fig:betat}.
 These results are suggestive that the inclusion of a trend in the transmission rate improves the quantitative ability of Model~1 to describe the observed data.
-\new{The maximum likelihood estimate for $\transmissionTrend$ corresponds with a \Sexpr{paste0(myround(100 - 100*exp(beta_t_mcap_results$mle * 430/215), 1), '\\%')} reduction to the transmission rate over the course of the outbreak, with a $95\%$ confidence interval of (\Sexpr{paste0(rev(myround(100 - 100*exp(beta_t_mcap_results$ci * 430/215), 1)), collapse = ', ', sep = '\\%')}) for the overall reduction in transmission.}
+\new{The maximum likelihood estimate for $\transmissionTrend$ corresponds to a \Sexpr{paste0(myround(100 - 100*exp(beta_t_mcap_results$mle * 430/215), 1), '\\%')} reduction to the transmission rate over the course of the outbreak, with a $95\%$ confidence interval of (\Sexpr{paste0(rev(myround(100 - 100*exp(beta_t_mcap_results$ci * 430/215), 1)), collapse = ', ', sep = '\\%')}) for the overall reduction in transmission.}
 The reported results for Model~1 in the remainder of this article were obtained with the inclusion of the parameter $\transmissionTrend$.
 \new{This example demonstrates the type of model variation that should be considered in the course of a data analysis: the model variation---the addition of a trend in transmission rate---has a plausible scientific justification, and is easily testable using likelihood based inference methods and observed data.}
 
