@@ -408,7 +408,7 @@ However, we do make a few comments on the benefits of including overdispersion i
 Because of their usefulness, we do not go as far as to explicitly forbid the use of deterministic models, but instead point out some of their limitations that should be considered. 
 Our revised discussion includes a comment that demonstrates this belief: 
 
-\article{Despite their limitations, deterministic models can offer valuable insights into dynamic systems; researchers should carefully weigh these limitations when using these models and presenting their results.}
+\article{Despite their limitations, deterministic models can offer valuable insights into dynamic systems. As with all models, researchers should consider and acknoweledge these limitations when applying deterministic models and interpreting their outcomes.}
 
 The decision on whether to choose Markov chain Monte Carlo (MCMC) methods is not fully aligned with the decision on whether to include stochasticity in the model.
 In our literature review, of the 12 previous Haiti cholera investigations including stochastic dynamic models \cite{kirpich17,lee20,pasetto18,mukandavire13,kirpich16,lewnard16,kunkel17,mukandavire15,sallah17,azman12,azman15}, four of them carried out inference via MCMC \cite{pasetto18,lewnard16,sallah17,azman12}.
@@ -545,9 +545,9 @@ Due to the size and complexity of the table we have elected to put uncertainty e
 
 The table you found is the function $\upsilon^\star(t)$, as that is what is used by each of their models. Lee et al~\cite{lee20} provide a smoothed version of this function in Figure~2 (B), but the actual function implemented by each of their models (and consequently, our models) is the numeric table itself; in this sense, the smoothed function they show in Figure~2 (B) is an approximation of the true vaccination function that they use, which is provided in Table S4 in their supplement material.
 
-According to Lee et al~\cite{lee20}, this function was obtained by ``fitting a log-linear weighted regression model to the raw data from a published meta-analysis on killed OCV efficacy against medically attended culter-confirmed cholera (figure 2, appendix 3 p 6) \cite{bi17}". Aside from this statement, they provided limited details on how they came up with this function. Because of this, we unfortunately can't provide much more additional information other than the statement that was already included in our article:
+According to Lee et al~\cite{lee20}, this function was obtained by ``fitting a log-linear weighted regression model to the raw data from a published meta-analysis on killed OCV efficacy against medically attended culter-confirmed cholera (figure 2, appendix 3 p 6) \cite{bi17}". Aside from this statement, they provided limited details on how they came up with this function. Our revised manuscript clarifies this point
 
-\article{$\upsilon^\star(t)$ is efficacy at time $t$ since vaccination for adults, taken from \cite{lee20}, Table S4, ...}
+\article{$\upsilon^\star(t)$ is efficacy at time $t$ since vaccination for adults, a step-function represented in Table~S4 of \cite{lee20}, ...}
 
 \report{
   8. Lines 209-211. In model 2, an incidence measurement is employed to configure a prevalence compartment. As the authors may know, initial values severely condition the dynamics of a model. Please explain this decision. Is it because that was the approach followed in the original formulation (Lee at al's paper)?
