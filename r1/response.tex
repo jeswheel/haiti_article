@@ -12,8 +12,11 @@
 \usepackage{bm}
 
 \usepackage{amsmath,amsthm}
+\usepackage{nameref,hyperref}
 \usepackage[normalem]{ulem}% to use \sout in feedback commands
+\usepackage{comment}
 
+\excludecomment{hidden}
 % \usepackage{natbib}
 %\bibliographystyle{apalike}
 
@@ -666,6 +669,12 @@ The following sentence has been added to clarify this:
 \article{\editModVacc}
 
 \bibliography{../bib-haiti.bib,../bib-lit.bib}
+
+% \begin{hidden}
+\paragraph*{S7 Text}
+\label{S_CI}
+{\bf Confidence Intervals} Tables and figures describing 95\% confidence intervals for estimated parameters.
+% \end{hidden}
 
 \end{document}
 
