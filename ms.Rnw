@@ -2622,11 +2622,16 @@ We therefore do not provide probability of elimination estimates under Model~2, 
 
 The ongoing global COVID-19 pandemic has \old{provided a clear example on} \new{demonstrated} how government policy may be affected by the \old{conclusions of scientific models} \new{inferences drawn from mathematical modeling} \cite{saltelli20}.
 \old{This article demonstrates that fitting appropriate scientific models to guide policy is a challenging statistical task.}
-\new{However, developing credible models---which are supported by data and can lend insights into a dynamic system---remains a challenging task.
-In this article, we demonstrate that increasing the current standards of mathematical modeling of ecological systems can increase our capacity to make sense of a complex, nonlinear system's dynamics and make data-driven inferences.
-We suggest devoting more effort to assess dynamic models intended for system inference.
-Explicitly, we urge researchers to search for indications in available data that quantify the reliability of model-based inferences.
-We illustrate that this can be achieved by comparing fitted models to a suitable statistical benchmark and verifying that model outcomes---including estimated parameters, latent states, and seasonal trends---are justified in the system context.}
+\new{However, the development of credible models---which are supported by data and can lend quantitative insights into a dynamic system---remains a challenging task.
+In this article, we demonstrate opportunites available for raising the current standards of statistical inference for mathematical models of biological systems.
+
+We present methodology consistent with existing guidelines but exceeding standard practice.  
+In particular, we show the value of comparing the likelihood of fitted mechanistic models versus non-mechanistic benchmarks.
+Further, we use likelihood-based diagnostic methods to identify specific limitations of proposed models.
+We use likelihood profile methods to assess parameter identifiability and to construct confidence intervals for parameter estimates. 
+We assess the accuracy of numerical approximations involved in our calculations.
+When reaching conclusions, we identify potential consequences of confounded variables and model misspecification.
+}
 
 \new{\editDiscussionOne}
 
