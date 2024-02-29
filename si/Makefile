@@ -13,7 +13,7 @@ create:
 # 	$(MAKE) clean
 
 fresh: ReplicateLee20.Rnw calibrateMod3.Rnw $(INPUTFILES)
-	rm -f si.tex calibrateMod3*.tex ReplicateLee20*.tex
+	rm -f si.tex calibrateMod3*.tex ReplicateLee20*.tex confidenceIntervals*.tex initialValues*.tex
 	rm -rf si_files
 
 si.Rnw: | $(COMPILEFILES) inputs/translateTab.tex
