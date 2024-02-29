@@ -255,7 +255,7 @@ if (RUN_LEVEL == 3) {
   # is when the final results are calculated.
   cat(
     utils::capture.output(sessionInfo()),
-    file = "sessionInfo_tmp.txt",
+    file = "sessionInfo.txt",
     sep="\n"
   )
 }
@@ -559,7 +559,7 @@ Evaluation of success at these goals is necessary in order for a model to provid
 \new{In this article, we conduct a re-analysis of the 2010 cholera outbreak in Haiti. We use this case study to investigate current procedures for fitting mathematical models to time series data, while identifying limitations of these methodologies and proposing remedies.}
 \new{We present} \old{Our analysis presents} methodology for diagnosing how well a model describes observed data\new{.}\old{, and provides careful justification of valid conclusions from the fitted model.}
 Objective measures are used to \old{benchmark} \new{evaluate} model fit; when \old{these}\new{objective measures of the goodness-of-fit of a model} are combined with reproducibility, a framework emerges for continual improvement \new{to model based inference} when revisiting the data\old{ and models}.
-\new{This framework promotes scientific discovery and supports model-based policy recommendations by simplifying the process for researchers to build off of previous results.}
+\new{This framework promotes scientific discovery and supports model-driven policy recommendations by simplifying the process of understanding and improving previous results.}
 Our data analysis workflow is supported by recent advances in algorithms, software and hardware, which facilitate statistical fitting of nonlinear stochastic dynamic models to observed incidence data.
 However, inference for high-dimensional systems remains a methodological challenge.
 One of the models under consideration involves spatially coupled stochastic meta-populations, and we demonstrate how a recently developed algorithm permits likelihood-based inference and model diagnostics in this setting.
@@ -588,9 +588,9 @@ Model~1 is stochastic and describes cholera at the national level;
 Model~2 is deterministic with spatial structure, and includes transmission via contaminated water;
 Model~3 is stochastic with spatial structure, and accounts for measured rainfall.
 Model~4 has an agent-based construction, featuring considerable mechanistic detail but limited ability to calibrate these details to data.
-\new{These modeling strategies were selected by \cite{lee20} to represent the range of approaches used in the research community}
+\new{These modeling strategies were selected by Lee et a.~\cite{lee20} to represent the range of approaches used in the research community}
 We focus on Models~1--3, as the strengths and weaknesses of the agent-based modeling approach \cite{tracy18} are outside the scope of this article.
-\new{In addition, agent-based models were less widely used, the agent based model of \cite{lee20} being the only model of this class that was found in our literature review.}
+\new{In addition, agent-based models were less widely used, the agent based model in \cite{lee20} being the only model of this class that was found in our literature review.}
 \new{The data that were used in \cite{lee20}, and that we reanalyze, are displayed in Fig.~\ref{fig:CholeraData}.}
 
 \begin{figure}[!h]
@@ -623,8 +623,8 @@ Weekly reported cholera cases in Haiti from October 2010 to January 2019 for eac
 The four independent teams were given the task of estimating the
 potential effect of prospective oral cholera vaccine (OCV) programs.
 While OCV is accepted as a safe and effective tool for controlling the spread of cholera, the global stockpile of OCV doses remains limited \cite{pezzoli20}.
-Advances in OCV technology and vaccine availability, however, raised the possibility of planning a national vaccination program \cite{lee20}.
-\new{The possibility of controlling the Haiti cholera outbreak via OCV was considered by various research groups \cite{ivers17,andrews11,walton11,matias17,chao11,fung13,date11,leung22,azman15}}.
+Advances in OCV technology and vaccine availability, however, raised the possibility of planning a national vaccination program.
+\new{The possibility of controlling the Haiti cholera outbreak via OCV was considered by various research groups \cite{lee20,ivers17,andrews11,walton11,matias17,chao11,fung13,date11,leung22,azman15}}.
 In the \new{Lee et al.~\cite{lee20}} study, certain data were shared between the groups, including demography and vaccination history; vaccine efficacy was also fixed at a shared value between groups.
 Beyond this, the groups made autonomous decisions on what to include and exclude from their models.
 \old{The groups largely adhered to existing guidelines for creating models to inform policy [35, 36] and, d}\new{D}espite their autonomy, \new{the four independent teams} obtained a consensus that an extensive nationwide vaccination campaign would be necessary to eliminate cholera from Haiti.
@@ -1304,7 +1304,7 @@ Reporting rate
 \begin{flushleft} References to the relevant equation are given in parentheses.
 Parameters that were fixed and not calibrated using the data are indicated with $\fixed$; all fixed parameters values were chosen to match the fixed parameter values of \cite{lee20}.
 Parameters that were added during our re-analysis and were not considered by Lee et al. are indicated with $^*$.
-\new{Confidence intervals for model parameters are given in supplement~S8.}
+\new{Confidence intervals for model parameters are given in supplement~S8.} %TODO: nameref this
 Translations back into the notation of \cite{lee20} are given in \nameref{S1_Table}.
 \end{flushleft}
 \end{adjustwidth}
@@ -1352,7 +1352,7 @@ For this reason, we provide flow chart diagrams for Models~1--3 in supplement fi
 \subsubsection*{Model~1}
 \label{sec:model1}
 The latent state vector $\bm{X}(t) = \big(S_{\vaccCounter}(t),  E_{\vaccCounter}(t), I_{\vaccCounter}(t), A_{\vaccCounter}(t), R_{\vaccCounter}(t), \vaccCounter \in 0:\vaccClass\big)$ describes susceptible, latent (exposed), infected (and symptomatic), asymptomatic, and recovered individuals in vaccine cohort $\vaccCounter$ at time $t$.
-Here, $\vaccCounter=0$ corresponds to unvaccinated individuals, and $\vaccCounter \in \seq{1}{\vaccClass}$ describes hypothetical vaccination programs\new{, where each program $\vaccCounter$ indexes differences in both the number of doses administered (one versus two doses per individual) and the round of vaccine administration.}
+Here, $\vaccCounter=0$ corresponds to unvaccinated individuals, and $\vaccCounter \in \seq{1}{\vaccClass}$ describes hypothetical vaccination programs. \new{Each program $\vaccCounter$ indexes differences in both the number of doses administered (one versus two doses per individual) and the round of vaccine administration, seperating individuals into compartments with distinct dynamics based on vaccination status.}
 The force of infection is
 \begin{equation}
 \label{model1:lambda}
@@ -1473,7 +1473,7 @@ In Eq.~\myeqref{model2:transport} the spatial coupling is specified by a gravity
 T_{u\varv} = v_{\mathrm{rate}} \times \frac{\mathrm{Pop}_u \mathrm{Pop}_{\varv}}{D_{u\varv}^2},
 \end{equation}
 where $\mathrm{Pop}_u$ is the mean population for department $u$,
-$D_{u\varv}$ is a distance measure estimating average road distance between randomly chosen members of each population, and $v_{\mathrm{rate}}= 10^{-12} \,\mbox{km$^2$yr$^{-1}$}$ \old{was treated as a fixed constant.}\new{was fixed at the value used by \cite{lee20}.}
+$D_{u\varv}$ is a distance measure estimating average road distance between randomly chosen members of each population, and $v_{\mathrm{rate}}= 10^{-12} \,\mbox{km$^2$yr$^{-1}$}$ \old{was treated as a fixed constant.}\new{was fixed at the value used in \cite{lee20}.}
 In Eq.~\myeqref{model2:water_transport}, $T^W_{u\varv}$ is a measure of river flow between departments.
 The unit of $W_u(t)$ is cells per ml, with dose response modeled via a saturation constant of $\Wsat$ in Eq.~\myeqref{model2:lambda}.
 In Eq.~\myeqref{model2:mu_SE}, $\vaccineEfficacy_\vaccCounter$ denotes the vaccine efficacy for each vaccination campaign $\vaccCounter \in \vaccClass$, with \old{$\vaccineEfficacy_0 = 1$, $\vaccineEfficacy_1 = 1 - 0.429 \childReduce$, $\vaccineEfficacy_2 = 1 - 0.519 \childReduce$, $\vaccineEfficacy_3 = 1 - 0.429$, and $\vaccineEfficacy_4 = 1 - 0.519$} \new{$\vaccineEfficacy_0 = 0$, $\vaccineEfficacy_1 = 0.429 \childReduce$, $\vaccineEfficacy_2 = 0.519 \childReduce$, $\vaccineEfficacy_3 = 0.429$, and $\vaccineEfficacy_4 = 0.519$}
@@ -1603,11 +1603,11 @@ Number of &
 \hline
 \end{tabular}
 \begin{flushleft}
-Values in parentheses are corresponding values using Lee et al.~\cite{lee20} parameter estimates.  \textsuperscript{1}The reported likelihood is an upper bound of the likelihood of the Lee et al.~\cite{lee20} model. \textsuperscript{2}Lee et al.~\cite{lee20} fit Model~3 to a subset of the data (March 2014 onward, excluding data from Ouest in 2015-2016).
+Values in parentheses are corresponding values \new{obtained} using \new{the models of \cite{lee20}} \old{Lee et al.~[4] parameter estimates}.  \textsuperscript{1}The reported likelihood is an upper bound of the likelihood of the \old{Lee et al.~[4]} model \new{in \cite{lee20}}. \old{Lee et al.~[4] fit} \textsuperscript{2}\new{In \cite{lee20},} Model~3 \new{was fit} to a subset of the data (March 2014 onward, excluding data from Ouest in 2015-2016).
 On this subset, their model has a likelihood of $\Sexpr{myround(lee3_results$sub_ll_eval, 1)}$.
 On this same subset, our model has a likelihood of $\Sexpr{myround(mod3_eval_res$subset_ll['est'], 1)}$.
-Details of estimating the likelihood of the Lee et al.~\cite{lee20} models is provided in \nameref{S_lee20}
-See Sec.~S6 of the supplement material for more details on estimating the likelihood of the Lee et al.~\cite{lee20} models.
+Details of estimating the likelihood of the \old{Lee et al.~[4]} models \new{used in \cite{lee20} are} \old{is} provided in \nameref{S_lee20}
+\old{See Sec.~S6 of the supplement material for more details on estimating the likelihood of the Lee et al.~[4] models.}
 \end{flushleft}
 \end{table}
 
@@ -1625,21 +1625,6 @@ This algorithm can also be used to accurately approximate the log-likelihood of 
 Iterated filtering---algorithms such as IF2 \cite{ionides15}---extend the particle filter by performing a random walk for each parameter and particle;
 these perturbations are carried out iteratively over multiple filtering operations, using the collection of parameters from the previous filtering pass as the parameter initialization for the next iteration, and decreasing the random walk variance at each step.
 With a sufficient number of iterations, the resulting parameter values converge to a region of the parameter space that maximizes the model likelihood.
-
-% One of the most frequently used approaches to calibrate the parameters of a statistical model is maximum likelihood estimation.
-% In particular, a closed form expression of the joint model density---described in Eq.~\myeqref{eq:jointLik}---is not readily available, making likelihood based inference a challenging task.
-% In the case of any POMP model, the likelihood function---as described in Eq.~\myeqref{eq:likedef}---is written as $\mathcal{L}(\paramVec) = \int f_{\bm{X}_{0:N}, \bm{Y}_{1:N}}\big(\bm{x}_{0:N}, \bm{y}_{1:N};\paramVec\big) d\bm{x}_{0:N}$.
-% The high-dimensional integral in the likelihood, and the potentially non-linear nature of the process model, make it impossible to obtain a closed form expression of the likelihood function of POMP models except in the most simple cases.
-% Model~1 was developed with the intent of providing a description of cholera dynamics that is scientifically plausible rather than on that is simply statistically convenient.
-% Because of this, a closed form expression of the likelihood of Model~1 is not readily available.
-
-% In order to retain the ability to propose models that are scientifically meaningful rather than only those that are simply statistically convenient, we restrict ourselves to parameter estimation techniques that have the plug-and-play property, which is that the fitting procedure only requires the ability to simulate the latent process instead of evaluating transition densities \cite{breto09,he10};
-% in the context of the notation and definitions employed in this article, this means that we only require the ability to simulate from $f_{\bm{X}_0}\big(\bm{x}_0;\paramVec\big)$ and $f_{\bm{X}_n|\bm{X}_{n-1}}\big(\bm{x}_{n}|\bm{x}_{n-1}; \paramVec\big)$ rather than needing to evaluate these densities.
-% Plug-and-play algorithms include Bayesian approaches like ABC and PMCMC \cite{toni09,andrieu10}, but here we use algorithms that enable maximum likelihood estimation.
-% To our knowledge, the only plug-and-play methods that can be used to maximize the likelihood for POMP models of this complexity are iterated filtering algorithms \cite{ionides15}, which modify the well-known \emph{particle filter} \cite{arulampalam02}.
-% The particle filter is often used to obtain values of latent states, but can also be used to obtain likelihood estimates of a POMP model.
-% Iterated filtering algorithms such as IF2 \cite{ionides15} extend the particle filter by performing a random walk for each parameter and particle;
-% these perturbations are carried out iteratively over multiple filtering operations, using the collection of parameters from the previous filtering pass as the parameter initialization for the next iteration, and decreasing the random walk variance at each step.
 
 The ability to maximize the likelihood allows for likelihood-based inference, such as performing statistical tests for potential model improvements.
 We demonstrate this capability by proposing a \new{log-}linear trend $\transmissionTrend$ in transmission in Eq.~\myeqref{model1:beta}:
@@ -1693,13 +1678,8 @@ If a mechanistic model including a feature (such as a representation of a mechan
 As for any analysis of observational data, we must be alert to the possibility of confounding.
 For a covariate, this shows up in a similar way to regression analysis: the covariate under investigation could be a proxy for some other unmodeled \new{phenomenon} or unmeasured covariate.
 \old{For a mechanism, the model feature could in principle explain the data by helping to account for some different unmodeled phenomenon. The statistical evidence of a trend in transmission rate in this model could be explained by any trending variable (such as hygiene improvements, or changes in population behavior), resulting in confounding from collinear covariates. Alternatively, the trend could be attributed to a decreasing reporting rate rather than decreasing transmission rate, resulting in confounded mechanisms. The robust statistical conclusion is that a model which allows for change fits better than one which does not---we argue that a decreasing transmission rate is a plausible way to explain this, but the incidence data themselves do not provide enough information to pin down the mechanism.}
-\new{The statistical evidence of a trend in transmission rate in this model could be explained by any trending variable (such as hygiene improvements, or changes in population behavior), resulting in confounding from collinear covariates. Alternatively, the trend could be attributed to a decreasing reporting rate rather than decreasing transmission rate. This could be formally tested by comparing models with either trend specification. We did not do this because evidence suggests that reporting rate was maintained or increased (Figure~1 of \cite{rebaudet21}). We instead argue that a decreasing transmission rate is a plausible way to explain the decrease in cases over time, as there is alternative evidence that supports this model \cite{rebaudet19CATI,rebaudet21,michel19}. It is not practical to test all remotely plausible model variations, yet a strongly supported conclusion should avoid ruling out untested hypotheses. The robust statistical conclusion for our analysis is that a model which allows for change fits better than one which does not, and a trend in transmission is a plausible way to do this.}
 
-% The statistical evidence of a trend in transmission rate in this model could be explained by any trending variable (such as hygiene improvements, or changes in population behavior), resulting in confounding from collinear covariates.
-% \old{Alternatively, the trend could be attributed to a decreasing reporting rate rather than decreasing transmission rate, resulting in confounded mechanisms.}
-% \new{Because we only have access to incidence data, the decrease in observed cases over the course of the outbreak may alternatively be attributed to a trend in other model parameters, such as a decrease in the reporting rate over time.
-% This results in confounded mechanisms, as one may not formally test all possible ways to include a trending parameter. In such a case, t}\old{T}he robust statistical conclusion is that a model which allows for change fits better than one which does not.\old{---we argue that a decreasing transmission rate is a plausible way to explain this, but} \new{Because} the incidence data themselves \old{do} \new{may} not provide enough information to pin down the mechanism\new{, a strongly supported conclusion should avoid ruling out untested hypotheses.}
-% \new{In this case study, we did not explicitly test if the incidence data favor a trend in transmission over a trend in reporting rate. We argue that a decreasing transmission rate is a plausible way to explain the decrease in cases over time, as there is alternative evidence that supports this model \cite{rebaudet19CATI,rebaudet21,michel19}. Additionally, there is little scientific evidence to support a decrease in reporting rate (for example, see Figure~1 of \cite{rebaudet21}).}
+\new{\editConfound}
 
 We implemented Model~1 using the \code{pomp} package \cite{king16}, relying heavily on the \code{pomp} source code provided by Lee et al.~\cite{lee20}.
 Both analyses used the \code{mif2} implementation of the IF2 algorithm to estimate $\paramVec$ by maximum likelihood.
@@ -1842,13 +1822,13 @@ mod2_VaccScenarios <- bake(
 ggplot() +
   geom_line(data = h2_traj, aes(x = date, y = Ctotal + 1), col = 'blue') +
   geom_ribbon(
-    data = h2_traj, 
+    data = h2_traj,
     aes(
-      x = date, 
+      x = date,
       ymin = (Ctotal + 1) * exp(-1.96*h2_fit$h2_params['v']),
       ymax = (Ctotal + 1) * exp(1.96*h2_fit$h2_params['v'])
     ), alpha = 0.5
-  ) + 
+  ) +
   geom_line(data = true_agg_cases, aes(x = date, y = ReportedAll + 1)) +
   geom_line(
     data = filter(mod2_VaccScenarios$all_trajs, year >= max(h2_traj$year)),
@@ -1861,7 +1841,7 @@ ggplot() +
       ymin = pmax((ReportedCases + 1) * exp(-1.96*h2_fit$h2_params['v']), 1),
       ymax = pmax((ReportedCases + 1) * exp(1.96*h2_fit$h2_params['v']), 1)
     ), linetype = 'dashed', alpha = 0.3
-  ) + 
+  ) +
   theme(axis.title.x = element_blank(),
         legend.title = element_blank(),
         axis.title.y = element_text(size = 9),
@@ -1901,7 +1881,7 @@ One concern is that cholera dynamics in department $u$ are highly related to the
 calibrating model parameters while conditioning on the observed cases in other departments may therefore lead to an over-dependence on observed cholera cases.
 Another concern is that the two versions of the model are not the same, resulting in sub-optimal parameter estimates for the spatially coupled model,
 as parameters that maximize the likelihood of the decoupled model almost certainly do not maximize the likelihood of the fully coupled model.
-These two concerns may explain the unrealistic forecasts and low likelihood of Model~3 of Lee et al.~\cite{lee20} (see Table~\ref{tab:likes}).
+These two concerns may explain the unrealistic forecasts and low likelihood of Model~3 \new{in \cite{lee20}} \old{of Lee et al.~[4]} (see Table~\ref{tab:likes}).
 
 At the time Lee et al.~\cite{lee20} conducted their study, there was no known algorithm that could readily be used to maximize the likelihood of an arbitrary meta-population POMP model with coupled spatial dynamics, which justifies the spatial decoupling approximation that was used to calibrate model parameters.
 For our analysis, we calibrate the parameters of the spatially coupled version of Model~3 using the \old{iterated block particle filter (IBPF)} \new{IBPF} algorithm \cite{ionides22}.
@@ -2612,7 +2592,7 @@ ggplot(tidyr::drop_na(all_prob_elims), aes(x = time, y = elim_prob, col = mod)) 
 \caption{\label{fig:elimProbs}
 {\figTitle Simulated probability of elimination using Models~1 and 3.}
 Probability of cholera elimination, defined as having zero cholera infectious for at least 52 consecutive weeks, based on 10 year simulations from calibrated versions of Models~1 and 3.
-Compare to Fig.~3A of Lee et al.~\cite{lee20}.}
+Compare to Fig.~3A of \cite{lee20}.}
 \end{figure}
 
 Probability of elimination estimates of this form are not meaningful for deterministic models, as the trajectory of these models only represent the mean behavior of the system rather than individual potential outcomes.
@@ -2623,12 +2603,12 @@ We therefore do not provide probability of elimination estimates under Model~2, 
 The ongoing global COVID-19 pandemic has \old{provided a clear example on} \new{demonstrated} how government policy may be affected by the \old{conclusions of scientific models} \new{inferences drawn from mathematical modeling} \cite{saltelli20}.
 \old{This article demonstrates that fitting appropriate scientific models to guide policy is a challenging statistical task.}
 \new{However, the development of credible models---which are supported by data and can lend quantitative insights into a dynamic system---remains a challenging task.
-In this article, we demonstrate opportunites available for raising the current standards of statistical inference for mathematical models of biological systems.
+In this article, we demonstrate opportunities available for raising the current standards of statistical inference for mathematical models of biological systems.}
 
-We present methodology consistent with existing guidelines but exceeding standard practice.  
+\new{We present methodology consistent with existing guidelines but exceeding standard practice.
 In particular, we show the value of comparing the likelihood of fitted mechanistic models versus non-mechanistic benchmarks.
 Further, we use likelihood-based diagnostic methods to identify specific limitations of proposed models.
-We use likelihood profile methods to assess parameter identifiability and to construct confidence intervals for parameter estimates. 
+We use likelihood profile methods to assess parameter identifiability and to construct confidence intervals for parameter estimates.
 We assess the accuracy of numerical approximations involved in our calculations.
 When reaching conclusions, we identify potential consequences of confounded variables and model misspecification.
 }

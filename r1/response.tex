@@ -40,6 +40,7 @@
 \newcommand\vaccClass{Z}
 \newcommand\vaccCounter{z}
 \newcommand\muRS{\mu_{RS}}
+\newcommand\transmissionTrend{\zeta}
 \input{../edits.tex}
 %\usepackage[sectionbib]{natbib}
 
@@ -178,7 +179,7 @@ We have further modified the statement in the abstract that led to this confusio
 That statement arose in the author summary, where references are not expected.
 However, we appreciate that the point should be expanded on, and we have done so in the revision. Specifically, we cite papers from the literature review we performed on the use of dynamic models for analyzing the Haiti cholera oubreak. The literature review was previously mentioned, but citations from the review were not made. Furthermore, we modified the quoted statement in the author summary to be the following:
 
-\article{we use an in-depth case study to motivate general procedures for fitting mathematical models to time series data, while explaining how these procedures help to address limitations of previous approaches.}
+\article{In this article, we conduct a re-analysis of the 2010 cholera outbreak in Haiti. We use this case study to investigate current procedures for fitting mathematical models to time series data, while identifying limitations of these methodologies and proposing remedies.}
 
 Among the most common mistakes in mechanistic modeling, in our opinion, is not critically evaluating the statistical fit of the model.
 We originally tried to make this point by having an entire section dedicated to model diagnostics, though we admit that the connection between the statement in the author summary and a section later in the article was not clear.
@@ -189,17 +190,13 @@ Our modified discussion also includes detailed examples of principles that were 
   Given the focus of the paper on how to better perform inference, explicitly commenting on what are the ``existing guidelines for creating models to inform policy [4, 5]". It would then also be helpful in the discussion to comment on how the recommendations of this study extend these pre-existing guidelines.
 }
 
-We have added two paragraphs in the introduction discussing how recommendations we make in this article fit in the broader category of papers that make recommendations on fitting mechanistic models to dynamic systems. This includes discussing these two papers that we originally cited in more detail, as well as other articles on similar topics:
-
-\jwc{I combined the two paragraphs into a single paragraph that I think addresses Ed's concern of "brevity and clarity". This paragraph is still quite long and could use some editing, so revisit this later.}
+We have added a paragraph in the introduction discussing how recommendations we make in this article fit in the broader category of papers that make recommendations on fitting mechanistic models to dynamic systems. This includes discussing these two papers that we originally cited in more detail, as well as other articles on similar topics:
 
 \article{\editModelingGuidance}
 
 % \article{\indent\editModelingGuidanceSecond}
 
-We have also added some material in the discussion connecting our results to the stated goals of the paper from the abstract and introduction.
-We could have gone further and discussed in more detail the relationship to the references \cite{behrend20,saltelli20}, following your recommendation.
-However, our newly added reference \cite{li23} more directly addresses \cite{behrend20,saltelli20} and so we have referred the reader to that paper (currently available on arXiv) for additional discussion of this point.
+We have also added some material in the discussion that connects our results to the stated goals of the paper in the abstract and introduction.
 
 \report{
   \textbf{\underline{Methods}}
@@ -218,11 +215,11 @@ If the journal requests that we make this into a table rather than a figure we a
     ``and $z \in 1:Z$ describes hypothetical vaccination programs" It would help to give an example of the different vaccine programs here. E.g. does this mean the number of doses the individual has received, or differences in the vaccine administered?
 }
 
-It could be either of the above, though in the analysis we only consider compartments based on the vaccination scenarios outlined in the Forecasts section.
-For Model~1, the assumption made by Lee et al.~\cite{lee20}, and reused in our analysis, is that the added dynamics of the vaccination compartments is an increased probability that an infection is asymptomatic, as described in a paragraph that follows the quoted text.
-a clause has been added to this sentence in order to clarify this point:
+It could be either of the above, the main point being that the subscript seperates individuals into compartments that have distinct dynamics. We try to make this more clear by adding the following sentences:
 
-\article{Here, $\vaccCounter=0$ corresponds to unvaccinated individuals, and $\vaccCounter \in \seq{1}{\vaccClass}$ describes hypothetical vaccination programs, where each program $\vaccCounter$ indexes differences in both the number of doses administered (one versus two doses per individual) and the round of vaccine administration.}
+\article{Here, $\vaccCounter=0$ corresponds to unvaccinated individuals, and $\vaccCounter \in \seq{1}{\vaccClass}$ describes hypothetical vaccination programs. Each program $\vaccCounter$ indexes differences in both the number of doses administered (one versus two doses per individual) and the round of vaccine administration, seperating individuals into compartments with distinct dynamics based on vaccination status.}
+
+In our analysis we only consider vaccination dynamics based on the scenarios outlined in the Forecasts section. For Model~1, the assumption made by Lee et al.~\cite{lee20}, and reused in our analysis, is that the added dynamics of the vaccination compartments is an increased probability that an infection is asymptomatic, as described in a paragraph that follows the quoted text.
 
 \report{5.
   Eq 6 and line 1: I think the notation for the asymptomatic fraction might be clearer and more consistent with the other models if you used $f_z(t)$ instead of $\vartheta_z(t)$. In fact, this is the notation used in the table in Figure 2.
@@ -237,9 +234,9 @@ Thank you for this suggestion, we have made this change.
 This parameter comes from Lee et al.~\cite{lee20}, and the only details that they provide is a subscript comment in one of their tables (S13) in their supplement: ``$v_{rate}$ was chosen to mimic the distribution of infections in Haiti".
 They do not, however, list it as a parameter that was ``fit" in the same table, making it unclear where the value comes from.
 Presumably, it was chosen somewhat subjectively based on their understanding of cholera dynamics in Haiti, because in order to obtain a fit for their model they had to have fixed the value at something without actually estimating it, and perhaps only considered a very small set of possible values. Notably, this parameter can mathematically be estimated like all other parameters in the model, but their specific implementation of Model~2 does not permit its estimation.
-Parameters that are partially estimated via subjective measures is outside the scope of our article, so to avoid this the revised manuscript simply reads:
+A full discussion on parameters that are partially estimated via subjective measures is outside the scope of our article, so the revised manuscript simply reads:
 
-\article{$v_{\mathrm{rate}}= 10^{-12} \,\mbox{km$^2$yr$^{-1}$}$ was fixed at the value used by \cite{lee20}.}
+\article{$v_{\mathrm{rate}}= 10^{-12} \,\mbox{km$^2$yr$^{-1}$}$ was fixed at the value used in \cite{lee20}.}
 
 \report{7.
   Usually, vaccine efficacy = 1 implies the vaccine completely blocks transmission and 0 implies no effect. In model 2 the definition of vaccine efficacy (lines 200-205 and Eq 14) implies the opposite. I suggest re-parameterising the model, or renaming the variable. For what its worth, models 1 and 3 seem to follow the usual convention.
@@ -251,14 +248,14 @@ This change has been made.
   I found the commentary on comparing fitted mechanistic models to a (statistical) benchmark model to be informative and helpful. I was wondering if the authors had any comments on whether (or not) to directly compare the AIC values of the different fitted models directly. Am I right in thinking this should be possible for models 2 and 3 given (I think) they are fitted to the same data? Model 1 is fitted to a different data set, which I understand makes such a comparison impossible.
 }
 
-It is correct that models fit to the same datasets can be directly compared using the AIC values. Models~2 and 3 are not fit to the same datasets, however, due to the way Model~3 is initialized. 
-Details on how they are initialized are provided in the section with the model descriptions, as well as supplement~S5. 
+It is correct that models fit to the same datasets can be directly compared using the AIC values. Models~2 and 3 are not fit to the same datasets, however, due to the way Model~3 is initialized.
+Details on how they are initialized are provided in the section with the model descriptions, as well as supplement~S5.
 % To initialize the latent states of Model~3, Lee et al~\cite{lee20} used approximately $60\%$ of the available data as ``burn-in" observations to initialize latent states. According to their supplement, this was done primarily because they believed the dynamics from the start of the outbreak were significantly different enough from the dynamics at the end of the outbreak to suggest that two seperate models would be needed to appropriately describe the data.
 % We feel that a properly designed and calibrated model should be able to explain the entire dynamics of the outbreak, including the change from what Lee et al~\cite{lee20} referred to as the ``epidemic" and ``endemic" periods of the outbreak.
 
 % One possible approach to re-analyzing their model would then be to fit all available observations; this would make Models~2 and 3 directly comparable, but would require a significant change to Model~3 itself, as the initialization model used by Lee et al~\cite{lee20} requires a ``burn-in" period. One of our goals, however, was to demonstrate that the models provided by Lee et al.~\cite{lee20} were not the issue, and a complete refactorization of the initialization could potentially contradict this objective. Therefore instead we decided to substantially shrink the ``burn-in" period to only the first three available observations, which corresponds to a natural change in the observations themselves \cite{barzilay13}. These details are available in the Initial Values section in the supplement material.
 
-% In short, though models that are fit to the same dataset are directly comparable using AIC, this is not the case for Models~2 and 3, as the first few observations in the dataset were not considered likelihood evalution of Model~3. This also explains the slight discrepency in AIC for the benchmark models of these two models (Table 2). 
+% In short, though models that are fit to the same dataset are directly comparable using AIC, this is not the case for Models~2 and 3, as the first few observations in the dataset were not considered likelihood evalution of Model~3. This also explains the slight discrepency in AIC for the benchmark models of these two models (Table 2).
 We added the following sentence to clarify this point:
 
 \article{Models that are fit to the same datasets can be directly compared using AIC values, making it a useful tool to compare to benchmark models. Though Models~2 and 3 are both fit to department level incidence reports, their AIC values are not directly comparable due to the way Model~3 initializes latent states, which is described in detail in Sec.~S5 of the supplement.}
@@ -273,8 +270,9 @@ Yes, that is correct. This has been fixed in the revision. In other instances wh
   While the data support a linear trend at the $95\%$ confidence level, it's worth commenting on the magnitude of the trend, e.g. the total reduction in $\beta(t)$ over the period of study.
 }
 
-Thank you for this suggestion, a sentence on the overall effect of the parameter estimate has been included.
-For reference, the maxmum likelihood estimate of the parameter corresponds to a 7.3\% reduction to the transmission rate over the course of the outbreak, with a $95\%$ confidence interval $(1.8\%, 17.9\%)$ for the overall reduction in transmission.
+Thank you for this suggestion, a sentence on the overall effect of the parameter estimate has been included in the revised manuscript:
+
+\article{The maximum likelihood estimate for $\transmissionTrend$ corresponds to a 7.3\% reduction to the transmission rate over the course of the outbreak, with a $95\%$ confidence interval of $(1.8\%, 17.9\%)$ for the overall reduction in transmission.}
 
 \report{11.
   I might have misunderstood it slightly, but I don't entirely follow the reasoning of lines 340-346. It seems that two different claims are being made: A) the model can’t identify which mechanism underlies a trend in $\beta(t)$ and B) the model can't definitively state there is a trend in $\beta(t)$ compared with some other time-varying parameter (e.g. reporting probability). For model 1, I agree with the authors that claims A and B are valid. What I take issue with is the final statement, which seems to be stronger and apply to both claims and mechanistic models more generally: ``we argue that a decreasing transmission rate is a plausible way to explain this, but the incidence data themselves do not provide enough information to pin down the mechanism." I agree that the ``incidence data themselves" (which I take to imply ``without additional covariates data") make claim A valid regardless of the model. However, I don’t think claim B holds regardless of the model. By changing model 1 to include time variation in the reporting rate I don't see \emph{a priori} why the ``the incidence data themselves" might not provide enough information to distinguish between time variation in transmission compared with time variation in reporting without the need for additional data. The deficiency is in model 1 rather than the information content of the data. I suggest the authors rework the paragraph to make the reasoning clearer.
@@ -282,10 +280,11 @@ For reference, the maxmum likelihood estimate of the parameter corresponds to a 
 
 Our views align with the referee's comments, and we have rewritten the article to make this clearer. The revised paragraphs with this statement are now:
 
-\article{If a mechanistic model including a feature (such as a representation of a mechanism, or the inclusion of a covariate) fits better than mechanistic models without that feature, and also has competitive fit compared to associative benchmarks, this may be taken as evidence supporting the scientific relevance of the feature. As for any analysis of observational data, we must be alert to the possibility of confounding. For a covariate, this shows up in a similar way to regression analysis: the covariate under investigation could be a proxy for some other unmodeled phenomenon or unmeasured covariate. The statistical evidence of a trend in transmission rate in this model could be explained by any trending variable (such as hygiene improvements, or changes in population behavior), resulting in confounding from collinear covariates. Alternatively, the trend could be attributed to a decreasing reporting rate rather than decreasing transmission rate. This could be formally tested by comparing models with either trend specification. We did not do this because evidence suggests that reporting rate was maintained or increased (Figure~1 of \cite{rebaudet21}). We instead argue that a decreasing transmission rate is a plausible way to explain the decrease in cases over time, as there is alternative evidence that supports this model \cite{rebaudet19CATI,rebaudet21,michel19}. It is not practical to test all remotely plausible model variations, yet a strongly supported conclusion should avoid ruling out untested hypotheses. The robust statistical conclusion for our analysis is that a model which allows for change fits better than one which does not, and a trend in transmission is a plausible way to do this.}
+\article{If a mechanistic model including a feature (such as a representation of a mechanism, or the inclusion of a covariate) fits better than mechanistic models without that feature, and also has competitive fit compared to associative benchmarks, this may be taken as evidence supporting the scientific relevance of the feature.
+As for any analysis of observational data, we must be alert to the possibility of confounding.
+For a covariate, this shows up in a similar way to regression analysis: the covariate under investigation could be a proxy for some other unmodeled phenomenon or unmeasured covariate.}
 
-\article{The statistical evidence of a trend in transmission rate in this model could be explained by any trending variable (such as hygiene improvements, or changes in population behavior), resulting in confounding from collinear covariates. Because we only have access to incidence data, the decrease in observed cases over the course of the outbreak may alternatively be attributed to a trend in other model parameters, such as a decrease in the reporting rate over time.
-This results in confounded mechanisms, as one may not formally test all possible ways to include a trending parameter. In such a case, the robust statistical conclusion is that a model which allows for change fits better than one which does not. Because the incidence data themselves may not provide enough information to pin down the mechanism, a strongly supported conclusion should avoid ruling out untested hypotheses. In this case study, we did not explicitly test if the incidence data favor a trend in transmission over a trend in reporting rate. We argue that a decreasing transmission rate is a plausible way to explain the decrease in cases over time, as there is alternative evidence that supports this model \cite{rebaudet19CATI,rebaudet21,michel19}. Additionally, there is little scientific evidence to support a decrease in reporting rate (for example, see Figure~1 of \cite{rebaudet21}).}
+\article{\editConfound}
 
 \report{12.
   Lines 553-556: I push back against this point. The models assume an exponential distribution for vaccine-derived immunity. Assuming a mean duration of 10 years, the proportion of individuals who remain immune 9 years after vaccination is . Even for much larger durations of immunity a non-negligible fraction of the population will lose immunity after 9 years, e.g. $e^{-9/10}\approx 0.41$. I therefore don't expect values for the duration of immunity around 10 years to ``effectively result in the same model dynamics".
@@ -390,7 +389,7 @@ Generally, it is advisable to consider the possibility of over-dispersed variati
 In the context of cholera dynamics, \cite{lemaitre19} found a substantial improvement in model fit by including stochasticity, involving one over-dispersion parameter.
 \cite{stocks20} found similar results, favoring a stochastic dynamic model with over-dispersion, when investigating transmission dynamics of a different enteric pathogen, rotavirus.
 In other contexts, \cite{king15} noted various scientific advantages for including stochasticity in the model; it is undoubtedly part of the biological dynamics, and its omission can lead to over-confident predictions.
-Our revised manuscript includes several references demonstrating the importance of modeling extra-demonstraphic stochasticity, including our revised discussion: 
+Our revised manuscript includes several references demonstrating the importance of modeling extra-demonstraphic stochasticity, including our revised discussion:
 
 \article{\editDiscussionFour}
 
@@ -401,10 +400,10 @@ This, coupled with the ease in fitting ODEs to data, makes ODEs a useful tool to
 Furthermore, stochastic dynamic models can be reduced to a deterministic model (a so-called determinsitic skeleton) which can usefully be analyzed to help understand the stochastic dynamics \cite{coulson04}.
 We therefore encourage the use of ODE analysis tools whether or not a stochastic model is adopted.
 Because this approach is tangential to the points we make in our analysis, and it was not done by Lee et al.~\cite{lee20}, we have not followed that approach in the current manuscript.
-A full discussion on deterministic vs simple stochastic models with and without over-dispersion is outside the scope of this article. 
-However, we do make a few comments on the benefits of including overdispersion in a model in several locations, including the description of Model~1 and the conclusion. 
-Because of their usefulness, we do not go as far as to explicitly forbid the use of deterministic models, but instead point out some of their limitations that should be considered. 
-Our revised discussion includes a comment that demonstrates this belief: 
+A full discussion on deterministic vs simple stochastic models with and without over-dispersion is outside the scope of this article.
+However, we do make a few comments on the benefits of including overdispersion in a model in several locations, including the description of Model~1 and the conclusion.
+Because of their usefulness, we do not go as far as to explicitly forbid the use of deterministic models, but instead point out some of their limitations that should be considered.
+Our revised discussion includes a comment that demonstrates this belief:
 
 \article{Despite their limitations, deterministic models can offer valuable insights into dynamic systems. As with all models, researchers should consider and acknoweledge these limitations when applying deterministic models and interpreting their outcomes.}
 
@@ -431,7 +430,7 @@ By contrast, obtaining reliable likelihood values from MCMC is not straightforwa
 Thus, particle filter methods facilitate the use of various likelihood-based methods for diagnostics and model selection.
 We demonstrate this in Figs S4, S5, S6, S7. \TODO{Check all figure numbers, especially to the supplement.}
 
-As a proper scoring rule \cite{gneiting07}, log-likelihood can be used as an effective way to evaluate filters as well as models. 
+As a proper scoring rule \cite{gneiting07}, log-likelihood can be used as an effective way to evaluate filters as well as models.
 The particle filter is unbiased for the likelihood, and therefore negatively biased for the log-likelihood with bias approaching zero as the number of particles increases and the Monte Carlo variance decreases.
 %%Log-likelihood is a proper scoring rule for probabilistic forecasts \cite{gneiting07}, so any error in filtering is expected to lead to a loss in log-likelihood. Thus, log-likelihood is an appropriate way to evaluate filters as well as models.
 If optimization searches from diverse starting points provide a consensus on the maximum log-likelihood, and the Monte Carlo variance is small, we can have reasonable confidence in our maximization.
@@ -442,10 +441,10 @@ We conclude that suitable diagnostic methods are available for the POMP methods 
 We would like to do what we can, within the constraints of this paper, to help build awareness of these diagnostic methods and ways in which they can be useful.
 A full exposition of this topic is out of the scope of this paper.
 
-\jwc{This text below is something that Ed added. I think it's a good idea. However, simply because of the overal length of the paper and total number of citations, I think it's probably okay to just leave this out}
-
-Howerver, we can alert the reader to the topic, and provide some additional references.
-Not infrequently, diagnostic issues are relegated to supplementary material and so we have indicated to interested readers some papers with extensive supplements demonstrating these diagnostic issues in action.
+% \jwc{This text below is something that Ed added. I think it's a good idea. However, simply because of the overal length of the paper and total number of citations, I think it's probably okay to just leave this out}
+%
+% Howerver, we can alert the reader to the topic, and provide some additional references.
+% Not infrequently, diagnostic issues are relegated to supplementary material and so we have indicated to interested readers some papers with extensive supplements demonstrating these diagnostic issues in action.
 % \cite{pons-salort18}
 
 \report{
@@ -466,8 +465,8 @@ However, these additional results are worthwhile extension to our analysis and w
 Wide prediction intervals are not necessarily a sign of a problem.
 For example, nobody knew for sure whether cholera was banished from Haiti after it was declared eliminated in February 2022.
 Cholera reemerged in September 2022, but a reasonable model might be expected to cover the possiblity of this reemergence either happening or not happening, leading to wide prediction intervals.
-It is also critical to recognize that the simulations in Figure~5 are obtained from initial conditions, effectively making simulations at the end of the time series (January 2019) 8 year forecasts from the starting point in November 2010. 
-The $95\%$ confidence interval for Ouest in this figure is from $0-1094$ reported cases. This range may not be considered unreasonably given the inherent demographic and environmental stochasticity present in the dynamic system and all of the many possible outcomes of the outbreak from its initial state in 2010.
+It is also critical to recognize that the simulations in Figure~5 are obtained from initial conditions, effectively making simulations at the end of the time series (January 2019) 8 year forecasts from the starting point in November 2010.
+The $95\%$ confidence interval for Ouest in this figure is from $0-1094$ reported cases. This range may not be considered unreasonably large given the inherent stochasticity present in the dynamic system and all of the many possible outcomes of the outbreak from its initial state in 2010.
 % Shorter term forecasts obtained by conditioning on previous data can be obtained by simulating from the filtering distribution.
 
 \report{
@@ -500,13 +499,13 @@ We have added several paragraphs in the discussion to address this point. These 
 
 The previous statement has been changed to the following:
 
-\article{Our analysis presents methodology for diagnosing how well a model describes observed data. Objective measures are used to evaluate model fit; when objective measures of the goodness-of-fit of a model are combined with reproducibility, a framework emerges for continual improvement to model based inference when revisiting the data. This framework promotes scientific discovery and supports model-based policy recommendations by simplifying the process for researchers to build off of previous results.}
+\article{Our analysis presents methodology for diagnosing how well a model describes observed data. Objective measures are used to evaluate model fit; when objective measures of the goodness-of-fit of a model are combined with reproducibility, a framework emerges for continual improvement to model based inference when revisiting the data. This framework promotes scientific discovery and supports model-driven policy recommendations by simplifying the process of understanding and improving previous results.}
 
 \report{
   2. Lines 1-8. Please add more citations.
 }
 
-Citations have been added. 
+Citations have been added.
 
 \report{
   3. Line 36. Can you be explicit about what the forecasts predicted? Did the models predict a rise in cases?
@@ -527,7 +526,7 @@ A hyphen has been added for all instances of the phrase: ``model-based".
   5. Lines 67-78. Add more citations.
 }
 
-We have added a paragraph that includes a discussion and references on mechanistic vs associative modeling, which also addresses the concerns of Reviewer 1. 
+We have added a paragraph that includes a discussion and references on mechanistic vs associative modeling, which also addresses the concerns of Reviewer 1.
 
 \article{\editMechModels}
 
@@ -535,7 +534,7 @@ We have added a paragraph that includes a discussion and references on mechanist
   6. Please add uncertainty intervals to the estimated parameters in Table 1. If necessary, consider splitting the table into two or including this additional information in the supplementary material. I suggest this update because there is an indication of unidentifiability when parameter estimates are fairly broad.
 }
 
-Due to the size and complexity of the table we have elected to put uncertainty estimates elsewhere. Specifically, have created an additional supplement material document that outlines how confidence intervals are obtained, along with tables and figures that show parameter uncertainty estimates. In the caption for Table~1, we include a reference to this supplement material. 
+Due to the size and complexity of the table we have elected to put uncertainty estimates elsewhere. Specifically, have created an additional supplement material document that outlines how confidence intervals are obtained, along with tables and figures that show parameter uncertainty estimates. In the caption for Table~1, we include a reference to this supplement material.
 
 \report{
   7. In line 159, it is stated that ``$\upsilon^\star(t)$ is efficacy at time $t$ since vaccination for adults" and then ``single and double vaccine doses were modeled by changing the waning of protection; protection was modeled as equal between single and double dose until 52 weeks after vaccination, at which point the single dose becomes ineffective". I examined the reference from which this function is based but found only a numeric table. Please provide the equation of this function or a detailed description in the supplementary information. It would be beneficial for readers to understand how to model this complex feature.
@@ -543,7 +542,7 @@ Due to the size and complexity of the table we have elected to put uncertainty e
 
 The table you found is the function $\upsilon^\star(t)$, as that is what is used by each of their models. Lee et al~\cite{lee20} provide a smoothed version of this function in Figure~2 (B), but the actual function implemented by each of their models (and consequently, our models) is the numeric table itself; in this sense, the smoothed function they show in Figure~2 (B) is an approximation of the true vaccination function that they use, which is provided in Table S4 in their supplement material.
 
-According to Lee et al~\cite{lee20}, this function was obtained by ``fitting a log-linear weighted regression model to the raw data from a published meta-analysis on killed OCV efficacy against medically attended culter-confirmed cholera (figure 2, appendix 3 p 6) \cite{bi17}". Aside from this statement, they provided limited details on how they came up with this function. Our revised manuscript clarifies this point
+According to Lee et al~\cite{lee20}, this function was obtained by ``fitting a log-linear weighted regression model to the raw data from a published meta-analysis on killed OCV efficacy against medically attended culter-confirmed cholera (figure 2, appendix 3 p 6) \cite{bi17}". Aside from this statement and the table, they no additional details on how they came up with this function. Our revised manuscript clarifies this point
 
 \article{$\upsilon^\star(t)$ is efficacy at time $t$ since vaccination for adults, a step-function represented in Table~S4 of \cite{lee20}, ...}
 
@@ -552,16 +551,16 @@ According to Lee et al~\cite{lee20}, this function was obtained by ``fitting a l
 }
 
 Our starting point was the formulation of \cite{lee20}.
-% Judging by the referee's comment, they will not be suprised to learn that this structure led to difficulties in some situations.
 We did consider the effect of not calibrating initial values.
 Unsurprisingly, fitting initial values results in a quantitative improvement to model-fit, measured by AIC, but we also found that this had negligable qualitative effects on model-based conclusions.
 On a nationally aggregated scale, the total number of initial infectious individuals in the fixed scenario was 36500, and 33480 when the initial states were estimated.
-We have included additional material in the supplement for Initialization Models that demonstrates this.
+We have included additional material in the supplement for Initialization Models that demonstrates this. % TODO: Specifically link / cite supplement.
 
 \report{
   9. Lines 245-247. Same comment as before. What’s the justification for assuming incidence measurements as the basis for prevalence states? What are the risks?
 }
 
+% TODO: Revisit this a bit more, giving explicit details in the manuscript and supplement that address this concern.
 % The cholera pathogen was recently introduced to Haiti, which facilitates the specification of initial conditions.
 Our experience with mechanistic modeling reflects that of the reviewer: calibrating initial values often results in improved dynamics.
 As such, we would recommend calibrating initial values in most cases; here, doing so may constitute a major change from the initialization model used by Lee et al.~\cite{lee20}.
@@ -592,14 +591,17 @@ We have added a citation to \cite{king16}, which discusses POMP models and their
 
 This suggestion is similar to one posed by Reviewer 1. We have made substantial edits to the paragraph that included this statement that clarifies our point:
 
-\article{The statistical evidence of a trend in transmission rate in this model could be explained by any trending variable (such as hygiene improvements, or changes in population behavior), resulting in confounding from collinear covariates. Because we only have access to incidence data, the decrease in observed cases over the course of the outbreak may alternatively be attributed to a trend in other model parameters, such as a decrease in the reporting rate over time.
-This results in confounded mechanisms, as one may not formally test all possible ways to include a trending parameter. In such a case, the robust statistical conclusion is that a model which allows for change fits better than one which does not. Because the incidence data themselves may not provide enough information to pin down the mechanism, a strongly supported conclusion should avoid ruling out untested hypotheses. In this case study, we did not explicitly test if the incidence data favor a trend in transmission over a trend in reporting rate. We argue that a decreasing transmission rate is a plausible way to explain the decrease in cases over time, as there is alternative evidence that supports this model \cite{rebaudet19CATI,rebaudet21,michel19}. Additionally, there is little scientific evidence to support a decrease in reporting rate (for example, see Figure~1 of \cite{rebaudet21}).}
+\article{If a mechanistic model including a feature (such as a representation of a mechanism, or the inclusion of a covariate) fits better than mechanistic models without that feature, and also has competitive fit compared to associative benchmarks, this may be taken as evidence supporting the scientific relevance of the feature.
+As for any analysis of observational data, we must be alert to the possibility of confounding.
+For a covariate, this shows up in a similar way to regression analysis: the covariate under investigation could be a proxy for some other unmodeled phenomenon or unmeasured covariate.}
+
+\article{\editConfound}
 
 \report{
   13. Line 357. ``Determining the necessary computational effort needed to maximize model likelihoods and acting accordingly" How do we determine the necessary computational effort?
 }
 
-We have added the following text to clarify this point: 
+We have added the following text to clarify this point:
 
 \article{The large increase in the log-likelihood for Model~1 (see Table~2) can primarily be attributed to increasing the computational effort in fitting the model.
 This result highlights the importance of carefully determining the necessary computational effort needed to maximize model likelihoods and acting accordingly.
@@ -609,33 +611,7 @@ In this case study, this was done by performing standard diagnostics for the IF2
   14. Please add the predicted intervals to Fig 4. I would like to see the effect of the log-normal measurement model.
 }
 
-We have added prediction intervals due to the error in the log-normal measurement model. 
-
-% We intentionally do not include predictive intervals in Fig~4. There are several reasons for this, one of which is mentioned in the article:
-% 
-% \article{In this analysis, we do not construct forecasts accounting for parameter uncertainty as our focus is on the estimation and diagnosis of mechanistic models.
-% Furthermore, we use the projections from a single point estimate to highlight the deficiency of deterministic models that the only variability in model projections is a result of parameter uncertainty, which can lead to over-confidence in forecasts \cite{king15}.}
-% 
-% \jwc{Below are some thoughts I had. We don't have to include all / any of this, but I thought it was something to think about on the topic of parameter uncertainty}
-% 
-% Parameter uncertainty in model forecasts is an important topic, one that we would have liked to have addressed in our article but felt that we could not since the article is already becoming longer than one would expect in this journal. 
-% In our literature review of dynamic models for cholera in Haiti, and our experience with literature with dynamic modeling outside of this problem, the most common approaches to accounting for parameter uncertainty are the following: 
-% 
-% \begin{itemize}
-%   \item Maximum likelihood etimation theory states that under certain conditions, the difference between the MLE and the generating model parameter is asymptoticly normally distributed with mean zero and variance determined by the inverse Fisher information matrix. Many numeric optimization techniques often approximate the curvature of the likelihood surface, thereby Fisher information matrix.
-%   This can then be used to obtain approximate confidence intervals using the asymptotic distribution of the MLE and the approximation to Fisher's information matrix. While mathematically and computationally convinient, the validity of these confidence intervals depends on asymptotics and assumptions that are often not appropriate for non-linear models. In fact, there is evidence that these types of confidence intervals are often far too narrow even in the most idealistic cases for dynamic models: linear Gaussian models fit with a large number of observations \cite{wheeler23}. 
-%   Because of this, confidence regions created in this way likely too narrow, resulting in over-confidence in parameter estimates. 
-%   \item Alternatively, it is common to account for parameter uncertainty by performing a sensitivity analysis. This is often done when parameters were selected via non-likelihood based approaches, but our review contained instances (e.g. \cite{lee20}) where this was done even if parameters were calibrated by maximizing likelihoods. 
-%   To perform a sensitivity anaylsis, researchers typically pick ranges of parameter estimates, creating a hypercube from which they obtain sample parameter values. 
-%   The bounds of this hypercube, however, are often obtained using approximations of Fisher's Information Matrix (the deficiencies of which are mentioned above), or by some non-data driven approach. 
-%   For example, bounds are often selected by arbitrarily adding / subtracting a percentage of the estimated parameter (where the bounds can be either larger or smaller than what should be used), or by using parameter estimates from other studies (in which case the parameter estimates may not make sense in the context of the model and data being considered, again resulting in intervals that may be arbitrarily wide or narrow).
-%   A persistent theme with all of the above approaches is that they enable researchers to effectively pick the level of uncertainty to present in their reports. 
-%   \item Sampling parameters from a Bayesian posterior.  For many researchers, this may be one of the primary reasons they prefer Baysian methods over maximum likelihood estimates, as these methods do have an advantage in accounting for parameter uncertainty.
-%   Bayesian methods to estimate model parameters may not be possible for all scientific models of interest. We have been made aware of recent work that demonstrates cases where the authors would like to have a posterior distribution for their model, but the scientific model they propose is unable to be calibrated using state-of-the-art Bayesian approaches; they therefore use IF2 to obtain parameter estimates that result in good behaviour of particle filters, and then arbitrarily select a uniform distribution centered around the MLE as a prior distribution to Bayesian methods (e.g. \cite{smith22,rivera22}). This approach is related to Empirical Bayes, where the prior distribution is selected using information in the available data. We propose something similar in our supplement material, but our proposition does not require additional runs of pMCMC which can be computationally expensive. 
-%   One drawback of our proposed Empirical Bayes approach is that when the Monte Carlo variance in likelihood evaluation is high, it is possible that the posterior mass function has the majority of its mass assigned to only a few parameter sets.
-% \end{itemize}
-% 
-% A full investigation / discussion on parameter uncertainty is outside of the scope of this article. 
+We have added prediction intervals due to the error in the log-normal measurement model.
 
 \report{
   15. Lines 513-515. Please clarify the comparison between disaggregated models and a benchmark. Let’s say I have spatial units 1 and 2, for which I have observations y1 and y2. Should I fit the disaggregated mechanistic model to y1 and y2 simultaneously (as usual) but keep a record of the individual log-likelihoods (log-lik y1 and log-lik y2). In parallel, fit the benchmark independently to y1 and y2, and then compare by log-likelihoods or information criteria by spatial unit.
@@ -667,14 +643,14 @@ A hyphen has been added for all instances of the phrase: ``model-based".
 
 \old{In the context of our case study, by reconstructing the latent states of Model~3, we notice that the calibrated model favors higher levels of cholera transmission than what was typically observed in the incidence data (S5 Text).}
 
-In the supplement material (S5 Text), we explore in more detail the process of model fitting and diagnostics. Here we demonstrate that although Model~3 does outperform its benchmark model on the aggregate scale, the model performance compared to the benchmark on units with the most cholera cases is poor. Furthermore, by comparing simulations from the fitted model to the filtering distribution, we see that the reconstructed latent states of the model favor higher levels of cholera transmission than what is typically observed in the incidence data. 
+In the supplement material (S5 Text), we explore in more detail the process of model fitting and diagnostics. Here we demonstrate that although Model~3 does outperform its benchmark model on the aggregate scale, the model performance compared to the benchmark on units with the most cholera cases is poor. Furthermore, by comparing simulations from the fitted model to the filtering distribution, we see that the reconstructed latent states of the model favor higher levels of cholera transmission than what is typically observed in the incidence data.
 These result hints at the possibility of model mispecification, and should prompt us to be skeptical of the reliability of conclusions drawn from this model.
 
 \report{
   18. Lines 599-601. ``The decision not to do this partially explains the unsuccessful forecasts of Lee et al. [1]: their Table S7 shows that the subset of their simulations which were consistent with observing zero cases in 2019 also accurately predicted the prolonged absence of detected cholera". The fragment before the colon says that Lee was unsuccessful. However, the fragment after the colon says that was in part successful. Please clarify.
 }
 
-In their article, Lee et al.~\cite{lee20} only presented forecasts that were based on simulations from initial conditions. These forecasts were generally inconsistent with the absence of cholera cases from 2019-2022, and do not account for the particular relevance of recent data for forecasting cholera dynamics. In their supplement material, however, they provide a table (S7) in which they show that if they condition the simulations on most recent data (0 cases from 2019-2020), their forecasts predict cholera elimination. This second effort that was only presented in the supplement material is more consistent with what we suggest is correct practice: forecasts of a system should start using latent states that are consistent with available data. We have expanded this argument in order to clarify this point:
+In their article, Lee et al.~\cite{lee20} only presented forecasts that were based on simulations from initial conditions. These forecasts were generally inconsistent with the absence of cholera cases from 2019-2022, and do not account for the particular relevance of recent data for forecasting cholera dynamics. In their supplement material, however, they provide a table (S7) in which they show that if they conditionally select only the simulations that were consistent with recent data (0 cases from 2019-2020), their forecasts predict cholera elimination. This second effort that was only presented in the supplement material is more consistent with what we suggest is correct practice: forecasts of a system should start using latent states that are consistent with available data. We have expanded this argument in order to clarify this point:
 
 \article{\editForecastOne}
 
