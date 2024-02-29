@@ -1304,7 +1304,7 @@ Reporting rate
 \begin{flushleft} References to the relevant equation are given in parentheses.
 Parameters that were fixed and not calibrated using the data are indicated with $\fixed$; all fixed parameters values were chosen to match the fixed parameter values of \cite{lee20}.
 Parameters that were added during our re-analysis and were not considered by Lee et al. are indicated with $^*$.
-\new{Confidence intervals for model parameters are given in supplement~S8.} %TODO: nameref this
+\new{Confidence intervals for model parameters are given in the supplement (\nameref{S_CI}).}
 Translations back into the notation of \cite{lee20} are given in \nameref{S1_Table}.
 \end{flushleft}
 \end{adjustwidth}
@@ -1482,7 +1482,8 @@ Because vaccine efficacy remains constant, individuals in this model transition 
 
 The starting value for each element of the latent state vector $\bm{X}(0)$ are set to zero except for $I_{u0}(0) = y_u^*(0)/\reportRate$ and $R_{u0}(0) = \mathrm{Pop}_u - I_{u0}(0)$, where $y_u^*(0)$ is the reported number of cholera cases in department $u$ at time $t = 0$.
 Reported cases are described using a log-normal distribution, with the log-scale mean equal to the reporting rate $\reportRate$ times the number of newly infected individuals.
-See the section describing how Model~2 is fit to data and Sec.~S3.2 of the supplement for more details.
+\old{See the section describing how Model~2 is fit to data and Sec.~S3.2 of the supplement for more details.}
+\new{See the supplement material on model initializations for more details (\nameref{S_init})}
 
 \subsubsection*{Model~3}
 \label{sec:model3}
@@ -1606,7 +1607,7 @@ Number of &
 Values in parentheses are corresponding values \new{obtained} using \new{the models of \cite{lee20}} \old{Lee et al.~[4] parameter estimates}.  \textsuperscript{1}The reported likelihood is an upper bound of the likelihood of the \old{Lee et al.~[4]} model \new{in \cite{lee20}}. \old{Lee et al.~[4] fit} \textsuperscript{2}\new{In \cite{lee20},} Model~3 \new{was fit} to a subset of the data (March 2014 onward, excluding data from Ouest in 2015-2016).
 On this subset, their model has a likelihood of $\Sexpr{myround(lee3_results$sub_ll_eval, 1)}$.
 On this same subset, our model has a likelihood of $\Sexpr{myround(mod3_eval_res$subset_ll['est'], 1)}$.
-Details of estimating the likelihood of the \old{Lee et al.~[4]} models \new{used in \cite{lee20} are} \old{is} provided in \nameref{S_lee20}
+Details of estimating the likelihood of the \old{Lee et al.~[4]} models \new{used in \cite{lee20} are} \old{is} provided in \new{the supplement} (\nameref{S_lee20}).
 \old{See Sec.~S6 of the supplement material for more details on estimating the likelihood of the Lee et al.~[4] models.}
 \end{flushleft}
 \end{table}
@@ -2695,6 +2696,10 @@ The dynamic document, together with the R packages, form a {\it compendium}, def
 \paragraph*{S6 Text}
 \label{S_uncertain}
 {\bf Accounting for parameter uncertainty} A description of a empirical-Bayes approach that can be used to account for parameter uncertainty.
+
+\paragraph*{S7 Text}
+\label{S_CI}
+{\bf Confidence Intervals} Tables and figures describing 95\% confidence intervals for estimated parameters.
 
 \section*{Acknowledgments}
 
