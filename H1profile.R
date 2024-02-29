@@ -13,7 +13,7 @@
 # WARNING:
 #
 #   This script was ran using a high-performance computing cluster. In total,
-#   the RUN_LEVEL == 3 version of this script took TODO compute hours. Partial
+#   the RUN_LEVEL == 3 version of this script took 3631 compute hours. Partial
 #   results can be obtained by lowering the required computational effort
 #   (params: NP, NMIF, nprof, NP_EVAL, NREPS_EVAL), which can be done by
 #   reducing the RUN_LEVEL to 2 or 1, or alternatively by manually changing
