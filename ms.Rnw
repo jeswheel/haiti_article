@@ -1224,7 +1224,7 @@ infectivity
 Human to water
   & \missing
   &
-  & $\Wshed = $ \Sexpr{signif(h2_fit$h2_params["Mu"],3)}
+  & $\Wshed = $ \Sexpr{signif(h2_fit$h2_params["Mu"]/52,3)}
   & \eqref{model2:to_W}
   & $\Wshed= \Sexpr{signif(p3s["thetaI"],3)}$
   & \eqref{eq:model3:water}
@@ -1257,19 +1257,19 @@ Mixing exponent
 \\
 Reporting rate
   & $\reportRate=\Sexpr{myround(p1["rho"], 3)}$
-  & (S15)
+  & (\nameref{S_meas})
   & ${\reportRate=\Sexpr{myround(h2_fit$h2_params["Rho"],2)}}\fixed$
-  & (S16)
+  & (\nameref{S_meas})
   & $\reportRate=\Sexpr{myround(p3s["epsilon"],2)}$
-  & (S19)
+  & (\nameref{S_meas})
 \\
 \raggedright Observation variance
   & \raggedright $\obsOverdispersion = (\Sexpr{myround(p1["tau_epi"],2)}, \Sexpr{round(p1["tau_end"],2)})$
-  & \multirow{2}{*}{(S15)}
+  & \multirow{2}{*}{(\nameref{S_meas})}
   & \multirow{2}{*}{$\obsOverdispersion = \Sexpr{myround(h2_fit$h2_params['v'], 3)}$}
-  & \multirow{2}{*}{(S16)}
+  & \multirow{2}{*}{(\nameref{S_meas})}
   & \multirow{2}{*}{$\obsOverdispersion = \Sexpr{myround(p3s["k"],2)}$}
-  & \multirow{2}{*}{(S19)}
+  & \multirow{2}{*}{(\nameref{S_meas})}
 \\
 \hline
 \multirow{2}{*}{Initial Values} & $\Iinit = \Sexpr{round(prod(p1[c('pop_0', 'I_0')]))}$
@@ -1278,7 +1278,7 @@ Reporting rate
   &
   & \multirow{2}{*}{$\Iinit^{3,4} = (
         \Sexpr{round(prod(p3[c('H3', 'Iinit3')]))}, \Sexpr{round(prod(p3[c('H4', 'Iinit4')]))})^*$}
-  &  \multirow{2}{*}{(S20)}
+  &  \multirow{2}{*}{(\nameref{S_init})}
   \\
   & $E_{0,0} = \Sexpr{round(prod(p1[c('pop_0', 'E_0')]))}$ & & \multicolumn{1}{c}{}
   &
@@ -1361,8 +1361,9 @@ The force of infection is
 where $\transmission(t)$ is a periodic cubic spline representation of seasonality, given in terms of a B-spline basis $\{ s_j(t), j\in \seq{1}{6}\}$ and parameters $\transmission_{1:6}$ as
 \begin{equation}
 \label{model1:beta}
-\log\transmission(t) = \sum_{j=1}^6 \transmission_j s_j(t).
+\transmission(t) = \bar{\transmission} \exp\Big(\sum_{j=1}^6 \transmission_j s_j(t)\Big),
 \end{equation}
+\new{where $\bar{\transmission} = 1 (\mathrm{wk})^{-1}$ is a dimensionality constant.}
 The process noise $d\Gamma(t)/dt$ is multiplicative Gamma-distributed white noise, with infinitesimal variance parameter $\sigmaProc^2$.
 Lee et al.~\cite{lee20} included process noise in Model~3 but not in Model~1, i.e., they fixed $\sigmaProc^2 = 0$.
 Gamma white noise in the transmission rate gives rise to an over-dispersed latent Markov process \cite{breto11} which has been found to improve the statistical fit of disease transmission models \cite{stocks20,he10}.
@@ -1631,7 +1632,7 @@ The ability to maximize the likelihood allows for likelihood-based inference, su
 We demonstrate this capability by proposing a \new{log-}linear trend $\transmissionTrend$ in transmission in Eq.~\myeqref{model1:beta}:
 \begin{equation}
 \label{model1:betat}
-\log\transmission(t) = \sum_{j=1}^6 \transmission_s s_j(t) + \transmissionTrend\bar{t},
+\transmission(t) = \bar{\transmission} \exp\Big(\sum_{j=1}^6 \transmission_s s_j(t) + \transmissionTrend\bar{t}\Big),
 \end{equation}
 where $\bar{t} = \frac{t - (t_N + t_0) / 2}{t_N - (t_N + t_0) / 2}$, so that $\bar{t} \in [-1, 1]$.
 The proposal of a \old{linear} trend in transmission is a result of observing an apparent decrease in reported cholera infections from 2012-2019 in Fig.~\ref{fig:CholeraData}.
@@ -2624,7 +2625,7 @@ When reaching conclusions, we identify potential consequences of confounded vari
 
 \new{\editDiscussionFive}
 
-\new{\editDiscussionSix}
+% \new{\editDiscussionSix}
 
 In our case study, we found that additional attention to statistical details could have resulted in \old{improved} \new{an enhanced} statistical fit to the observed incidence data\old{, leading to improvements in the accuracy of the resulting policy guidance.} \new{This would have improved the accuracy of the policy guidance resulting from the study.}
 \old{We used the same data and models, and even much of the same code, as Lee et al.~[29], and yet ended up with drastically different conclusions.}

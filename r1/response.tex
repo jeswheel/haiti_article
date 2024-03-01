@@ -44,6 +44,7 @@
 \newcommand\vaccCounter{z}
 \newcommand\muRS{\mu_{RS}}
 \newcommand\transmissionTrend{\zeta}
+\newcommand\transmission{\beta}
 \input{../edits.tex}
 %\usepackage[sectionbib]{natbib}
 
@@ -83,13 +84,15 @@
 
 Dear PLOS Computational Biology editorial board,
 
-\TODO{Edit this letter}
 Thank you for arranging the review of our manuscript, and for the invitation to submit a revision.
 We are grateful for the thoughtful comments from the referees.
 Our revised manuscript has various edits for clarity, following the referee suggestions, as well as some small corrections in the text.
-The numerical results are unchanged.
 
-To make space for some additional sentences, we cut a few sentences that seemed least essential. We also placed some of the new material in the supplement.
+One of the reviewers recommended the inclusion of confidence intervals for model parameters, which was not originally included because the paper that we re-analyze did not include them. 
+However, we agree that the inclusion of confidence intervals is beneficial for readers, so we have done so in the revised manuscript.
+The additional computational effort required to obtain confidence intervals resulted in slightly improved parameter estimates, though qualitative conclusions drawn from the fitted models remain unchanged. 
+
+The other main changes revisions to both the introduction and discussion, as recommended by both reviewers. 
 
 Below are point-by-point responses to the referee reports.
 The reviewer comments are shown in green, italic type.
@@ -171,7 +174,7 @@ Additional commentary to this point has been added in the abstract, introduction
 
 We have further modified the statement in the abstract that led to this confusion. Rather than stating that we ``develop data analysis strategies leading to improved statistical fit", we now say:
 
-\article{We assess current methodological approaches to these issues via a case study of the 2010-2019 cholera epidemic in Haiti. We consider three dynamic models developed by expert teams to advise on vaccination policies. We evaluate previous methods used for fitting these models, and we demonstrate modified data analysis strategies leading to improved statistical fit. Speficially, we present appraoches for diagnosing model misspecification and the consequent development of improved models. We futher demonstrate the utility of recent advances in likelihood maximization for high-dimensional nonlinear dynamic models, enabling likelihood-based inference for high-dimensional models for spatiotemporal incidence data.}
+\article{We assess current methodological approaches to these issues via a case study of the 2010-2019 cholera epidemic in Haiti. We consider three dynamic models developed by expert teams to advise on vaccination policies. We evaluate previous methods used for fitting these models, and we demonstrate modified data analysis strategies leading to improved statistical fit. Specifically, we present appraoches for diagnosing model misspecification and the consequent development of improved models. We futher demonstrate the utility of recent advances in likelihood maximization for high-dimensional nonlinear dynamic models, enabling likelihood-based inference for high-dimensional models for spatiotemporal incidence data.}
 
 \report{
   \textbf{\underline{Introduction}}
@@ -372,7 +375,7 @@ The referee raises several points in this paragraph, and we consider them one at
 
 Moving from an ODE model to a stochastic model may not involve any additional parameters, if only demographic stochasticity is included.
 We agree, however, that adding to model complexity has costs, including loss of identifiability.
-In our revised manuscript, we address identifiability via profile likelihood methods.
+In our revised manuscript, we address identifiability via profile likelihood methods (\nameref{S_CI}).
 % AIC and other formal statistical methods can assess whether the additional complexity is justified by a sufficiently large improvement of statistical fit.
 % Identifiability and model simplicity have practical scientific value which goes beyond their statistical role in reducing generalization error and hence improving out-of-fit predictions.
 % This is a variation on the issue of ``statistical significance versus practical significance"  often covered in introductory statistics textbooks.
@@ -380,8 +383,8 @@ In our revised manuscript, we address identifiability via profile likelihood met
 In our study, we find that the deterministic model (model 2) has poor statistical fit.
 A poor fit can lead to a risk of identifying spurious scientific phenomena: additional deterministic complexity added to the model may help to fit the model to unmodeled stochastic phenomena present in the data, and may therefore spuriously be assessed as a highly statistically significant model improvement.
 We see some evidence of this in our analysis.
-Aside from not being stochastic, the mechanistic structure of Model~2 is far more complex than the other two models considered in our study.
-Model~2 also demonstrates the most clear cases of spurious scientific findings, as some estimated parameters favor regions of the parameter space that we would not expect scientifically.
+Aside from not being stochastic, the mechanistic structure of Model~2 is more complex than the other two models considered in our study.
+Model~2 also demonstrates the most clear cases of spurious scientific findings, as some estimated parameters favor regions of the parameter space that we would not expect scientifically---such as permanent immunity from infection once recovered from an infection ($\muRS^{-1}$), and zero human-to-human transmission ($\transmission$).
 This may partially explain the choice of Lee et al~\cite{lee20} to consider a scientifically unjustifiable jump in latent state values from their epidemic to endemic periods: without this additional flexibility, Model~2 cannot adequately describe cholera dynamics in Haiti while keeping parameter values in scientifically plausible ranges.
 From our experience, this type of a result is quite common: for a deterministic model to adequately account for unmodeled features of a dynamic system, parameters that are estimated are often forced to unexpected regions of the parameter space.
 
@@ -408,7 +411,7 @@ However, we do make a few comments on the benefits of including overdispersion i
 Because of their usefulness, we do not go as far as to explicitly forbid the use of deterministic models, but instead point out some of their limitations that should be considered.
 Our revised discussion includes a comment that demonstrates this belief:
 
-\article{Despite their limitations, deterministic models can offer valuable insights into dynamic systems. As with all models, researchers should consider and acknoweledge these limitations when applying deterministic models and interpreting their outcomes.}
+\article{Despite their limitations, deterministic models can offer valuable insights into dynamic systems \cite{may04}. In \cite{lee20}, the forecasts from the deterministic Model~2 were qualitatively more consistent with the observed dissapearance of cholera than the stochastic models.}
 
 The decision on whether to choose Markov chain Monte Carlo (MCMC) methods is not fully aligned with the decision on whether to include stochasticity in the model.
 In our literature review, of the 12 previous Haiti cholera investigations including stochastic dynamic models \cite{kirpich17,lee20,pasetto18,mukandavire13,kirpich16,lewnard16,kunkel17,mukandavire15,sallah17,azman12,azman15}, four of them carried out inference via MCMC \cite{pasetto18,lewnard16,sallah17,azman12}.
@@ -431,7 +434,8 @@ For iterated filtering, one checks the filtering diagnostics for the last iterat
 The particle filter provides access to the likelihood of the data, and conditional likelihood of each individual data point.
 By contrast, obtaining reliable likelihood values from MCMC is not straightforward.
 Thus, particle filter methods facilitate the use of various likelihood-based methods for diagnostics and model selection.
-We demonstrate this in Figs S4, S5, S6, S7. \TODO{Check all figure numbers, especially to the supplement.}
+We demonstrate this in the supplement (\nameref{S_CI}, \nameref{S_mod3cal}). 
+% Figs S4, S5, S6, S7. \TODO{Check all figure numbers, especially to the supplement.}
 
 As a proper scoring rule \cite{gneiting07}, log-likelihood can be used as an effective way to evaluate filters as well as models.
 The particle filter is unbiased for the likelihood, and therefore negatively biased for the log-likelihood with bias approaching zero as the number of particles increases and the Monte Carlo variance decreases.
@@ -439,6 +443,7 @@ The particle filter is unbiased for the likelihood, and therefore negatively bia
 If optimization searches from diverse starting points provide a consensus on the maximum log-likelihood, and the Monte Carlo variance is small, we can have reasonable confidence in our maximization.
 Monte Carlo adjusted profile (MCAP) methods \cite{ionides17,ning21} provide methodology which reduces and evaluates the consequences of this Monte Carlo error.
 MCAP methods have been used in various recent investigations using particle filters \cite{subramanian21,ali22,pons-salort18}.
+Our revised manuscript includes MCAP confidence intervals for both Model~1 and Model~3 (\nameref{S_CI}).
 
 We conclude that suitable diagnostic methods are available for the POMP methods we employ, and some of them are demonstrated and discussed in our paper.
 We would like to do what we can, within the constraints of this paper, to help build awareness of these diagnostic methods and ways in which they can be useful.
@@ -490,7 +495,7 @@ We have added several paragraphs in the discussion to address this point. These 
 
 \article{\editDiscussionFive}
 
-\article{\editDiscussionSix}
+% \article{\editDiscussionSix}
 
 \report{
   \textbf{\underline{Minor Comments:}}
@@ -669,6 +674,10 @@ The following sentence has been added to clarify this:
 \article{\editModVacc}
 
 \bibliography{../bib-haiti.bib,../bib-lit.bib}
+
+\paragraph*{S5 Text}
+\label{S_mod3cal}
+{\bf Calibrating Model 3.} Additional details on the procedures for fitting and diagnosing Model~3.
 
 % \begin{hidden}
 \paragraph*{S7 Text}

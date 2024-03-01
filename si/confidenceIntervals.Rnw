@@ -449,7 +449,7 @@ h2_plots <- list()
 for (i in 1:length(prof_params)) {
   p = prof_params[i]
   if (p == 'Mu') {
-    my_lab <- TeX('$\\mu_W')
+    my_lab <- TeX('$52\\times\\mu_W')
   } else if (p == 'Beta') {
     my_lab <- TeX('$\\beta^{1/5}$')
   } else if (p == 'BetaW') {
@@ -705,9 +705,9 @@ cowplot::plot_grid(
 \hline
 \hline
 
- Human to water shedding & $\Wshed$ & $\Sexpr{myround(h2_mles['Mu'], 1)}$
+ Human to water shedding & $\Wshed$ & $\Sexpr{myround(h2_mles['Mu']/52, 1)}$
    &
-  $(\Sexpr{myround(h2_plots_lb['Mu'], 1)}, \Sexpr{myround(h2_plots_ub['Mu'], 1)})$ 
+  $(\Sexpr{myround(h2_plots_lb['Mu']/52, 1)}, \Sexpr{myround(h2_plots_ub['Mu']/52, 1)})$ 
 \\
 \hline
 
