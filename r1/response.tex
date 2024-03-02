@@ -92,7 +92,7 @@ One of the reviewers recommended the inclusion of confidence intervals for model
 However, we agree that the inclusion of confidence intervals is beneficial for readers, so we have done so in the revised manuscript.
 The additional computational effort required to obtain confidence intervals resulted in slightly improved parameter estimates, though qualitative conclusions drawn from the fitted models remain unchanged. 
 
-The other main changes revisions to both the introduction and discussion, as recommended by both reviewers. 
+The other main change in the revised manuscript is edits to both the introduction and discussion, as recommended by both reviewers.
 
 Below are point-by-point responses to the referee reports.
 The reviewer comments are shown in green, italic type.
@@ -159,9 +159,9 @@ In the revision, we have added more signposts to help the reader see how the poi
 }
 
 Thank you for this feedback.
-We have made substantial changes to the abstract, author summary, and introduction in order to make the focus of the paper more clear.
-We have also done a nearly complete rewritting of the discussion section.
-Specifically, though the content and arguments made remain the same, we specifically point out ways that our case study demonstrates the usefulness of our general suggestions for model based inference of dynamic systems.
+Our primary changes in the revised manuscript include edits to the abstract, author summary, introduction, in order to make the focus of the paper more clear.
+We have also done a nearly complete rewritting of the discussion section, improving the connection between the our overal goals with the cholera case study. 
+Specifically, though the content and arguments made in the discussion remain the same, we specifically point out ways that our case study demonstrates the usefulness of our general suggestions for model based inference of dynamic systems.
 
 \report{
   \textbf{\underline{Abstract}}
@@ -170,11 +170,11 @@ Specifically, though the content and arguments made remain the same, we specific
 }
 
 Fitting models 1 and 2 does not require any methodological innovation. Model 3 has a stochastic spatiotemporal partially-observed structure that leads to methodological challenges. \cite{lee20} made some approximations to avoid carrying out inference for the full coupled system. We show some consequences of those approximations, taking advantage of a newly developed method which has not yet been applied in the context of scientific investigations. So, although the method is not entirely new, its applicability to this task is novel.
-Additional commentary to this point has been added in the abstract, introduction, and the subsection on fitting Model 3.
+Additional commentary to this point has been added in the abstract, introduction, and discussion sections.
 
 We have further modified the statement in the abstract that led to this confusion. Rather than stating that we ``develop data analysis strategies leading to improved statistical fit", we now say:
 
-\article{We assess current methodological approaches to these issues via a case study of the 2010-2019 cholera epidemic in Haiti. We consider three dynamic models developed by expert teams to advise on vaccination policies. We evaluate previous methods used for fitting these models, and we demonstrate modified data analysis strategies leading to improved statistical fit. Specifically, we present appraoches for diagnosing model misspecification and the consequent development of improved models. We futher demonstrate the utility of recent advances in likelihood maximization for high-dimensional nonlinear dynamic models, enabling likelihood-based inference for high-dimensional models for spatiotemporal incidence data.}
+\article{We assess current methodological approaches to these issues via a case study of the 2010-2019 cholera epidemic in Haiti. We consider three dynamic models developed by expert teams to advise on vaccination policies. We evaluate previous methods used for fitting these models, and we demonstrate modified data analysis strategies leading to improved statistical fit. Specifically, we present approaches for diagnosing model misspecification and the consequent development of improved models. Additionally, we demonstrate the utility of recent advances in likelihood maximization for high-dimensional nonlinear dynamic models, enabling likelihood-based inference for high-dimensional models for spatiotemporal incidence data.}
 
 \report{
   \textbf{\underline{Introduction}}
@@ -183,7 +183,7 @@ We have further modified the statement in the abstract that led to this confusio
 }
 
 That statement arose in the author summary, where references are not expected.
-However, we appreciate that the point should be expanded on, and we have done so in the revision. Specifically, we cite papers from the literature review we performed on the use of dynamic models for analyzing the Haiti cholera oubreak. The literature review was previously mentioned, but citations from the review were not made. Furthermore, we modified the quoted statement in the author summary to be the following:
+However, we appreciate that the point should be expanded on, and we have done so in the revision. Specifically, we cite papers from the literature review we performed on the use of dynamic models for analyzing the Haiti cholera oubreak. Our literature review was previously mentioned, but citations from the review were not made. Furthermore, we modified the quoted statement in the author summary to be the following:
 
 \article{In this article, we conduct a re-analysis of the 2010 cholera outbreak in Haiti. We use this case study to investigate current procedures for fitting mathematical models to time series data, while identifying limitations of these methodologies and proposing remedies.}
 
@@ -221,7 +221,7 @@ If the journal requests that we make this into a table rather than a figure we a
     ``and $z \in 1:Z$ describes hypothetical vaccination programs" It would help to give an example of the different vaccine programs here. E.g. does this mean the number of doses the individual has received, or differences in the vaccine administered?
 }
 
-It could be either of the above, the main point being that the subscript seperates individuals into compartments that have distinct dynamics. We try to make this more clear by adding the following sentences:
+It could be either of the above, the main point being that the subscript seperates individuals into compartments that have distinct dynamics. We clarified this by adding the following sentences:
 
 \article{Here, $\vaccCounter=0$ corresponds to unvaccinated individuals, and $\vaccCounter \in \seq{1}{\vaccClass}$ describes hypothetical vaccination programs. Each program $\vaccCounter$ indexes differences in both the number of doses administered (one versus two doses per individual) and the round of vaccine administration, seperating individuals into compartments with distinct dynamics based on vaccination status.}
 
@@ -395,23 +395,9 @@ Generally, it is advisable to consider the possibility of over-dispersed variati
 In the context of cholera dynamics, \cite{lemaitre19} found a substantial improvement in model fit by including stochasticity, involving one over-dispersion parameter.
 \cite{stocks20} found similar results, favoring a stochastic dynamic model with over-dispersion, when investigating transmission dynamics of a different enteric pathogen, rotavirus.
 In other contexts, \cite{king15} noted various scientific advantages for including stochasticity in the model; it is undoubtedly part of the biological dynamics, and its omission can lead to over-confident predictions.
-Our revised manuscript includes several references demonstrating the importance of modeling extra-demonstraphic stochasticity, including our revised discussion:
+Our revised manuscript includes several references demonstrating the importance of modeling extra-demographic stochasticity, including our revised discussion:
 
 \article{\editDiscussionFour}
-
-We acknowledge the existence of useful mathematical tools for studying ODE models, their identifiability and stability and limiting properties.
-Perhaps one example demonstrating the usefulness of ODE models is the Lee et al.~\cite{lee20} study: of the four models considered, the forecasts from Model~2 were most consistent with the actual cholera situation in Haiti.
-Despite their inability to describe incidence data, deterministic models can do a good job at detecting overal trends, like the gradual decline of cholera cases in Haiti.
-This, coupled with the ease in fitting ODEs to data, makes ODEs a useful tool to gain preliminary insight on a dynamic system.
-Furthermore, stochastic dynamic models can be reduced to a deterministic model (a so-called determinsitic skeleton) which can usefully be analyzed to help understand the stochastic dynamics \cite{coulson04}.
-We therefore encourage the use of ODE analysis tools whether or not a stochastic model is adopted.
-Because this approach is tangential to the points we make in our analysis, and it was not done by Lee et al.~\cite{lee20}, we have not followed that approach in the current manuscript.
-A full discussion on deterministic vs simple stochastic models with and without over-dispersion is outside the scope of this article.
-However, we do make a few comments on the benefits of including overdispersion in a model in several locations, including the description of Model~1 and the conclusion.
-Because of their usefulness, we do not go as far as to explicitly forbid the use of deterministic models, but instead point out some of their limitations that should be considered.
-Our revised discussion includes a comment that demonstrates this belief:
-
-\article{Despite their limitations, deterministic models can offer valuable insights into dynamic systems \cite{may04}. In \cite{lee20}, the forecasts from the deterministic Model~2 were qualitatively more consistent with the observed dissapearance of cholera than the stochastic models.}
 
 The decision on whether to choose Markov chain Monte Carlo (MCMC) methods is not fully aligned with the decision on whether to include stochasticity in the model.
 In our literature review, of the 12 previous Haiti cholera investigations including stochastic dynamic models \cite{kirpich17,lee20,pasetto18,mukandavire13,kirpich16,lewnard16,kunkel17,mukandavire15,sallah17,azman12,azman15}, four of them carried out inference via MCMC \cite{pasetto18,lewnard16,sallah17,azman12}.
@@ -419,6 +405,14 @@ We agree with the referee that MCMC is more routine for determinstic models than
 Sequential Monte Carlo (SMC) was used for only two of the investigations in our literature review \cite{lee20,azman15}.
 In principle, MCMC methods can be applied for inference in over-dispersed stochastic dynamic models via so-called particle MCMC (PMCMC) \cite{andrieu10}.
 In practice, these models have been fitted by maximum likelihood, some examples including \cite{lemaitre19,fox22,molodecky23,pons-salort18,subramanian20,stocks20}.
+
+Despite their inability to describe incidence data, deterministic models can do a good job at detecting overal trends, like the gradual decline of cholera cases in Haiti.
+This, coupled with the ease in fitting ODEs to data, makes ODEs a useful tool to gain preliminary insight on a dynamic system.
+They are also a useful tool to understand a stochastic model \cite{coulson04}.
+Because of their usefulness, we do not go as far as to suggest that deterministic models should not be used. 
+Our revised discussion includes a comment that demonstrates this belief:
+
+\article{Despite their limitations, deterministic models can offer valuable insights into dynamic systems \cite{may04}. In \cite{lee20}, the forecasts from the deterministic Model~2 were qualitatively more consistent with the observed dissapearance of cholera than the stochastic models.}
 
 In summary, maximum likelihood (ML) inference via SMC nowadays provides a fairly well estabilished alternative to Bayesian MCMC inference. ML appears to be methodologically more convenient for stochastic dynamic models with overdispersion. When analyzing long epidemiological datasets, this stochasticity appears to be important for statistical model fit. That alone is not enough to show that models with overdispersed stochastic dynamics are scientifically preferable. However, discovery of a  model feature which generates a large improvement in statistcal fit from adding one more parameter is typically treated as scientific evidence favoring the inclusion of that feature in a scientific model for the phenomenon.
 
@@ -645,14 +639,9 @@ A hyphen has been added for all instances of the phrase: ``model-based".
   17. Lines 576-577. ``We notice that the calibrated model favors higher levels of cholera transmission than what was typically observed in the incidence data (S5 Text)". After this fragment, please summarise in one or two sentences what it will be found in S5 Text.
 }
 
-\jwc{I'm not exactly sure how to respond to this point. The relevant information about what can be found in S5 text is precisly what is already stated: ``by reconstructing the latent states of Model~3, we notice that the calibrated model favors higher levels of cholera transmission than what was typically observed in the incidence data (S5 Text)".}
+We have expanded this paragraph to provide more details about the supplement material: 
 
-\jwc{Maybe we could edit this part to the following:}
-
-\old{In the context of our case study, by reconstructing the latent states of Model~3, we notice that the calibrated model favors higher levels of cholera transmission than what was typically observed in the incidence data (S5 Text).}
-
-In the supplement material (S5 Text), we explore in more detail the process of model fitting and diagnostics. Here we demonstrate that although Model~3 does outperform its benchmark model on the aggregate scale, the model performance compared to the benchmark on units with the most cholera cases is poor. Furthermore, by comparing simulations from the fitted model to the filtering distribution, we see that the reconstructed latent states of the model favor higher levels of cholera transmission than what is typically observed in the incidence data.
-These result hints at the possibility of model mispecification, and should prompt us to be skeptical of the reliability of conclusions drawn from this model.
+\article{\editSuppText}
 
 \report{
   18. Lines 599-601. ``The decision not to do this partially explains the unsuccessful forecasts of Lee et al. [1]: their Table S7 shows that the subset of their simulations which were consistent with observing zero cases in 2019 also accurately predicted the prolonged absence of detected cholera". The fragment before the colon says that Lee was unsuccessful. However, the fragment after the colon says that was in part successful. Please clarify.

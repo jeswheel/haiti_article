@@ -1084,21 +1084,21 @@ Translations back to the original notation of Lee et al.~\cite{lee20} are given 
 \begin{adjustwidth}{-2.25in}{0in}
 \centering
 \caption{\label{tab:params} {\bf Model parameters.}}
-\begin{tabular}{|p{0.15\linewidth}|p{0.14\linewidth}t|p{0.13\linewidth}t|p{0.17\linewidth}t|}
+\begin{tabular}{|p{0.15\linewidth}|p{0.14\linewidth}t|p{0.15\linewidth}t|p{0.17\linewidth}t|}
 \hline
 Mechanism & Model 1 && Model 2 && Model 3 &
 \\
 \hline
 \hline
-Infection (day)
+Infection {\small (day)}
   & ${\muIR^{-1}=\Sexpr{myround(7/p1["gamma"],1)}}\fixed$
   & \eqref{model1:toR}
   & ${\muIR^{-1}=\Sexpr{myround(365/h2_fit$h2_params["gamma"],1)}}\fixed $
   & \eqref{model2:mu_IR}
   & ${\muIR^{-1}=\Sexpr{myround(365/p3["gamma1"],1)}}\fixed $
   & \eqref{eq:model3:IR}
-\\
-Latency (day)
+\\\hline
+Latency {\small (day)}
   & ${\muEI^{-1}=\Sexpr{myround(7/p1["sigma"],1)}}\fixed$
   & \eqref{model1:EA}
   & ${\muEI^{-1}=\Sexpr{myround(365/h2_fit$h2_params["gammaE"],1)}}\fixed$
@@ -1128,7 +1128,7 @@ Latency (day)
   & \multirow{-2}{*}{$\rainfallExponent = \Sexpr{signif(p3s["r"],3)}$}
   & \multirow{-2}{*}{\eqref{eq:model3:water}}
   \\\hline
-  \multirow{3}{*}{Immunity (yr)}
+  \multirow{3}{*}{Immunity {\small (yr)}}
   & \multirow{3}{*}{${\muRS^{-1}=\Sexpr{myround(1/p1["alpha"]/52,1)}}\fixed$}
   & \multirow{3}{*}{\eqref{model1:RS}}
   & $\muRS^{-1}= \Sexpr{signif(1/h2_fit$h2_params["sigma"],2)}$
@@ -1139,7 +1139,7 @@ Latency (day)
 & & & ${\omega_1^{-1} = \Sexpr{myround(1/h2_fit$h2_params["Omega1"],1)}}\fixed$ & \eqref{model2:omega1} & &\\
 & & & ${\omega_2^{-1} = \Sexpr{myround(1/h2_fit$h2_params["Omega2"],1)}}\fixed$ & \eqref{model2:omega2} & &\\
 \hline
-\multirow{2}{*}{Birth/death (yr\textsuperscript{-1})}
+\multirow{2}{*}{Birth/death {\small (yr\textsuperscript{-1})}}
   & ${\muBirth =  10^{-2}\times \Sexpr{myround(100 * 52 * p1["mu"],2)}}\fixed$
     %
   & \eqref{model1:death}
@@ -1154,7 +1154,7 @@ Latency (day)
 &
 & ${\choleraDeath = \Sexpr{myround(p3["alpha1"],2)}}\fixed$
 &
-\\
+\\\hline
 Sympt. frac.
   & ${\symptomFrac_z(t)=c\vaccineEfficacy^*(t-\tau_d)}\fixed$
   & (\ref{model1:EI}-\ref{model1:EA})
@@ -1162,17 +1162,17 @@ Sympt. frac.
   & \eqref{model2:mu_EI}
   & ${\symptomFrac=\Sexpr{myround(p3["sigma1"],2)}}\fixed$
   & \eqref{eq:model3:SA}
-\\
+\\\hline
 Asympt.
-  & ${\asymptomRelativeInfect=0.05}\fixed$
-  & \eqref{model1:lambda}
+  & \multirow{2}{*}{${\asymptomRelativeInfect=0.05}\fixed$}
+  & \multirow{2}{*}{\eqref{model1:lambda}}
   & ${\asymptomRelativeInfect = 0.001}\fixed$
   & \eqref{model2:lambda}
   &  ${\asymptomRelativeInfect = 1}\fixed$
   & \eqref{eq:model3:foi}
 \\
 infectivity
-& \missing
+&
 &
 & ${\asymptomRelativeShed = \Sexpr{1e-7}}\fixed$
 & \eqref{model2:to_W}
@@ -1183,7 +1183,7 @@ infectivity
 \multirow{4}{*}{Human to human}
   & \multirow{4}{*}{$\transmission_{1:6}$ as above}
   & \multirow{4}{*}{\eqref{model1:lambda}}
-  & \multirow{4}{*}{$\transmission=$\Sexpr{signif(h2_fit$h2_params["Beta"],3)}}
+  & \multirow{4}{*}{$\transmission=$\Sexpr{signif(h2_fit$h2_params["Beta"],3)} {\small yr\textsuperscript{-1}}}
   & \multirow{4}{*}{\eqref{model2:lambda}}
   & $\transmission_{1:10}=(
   \Sexpr{myround(p3u["foi_add",1]*1e6,2)}, \allowbreak
@@ -1196,7 +1196,7 @@ infectivity
 	\Sexpr{myround(p3u["foi_add",8]*1e6,2)}, \allowbreak
 	\Sexpr{myround(p3u["foi_add",9]*1e6,2)}, \allowbreak
 	\Sexpr{myround(p3u["foi_add",10]*1e6,2)}
-	) \allowbreak \times 10^{-6}$
+	) \allowbreak \times 10^{-6}$ {\small yr\textsuperscript{-1}}
   & \multirow{4}{*}{\eqref{eq:model3:foi}}
 \\
 \hline
@@ -1215,28 +1215,28 @@ infectivity
         \Sexpr{myround(p3u["betaB",7],2)}, \allowbreak
         \Sexpr{myround(p3u["betaB",8],2)}, \allowbreak
         \Sexpr{myround(p3u["betaB",9],2)}, \allowbreak
-        \Sexpr{myround(p3u["betaB",10],2)})$
+        \Sexpr{myround(p3u["betaB",10],2)})$ {\small yr\textsuperscript{-1}}
   & \multirow{4}{*}{\eqref{eq:model3:foi}}
 \\
-& & & \multirow{-3}{*}{$\beta_W= \Sexpr{signif(h2_fit$h2_params["BetaW"],3)}$} & \multirow{-3}{*}{\eqref{model2:lambda}} & &
+& & & \multirow{-3}{*}{$\beta_W= \Sexpr{signif(h2_fit$h2_params["BetaW"],3)}$ {\small yr\textsuperscript{-1}}} & \multirow{-3}{*}{\eqref{model2:lambda}} & &
 \\
 \hline
 Human to water
   & \missing
   &
-  & $\Wshed = $ \Sexpr{signif(h2_fit$h2_params["Mu"]/52,3)}
+  & $\Wshed = $ \Sexpr{signif(h2_fit$h2_params["Mu"]/52,3)} {\small wk\textsuperscript{-1}}
   & \eqref{model2:to_W}
-  & $\Wshed= \Sexpr{signif(p3s["thetaI"],3)}$
+  & $\Wshed= \Sexpr{signif(p3s["thetaI"]/52,3)}$ {\tiny	$\frac{\mathrm{km^2}}{\mathrm{wk}}$}
   & \eqref{eq:model3:water}
 \\
-\raggedright Water survival (wk)
-  & \multirow{2}{*}{\missing}
+Water survival {\footnotesize (wk)}
+  & \missing
   &
-  & \multirow{2}{*}{${\Wremoval^{-1} = \Sexpr{signif(52/h2_fit$h2_params["Delta"],3)}}\fixed$}
-  & \multirow{2}{*}{\eqref{model2:from_W}}
-  & \multirow{2}{*}{$\Wremoval^{-1}=\Sexpr{myround(52/p3s["mu_B"],2)}$}
-  & \multirow{2}{*}{\eqref{eq:model3:Decay}}
-\\
+  & ${\Wremoval^{-1} = \Sexpr{signif(52/h2_fit$h2_params["Delta"],3)}}\fixed$
+  & \eqref{model2:from_W}
+  & $\Wremoval^{-1}=\Sexpr{myround(52/p3s["mu_B"],2)}$
+  & \eqref{eq:model3:Decay}
+\\\hline
 Mixing exponent
   & $\mixExponent=\Sexpr{myround(p1["nu"],2)}$
   & \eqref{model1:lambda}
@@ -1246,13 +1246,13 @@ Mixing exponent
   &
 \\
 \hline
-\raggedright Process noise (wk\textsuperscript{1/2})
+\raggedright Process noise {\small (wk\textsuperscript{1/2})}
   & \raggedright $\sigmaProc = (\Sexpr{myround(p1["sig_sq_epi"],2)},
   \Sexpr{myround(p1["sig_sq_end"],2)})^*$
   & \multirow{2}{*}{\eqref{model1:lambda}}
   & \multirow{2}{*}{\missing}
   &
-  & \multirow{2}{*}{$\sigmaProc= \Sexpr{myround(p3s["std_W"],3)}$}
+  & \multirow{2}{*}{$\sigmaProc= \Sexpr{myround(p3s["std_W"] * sqrt(52),3)}$}
   & \multirow{2}{*}{\eqref{eq:model3:SA}}
 \\
 Reporting rate
@@ -1363,7 +1363,7 @@ where $\transmission(t)$ is a periodic cubic spline representation of seasonalit
 \label{model1:beta}
 \transmission(t) = \bar{\transmission} \exp\Big(\sum_{j=1}^6 \transmission_j s_j(t)\Big),
 \end{equation}
-\new{where $\bar{\transmission} = 1 (\mathrm{wk})^{-1}$ is a dimensionality constant.}
+\new{where $\bar{\transmission} = 1 (wk)\textsuperscript{-1}$ is a dimensionality constant.}
 The process noise $d\Gamma(t)/dt$ is multiplicative Gamma-distributed white noise, with infinitesimal variance parameter $\sigmaProc^2$.
 Lee et al.~\cite{lee20} included process noise in Model~3 but not in Model~1, i.e., they fixed $\sigmaProc^2 = 0$.
 Gamma white noise in the transmission rate gives rise to an over-dispersed latent Markov process \cite{breto11} which has been found to improve the statistical fit of disease transmission models \cite{stocks20,he10}.
@@ -2125,7 +2125,7 @@ In epidemiological studies, for example, quantitative understanding of individua
 This makes direct interpretation of estimated parameters delicate.
 
 Our case study provides an example of this in the parameter estimate for the duration of natural immunity due to cholera infection, $\muRS^{-1}$.
-Under the framework of Model~2, the best estimate for this parameter is $\Sexpr{signif(1/h2_fit$h2_params["sigma"],3)} \, \mathrm{yr}$, suggesting that individuals have \old{effectively} permanent immunity to cholera once infected.
+Under the framework of Model~2, the best estimate for this parameter is $\Sexpr{signif(1/h2_fit$h2_params["sigma"],3)}$ yr, suggesting that individuals have \old{effectively} permanent immunity to cholera once infected.
 \new{Rather than interpreting this as scientific evidence that individuals have permanent immunity from cholera, this result suggests that Model~2 favors a regime where reinfection events are a negligble part of the dynamics.}
 \old{To interpret this result, we bear in mind that the data ranged from 2010-2019, and therefore estimates of immunity longer than $10\, \mathrm{yr}$---the upper end of previous estimates of natural immunity [101]---effectively result in the same model dynamics.}
 The depletion of susceptible individuals may \old{also} be attributed to confounding mechanisms---such as localized vaccination programs and non-pharmaceutical interventions that reduce cholera transmission \cite{trevisin22, rebaudet21}---that were not accounted for in the model.
@@ -2138,9 +2138,11 @@ A model which aspires to provide quantitative guidance for assessing interventio
 However, strong statistical fit does not guarantee a correct causal structure: it does not even necessarily require the model to assert a causal explanation.
 A causal interpretation is strengthened by corroborative evidence.
 For example, reconstructed latent variables (such as numbers of susceptible and recovered individuals) should make sense in the context of alternative measurements of these variables \cite{grad12}.
-In the context of our case study, by reconstructing the latent states of Model~3, we notice that the calibrated model favors higher levels of cholera transmission than what was typically observed in the incidence data (\nameref{S_mod3cal}).
-This result hints at the possibility of model mispecification, and should prompt us to be \old{sceptical} \new{skeptical} of the reliability of forecasts from this model.
+\old{In the context of our case study, by reconstructing the latent states of Model~3, we notice that the calibrated model favors higher levels of cholera transmission than what was typically observed in the incidence data (S5 Text).
+This result hints at the possibility of model mispecification, and should prompt us to be skeptical of the reliability of forecasts from this model.}
 Similarly, parameters that have been calibrated to data should make sense in the context of alternative lines of evidence about the phenomena being modeled, while making allowance for the possibility that the interpretations of parameters may vary when modeling across differing spatial scales.
+
+\new{\editSuppText}
 
 \section*{Results}
 
@@ -2604,14 +2606,14 @@ We therefore do not provide probability of elimination estimates under Model~2, 
 
 The ongoing global COVID-19 pandemic has \old{provided a clear example on} \new{demonstrated} how government policy may be affected by the \old{conclusions of scientific models} \new{inferences drawn from mathematical modeling} \cite{saltelli20}.
 \old{This article demonstrates that fitting appropriate scientific models to guide policy is a challenging statistical task.}
-\new{However, the development of credible models---which are supported by data and can lend quantitative insights into a dynamic system---remains a challenging task.
-In this article, we demonstrate opportunities available for raising the current standards of statistical inference for mathematical models of biological systems.}
+\new{However, the development of credible models---which are supported by data and can provide quantitative insights into a dynamic system---remains a challenging task.
+In this article, we demonstrated opportunities available for raising the current standards of statistical inference for mathematical models of biological systems.}
 
-\new{We present methodology consistent with existing guidelines but exceeding standard practice.
-In particular, we show the value of comparing the likelihood of fitted mechanistic models versus non-mechanistic benchmarks.
-Further, we use likelihood-based diagnostic methods to identify specific limitations of proposed models.
-We use likelihood profile methods to assess parameter identifiability and to construct confidence intervals for parameter estimates.
-We assess the accuracy of numerical approximations involved in our calculations.
+\new{We presented methodology consistent with existing guidelines but going beyond standard practice.
+In particular, we showed the value of comparing the likelihood of fitted mechanistic models versus non-mechanistic benchmarks.
+Further, we used likelihood-based diagnostic methods to identify specific limitations of proposed models.
+We used likelihood profile methods to assess parameter identifiability and to construct confidence intervals for parameter estimates.
+% We assessed the accuracy of numerical approximations involved in our calculations.
 When reaching conclusions, we identify potential consequences of confounded variables and model misspecification.
 }
 

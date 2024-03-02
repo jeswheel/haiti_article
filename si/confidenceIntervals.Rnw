@@ -388,13 +388,13 @@ cowplot::plot_grid(
 \\
 \hline
 
-  Process noise & $\sigmaProc: \mathrm{Epi}$ & $\Sexpr{myround(h1_mles %>% filter(prof_var == 'sig_sq_epi') %>% pull(value), 3)}$
+  Process noise {\small (wk\textsuperscript{1/2})} & $\sigmaProc: \mathrm{Epi}$ & $\Sexpr{myround(h1_mles %>% filter(prof_var == 'sig_sq_epi') %>% pull(value), 3)}$
    &
   $(\Sexpr{myround(all_ci %>% filter(prof_var == 'sig_sq_epi') %>% pull(lower), 3)}, \Sexpr{myround(all_ci %>% filter(prof_var == 'sig_sq_epi') %>% pull(upper), 3)})$ 
 \\
 \hline
 
-  Process noise & $\sigmaProc: \mathrm{End}$ & $\Sexpr{myround(h1_mles %>% filter(prof_var == 'sig_sq_end') %>% pull(value), 3)}$
+  Process noise {\small (wk\textsuperscript{1/2})} & $\sigmaProc: \mathrm{End}$ & $\Sexpr{myround(h1_mles %>% filter(prof_var == 'sig_sq_end') %>% pull(value), 3)}$
    &
   $(\Sexpr{myround(all_ci %>% filter(prof_var == 'sig_sq_end') %>% pull(lower), 3)}, \Sexpr{myround(all_ci %>% filter(prof_var == 'sig_sq_end') %>% pull(upper), 3)})$ 
 \\
@@ -449,7 +449,7 @@ h2_plots <- list()
 for (i in 1:length(prof_params)) {
   p = prof_params[i]
   if (p == 'Mu') {
-    my_lab <- TeX('$52\\times\\mu_W')
+    my_lab <- TeX('$\\mu_W')
   } else if (p == 'Beta') {
     my_lab <- TeX('$\\beta^{1/5}$')
   } else if (p == 'BetaW') {
@@ -598,6 +598,88 @@ for (i in 1:length(prof_params)) {
       )
     }
     
+  } else if (p == 'Mu') {
+    
+    tmp_df <- h2_profiles %>% 
+      filter(prof_var == p) %>% 
+      # filter(logLik >= -21957.26 - 4) %>%
+      arrange(p)
+    
+    vals <- tmp_df[, p]
+    
+    profile_like <- splinefun(x = tmp_df[, p], y = tmp_df[, 'logLik'])
+    max_profile <- optimize(profile_like, interval = range(vals), maximum = TRUE)
+    threshold <- max_profile$objective - 1.92
+    plot_threshold <- max_profile$objective - 6
+    profile_roots <- function(x) {profile_like(x) - threshold}
+    plot_limits <- function(x) {profile_like(x) - plot_threshold}
+    
+    lower_bound <- uniroot(
+      profile_roots, 
+      interval = c(min(vals), max_profile$maximum)
+    )$root
+    
+    upper_bound <- uniroot(
+      profile_roots, 
+      interval = c(vals[which.max(tmp_df$logLik)], max(vals))
+    )$root
+    
+    add_piece <- c(
+      'Mu' = 3000, 'BetaW' = 0.3, 'phase' = 0.2, v = 0.5 
+    )
+    
+    max_x <- uniroot(
+      plot_limits, 
+      interval = c(max_profile$maximum, max(vals) + add_piece[p])
+    )$root
+    
+    min_x <- uniroot(
+      plot_limits, 
+      interval = c(min(vals) - add_piece[p], max_profile$maximum)
+    )$root
+    
+    h2_plots_lb[p] <- lower_bound
+    h2_plots_ub[p] <- upper_bound
+    
+    gg_tmp <- ggplot() + 
+      geom_point(
+        data = h2_profiles %>% 
+          filter(prof_var == p) %>% 
+          filter(.data[[p]] <= max_x & .data[[p]] >= min_x) ,
+        aes(x = .data[[p]] / 52, y = logLik)
+      ) + 
+      geom_function(fun = profile_like) + 
+      geom_vline(xintercept = lower_bound / 52, linetype = 'dashed') + 
+      geom_vline(xintercept = upper_bound / 52, linetype = 'dashed') + 
+      geom_vline(xintercept = max_profile$maximum / 52, col = 'blue') + 
+      labs(y = 'Log-Likelihood', title = my_lab) + 
+      theme(
+        axis.text = element_text(size = 8),
+        axis.title = element_text(size = 10)
+      ) +
+      theme_bw() +
+      # scale_y_continuous(limits = c(-21963, -21957)) + 
+      scale_y_continuous(limits = c(max(h2_profiles$logLik)-6, max(h2_profiles$logLik))) +
+      scale_x_continuous(limits = c(min_x/52, max_x/52)) + 
+      theme(
+        axis.title.x = element_blank(), 
+        plot.title = element_text(
+          hjust = 0.5, size = 8, margin = margin(t = 0, unit = "pt")
+        ),
+        axis.title.y = element_text(size = 8),
+        axis.text.y = element_text(size = 7),
+        axis.text.x = element_text(size = 6.5),
+        plot.margin = margin(5.5, 3, 0, -1, unit = 'pt')
+      )
+    
+    if (i %in% c(1, 4)) {
+      h2_plots[[p]] <- gg_tmp
+    } else {
+      h2_plots[[p]] <- gg_tmp + theme(
+        axis.text.y = element_blank(), axis.ticks.y = element_blank(),
+        axis.title.y = element_blank()
+      )
+    }
   } else {
     tmp_df <- h2_profiles %>% 
       filter(prof_var == p) %>% 
@@ -705,13 +787,13 @@ cowplot::plot_grid(
 \hline
 \hline
 
- Human to water shedding & $\Wshed$ & $\Sexpr{myround(h2_mles['Mu']/52, 1)}$
+ Human to water shedding {\small (wk\textsuperscript{-1})} & $\Wshed$ & $\Sexpr{myround(h2_mles['Mu']/52, 1)}$
    &
   $(\Sexpr{myround(h2_plots_lb['Mu']/52, 1)}, \Sexpr{myround(h2_plots_ub['Mu']/52, 1)})$ 
 \\
 \hline
 
- Water to Human Infection & $\beta_W$ & $\Sexpr{myround(h2_mles['BetaW'], 3)}$
+ Water to Human Infection {\small (yr\textsuperscript{-1})} & $\beta_W$ & $\Sexpr{myround(h2_mles['BetaW'], 3)}$
    &
   $(\Sexpr{myround(h2_plots_lb['BetaW'], 3)}, \Sexpr{myround(h2_plots_ub['BetaW'], 3)})$ 
 \\
@@ -729,13 +811,13 @@ cowplot::plot_grid(
 \\
 \hline
 
-Human to Human Infection & $\transmission$ & $\Sexpr{signif(h2_mles['Beta'], 3)}$\textsuperscript{*}
+Human to Human Infection {\small (yr\textsuperscript{-1})} & $\transmission$ & $\Sexpr{signif(h2_mles['Beta'], 3)}$\textsuperscript{*}
    &
   $[0, \Sexpr{signif(h2_plots_ub['Beta'], 3)})$ 
 \\
 \hline
 
-Immunity (yr) & $\muRS^{-1}$ & $\Sexpr{signif(1/h2_mles['sigma'], 3)}$\textsuperscript{*}
+Immunity {\small (yr)} & $\muRS^{-1}$ & $\Sexpr{signif(1/h2_mles['sigma'], 3)}$\textsuperscript{*}
    &
   $(\Sexpr{signif(1/h2_plots_ub['sigma'], 3)}, \inf)$ 
 \\
@@ -768,6 +850,8 @@ H3_profiles_long <- H3_profiles %>%
   select(prof_var, logLik, logLik_se, all_of(paste0(prof_params, '1'))) %>%
   rename_with(~ sub("1$", "", .x)) %>%
   mutate(mu_B = mu_B / 52) %>% 
+  mutate(thetaI = thetaI / 52) %>% 
+  mutate(std_W =  std_W * sqrt(52)) %>%
   select(-epsilon, -XthetaA) %>% 
   pivot_longer(
     cols = -c(prof_var, logLik, logLik_se),
@@ -783,6 +867,7 @@ H3_remaining_long <- H3_profiles %>%
   rename(epsilon = epsilon1, XthetaA = XthetaA1) %>% 
   mutate(XthetaA = sqrt(XthetaA)) %>%
   mutate(epsilon = epsilon^2) %>%
+  # mutate(std_W =  std_W * sqrt(52)) %>% 
   pivot_longer(
     cols = -c(prof_var, logLik, logLik_se),
     names_to = 'variable',
@@ -894,7 +979,7 @@ for (i in 1:length(prof_params)) {
   } else if (p == 'r') {
     my_lab <- TeX('$r$')
   } else if (p == 'std_W') {
-    my_lab <- TeX('$\\sigma$')
+    my_lab <- TeX('$\\sigma_{proc}$')
   } else if (p == 'epsilon') {
     my_lab <- TeX('$\\rho$')
   } else if (p == 'k') {
@@ -981,19 +1066,19 @@ cowplot::plot_grid(
 \hline
 \hline
 
- Process Noise & $\sigmaProc$ & $\Sexpr{myround(h3_mles %>% filter(prof_var == 'std_W') %>% pull(value), 3)}$
+ Process Noise {\small (wk\textsuperscript{1/2})} & $\sigmaProc$ & $\Sexpr{myround((h3_mles %>% filter(prof_var == 'std_W') %>% pull(value)) * sqrt(52), 3)}$
    &
-  $(\Sexpr{myround(all_ci %>% filter(prof_var == 'std_W') %>% pull(lower), 3)}, \Sexpr{myround(all_ci %>% filter(prof_var == 'std_W') %>% pull(upper), 3)})$ 
+  $(\Sexpr{myround((all_ci %>% filter(prof_var == 'std_W') %>% pull(lower)), 3)}, \Sexpr{myround((all_ci %>% filter(prof_var == 'std_W') %>% pull(upper)), 3)})$ 
 \\
 \hline
 
- Water Survival (wk) & $\Wremoval^{-1}$ & $\Sexpr{myround(52 / (h3_mles %>% filter(prof_var == 'mu_B') %>% pull(value)), 3)}$
+ Water Survival {\small (wk)} & $\Wremoval^{-1}$ & $\Sexpr{myround(52 / (h3_mles %>% filter(prof_var == 'mu_B') %>% pull(value)), 3)}$
    &
   $(\Sexpr{myround(1 / (all_ci %>% filter(prof_var == 'mu_B') %>% pull(upper)), 3)}, \Sexpr{myround(1 / (all_ci %>% filter(prof_var == 'mu_B') %>% pull(lower)), 3)})$ 
 \\
 \hline
 
- Human to Water Shedding & $\Wshed$ & $\Sexpr{signif(h3_mles %>% filter(prof_var == 'thetaI') %>% pull(value), 3)}$
+ Human to Water Shedding {\small $\frac{\mathrm{km^2}}{\mathrm{wk}}$} & $\Wshed$ & $\Sexpr{signif((h3_mles %>% filter(prof_var == 'thetaI') %>% pull(value))/52, 3)}$
    &
   $(\Sexpr{signif(all_ci %>% filter(prof_var == 'thetaI') %>% pull(lower), 3)}, \Sexpr{signif(all_ci %>% filter(prof_var == 'thetaI') %>% pull(upper), 3)})$ 
 \\
