@@ -553,7 +553,7 @@ Quantitative understanding of infectious disease transmission dynamics relies up
 The models aim to provide a statistical description of the trajectory of an epidemic and its uncertainty, together with a representation of the underlying biological mechanisms.
 Evaluation of success at these goals is necessary in order for a model to provide a reliable tool for guiding evidence-based public policy interventions.
 In this article, we conduct a re-analysis of the 2010-2019 cholera outbreak in Haiti. We use this case study to investigate current procedures for fitting mechanistic models to time series data, while identifying limitations of these methodologies and proposing remedies.
-\editAuthorSum
+Our analysis presents methodology for diagnosing how well a model describes observed data. Using objective measures to assess model fit ensures that our evaluation is based on quantifiable criteria. Incorporating reproducibility into this assessment results in a framework that enables the validation or refinement of model based inferences when revisiting the data, facilitating scientific discovery.
 Our data analysis workflow is supported by recent advances in algorithms, software and hardware, which facilitate statistical fitting of nonlinear stochastic dynamic models to observed incidence data.
 However, inference for high-dimensional systems remains a methodological challenge.
 One of the models under consideration involves spatially coupled stochastic meta-populations, and we demonstrate how a recently developed algorithm permits likelihood-based inference and model diagnostics in this setting.
@@ -629,7 +629,7 @@ We find a more nuanced conclusion: attention to methodological details in model 
 This improved ability may result in more accurate forecasts and facilitates the exploration of model assumptions.
 Based on this retrospective analysis, we offer suggestions on fitting mechanistic models to dynamic systems for future studies.
 
-\editModelingGuidance
+Numerous guidelines have been proposed for using mechanistic models to inform policy, reviewed in \cite{behrend20}. Behrend et al.~\cite{behrend20} identify the importance of stakeholder engagement, transparency, reproducibility, uncertainty communication, and testable model outcomes. These and related principles are echoed by other influential articles \cite{saltelli20,donnelly18}. Additional literature emphasizes model calibration and evaluation techniques \cite{dahabreh17,egger17,penaloza15}. These guidelines often lack implementation specifics. As an example, \cite{lee20} largely adhere to the principles of \cite{behrend20}---though assessing the extent of stake-holder engagement is challenging---yet their projections are inconsistent with actual cholera incidence data from 2019 to 2022, demonstrating the limitations of current standards. We provide methodology for rigorous statistical calibration and evaluation of dynamic models (as advocated by \cite{saltelli19}), thereby expanding on the prevailing guidance. We specifically emphasize principles that prove essential in our case study. Complementary methodological suggestions arising from a spatio-temporal analysis of COVID-19 are detailed in \cite{li23}.
 
 Our recommendations are presented in the context of a case study, with the goal of demonstrating how careful adherence to statistical principles may result in improved model fits.
 We proceed by introducing the general modeling scheme employed by Models~1--3 and provide details of each individual model;
@@ -1047,7 +1047,7 @@ mod3_lee_coupled_partial_aic <- 2 * lee3_results$n_params - 2 * lee3_results$sub
 \section*{Materials and methods}
 \subsection*{Mechanistic models for disease modeling}
 
-\editMechModels
+Mechanistic models representing biological phenomena are valuable for epidemiology and consequently for public health policy \cite{lofgren14,mccabe21}. More broadly, they have useful roles throughout biology, especially when combined with statistical methods that properly account for stochasticity and nonlinearity \cite{may04}. In some situations, modern machine learning methods can outperform mechanistic models on epidemiological forecasting tasks \cite{lau22,baker18}. The predictive skill of non-mechanistic models can reveal limitations in mechanistic models, but cannot readily replace the scientific understanding obtained by describing the biological dynamics of the system in a mathematical model \cite{baker18,prosperi20}.
 
 In this article, we refer to models that focus on learning relationships between variables in a dataset as {\it associative}, whereas models that incorporate a known scientific property of the system we call {\it causal} or {\it mechanistic}.
 The danger in using forecasting techniques which rely on associative models to predict the consequence of interventions is called the Lucas critique in an econometric context.
@@ -1660,7 +1660,7 @@ If a mechanistic model including a feature (such as a representation of a mechan
 As for any analysis of observational data, we must be alert to the possibility of confounding.
 For a covariate, this shows up in a similar way to regression analysis: the covariate under investigation could be a proxy for some other unmodeled phenomenon or unmeasured covariate.
 
-\editConfound
+The statistical evidence of a trend in transmission rate in this model could be explained by any trending variable (such as hygiene improvements, or changes in population behavior), resulting in confounding from collinear covariates. Alternatively, it is possible that the negative trend observed in the incidence data could be attributed to a decreasing reporting rate rather than decreasing transmission rate. This could be formally tested by comparing models with either trend specification. We did not do this because evidence suggests that reporting rate was maintained or increased (Figure~1 of \cite{rebaudet21}). We instead argue that a decreasing transmission rate is a plausible way to explain the decrease in cases over time, as there is alternative evidence that supports this model \cite{rebaudet19CATI,rebaudet21,michel19}. It is not practical to test all remotely plausible model variations, yet a strongly supported conclusion should avoid ruling out untested hypotheses. The robust statistical conclusion for our analysis is that a model which allows for change fits better than one which does not, and a trend in transmission is a plausible way to do this.
 
 We implemented Model~1 using the \code{pomp} package \cite{king16}, relying heavily on the source code provided by Lee et al.~\cite{lee20}.
 Both analyses used the \code{mif2} implementation of the IF2 algorithm to estimate $\paramVec$ by maximum likelihood.
@@ -1848,7 +1848,7 @@ The decision to address metapopulation dynamics using a spatially explicit model
 Evidence for the former approach has been provided in previous studies \cite{king15}, including the specific case of heterogeneity between Haitian departments in cholera transmission \cite{collins14}.
 However, a legitimate preference for simplicity can support a decision to consider nationally aggregated models \cite{saltelli20,green15}.
 
-\editMetaPop
+In our literature review, 17 articles considered dynamic models that incorporate spatial heterogeneity \cite{lee20,tuite11,pasetto18,fitzgibbon20,eisenberg13,rinaldo12,chao11,abrams13,trevisin22,sallah17,collins14,kelly16,azman12,leung22,kuhn14,mari15,gatto12}. All but four \cite{lee20,pasetto18,sallah17,azman12} of these studies used deterministic dynamic models: this greatly simplifies the process of calibrating model parameters to incidence data, though deterministic models can struggle to describe complex stochastic dynamics. The model in \cite{pasetto18} was fit using an Ensemble Kalman Filter (EnKF) \cite{evensen09}; though EnKF scales favorably with the number of spatial units, it relies on linearization of latent states which can be problematic for highly nonlinear systems \cite{evensen22,ionides21}. Alternative approaches used to fit stochastic models included making additional simplifying assumptions to aid in the fitting process \cite{lee20}, and using MCMC algorithms \cite{sallah17,azman12} which require specific structures in the latent dynamics, making these algorithms non plug-and-play. In this subsection, we present how the recently developed iterated block particle filter (IBPF) algorithm \cite{ning23,ionides22} can be used to fit a spatially explicit stochastic dynamic model to incidence data.
 
 One issue that arises when fitting spatially explicit models is that parameter estimation techniques based on the particle filter become computationally intractable as the number of spatial units increases.
 This is a result of the approximation error of particle filters growing exponentially in the dimension of the model \cite{rebeschini15,park20}.
@@ -1988,7 +1988,7 @@ Because of this, we use a simple negative binomial model with an auto regressive
 Y_n|Y_{n - 1} \sim \text{NB}\big(\NBintercept + \NBar Y_{n-1}, \NBsize \big),
 \end{eqnarray}
 where $\mathrm{E}\big(Y_n|Y_{n - 1}\big) = \NBintercept + \NBar Y_{n-1}$, and $\Var\big(Y_n|Y_{n - 1}\big) = \mathrm{E}\big(Y_n|Y_{n - 1}\big) + \mathrm{E}\big(Y_n|Y_{n - 1}\big)^2 / \NBsize$.
-\editSpatBench
+To obtain a benchmark for models with a meta-population structure, we fit independent auto-regressive negative binomial models to each spatial unit. Under the assumption of independence, the log-likelihood of the benchmark on the entire collection of data can be obtained by summing up the log-likelihood for each independent model. In general, a spatially explicit model may not have well-defined individual log-likelihoods, and, in this case, comparisons to benchmarks must be made at the level of the joint model.
 
 In the case where the case counts are large, an alternative benchmark recommended by He et al.~\cite{he10} is a log-linear Gaussian ARMA model;
 the theory and practice of ARMA models is well developed, and these linear models are appropriate on a log scale due to the exponential growth and decay characteristic of biological dynamics.
@@ -2117,7 +2117,9 @@ A causal interpretation is strengthened by corroborative evidence.
 For example, reconstructed latent variables (such as numbers of susceptible and recovered individuals) should make sense in the context of alternative measurements of these variables \cite{grad12}.
 Similarly, parameters that have been calibrated to data should make sense in the context of alternative lines of evidence about the phenomena being modeled, while making allowance for the possibility that the interpretations of parameters may vary when modeling across differing spatial scales.
 
-\editSuppText
+In the supplement material (\nameref{S_mod3cal}), we explore in more detail the process of model fitting and diagnostics for Model~3. Here we demonstrate that the model outperforms its benchmark model on the aggregate scale.
+However, when focusing on the spatial units with the highest incidence of cholera, Model~3 performs roughly the same as a simple benchmark. By comparing simulations from the fitted model to the filtering distribution, we see that the reconstructed latent states of the model favor higher levels of cholera transmission than what is typically observed in the incidence data.
+These results hint at the possibility of model mispecification, and warrant a degree of caution in interpreting the model's outputs.
 
 \section*{Results}
 
@@ -2127,9 +2129,10 @@ Forecasts are an attempt to provide an accurate estimate of the future state of 
 Forecasts from mechanistic models that are compatible with current scientific understanding may also provide estimates of the future effects of potential interventions.
 Further, they may enable real-time testing of new scientific hypotheses \cite{lewis22}.
 
-\editForecastOne
+Forecasts of a dynamic system should should be consistent with the available data. It is particularly important that forecasts are consistent with the most recent information available, as recent data is likely to be more relevant than older data. While this assertion may seem self-evident, it is not the case for deterministic models, for which the initial conditions together with the parameters are sufficient for forecasting, and so recent data may not be consistent with model trajectories. Epidemiological forecasts based on deterministic models are not uncommon in practice, despite their limitations \cite{king15}. Lee et al.~\cite{lee20} chose to obtain forecasts from all of their models by simulating forward from initial conditions, rather than conditioning forecasts based on the available data.
+This decision is possibly as a result of using a deterministic model, as forecasts from different models may only be considered comparable if they are obtained in the same way, which is most easily done be by simulating from initial conditions because Model~2 is deterministic.
 
-\editForecastTwo
+In contrast, for non-deterministic Models~1 and 3, we obtain forecasts by simulating future values using latent states that are harmonious with the most recent data. This is done by simulating forward from latent states drawn at the last observation time ($t_N$) from the filtering distribution $f_{\bm{X}_N|\bm{Y}_{1:N}}(\bm{x}_{N} | \bm{y}^*_{1:N} ; \hat\paramVec)$. The decision to obtain model forecasts from initial conditions partially explains the unsuccessful forecasts of Lee et al.~\cite{lee20}. Table~S7 in their supplement material, which contains results that were not discussed in their main article, shows that the subset of their simulations with zero cholera cases from 2019-2020 also correspond with its disappearance until 2022. These results support our argument that forecasts should be made by ensuring the starting point for the forecast is consistent with available data.
 
 Uncertainty in just a single parameter can lead to drastically different forecasts \cite{saltelli20}.
 Therefore, parameter uncertainty should also be considered when obtaining model forecasts to influence policy.
@@ -2511,7 +2514,7 @@ mod3_V4_res <- bake(
 @
 
 Simulations from probabilistic models (Models~1 and~3) represent possible trajectories of the dynamic system under the scientific assumptions of the models.
-\editModVacc
+Because Model~1 only accounts for national level disease dynamics, the pre-determined department-specific vaccination campaigns are carried out by assuming the vaccines are administered in one week to the same number of individuals that would have obtained vaccines if explicitly administered to the specific departments. We refer readers to \cite{lee20} and the accompanying supplement material for more details.
 Estimates of the probability of cholera elimination can therefore be obtained as the proportion of simulations from these models that result in cholera elimination.
 The results of these projections are summarized in Figs. \ref{fig:elimProbs}.
 
@@ -2587,15 +2590,26 @@ These comparisons, along with other likelihood based diagnostics, help identify 
 Diagnostic tools include likelihood profile methods, which help to assess parameter identifiability and enable the construction of confidence intervals for parameter estimates \cite{ionides17, simpson23}.
 When reaching conclusions, it is important to consider potential consequences of confounded variables and model misspecification.
 
-\editDiscussionOne
+Model diagnostics are a key tool for exposing unresolved model limitations and improving model fit. In our case study, we compared the three models from Lee et al.~\cite{lee20} to statistical benchmarks, revealing areas for improvement. For example, comparisons of Model~3 to a benchmark revealed its inadequacy in accounting for the post-hurricane increase in transmission, leading to a beneficial model refinement. When a mechanistic model is competitive with statistical benchmarks, we have a license to begin critical evaluation of its causal implications.
+If a model falls far behind simple benchmarks, there is likely to be substantial limitation in the data analysis that should be identified and remedied.
+In our case study, the re-calibrated version of Model~1 outperformed its benchmark, so we proceeded to examine causal implications. When doing so, we found that the fitted model provides a causal description of the dynamic system that is consistent with known features of the system, such as the importance of rainfall as a driver of cholera infection. The congruency between causal implications of the model and our belief about the dynamic system, coupled with a strong quantitative description of observed data relative to a benchmark, provides support for viewing the model as a plausible quantitative representation of the system under investigation.
 
-\editDiscussionTwo
+When fitting a mechanistic model to a dynamic system, the complexity of the model warrants consideration. Mathematical models provide simplified representations of complex systems, with the simplicity serving both to facilitate scientific understanding and to enable statistical inference on unknown parameters.
+In our case study, employing deterministic dynamics in Model~2 was found to be an over-simplification by comparing model fit with benchmarks.
+% Including stochastic metapopulation dynamics permitted investigation of spatiotemporal data, the main cost being additional complexity of numerical computations.
+Model~3 is distinct in that it is both stochastic and has a meta-population structure, making it challenging to draw likelihood-based inferences. In this paper, we demonstrated how this model class can be calibrated to incidence data using the innovative IBPF algorithm. One of only a few examples of fitting a nonlinear non-Gaussian meta-population model via maximum likelihood \cite{li23,ionides22}, this case study exemplifies the algorithm's potential benefits and provides an example for future researchers on a possible approach to fitting a high-dimensional non-linear model.
 
-\editDiscussionThree
+Likelihood-based methods aid in determining an appropriate level of model complexity. Models fit to the same data can be compared using a criteria such as AIC. Nested model variations are particularly useful as they enable formal statistical testing of the nested features via likelihood ratio tests. Our case study demonstrated the examination of nested model features for all three models. Model~1 investigated a time-varying transmission rate; Model~2 assessed a phase-shift parameter in seasonal cholera peaks; Model~3 incorporated hurricane-related parameters.
 
-\editDiscussionFour
+Unmodeled features of a dynamic system can lead to spurious or misleading parameter estimates if the features substantially impact observed data. 
+% A fitted model must compensate for these unaccounted features using its inherent flexibility. 
+In deterministic models, features that cannot be explained by measurement error must be accounted for by the choice of parameters. 
+% the choice of parameters is the primary source of flexibility to compensate for these unaccounted features.
+For our case study, some of the parameter estimates for the deterministic Model~2 are implausible, such as the infinite immunity discussed above, and this may be explained by compensation for model misspecification.
+Incorporating demographic and environmental stochasticity into models can mitigate the impact of unmodeled features. Stochastic phenomena are not only arguably present in biological systems, but their inclusion in a model also allows observed data variations to be attributed to inherent uncertainty rather than to distorted parameter values.
+Models~1 and 3 suggest the presence of extra-demographic stochasticity \cite{he10,stocks20,li23}, as evidenced by the confidence intervals for the corresponding parameter $\sigmaProc$ (\nameref{S_CI}).
 
-\editDiscussionFive
+If forecasts are an important component of a modeling task, the forecasts should be consistent with the available data, particularly at the most recently available time points. In our case study, we did this by simulating forward from the filtering distribution, as this procedure conditions latent variables on the available data. This type of forecasting, however, is not directly available using a deterministic model, where future dynamics are fully determined by initial conditions and parameter values. This can result in over-confident model forecasts \cite{king15}. Despite their limitations, deterministic models can offer valuable insights into dynamic systems \cite{may04}. In \cite{lee20}, the forecasts from the deterministic Model~2 were qualitatively more consistent with the observed disappearance of cholera than the stochastic models. In our case study, we found improvements to Models~1 and 3 that resulted in improved forecasts for these models.
 
 In our case study, we found that additional attention to statistical details could have resulted in an enhanced statistical fit to the observed incidence data. This would have improved the accuracy of the policy guidance resulting from the study.
 We used the same data, models, and much of the same code used by Lee et al.~\cite{lee20}, but we arrived at drastically different conclusions.
