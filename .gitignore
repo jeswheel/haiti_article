@@ -27,3 +27,11 @@ si/ReplicateLee20Out.tex
 ms-submission.*
 ArXiv/*
 ArXiv.zip
+analyzeh3profiles.R
+setupProfiles3.R
+model*/profileReg_RL*/*
+sessionInfo_tmp.txt
+analyzeH1Profiles.R
+model1/run_level_1/*
+model3/run_level_1/*
+refs/*

@@ -2,7 +2,20 @@
 
 \input{inputs/header}
 
-\setcounter{tocdepth}{1}
+\usepackage{titlesec}
+\usepackage{chngcntr}
+\usepackage{etoolbox}
+
+% Remove the numbering from sections
+\titleformat{\section}{\normalfont\Large\bfseries}{}{0pt}{}
+
+% Reset the subsection counter at the start of each section
+\counterwithin*{subsection}{section}
+
+% Change the numbering for subsections to have an S prefix and remove chapter numbering
+\renewcommand{\thesubsection}{S\arabic{subsection}}
+
+% \setcounter{tocdepth}{1}
 
 <<packages, include=FALSE>>=
 library(tidyverse)
@@ -58,8 +71,414 @@ if (!dir.exists("../model3/si")) {
 
 \section{Calibrating Model~3 to observed cases}\label{sec:mod3Cal}
 
+<<DefineH3FitFunction>>=
+
+# This function is how the model was fit before doing profiles. The commit id
+# that this function was copied from, for reference, is 49b52e3 of haitipkg. 
+fit_haiti3_si <- function(
+    search1 = NULL,
+    search2 = NULL,
+    nsearches = 1,
+    search_rho = FALSE,
+    search_gamma = FALSE,
+    search_hur = FALSE,
+    search_Iinit = FALSE,
+    start_date = "2010-11-20"
+    ) {
+
+  #
+  ##
+  ### Search1: Global search
+  ##
+  #
+
+  if (is.null(search1$COOLING)) {
+    search1$COOLING <- 0.5
+  }
+
+  if (is.null(search1$KEEP_LIK_MAT)) {
+    search1$KEEP_LIK_MAT <- TRUE
+  }
+
+  if (nsearches >= 2 && is.null(search2$COOLING)) {
+    search2$COOLING <- 0.5
+  }
+
+  if (nsearches >= 2 && is.null(search2$KEEP_LIK_MAT)) {
+    search2$KEEP_LIK_MAT <- TRUE
+  }
+
+  # Create the model that will be fit to cholera incidence data
+  h3_spat <- haitipkg::haiti3_spatPomp(start_date = start_date)
+
+  # Create a list to save all of the results.
+  results <- list()
+
+  # Create vectors for the unit and shared parameters
+  unit_specific_names <- c("betaB", "foi_add", "aHur", "hHur")
+
+  shared_param_names <- c(
+    "mu_B", "XthetaA", "thetaI", "lambdaR", "r", "std_W",
+    "epsilon", "k"
+  )
+
+  if (search_rho) {
+    shared_param_names <- c(shared_param_names, "rho")
+  }
+
+  if (search_gamma) {
+    shared_param_names <- c(shared_param_names, "gamma")
+  }
+
+  est_param_names <- c(
+    unit_specific_names, shared_param_names
+  )
+
+  # Add unit numbers to each parameter
+  est_param_names_expanded <- paste0(rep(est_param_names, each = 10), 1:10)
+
+  if (is.null(search1$RW_SD)) {
+    stop("RW_SD must be supplied for search 1.")
+  } else {
+    chol_rw_1.sd <- search1$RW_SD
+  }
+
+  if (nsearches >= 2 && is.null(search2$RW_SD)) {
+    stop("RW_SD must be supplied for search 2.")
+  } else {
+    chol_rw_2.sd <- search2$RW_SD
+  }
+
+  # Get lower bound for unit parameters (global search)
+  min_val <- 1e-8
+  unit_lb <- rep(c(1, 1e-9, 0, 0), each = 10)
+  names(unit_lb) <- paste0(rep(unit_specific_names[1:4], each = 10), 1:10)
+
+  # Get upper bound for unit parameters (global search)
+  unit_ub <- rep(c(50, 1e-6, 0, 0), each = 10)
+  names(unit_ub) <- paste0(rep(unit_specific_names[1:4], each = 10), 1:10)
+
+  # Set unique upper-bounds for betaB, based on run_level_2 search results.
+  unit_ub['betaB1'] <- 15
+  unit_ub['betaB2'] <- 80
+  unit_ub['betaB3'] <- 75
+  unit_ub['betaB4'] <- 70
+  unit_ub['betaB10'] <- 35
+  unit_ub['betaB5'] <- 15
+  unit_ub['betaB6'] <- 80
+  unit_ub['betaB7'] <- 20
+  unit_ub['betaB8'] <- 5
+  unit_ub['betaB9'] <- 30
+  unit_ub['foi_add10'] <- 2e-7
+  unit_ub['foi_add3'] <- 2e-7
+  unit_ub['foi_add4'] <- 2e-7
+  unit_ub['foi_add6'] <- 5e-7
+  unit_ub['foi_add9'] <- 5e-7
+
+  if (search_hur) {
+    unit_ub['aHur3'] <- 50
+    unit_ub['aHur9'] <- 25
+    unit_ub['hHur3'] <- 120
+    unit_ub['hHur9'] <- 120
+
+    unit_lb['aHur3'] <- 0.01
+    unit_lb['aHur9'] <- 0.01
+    unit_lb['hHur3'] <- 30
+    unit_lb['hHur9'] <- 30
+  }
+
+  if (search_Iinit) {
+    unit_lb['Iinit3'] <- 0.8 / 468301  # H3
+    unit_lb['Iinit4'] <- 0.8 / 342525  # H4
+
+    unit_ub['Iinit3']  <- 40 / 468301
+    unit_ub['Iinit4']  <- 40 / 342525
+  }
+
+  # Get lower bound for shared parameters (global search)
+  shared_lb <- c(
+    25, 0.02, min_val, min_val,
+    0.75, 0.005, 0.5, 1
+  )
+
+  if (search_rho) {
+    shared_lb <- c(shared_lb, 1/8)
+  }
+
+  if (search_gamma) {
+    shared_lb <- c(shared_lb, 365.25 / 5)
+  }
+
+  names(shared_lb) <- shared_param_names
+
+  # Get upper bound for shared parameters (global search)
+  shared_ub <- c(500, 0.8, 0.0001, 5, 1.75, 0.075, 0.99, 200)
+
+  if (search_rho) {
+    shared_ub <- c(shared_ub, 1/(0.2))
+  }
+
+  if (search_gamma) {
+    shared_ub <- c(shared_ub, 365.25 / 2)
+  }
+
+  names(shared_ub) <- shared_param_names
+
+  # Create data.frame with random unit parameters
+  guesses_unit <- pomp::runif_design(
+    lower = unit_lb,
+    upper = unit_ub,
+    nseq = search1$NREPS
+  )
+
+  # Create data.frame with random shared parameters
+  guesses_shared <- pomp::runif_design(
+    lower = shared_lb,
+    upper = shared_ub,
+    nseq = search1$NREPS
+  )
+
+  # Need to duplicate each of the shared parameter columns
+  guesses_shared <- guesses_shared[, rep(1:length(shared_param_names), each = 10)]
+  colnames(guesses_shared) <- paste0(rep(shared_param_names, each = 10), 1:10)
+
+  # Combine the unit and shared parameters
+  guesses <- cbind(guesses_shared, guesses_unit)
+
+  # We need to add fixed parameters
+  all_params <- coef(h3_spat)
+  fixed_params <- all_params[!names(all_params) %in% colnames(guesses)]
+  fixed_mat <- matrix(
+    rep(fixed_params, search1$NREPS),
+    byrow = TRUE, nrow = search1$NREPS
+  )
+  colnames(fixed_mat) <- names(all_params[!names(all_params) %in% colnames(guesses)])
+
+  # Combine estimated and fixed parameters, and reorder based on original order.
+  guesses_all <- cbind(guesses, fixed_mat)[, names(coef(h3_spat))]
+
+  # Memory clean-up
+  rm(guesses_unit, guesses_shared, fixed_mat, min_val, shared_lb,
+     shared_ub, unit_lb, unit_ub,  all_params, fixed_params,
+     est_param_names)
+  gc()
+
+  # It is assumed that a parallel backend has been registered prior to calling
+  # this function.
+  # doParallel::registerDoParallel(ncores)
+  doRNG::registerDoRNG(2198635)
+
+  t_global <- system.time(
+    foreach(
+      i = 1:search1$NREPS,
+      .packages = c("spatPomp"),
+      .combine = c
+    ) %dopar% {
+      r_params <- unlist(guesses_all[i, ])
+      coef(h3_spat) <- r_params
+
+      ibpf_out <- ibpf(
+        h3_spat,
+        Nbpf = search1$NBPF,
+        Np = search1$NP,
+        sharedParNames = shared_param_names,
+        unitParNames = unit_specific_names,
+        spat_regression = search1$SPAT_REGRESSION,
+        rw.sd = chol_rw_1.sd,
+        cooling.fraction.50 = search1$COOLING,
+        block_size = 1
+        # params = r_params  Not yet implemented in spatPomp
+      )
+    } -> Global_ibpf
+  )
+
+  rm(guesses_all)
+
+  pfilterLikes <- data.frame(
+    "ll" = rep(0, search1$NREPS_EVAL*search1$NREPS),
+    "which" = rep(1:search1$NREPS, each = search1$NREPS_EVAL)
+  )
+
+  ibpf_params <- t(coef(Global_ibpf))
+
+  for (i in 1:nrow(ibpf_params)) {
+    for (sp in shared_param_names) {
+      ibpf_params[i, paste0(sp, 1:10)] <- mean(ibpf_params[i, paste0(sp, 1:10)])
+    }
+  }
+
+  t_global_bpf <- system.time(
+    likMat <- foreach(  # Get log-likelihood for each unit and set of parameters, NREPS_EVAL times each
+      i = 1:(search1$NREPS_EVAL*search1$NREPS), .combine = rbind, .packages = 'spatPomp'
+    ) %dopar% {
+      p3 <- ibpf_params[(i-1) %/% search1$NREPS_EVAL + 1, ]
+
+      coef(h3_spat) <- p3
+      apply(bpfilter(
+        h3_spat, Np = search1$NP_EVAL,
+        block_size = 1
+      )@block.cond.loglik, 1, sum)
+    }
+  )
+
+  # Condense unit likelihoods into model likelihood
+  # pfilterLikes$ll <- apply(likMat, 1, sum)
+  pfilterLikes$ll <- rowSums(likMat)  # Faster
+
+  # Group by model parameter set.
+  ibpf_logLik <- pfilterLikes |>
+    dplyr::group_by(which) |>
+    dplyr::summarize(logLik = logmeanexp(ll),
+              se = logmeanexp(ll, se = TRUE)[2])
+
+  search1_results <- list()
+  search1_results$logLiks <- ibpf_logLik
+  search1_results$params <- ibpf_params
+  search1_results$ibpf_time <- t_global
+  search1_results$bpf_time <- t_global_bpf
+
+  if (isTRUE(search1$KEEP_LIK_MAT)) {
+    search1_results$likMat <- likMat
+  }
+
+  if (isTRUE(search1$KEEP_TRACES)) {
+    search1_results$traces <- lapply(Global_ibpf, function(x) x@traces[, c('loglik', names(chol_rw_1.sd@call)[-1])])
+  }
+
+  results$search1 <- search1_results
+
+  if (nsearches == 1) {
+    return(results)
+  }
+
+  rm(ibpf_logLik, guesses, likMat, pfilterLikes,
+     Global_ibpf, chol_rw_1.sd, t_global, t_global_bpf,
+     i, sp, ibpf_params)
+  gc()
+
+  #
+  ##
+  ### Search 2: Local Search
+  ##
+  #
+
+  top_n_global <- order(-search1_results$logLiks$logLik)[1:search2$TOP_N]
+
+  # Contains the best set of parameters, measure for the coupled model
+  params <- search1_results$params[rep(top_n_global, each = search2$NREPS), ]
+
+  all_params <- params
+
+  rm(params)
+
+  doRNG::registerDoRNG(327498615)
+
+  t_ibpf_local <- system.time(
+    foreach(
+      i = 1:(search2$TOP_N * search2$NREPS),
+      .packages = c("spatPomp"),
+      .combine = c
+    ) %dopar% {
+      r_params <- all_params[i, ]
+      coef(h3_spat) <- r_params
+
+      ibpf_out <- ibpf(
+        h3_spat,
+        Nbpf = search2$NBPF,
+        Np = search2$NP,
+        sharedParNames = shared_param_names,
+        unitParNames = unit_specific_names,
+        spat_regression = search2$SPAT_REGRESSION,
+        rw.sd = chol_rw_2.sd,
+        cooling.fraction.50 = search2$COOLING,
+        block_size = 1
+        # params = r_params  Not yet implemented in spatPomp
+      )
+    } -> local_ibpf
+  )
+
+  rm(all_params)
+
+  pfilterLikes <- data.frame(
+    "ll" = NA_real_,
+    "starting_set" = rep(top_n_global, each = search2$NREPS * search2$NREPS_EVAL),
+    "which" = rep(1:(search2$NREPS * search2$TOP_N), each = search2$NREPS_EVAL)
+  )
+
+  ibpf_params <- t(coef(local_ibpf))
+
+  for (i in 1:nrow(ibpf_params)) {
+    for (sp in shared_param_names) {
+      ibpf_params[i, paste0(sp, 1:10)] <- mean(ibpf_params[i, paste0(sp, 1:10)])
+    }
+  }
+
+  t_local_bpf <- system.time(
+    likMat <- foreach(  # Get log-likelihood for each unit and set of parameters, NREPS_EVAL times each
+      i = 1:(search2$NREPS_EVAL*search2$NREPS*search2$TOP_N), .combine = rbind, .packages = 'spatPomp'
+    ) %dopar% {
+      # p3 <- coef(local_ibpf[[(i-1) %/% search2$NREPS_EVAL + 1]])
+      p3 <- ibpf_params[(i-1) %/% search2$NREPS_EVAL + 1, ]
+      coef(h3_spat) <- p3
+      apply(bpfilter(
+        h3_spat, Np = search2$NP_EVAL,
+        block_size = 1
+      )@block.cond.loglik, 1, sum)
+    }
+  )
+
+  # Condense unit likelihoods into model likelihood
+  pfilterLikes$ll <- rowSums(likMat)
+
+  # Group by model parameter set.
+  ibpf_logLik_temp <- pfilterLikes |>
+    dplyr::group_by(which) |>
+    dplyr::summarize(logLik = logmeanexp(ll),
+                     se = logmeanexp(ll, se = TRUE)[2])
+
+  ibpf_logLik <- pfilterLikes |>
+    dplyr::group_by(which) |>
+    dplyr::summarise(starting_set = dplyr::first(starting_set)) |>
+    dplyr::right_join(
+      y = ibpf_logLik_temp,
+      by = "which"
+    ) |>
+    dplyr::select(which, starting_set, logLik, se)
+
+  # ibpf_logLik$init_method <- (ibpf_logLik$which - 1) %/% (search2$TOP_N * search2$NREPS) + 1
+  search2_results <- list()
+  search2_results$logLiks <- ibpf_logLik
+  search2_results$params <- ibpf_params
+  search2_results$ibpf_time <- t_ibpf_local
+  search2_results$bpf_time <- t_local_bpf
+
+  if (isTRUE(search2$KEEP_LIK_MAT)) {
+    search2_results$likMat <- likMat
+  }
+
+  if (isTRUE(search2$KEEP_TRACES)) {
+    search2_results$traces <- lapply(local_ibpf, function(x) x@traces[, c('loglik', names(chol_rw_2.sd@call)[-1])])
+  }
+
+  results$search2 <- search2_results
+
+  if (nsearches == 2) {
+    return(results)
+  }
+
+  rm(
+    search1, search1_results, top_n_global, t_ibpf_local, t_local_bpf,
+    pfilterLikes, ibpf_logLik, chol_rw_2.sd, local_ibpf, likMat, ibpf_logLik_temp
+  )
+
+  gc()
+
+  results
+}
+@
+
+
 <<CalibrateOrig3>>=
-# Create vectors for the unit and shared parameters
 unit_specific_names <- c("betaB", "foi_add")
 shared_param_names <- c(
   "mu_B", "XthetaA", "thetaI", "lambdaR", "r", "std_W",
@@ -145,8 +564,8 @@ SEARCH2 = list(
 )
 
 haiti3_sub_fit <- bake(
-  file = "../model3/si/subset_noparams.rds", {
-    fit_haiti3(
+  file = "../model3/si/h3_no_hurricane.rds", {
+    fit_haiti3_si(
       nsearches = 2L,
       search1 = SEARCH1,
       search2 = SEARCH2,
@@ -157,6 +576,10 @@ haiti3_sub_fit <- bake(
     )
   }
 )
+@
+
+
+<<LoadOrig3>>=
 
 # Find model index with best log-likelihood
 best_m <- which.max(haiti3_sub_fit$search2$logLiks$logLik)
@@ -250,10 +673,10 @@ coef(h3)[names(sub_params)] <- sub_params
 
 registerDoRNG(40765101)  # for modular, reproducible results
 
-# Perform block partical filter with fitted model, to get conditional
+# Perform block particle filter with fitted model, to get conditional
 # log-likelihoods.
 bpf_sub3_out <- bake(
-  file = "../model3/si/bpf_sub_cond_LL.rds", {
+  file = "../model3/si/noHur_cond_LL.rds", {
 
     results <- list()
 
@@ -274,23 +697,25 @@ bpf_sub3_out <- bake(
 In this section, we provide more detail on the process that was used to estimate the coefficients of Model~3.
 In particular, we discuss why we decided to include additional model parameters---those that are associated with the behavior of the system during Hurricane Matthew---that were not considered by \cite{lee20}.
 To calibrate this model, we used the iterated block particle filter (IBPF) method of \cite{ionides22}.
-Due to the novelty of this algorithm, there does not exist published examples the IBPF algorithm used for data analysis outside of the papers in which the algorithm was introduced \citep{ning21ibpf,ionides22}, which is one motivation of the inclusion additional details related to fitting and diagnosing the model fit provided here.
+Due to the novelty of this algorithm, there exists only a few examples where the IBPF algorithm is used for data analysis \citep{li23,ionides22}, which is one motivation of the inclusion additional details related to fitting and diagnosing the model fit provided here.
 
-\cite{lee20} were only able to estimate model parameters to a simplified version of Model~3 on a subset of the available data, as no method existed at the time of their publication to fit a fully coupled meta-population model to disease incidence data.
-Building on their results, we fit the fully coupled version of Model~3 to nearly all available data, reserving only a few observations to use to calibrate the initial conditions of the model (see the previous section for more details).
-In order to properly maximize the model likelihood, we found that it was necessary to use multiple searches for the MLE, periodically pruning away less successful searches.
-The first collection of searches was performed by obtaining initial values for the parameters by uniformly sampling values from a predefined hypercube.
+\cite{lee20} only estimated model parameters to a simplified version of Model~3 on a subset of the available data, as no method existed at the time of their publication to fit a fully coupled meta-population model to disease incidence data.
+Building on their results, we fit the fully coupled version of Model~3 to (nearly) all available data, reserving only a few observations to use to calibrate the initial conditions of the model (see the supplement for initialization models for more details).
+To maximize model likelihoods, we relied on parameter estimates obtained while calculating profile-likelihood confidence intervals, as this calculation requires many replicated IBPF searches.
+In our preliminary investigations that were done prior to conducting a profile likelihood search, we found that it was necessary to use multiple searches for the MLE, periodically pruning away less successful searches.
+To do this, the first collection of searches is performed by obtaining initial values for the parameters by uniformly sampling values from a predefined hypercube.
 A subsequent refinement search used parameter values corresponding to the largest model likelihoods as starting parameter values.
 The need for multiple searches does not appear to be uncommon, as a similar approach was used by \cite{ionides22}.
+While computationally intensive, profile likelihoods proved to be an effective alternative to maximizing model likelihoods without the need to apply this multistage heuristic. 
 
-We use the technique described above to fit the fully coupled version of Model~3 proposed by \cite{lee20}.
+We use the iterative fitting / pruning technique described above to fit the fully coupled version of Model~3 proposed by \cite{lee20}.
 The maximum likelihood we obtained after two rounds of searching was $\Sexpr{round(max(haiti3_sub_fit$search2$logLiks$logLik))}$, which is higher than the benchmark model ($\Sexpr{round(sum(unitLikes_bench$ll))}$).
-While beating a simple associative benchmark is promising, this does not immediately rule out the possibility that the model is a poor description of the system.
+While beating a simple associative benchmark is promising, this does not immediately imply that the model is a good description of the system.
 Additional investigation of parameters estimates and their corresponding implications on model based conclusions should always be conducted.
 For meta-population models, it is worth considering how well the model fits the data to each spatial unit.
 % This can be done by looking at conditional log-likelihoods, which is part of the output of the \texttt{bpfilter} algorithm in the \texttt{spatPomp} package.
 The likelihoods for each department, compared to the corresponding benchmark model, are displayed in Fig.~\ref{fig:h3UnitLikes}.
-The figure demonstrates that while the log-likelihood of the fitted model outperforms the auto-regressive negative binomial benchmark model, Model~3 has lower likelihoods than the benchmark for some departments.
+The figure demonstrates that while the log-likelihood of the fitted model outperforms the auto-regressive negative binomial benchmark model at the aggregate level, Model~3 has lower likelihoods for some departments.
 
 \begin{figure}[!ht]
 <<h3UnitLikes, fig.height=3, fig.width=5.5, echo=FALSE>>=
@@ -357,37 +782,47 @@ The effect of the hurricane on cholera transmission is assumed to have an expone
 <<loadFinalModel3, echo=FALSE, include=FALSE, message=FALSE>>=
 
 # This result was used in the manuscript, so it doesn't need to be recalculated.
-h3_final_results <- readRDS("../model3/run_level_3/haiti3_fit.rds")
+h3_final_mod_pars <- readRDS("../model3/run_level_3/h3_MLE_eval.rds") %>%
+  slice_max(logLik, n = 1) %>%
+  select(-(job.id:logLik_se)) %>%
+  unlist()
 
-# Save best_m as index for the model parameters with the best likelihood.
-# Then, save the model parameter values and the likelihood evaluations
-best_m <- which.max(h3_final_results$search2$logLiks$logLik)
-best_params <- h3_final_results$search2$params[best_m, ]
-all_liks <- as.data.frame(h3_final_results$search2$likMat)
-all_liks$which <- rep(1:72, each = 18)
-best_mod <- dplyr::filter(all_liks, which == best_m)
+# Change model parameters to the best set of parameters from previous
+# search
+coef(h3)[names(h3_final_mod_pars)] <- h3_final_mod_pars
 
-# Get repeated estimates of unit log-likelihoods
-unitLikesM3 <- best_mod %>%
-  pivot_longer(
-    cols = -which,
-    names_to = "unit",
-    names_prefix = "V",
-    values_to = "logLik"
-  ) %>%
-  select(-which) %>%
-  group_by(unit) %>%
-  summarize(
-    ll_est = pomp::logmeanexp(logLik),
-    ll_se = pomp::logmeanexp(logLik, se = TRUE)[2]
-  ) %>%
-  ungroup() %>%
-  mutate(unit = as.numeric(unit)) %>%
-  arrange(unit)
+registerDoRNG(731955)  # for modular, reproducible results
+
+# Perform block particle filter with fitted model, to get conditional
+# log-likelihoods.
+bpf_final3_out <- bake(
+  file = "../model3/si/h3_cond_LL.rds", {
+
+    results <- list()
+
+    bpf_out <- h3 %>% bpfilter(
+      Np = 5000,
+      block_size = 1,
+      save_states = TRUE
+    )
+
+    results$block.cond.loglik <- bpf_out@block.cond.loglik
+    results$times <- bpf_out@times  # Saved for convenience
+    results
+  },
+  seed = 432235
+)
+
+unitLikesM3_final <- readRDS("../model3/run_level_3/mod3_eval_res.rds")[['u_cond_ll']] %>%
+  t() %>% 
+  as_tibble() %>% 
+  rename(ll_est = est, ll_se = se) %>% 
+  mutate(unit = 1:10) %>% 
+  select(unit, ll_est, ll_se)
 
 # Combine model likelihood table to benchmarks
-bench_M3_joined <- dplyr::left_join(
-  x = unitLikesM3,
+bench_M3_joined_final <- dplyr::left_join(
+  x = unitLikesM3_final,
   y = unitLikes_bench,
   by = "unit"
 ) %>%
@@ -400,8 +835,8 @@ bench_M3_joined <- dplyr::left_join(
   ) %>%
   mutate(unit = paste0(unit, ": ", deps[as.numeric(unit)]))
 
-bench_diffs <- dplyr::left_join(
-  x = unitLikesM3,
+bench_diffs_final <- dplyr::left_join(
+  x = unitLikesM3_final,
   y = unitLikes_bench,
   by = "unit"
 ) %>%
@@ -410,23 +845,22 @@ bench_diffs <- dplyr::left_join(
          ll_diff = ll_mod3 - ll_bench) %>%
   arrange(ll_diff)
 
-floor(100 * sum(mod3_cases[, c(bench_diffs$unit[1:4])], na.rm = TRUE) / sum(mod3_cases, na.rm = TRUE))
 @
 
-We refit Model~3 after introducing these hurricane-related parameters using the same successive search scheme described above.
-The resulting model has a log-likelihood value of $\Sexpr{round(max(h3_final_results$search2$logLiks$logLik), 1)}$.
-The addition of the Hurricane parameters seems to have resulted in a dramatic increase in conditional likelihoods around and after October 2016, as seen in Fig.~\ref{fig:finalCondLL}.
-The inclusion of these parameters resulted in an overall increase of $\Sexpr{round(max(h3_final_results$search2$logLiks$logLik) - max(haiti3_sub_fit$search2$logLiks$logLik), 1)}$ log-likelihood units.
+We refit Model~3 after introducing these hurricane-related parameters.
+The resulting model has a log-likelihood value of $\Sexpr{round(readRDS("../model3/run_level_3/mod3_eval_res.rds")[['ll']]['est'], 1)}$.
+The inclusion of these parameters resulted in an overall increase of $\Sexpr{round(readRDS("../model3/run_level_3/mod3_eval_res.rds")[['ll']]['est'] - max(haiti3_sub_fit$search2$logLiks$logLik), 1)}$ log-likelihood units.
 Such a large difference in log-likelihoods is well beyond the threshold of statistical uncertainty determined by Wilks' theorem, suggesting that the data highly favor the inclusion of the additional parameters.
+The addition of the Hurricane parameters also increases in conditional likelihoods for each observation, particularly around October 2016 (Fig.~\ref{fig:finalCondLL}).
 
 <<finalModel3BPF, echo=FALSE, message=FALSE, include=FALSE>>=
-
-# Set the model parameters to the best results from previous search
-coef(h3)[names(best_params)] <- best_params
 
 # block particle filter to get conditional log-likelihoods.
 bpf_final3_out <- bake(
   file = "../model3/si/h3_final_bpf_cond_ll.rds", {
+    
+    # Set the model parameters to the best results from previous search
+    coef(h3)[names(h3_final_mod_pars)] <- h3_final_mod_pars
 
     results <- list()
 
@@ -474,16 +908,16 @@ t(bpf_final3_out$block.cond.loglik) %>%
 \end{figure}
 
 Now that the model with additional parameters has been calibrated to the incidence data, we plot the conditional log-likelihood of each department compared to a benchmark model in Fig.~\ref{fig:finalUnitLL}.
-Interestingly, the difference in log-likelihoods between Model~3 and the benchmark model is smallest in the departments \Sexpr{bench_diffs$unit[1]}, \Sexpr{bench_diffs$unit[2]}, \Sexpr{bench_diffs$unit[3]} and \Sexpr{bench_diffs$unit[4]}.
+The difference in log-likelihoods between Model~3 and the benchmark model is smallest in the departments \Sexpr{bench_diffs_final$unit[1]}, \Sexpr{bench_diffs_final$unit[2]}, \Sexpr{bench_diffs_final$unit[3]} and \Sexpr{bench_diffs_final$unit[4]}.
 Each of these departments also exhibited the most sustained cholera transmission, defined by having the fewest number of weeks with no recorded cholera cases.
 Specifically, these four departments have zero cholera cases recorded in less than $4\%$ of the available data, and all remaining departments---except for Nord-Ouest, which has approximately $9.5\%$ of cases that are zeros and also exhibits the next smallest difference in log-likelihoods---have zero cases recorded in at least $14\%$ of the available weekly data.
 This result suggests that the quantitative advantage Model~3 has over its respective benchmark is primarily due to the model's ability to describe a resurgence of cases after a department records a week of zero cholera cases.
 This result may be unsurprising in the context of the models that we are comparing.
-Because the cholera transmission in individual departments likely depends on the national prevalence of cholera and the Vibrio cholerae bacteria, our benchmark model that relies exclusively on the previous number of case within any given unit has a difficult time predicting a resurgence of cases.
+Because the cholera transmission in individual departments likely depends on the national prevalence of cholera and the Vibrio cholerae bacteria, our spatially-independent benchmark model that relies exclusively on the previous number of case within any given unit has a difficult time predicting a resurgence of cases.
 
 \begin{figure}[!ht]
 <<finalUnitLLFig, fig.height=3, fig.width=5.5, echo=FALSE>>=
-ggplot(bench_M3_joined, aes(x = ll, y = reorder(unit, ll))) +
+ggplot(bench_M3_joined_final, aes(x = ll, y = reorder(unit, ll))) +
   geom_point(aes(col = type)) +
   ylab("Unit") +
   xlab("Log Likelihood") +
@@ -498,8 +932,8 @@ ggplot(bench_M3_joined, aes(x = ll, y = reorder(unit, ll))) +
 \end{figure}
 
 The difference in log-likelihoods between Model~3 and its benchmark model for each individual units suggests that Model~3 has a relatively poor fit for the four units with the most sustained cholera transmission.
-The simple four parameter benchmark has a higher likelihood than Model~3 for the \Sexpr{bench_diffs$unit[1]} and \Sexpr{bench_diffs$unit[2]} departments, and also has log-likelihoods only a few units smaller than Model~3 for units \Sexpr{bench_diffs$unit[3]} and \Sexpr{bench_diffs$unit[4]}.
-This is particularly worrisome given that these four departments account for more than $\Sexpr{floor(100 * sum(mod3_cases[, c(bench_diffs$unit[1:4])], na.rm = TRUE) / sum(mod3_cases, na.rm = TRUE))}\%$ of the total number of reported cholera cases.
+The simple four parameter benchmark has a higher likelihood than Model~3 for the \Sexpr{bench_diffs_final$unit[1]} and \Sexpr{bench_diffs_final$unit[2]} departments, and also has log-likelihoods only a few units smaller than Model~3 for the departments \Sexpr{bench_diffs_final$unit[3]} and \Sexpr{bench_diffs_final$unit[4]}.
+This is particularly worrisome given that these four departments account for more than $\Sexpr{floor(100 * sum(mod3_cases[, c(bench_diffs_final$unit[1:4])], na.rm = TRUE) / sum(mod3_cases, na.rm = TRUE))}\%$ of the total number of reported cholera cases.
 
 \subsection{Examining the Hidden States of the Calibrated Model}
 
@@ -508,24 +942,28 @@ Indeed, a good statistical fit does not require the model to assert a causal exp
 For example, reconstructed latent variables should make sense in the context of alternative measurements of these variables \citep{grad12}.
 We demonstrate this principle by examining the latent state of the calibrated model.
 In particular, we examine the compartment of susceptible individuals under various scenarios.
+This analysis can also provide insight into why the calibrated model fails to outperform the benchmark model on the four departments with the most sustained cholera transmission. 
 
 Recall that the filtering distribution for the calibrated version of Model~3 at time $t_k$ is defined as the distribution of the latent state at time $t_k$ given the data from times $t_{1}:t_{k}$, i.e. $f^{(3)}_{\bm{X}_k|\bm{Y}_{1:k}}(\bm{x}_{k} | \bm{y}^*_{1:k} ; \hat\theta)$.
 In general, one may expect simulations from the filtering distribution of a model with a good statistical fit to result in hidden states that are highly consistent with the observed data because the filtering distribution is conditioned on the observed data.
 Fig.~\ref{fig:h3Sus} shows the percentage of individuals that are in the susceptible compartment from various simulations of the model:
 simulations from Model~3 under initial conditions are displayed in red; simulations from the filtering distribution of model are displayed in blue.
 This figure shows that simulations from initial conditions tends to result in a much more rapid depletion of susceptible individuals at the start of the epidemic than simulations from the filtering distribution, suggesting the calibrated model has a propensity to predict larger outbreaks than what is typically seen in the data.
-This also appears true in later stages of the time period of observed data, where the data suggests that there is a replenishment of the susceptible compartment, but the Model simulations typically retain a smaller proportion of susceptible individuals.
-This result demonstrates that the calibrated model favors a more rapid growth in cholera cases than what is typically seen in the observed data, which explains why the model fails to predict the absence of cases between February, 2019 and October, 2022.
+This result demonstrates that the calibrated model favors a more rapid growth in cholera cases than what is typically seen in the observed data, providing a possible explanation as to why the model fails to beat the simple benchmark for each spatial unit. 
+This results hints at the possibility of model mispecification, and warrants a degree of caution in interpreting the model's outputs.
 
 <<h3SusFigSetup, echo=FALSE, message=FALSE, include=FALSE>>=
 
-# This bake perfoms the following:
+# This bake performs the following:
 #  (1) simulates the model from initial conditions
 #  (2) get the values of the hidden states at the end of each simulation, and
 #      saves these for later use.
 #  (3) Obtain quantiles for the Susceptible pool from the simulations.
 init_conditions_results <- bake(
   file = "../model3/si/InitSimsQuants.rds", {
+    
+    # Set the model parameters to the best results from previous search
+    coef(h3)[names(h3_final_mod_pars)] <- h3_final_mod_pars
 
     results <- list()  # To return final output of bake
 
@@ -613,7 +1051,8 @@ mod3_V0_initcond_res <- bake(
     # Get "noVacc" scenario parameters
     h3_S0_par <- get_model3_vacc_scenario_params(scenario = "noVacc")
     h3Spat <- h3
-    p3 <- best_params
+    p3 <- h3_final_mod_pars
+    
     coef(h3Spat) <- p3
     coef(h3Spat)[names(h3_S0_par)] <- h3_S0_par
 
@@ -623,7 +1062,7 @@ mod3_V0_initcond_res <- bake(
     # Using parameters and end state values, obtain projections
     h3_V0_sims <- project_from_filter(
       h3Spat, end_states = h3_bpf_end_states, covarGen = project_rain,
-      nsims = 1000, seed = 184697
+      nsims = 500, seed = 184697
     )
 
     # Store nationally aggregated results

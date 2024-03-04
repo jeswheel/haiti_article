@@ -1,0 +1,391 @@
+\documentclass[11pt]{article}
+
+\input{inputs/header}
+
+\setcounter{tocdepth}{1}
+
+<<packages, include=FALSE>>=
+library(tidyverse)
+library(pomp)
+library(haitipkg)
+library(spatPomp)
+library(doParallel)
+library(doRNG)
+library(knitr)
+
+options(
+  scipen = 2,
+  help_type = "html",
+  stringsAsFactors = FALSE,
+  continue = "+  ",
+  width = 70,
+  useFancyQuotes = FALSE,
+  reindent.spaces = 2,
+  xtable.comment = FALSE
+)
+
+opts_chunk$set(
+  tidy.opts=list(
+    keep.blank.line=FALSE
+  ),
+  comment="",
+  fig.path = 'figure/',
+  # warning=FALSE,
+  # message=FALSE,
+  echo=FALSE,
+  fig.align="center",
+  dev="pdf",
+  dev.args=list(
+    bg="transparent",
+    pointsize=9
+  )
+)
+
+cores <-  as.numeric(Sys.getenv('SLURM_NTASKS_PER_NODE', unset = NA))
+if(is.na(cores)) cores <- detectCores()
+# cores <- 20
+registerDoParallel(cores)
+theme_set(theme_bw())
+
+if (!dir.exists("../model3/si")) {
+  dir.create("../model3/si", recursive = TRUE)
+}
+
+myround <- function(x, digits = 1) {
+  # taken from the broman package
+  if (digits < 1)
+    stop("This is intended for the case digits >= 1.")
+  if (length(digits) > 1) {
+    digits <- digits[1]
+    warning("Using only digits[1]")
+  }
+  tmp <- sprintf(paste("%.", digits, "f", sep = ""), x)
+  zero <- paste0("0.", paste(rep("0", digits), collapse = ""))
+  tmp[tmp == paste0("-", zero)] <- zero
+  tmp
+}
+
+theme_set(theme_bw() + theme(plot.title = element_text(hjust = 0.5)))
+
+dep_labeller <- as_labeller(
+  c(
+    'Artibonite' = 'Artibonite',
+    'Sud_Est' = 'Sud-Est',
+    'Sud.Est' = 'Sud-Est',
+    'Nippes' = 'Nippes',
+    'Nord_Est' = 'Nord-Est',
+    'Nord.Est' = 'Nord-Est',
+    'Ouest' = 'Ouest',
+    'Centre' = 'Centre',
+    'Nord' = 'Nord',
+    'Sud' = 'Sud',
+    'Nord_Ouest' = 'Nord-Ouest',
+    'Nord.Ouest' = 'Nord-Ouest',
+    'Grande_Anse' = 'Grand\'Anse',
+    'Grand.Anse' = 'Grand\'Anse'
+  )
+)
+@
+
+\begin{document}
+
+%%%%%%%%%% START
+
+\section{Initial Values}
+
+To perform inference on POMP models, it is necessary to propose an initial probability density for the latent process $f_{X_0}(x_0;\theta)$, including the possibility that the initial values of the latent states are known, or are a non-random function of the unknown parameter vector, $\theta$.
+This density is used to obtain initial values of the latent state when fitting and evaluating the model.
+For each of the models considered in this analysis, the initial conditions are derived by enforcing the model dynamics on reported cholera cases.
+It is also sometimes necessary to fit some initial value parameters in order to help determine initial values for weakly identifiable compartments.
+In the following subsections, we mention initial value parameters that were fit for each model.
+
+\subsection{Model~1}
+
+For this model, the number of individuals in the Recovered and Asymptomatic compartments are set to zero, but the initial proportion of Infected and Exposed individuals is estimated as initial value parameters ($\Iinit$ and $\Einit$, respectively) using the IF2 algorithm, implemented as \texttt{mif2} in the \texttt{pomp} package.
+Finally, the initial proportion of Susceptible individuals $S_{0, 0}$ is calculated as $S_{0, 0} = 1 - \Iinit - \Einit$.
+This model for the initial values of the latent states matches that which was used by \citet{lee20}.
+
+\subsection{Model~2}
+
+Model~2 assumes that the initial values are a deterministic function of the reporting rate and the initial case reports, and so no initial value parameters need to be estimated.
+Initial values for latent state compartments are chosen so as to enforce the model dynamics on the observed number of cases.
+Specifically, the model sets $I_{u0}(0) = y^*_{1u} / \reportRate$ for each unit $u \in 1:10$, where $I_{u0}(t)$ is the number of infected individuals in unit $u$ at time $t$, vaccination scenario $z = 0$, $y^*_{tu}$ is the reported number of cases, and $\reportRate$ is the reporting rate.
+It is further assumed that there are no individuals in the recovered compartment, as the epidemic has just begun. 
+This model for the initial values of the latent states matches that which was used by \citet{lee20}.
+
+The decision to fix initial values so that they satisfy the dynamics of the model has the benefit of reducing the number of estimated parameters and enforcing latent states at time $t_0$ to be consistent with the calibrated model. 
+The risk of fixing initial values rather than estimating them is doing so may have substantial effects on the model dynamics, and hence on the consequences of the analysis. 
+To consider the impact of the chosen model approach, we consider an alternative initialization model that enables flexible estimation of certain latent states. Specifically, we initialize $I_{u0}(0) = \tilde{I}_{u0}$ for $u \in 1:10$, where $\{\tilde{I}_{u0}\}_{u = 1}^{10}$ is a set of additional model parameters. 
+We then fix $S_{u0}(0) = \text{pop}_u - I_{u0}(0)$, and all other starting values are set to zero, as with the fixed value approach. 
+
+<<Fit H2 Initialization Params, include=FALSE, message=FALSE, warning=FALSE>>=
+h2_main_fit <- readRDS("../model2/model2_fit.rds")
+
+h2Init_fit <- bake(
+  file = '../model2/model2_all_fit.rds', {
+    
+    # Create model and save initial values for each parameter
+    h2 <- haiti2(cutoff = 10000, measure = "log")  # Default is epidemic period
+    h2_params <- h2@params
+    est_params <- c(
+      'Mu', 'Beta', 'BetaW', 'v', 'sigma', 'phase',
+      paste0('InitInfected', 1:10)
+      )
+    n_fit_params <- length(est_params)
+    
+    # Get objective function to minimize
+    epi_ofun <- pomp::traj_objfun(h2, est = est_params, params = h2_params)
+    
+    # Vector of starting values of the parameters that are estimated.
+    # phase is not included because it's the only non log-transformed variable
+    log_parms <- c(
+      'Mu', 'Beta', 'BetaW', 'v', 'sigma', paste0('InitInfected', 1:10)
+    )
+    
+    log_theta <- h2_params[est_params[est_params %in% log_parms]]
+    log_theta[log_theta == 0] <- 1
+    
+    # Fit the epi model
+    h2_fit_tmp <- subplex::subplex(
+      par = c(
+        log(log_theta), 
+        h2_params[setdiff(est_params, log_parms)]
+      )[est_params],
+      fn = epi_ofun
+    )
+    
+    # Save the fitted parameters to the h2_params vector
+    h2_params[log_parms] <- exp(h2_fit_tmp$par[log_parms])
+    h2_params[setdiff(est_params, log_parms)] <- h2_fit_tmp$par[setdiff(est_params, log_parms)]
+    
+    
+    model2_fit_results <- list()
+    model2_fit_results[['h2_params']] <- h2_params
+    model2_fit_results[["n_fit_params"]] <- n_fit_params
+    model2_fit_results[['logLik']] <- -h2_fit_tmp$value
+    
+    model2_fit_results
+  }, timing = FALSE
+)
+
+
+mod2_AIC <- -2 * h2_main_fit$logLik + 2 * h2_main_fit$n_fit_params
+mod2_newInit_AIC <- -2 * h2Init_fit$logLik + 2 * h2Init_fit$n_fit_params
+@
+
+The AIC of this alternative approach is $\Sexpr{myround(mod2_newInit_AIC, 1)}$, compared to the fixed approach with an AIC of $\Sexpr{myround(mod2_AIC, 1)}$. 
+This alternative initialization approach results in quantitative improvement to the model-fit, but does not result in qualitative differences in the conclusions made using this model. Figure~\ref{fig:h2InitialTraj} displays the trajectory of the model with this alternate initialization model. 
+Table~\ref{tab:InitValues} gives the estimated initial values. 
+The estimated value of the latent state is similar to the fixed value in Artibonite and Centre, where the largest number of cases are present at the start of the epidemic. 
+Because of this, the qualitative dynamics do not differ by much when the parameters are estimated versus held constant, despite the improvement in model fit measured by AIC. 
+
+<<Get H2 trajectories, include=FALSE, echo=FALSE, message=FALSE>>=
+
+h2_Init <- haiti2(region = 'before', cutoff = 10000, measure = 'log')
+coef(h2_Init) <- h2Init_fit$h2_params
+
+h2_Init_traj <- trajectory(
+  h2_Init,  # Model
+  params = h2Init_fit$h2_params,  # estimated parameters
+  format = 'data.frame'
+)
+
+# Display the output as nationally aggregated data, as was done in Lee et al (2020)
+h2_Init_traj$Ctotal <- rowSums(
+  h2_Init_traj[, paste0("C", 1:10)]  # Infections in each department
+) * h2Init_fit$h2_params['Rho']  # multiply by reporting rate, to compare to reported cases.
+
+h2_traj <- h2_Init_traj %>%
+  select(year, Ctotal) %>%
+  mutate(
+    date = as.Date(lubridate::round_date(lubridate::date_decimal(year), unit = 'day'))
+  )
+
+mod2_VaccScenarios <- bake(
+  file = paste0("../model2/VaccinationScenarios_InitPars.rds"), {
+    haiti2_vaccScenario(
+      h2_params = h2Init_fit$h2_params
+    )
+  },
+  timing = FALSE
+)
+
+# Create "long" version of the observed cholera cases, for plotting purposes.
+dep_plot_df <- haitiCholera %>%
+  select(-report) %>%
+  pivot_longer(
+    data = .,
+    cols = -date_saturday,
+    values_to = 'cases',
+    names_to = 'dep'
+  ) %>%
+  mutate(
+    date = as.Date(date_saturday),
+    dep = gsub("\\.", "_", dep)
+  ) %>%
+  mutate(
+    dep = case_when(dep == "Grand_Anse" ~ "Grande_Anse", TRUE ~ dep)
+  )
+
+# Calculate total number of nationally aggregated cholera cases, using previous
+# data.
+true_agg_cases <- dep_plot_df %>%
+  tidyr::pivot_wider(
+    data = .,
+    id_cols = c(date),
+    names_from = dep,
+    values_from = cases,
+    names_prefix = 'cases_'
+  ) %>%
+  mutate(
+    ReportedAll = cases_Artibonite + cases_Centre +
+      cases_Grande_Anse + cases_Nippes + cases_Nord +
+      cases_Nord_Est + cases_Ouest + cases_Sud +
+      cases_Sud_Est + cases_Nord_Ouest
+  )
+@
+
+\begin{figure}[!ht]
+<<h2InitialTraj, echo=FALSE, message=FALSE, fig.height=1.9, fig.width=4.8, fig.align='center'>>=
+ggplot() +
+  geom_line(data = h2_traj, aes(x = date, y = Ctotal + 1), col = 'blue') +
+  geom_line(data = true_agg_cases, aes(x = date, y = ReportedAll + 1)) +
+  geom_line(data = filter(mod2_VaccScenarios$all_trajs,
+                          year >= max(h2_traj$year)),
+            aes(x = as.Date(date), y = ReportedCases + 1, color = scenario)) +
+  theme(axis.title.x = element_blank(),
+        legend.title = element_blank(),
+        axis.title.y = element_text(size = 9),
+        axis.text = element_text(size = 8)) +
+  ylab("Reported cholera cases") +
+  scale_color_manual(values = c("V0" = '#f4a582',
+                                "V1" = '#d6604d',
+                                "V2" = '#b2182b',
+                                "V3" = '#92c5de',
+                                "V4" = '#4393c3')) +
+  scale_y_log10(labels = scales::trans_format("log10", scales::math_format(10^.x))) +
+  scale_x_date(date_labels = "'%y", breaks = seq.Date(from = as.Date("2010-01-01"), as.Date("2030-01-01"), by = '2 years'))
+@
+\caption{\label{fig:h2InitialTraj}
+{\figTitle Simulated trajectory of alternate initialization of Model~2.}
+The black line shows the nationally aggregated weekly cholera incidence data.
+The blue curve from 2012-2019 is the trajectory of the calibrated version of Model~2.
+Compare to Fig.~4 of the article.}
+\end{figure}
+
+\begin{table}[!h]
+\centering
+\caption{\label{tab:InitValues}Initial values estimated for alternative initialization model for Model~2 compared to the fixed-value initialization model.}
+\vspace{2mm}
+\begin{tabular}{|c|c|c|c|}
+\hline
+Latent State & Department & Calibrated Model Value & Fixed Value
+\\
+\hline
+\hline
+
+$I_{1,0}(0)$ & \Sexpr{unlist(dep_labeller(unit_names(h2_Init)[1]))} &
+  $\Sexpr{round(h2Init_fit$h2_params["InitInfected1"], 0)}$ &
+  $\Sexpr{round(h2_main_fit$h2_params["InitInfected1"], 0)}$ 
+\\
+\hline
+
+$I_{2,0}(0)$ & \Sexpr{unlist(dep_labeller(unit_names(h2_Init)[2]))} &
+  $\Sexpr{round(h2Init_fit$h2_params["InitInfected2"], 0)}$ &
+  $\Sexpr{round(h2_main_fit$h2_params["InitInfected2"], 0)}$ 
+\\
+\hline
+
+$I_{3,0}(0)$ & \Sexpr{unlist(dep_labeller(unit_names(h2_Init)[3]))} &
+  $\Sexpr{round(h2Init_fit$h2_params["InitInfected3"], 0)}$ &
+  $\Sexpr{round(h2_main_fit$h2_params["InitInfected3"], 0)}$ 
+\\
+\hline
+
+$I_{4,0}(0)$ & \Sexpr{unlist(dep_labeller(unit_names(h2_Init)[4]))} &
+  $\Sexpr{round(h2Init_fit$h2_params["InitInfected4"], 0)}$ &
+  $\Sexpr{round(h2_main_fit$h2_params["InitInfected4"], 0)}$ 
+\\
+\hline
+
+$I_{5,0}(0)$ & \Sexpr{unlist(dep_labeller(unit_names(h2_Init)[5]))} &
+  $\Sexpr{round(h2Init_fit$h2_params["InitInfected5"], 0)}$ &
+  $\Sexpr{round(h2_main_fit$h2_params["InitInfected5"], 0)}$ 
+\\
+\hline
+
+$I_{6,0}(0)$ & \Sexpr{unlist(dep_labeller(unit_names(h2_Init)[6]))} &
+  $\Sexpr{round(h2Init_fit$h2_params["InitInfected6"], 0)}$ &
+  $\Sexpr{round(h2_main_fit$h2_params["InitInfected6"], 0)}$ 
+\\
+\hline
+
+$I_{7,0}(0)$ & \Sexpr{unlist(dep_labeller(unit_names(h2_Init)[7]))} &
+  $\Sexpr{round(h2Init_fit$h2_params["InitInfected7"], 0)}$ &
+  $\Sexpr{round(h2_main_fit$h2_params["InitInfected7"], 0)}$ 
+\\
+\hline
+
+$I_{8,0}(0)$ & \Sexpr{unlist(dep_labeller(unit_names(h2_Init)[8]))} &
+  $\Sexpr{round(h2Init_fit$h2_params["InitInfected8"], 0)}$ &
+  $\Sexpr{round(h2_main_fit$h2_params["InitInfected8"], 0)}$ 
+\\
+\hline
+
+$I_{9,0}(0)$ & \Sexpr{unlist(dep_labeller(unit_names(h2_Init)[9]))} &
+  $\Sexpr{round(h2Init_fit$h2_params["InitInfected9"], 0)}$ &
+  $\Sexpr{round(h2_main_fit$h2_params["InitInfected9"], 0)}$ 
+\\
+\hline
+
+$I_{10,0}(0)$ & \Sexpr{unlist(dep_labeller(unit_names(h2_Init)[10]))} &
+  $\Sexpr{round(h2Init_fit$h2_params["InitInfected10"], 0)}$ &
+  $\Sexpr{round(h2_main_fit$h2_params["InitInfected10"], 0)}$ 
+\\
+\hline
+
+\end{tabular}
+\end{table}
+
+\subsection{Model~3}
+
+The latent states of this model are initialized by enforcing the model dynamics on the incidence data from the start of the recorded cases until time $t_0$, requiring that some of the available data be used to determine the initial values of the latent states.
+This is the same approach that was taken by \citet{lee20}, who used the value $t_0 = \text{2014-02-22}$; this choice of $t_0$ results in modeling roughly only $60\%$ of the available data, some of which is later discarded for alternative reasons \citep{lee20sup}.
+
+We do not see any immediate reason that this model could not be extended to cover a larger range of the data, and chose the value $t_0 = \text{2010-11-13}$.
+This choice of $t_0$ corresponds to using approximately $1\%$ of the available data to determine initial values of the latent states.
+In addition to modeling a larger portion of the available data, this choice of $t_0$ corresponds to an important real-world event, as daily reports from each of the departments were not being sent to the health ministry until November 10, 2010 \citep{barzilay13};
+this choice of $t_0$ therefore makes $\bm{Y}\big(t_1\big)$ the first week of data once daily reports are being sent to the health ministry.
+The few observation times that exist before $t_0$ are used to initialize the model by enforcing model dynamics on these preliminary observations.
+For convenience, we denote these observations as $t_{-3}, t_{-2}$ and $t_{-1}$; as before, we let $y_{u,-k} = Y_{u}\big(t_{-k}\big)$ denote the observed case count for unit $u$ at time point $t_{-k}$, where $k \in 1:3$.
+Equations for the initial values of non-zero latent states are provided in Eqs.~\myeqref{eq:model3:I0}--\myeqref{eq:model3:B0}; these equations match those that were used by \citet{lee20}, the primary change being a change to the value of $t_0$.
+
+\begin{eqnarray}
+\label{eq:model3:I0}
+I_{u}\big(t_0\big) &=& \frac{y^*_{u, -1}}{7\reportRate\left(\muIR + \left(\muDeath + \choleraDeath\right)/365\right)},
+\\%[-3pt]
+\label{eq:model3:A0}
+A_{u}\big(t_0\big) &=& \frac{I_{u0}\big(t_0\big)\left(1 - \symptomFrac\right)}{\symptomFrac},
+\\
+\label{eq:model3:R0}
+R_{u01}\big(t_0\big) &=& R_{u02}\big(t_0\big) = R_{u03}\big(t_0\big) = \left(\frac{\sum_{k = -3}^0 y^*_{u, k}}{\reportRate \symptomFrac} - \left(I_{u0}\big(t_0\big) + A_{u0}\big(t_0\big)\right)\right) / 3
+\\
+\label{eq:model3:S0}
+S_{u0}\big(t_0\big) &=& \mathrm{Pop}_u - I_{u}\big(t_0\big) - A_{u}\big(t_0\big) - \sum_{k=1}^3 R_{u0k}\big(t_0\big)
+\\
+\label{eq:model3:B0}
+B_{u}\big(t_0\big) &=& \big[1 + \seasAmplitude \tilde{J}^r \big] \mathrm{Den}_u \, \Wshed \big[ I_{u}(t_0)+ \asymptomRelativeShed A_{u_0}(t) \big]/\Wshed.
+\end{eqnarray}
+
+In Eq.~\myeqref{eq:model3:B0}, $\tilde{J} = 0.002376$ is the median adjusted rainfall over the observation period.
+One important consideration to make with this parameter initialization model is when $y_{u, -1}^* = 0$, which occurs for units $u \in \{3, 4\}$, which correspond to the Grand'Anse and Nippes departments, respectively.
+When this is the case, each of the infectious $I_u(t_0)$, asymptomatic $A_u(t_0)$, and bacterial reservoir $W_u(t_0)$ compartments have a value of zero.
+Because Model~3 models cholera transmission primarily by means of the bacterial reservoir, this makes it nearly impossible for an outbreak to occur.
+Therefore for units $u \in \{3, 4\}$, we introduce initial value parameters $I_{0,0}^3$ and $I_{0,0}^4$, and calibrate these parameter values using the data.
+The resulting parameter estimates are used to obtain the remaining non-zero initial values of the latent states using Eqs.~\myeqref{eq:model3:A0}--\myeqref{eq:model3:B0}.
+
+%%%%%%%%%% END
+
+\bibliography{../bib-haiti}
+
+\end{document}

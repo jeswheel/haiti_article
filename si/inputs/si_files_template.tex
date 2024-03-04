@@ -2,6 +2,22 @@
 
 \input{inputs/header}
 
+\usepackage{titlesec}
+\usepackage{chngcntr}
+\usepackage{etoolbox}
+
+% Remove the numbering from sections
+\titleformat{\section}{\normalfont\Large\bfseries}{}{0pt}{}
+
+% Reset the subsection counter at the start of each section
+\counterwithin*{subsection}{section}
+
+% Change the numbering for subsections to have an S prefix and remove chapter numbering
+\renewcommand{\thesubsection}{S\arabic{subsection}}
+
+% Increment the subsection counter every time a subsection is created
+% \pretocmd{\subsection}{\stepcounter{subsection}}{}{}
+
 \usepackage[labelformat=empty]{caption}
 
 \begin{document}

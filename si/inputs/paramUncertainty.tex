@@ -4,18 +4,22 @@ Let $f_{Y_{1:N}}(y_{1:N} | \theta)$ denote the pdf of the model under considerat
 Furthermore, denote the observed data as $y_{1:N}^*$.
 Because the uncertainty in just a single parameter can lead to drastically different forecasts \citep{saltelli20},
 parameter uncertainty should be considered when obtaining model forecasts when the goal is to influencing policy.
-In a Bayesian modelling paradigm, the most natural way to account for parameter uncertainty in model forecasts is to suppose that $\theta$ comes from a distribution $f_{\Theta}$, and then to obtain $J$ forecasts from the model where each forecast is obtained using parameters drawn from the posterior distribution $\Theta_{1:J} \mid Y_{1:N} = y_{1:N}^* \sim f_{\Theta}\big(\theta | Y_{1:N} = y_{1:N}^*\big)$.
+In a Bayesian modelling paradigm, the most natural way to account for parameter uncertainty in model forecasts is to suppose that $\theta$ comes from a distribution $f_{\Theta}$, and then to obtain $J$ forecasts from the model where each forecast is obtained using parameters drawn from the posterior distribution $\theta_{1:J} \mid Y_{1:N} = y_{1:N}^* \sim f_{\Theta}\big(\theta | Y_{1:N} = y_{1:N}^*\big)$.
 
 When frequentist methods are used, however, there does not exist a posterior distribution from which one could sample.
 A common approach could be to obtain a weighted average of the simulations from various models \citep{hoeting99}, but this can be problematic when forecasts from each model are very different from each other \citep{grueber11}.
 A similar approach that has been taken \citep{king15} is to obtain model forecasts using multiple sets of parameter values and then sample from the resulting forecasts using weights proportional to the corresponding likelihoods of the parameter values.
 This approach could be considered as empirical Bayes, as it is equivalent to using a discrete uniform prior where the set of values in the prior distribution is determined by a stochastic routine applied to the observed data, as discussed below.
 
-For each $i \in 1:k$, let $\Theta_i$ be a random vector of model parameters.
-Then, letting $\Theta$ denote the true model parameters, we endow the set $\{\Theta_1, \Theta_2, \ldots, \Theta_k\}$ with a discrete uniform distribution, such that $P\big(\Theta = \Theta_i\big) = \frac{1}{K}$ for all values $i \in \seq{1}{k}$.
+% Let $\Theta$ denote a random vector of model parameters.
+For each $k \in 1:K$, let $\theta_k$ be a unique set of model parameters.
+Letting $\Theta$ denote a random vector of model parameters, we endow $\Theta$ with a discrete uniform distribution on the set $\{\theta_1, \theta_2, \ldots, \theta_K\}$, such that $P\big(\Theta = \theta_k\big) = \frac{1}{K}$ for all values $k \in \seq{1}{K}$.
 Using this as a prior distribution, the posterior distribution of $\Theta | Y_{1:N} = y_{1:N}^*$ can be expressed as:
-$P\big(\Theta = \Theta_k | Y_{1:N} = y_{1:N}^*\big) = \frac{f_{Y_{1:N}}(y_{1:N}^*| \Theta_k)}{\sum_{l = 1}^K f_{Y_{1:N}}(y_{1:N}^*| \theta_l)}$.
-In a standard empirical Bayes analysis, the values $\Theta_1, \ldots, \Theta_k$ of the prior distribution would be chosen using the observed data, resulting in a posterior distribution that weighs the prior parameter vectors proportional to their corresponding likelihoods.
-Instead, we choose $\Theta_i$ to be the output of a stochastic routine applied to the observed data by setting $\Theta_i$ to be the output of an iterated filtering algorithm.
-In practice, because the likelihood maximization routines of iterated filtering methods are stochastic, it is common to run the iterated filtering method multiple times for each model in order to obtain a maximum likelihood estimate for model parameters.
+$P\big(\Theta = \theta_k | Y_{1:N} = y_{1:N}^*\big) = \frac{f_{Y_{1:N}}(y_{1:N}^*| \theta_k)}{\sum_{l = 1}^K f_{Y_{1:N}}(y_{1:N}^*| \theta_l)}$.
+In a standard empirical Bayes analysis, the values $\theta_1, \ldots, \theta_k$ of the prior distribution would be chosen using the observed data, resulting in a posterior distribution that weighs the prior parameter vectors proportional to their corresponding likelihoods.
+We choose $\theta_k$ to be the output of a stochastic routine applied to the observed data by setting $\theta_k$ to be the output of an iterated filtering algorithm.
+In practice, because the likelihood maximization routines of iterated filtering methods are stochastic, it is common to run the iterated filtering method multiple times $(K)$ for each model in order to obtain a maximum likelihood estimate for model parameters.
 This results in a natural set of parameters near the MLE that could be used as the discrete prior distribution.
+Alternatively, the set $\{\theta_1, \theta_2, \ldots, \theta_K\}$ could be determined by first obtaining marginal confidence intervals for each element of the parameter vector $\Theta$, and then creating a hypercube using the combination of marginal confidence intervals. 
+The set $\{\theta_1, \theta_2, \ldots, \theta_K\}$ is then obtained by sampling uniformly $K$ values from the resulting hypercube, as was done by \citep{king15}. 
+
