@@ -541,24 +541,19 @@ These decisions should be informed by data on the epidemic as well as current un
 Such decisions can be posed as statistical questions about scientifically motivated dynamic models.
 Thus, we encounter the methodological task of building credible, data-informed decisions based on stochastic, partially observed, nonlinear dynamic models.
 This necessitates addressing the tradeoff between biological fidelity and model simplicity, and the reality of misspecification for models at all levels of complexity.
-\old{As a case study, we consider the 2010-2019 cholera epidemic in Haiti.
-We study three dynamic models developed by expert teams to advise on vaccination policies.
-We assess previous methods used for fitting and evaluating these models, and we develop data analysis strategies leading to improved statistical fit.}
-\new{We assess current methodological approaches to these issues via a case study of the 2010-2019 cholera epidemic in Haiti.
+We assess current methodological approaches to these issues via a case study of the 2010-2019 cholera epidemic in Haiti.
 We consider three dynamic models developed by expert teams to advise on vaccination policies.
-We evaluate previous methods used for fitting these models, and we demonstrate modified data analysis strategies leading to improved statistical fit.}
-Specifically, we present approaches for diagnosing model misspecification \old{, development of alternative models, and computational improvements in optimization, in the context of likelihood-based inference on nonlinear dynamic systems.} \new{and the consequent development of improved models.
-Additionally, we demonstrate the utility of recent advances in likelihood maximization for high-dimensional nonlinear dynamic models, enabling likelihood-based inference for high-dimensional models for spatiotemporal incidence data.}
+We evaluate previous methods used for fitting these models, and we demonstrate modified data analysis strategies leading to improved statistical fit.
+Specifically, we present approaches for diagnosing model misspecification and the consequent development of improved models.
+Additionally, we demonstrate the utility of recent advances in likelihood maximization for high-dimensional nonlinear dynamic models, enabling likelihood-based inference for high-dimensional models for spatiotemporal incidence data.
 Our workflow is reproducible and extendable, facilitating future investigations of this disease system.
 
 \section*{Author summary}
 Quantitative understanding of infectious disease transmission dynamics relies upon mathematical models informed by scientific knowledge and relevant data.
 The models aim to provide a statistical description of the trajectory of an epidemic and its uncertainty, together with a representation of the underlying biological mechanisms.
 Evaluation of success at these goals is necessary in order for a model to provide a reliable tool for guiding evidence-based public policy interventions.
-\old{In this article, we discuss common modeling decisions that may not provide an adequate statistical explanation of the data, and we show that attention to statistical fit can lead to more accurate policy evaluations}.
-\new{In this article, we conduct a re-analysis of the 2010-2019 cholera outbreak in Haiti. We use this case study to investigate current procedures for fitting mechanistic models to time series data, while identifying limitations of these methodologies and proposing remedies.}
-\old{Our analysis presents methodology for diagnosing how well a model describes observed data, and provides careful justification of valid conclusions from the fitted model. Objective measures are used to benchmark model fit; when these are combined with reproducibility, a framework emerges for continual improvement when revisiting the data and models.}
-\new{\editAuthorSum}
+In this article, we conduct a re-analysis of the 2010-2019 cholera outbreak in Haiti. We use this case study to investigate current procedures for fitting mechanistic models to time series data, while identifying limitations of these methodologies and proposing remedies.
+\editAuthorSum
 Our data analysis workflow is supported by recent advances in algorithms, software and hardware, which facilitate statistical fitting of nonlinear stochastic dynamic models to observed incidence data.
 However, inference for high-dimensional systems remains a methodological challenge.
 One of the models under consideration involves spatially coupled stochastic meta-populations, and we demonstrate how a recently developed algorithm permits likelihood-based inference and model diagnostics in this setting.
@@ -576,13 +571,11 @@ Questions of interest include: What indications should we look for in the data t
 What diagnostic tests and model variations can and should be considered in the course of the data analysis?
 What are the possible trade-offs of increasing model complexity, such as the inclusion of interactions across spatial units?
 
-This case study investigates the use of dynamic models and spatiotemporal data to inform \old{a policy decision} \new{public health policy} in the context of the cholera outbreak in Haiti, which started in 2010.
-\old{We build on a multi-group modeling exercise by Lee et al. [1] in which four expert modeling teams developed models to the same dataset with the goal of comparing conclusions on the feasibility of eliminating cholera by a vaccination campaign}.
-\old{The data that were used for this study, and that is the subject of our reanalysis, is displayed in Fig.~[1].}
-\new{Various dynamic models were developed to study this outbreak: searching PubMed with keywords ``Haiti, cholera, model'' we obtained 22 studies that utilized deterministic mechanistic dynamic models \cite{lee20,tuite11,andrews11,botelho21,fitzgibbon20,eisenberg13,rinaldo12,chao11,date11,lin19,abrams13,collins21,akman15,trevisin22,mavian20,collins14,kelly16,capone15,leung22,mari15,gatto12,kuhn14}
+This case study investigates the use of dynamic models and spatiotemporal data to inform public health policy in the context of the cholera outbreak in Haiti, which started in 2010.
+Various dynamic models were developed to study this outbreak: searching PubMed with keywords ``Haiti, cholera, model'' we obtained 22 studies that utilized deterministic mechanistic dynamic models \cite{lee20,tuite11,andrews11,botelho21,fitzgibbon20,eisenberg13,rinaldo12,chao11,date11,lin19,abrams13,collins21,akman15,trevisin22,mavian20,collins14,kelly16,capone15,leung22,mari15,gatto12,kuhn14}
 and 11 studies that used stochastic models \cite{kirpich16,lee20,pasetto18,mukandavire13,kirpich17,lewnard16,kunkel17,mukandavire15,sallah17,azman12,azman15}.
 Incidence data on the outbreak are available at various spatial scales, motivating 17 studies in our literature review to consider spatially explicit dynamic models \cite{lee20,tuite11,pasetto18,fitzgibbon20,eisenberg13,rinaldo12,chao11,abrams13,trevisin22,sallah17,collins14,kelly16,azman12,leung22,kuhn14,mari15,gatto12}.
-Here we focus on a multi-group modeling exercise by Lee et al.~\cite{lee20} in which four expert modeling teams developed models to the same dataset with the goal of comparing conclusions on the feasibility of eliminating cholera by a vaccination campaign.}
+Here we focus on a multi-group modeling exercise by Lee et al.~\cite{lee20} in which four expert modeling teams developed models to the same dataset with the goal of comparing conclusions on the feasibility of eliminating cholera by a vaccination campaign.
 Model~1 is stochastic and describes cholera at the national level;
 Model~2 is deterministic with spatial structure, and includes transmission via contaminated water;
 Model~3 is stochastic with spatial structure, and accounts for measured rainfall.
@@ -626,21 +619,15 @@ Advances in OCV technology and vaccine availability, however, raised the possibi
 \new{The possibility of controlling the Haiti cholera outbreak via OCV was considered by various research groups \cite{lee20,ivers17,andrews11,walton11,matias17,chao11,fung13,date11,leung22,azman15}}.
 In the \new{Lee et al.~\cite{lee20}} study, certain data were shared between the groups, including demography and vaccination history; vaccine efficacy was also fixed at a shared value between groups.
 Beyond this, the groups made autonomous decisions on what to include and exclude from their models.
-\old{The groups largely adhered to existing guidelines for creating models to inform policy [35, 36] and, d}\new{D}espite their autonomy, \new{the four independent teams} obtained a consensus that an extensive nationwide vaccination campaign would be necessary to eliminate cholera from Haiti\new{, estimating that a large number of cumulative cholera cases would be observed in the absense of additional vaccination efforts (Figure~3 and 4 of \cite{lee20}).}
-\old{Their forecasts, however, were} \new{These forecasts are} inconsistent with the prolonged period with no confirmed cholera cases between February, 2019 and September, 2022 \cite{trevisin22}.
-Though cholera has recently reemerged in Haiti \cite{rubin22,PAHO23}, the inability to accurately forecast cholera incidence from 2019-2022\old{---while diligently adhering to existing scientific standards for infectious disease modeling---demonstrates that existing standards of disease modeling and forecasting may be insufficient.} \new{prompts us to consider retrospectively what may have been done differently in order to obtain more reliable conclusions, leading to recommendations for future studies.}
+Despite their autonomy, the four independent teams obtained a consensus that an extensive nationwide vaccination campaign would be necessary to eliminate cholera from Haiti, estimating that a large number of cumulative cholera cases would be observed in the absense of additional vaccination efforts (Figure~3 and 4 of \cite{lee20}).
+These forecasts are inconsistent with the prolonged period with no confirmed cholera cases between February, 2019 and September, 2022 \cite{trevisin22}.
+Though cholera has recently reemerged in Haiti \cite{rubin22,PAHO23}, the inability to accurately forecast cholera incidence from 2019-2022 prompts us to consider retrospectively what may have been done differently in order to obtain more reliable conclusions, leading to recommendations for future studies.
 
 The discrepancy between the model-based conclusions of Lee et al.~\cite{lee20} and the prolonged absence of cholera in Haiti has been debated \cite{francois20,rebaudetComment20,henrys20,leeReply20}.
 Suggested origins of this discrepancy include the use of unrealistic models \cite{rebaudetComment20} and unrealistic criteria for cholera elimination \cite{henrys20}.
 We find a more nuanced conclusion: attention to methodological details in model fitting, diagnosis and forecasting can improve each of the proposed model's ability to quantitatively describe observed data.
 This improved ability may result in more accurate forecasts and facilitates the exploration of model assumptions.
 Based on this retrospective analysis, we offer suggestions on fitting mechanistic models to dynamic systems for future studies.
-
-%% IT SEEMS THIS PARAGRAPH IS DEPRECATED IN FAVOR OF CITING THESE REFERENCES WHERE APPROPRIATE
-\old{While this work is focused on the models proposed by Lee et al.~[1], our suggestions have broader relevance.
-To investigate the extent to which [1] is typical of the substantial body of work on Haiti cholera dynamics, we performed a literature review by searching PubMed with keywords: Haiti, cholera, model.
-The search resulted in 66 papers, of which 32 used dynamic models to describe the cholera epidemic in Haiti.
-The models make various choices on the dichotomies considered by Lee et al.~[1]; deterministic versus stochastic; compartment model versus agent-based; aggregated versus spatially explicit.}
 
 \new{\editModelingGuidance}
 
@@ -1064,7 +1051,7 @@ mod3_lee_coupled_partial_aic <- 2 * lee3_results$n_params - 2 * lee3_results$sub
 
 \new{\editMechModels}
 
-\new{In this article, we refer to} models that focus on learning relationships between variables in a dataset \new{as} \old{are called} {\it associative}, whereas models that incorporate a known scientific property of the system \old{are called} \new{we call} {\it causal} or {\it mechanistic}.
+In this article, we refer to models that focus on learning relationships between variables in a dataset as {\it associative}, whereas models that incorporate a known scientific property of the system we call {\it causal} or {\it mechanistic}.
 The danger in using forecasting techniques which rely on associative models to predict the consequence of interventions is called the Lucas critique in an econometric context.
 Lucas et al.~\cite{lucas76} pointed out that it is naive to predict the effects of an intervention on a given system based entirely on historical associations.
 To successfully predict the effect of an intervention, a model should therefore both provide a quantitative explanation of existing data and should have a causal interpretation: a manipulation of the system should correspond quantitatively with the corresponding change to the model.
@@ -1314,7 +1301,7 @@ The observation at time $t_n$ is modeled by the random vector $\bm{Y}_n$.
 While the latent process exists between observation times, the value of the latent state at observations times is of particular interest.
 We therefore write $\bm{X}_n = \bm{X}(t_n)$ to denote the value of the latent process at the $n$th observation time, and $\bm{X}_{1:N}$ is the collection of latent state values for all observed time points.
 The observable random variables $\bm{Y}_{1:N}$ are assumed to be conditionally independent given $\bm{X}_{0:N}$.
-Together, with the density for the initial value of the latent state $\bm{X}_{0} = \bm{X}(t_0)$, each model \new{defines} \old{assumes} a joint density $f_{\bm{X}_{0:N}, \bm{Y}_{1:N}}\big(\bm{x}_{0:N}, \bm{y}_{1:N};\paramVec\big)$, where $\paramVec$ is a parameter vector that indexes the model.
+Together, with the density for the initial value of the latent state $\bm{X}_{0} = \bm{X}(t_0)$, each model defines a joint density $f_{\bm{X}_{0:N}, \bm{Y}_{1:N}}\big(\bm{x}_{0:N}, \bm{y}_{1:N};\paramVec\big)$, where $\paramVec$ is a parameter vector that indexes the model.
 The observed data $\bm{y}_{1:N}^*$, along with the unobserved true value of the latent state, are modeled as a realization of this joint distribution.
 
 Because of the probabilistic nature of both the unobserved latent state and the observable random variables, it is possible to consider various marginal and conditional densities of these two jointly random vectors.
@@ -1402,7 +1389,7 @@ In Model~1, the advantage afforded to vaccinated individuals is an increased pro
 Conditional on infection status, vaccinated individuals are also less infectious than their non-vaccinated counterparts by a rate of $\asymptomRelativeInfect = 0.05$ in Eq.~\eqref{model1:lambda}.
 In Eqs.~\myeqref{model1:EA} and~\myeqref{model1:EI} the asymptomatic ratio for non-vaccinated individuals is set $\symptomFrac_0(t)=0$, so that the asymptomatic route is reserved for vaccinated individuals.
 For $\vaccCounter\in\seq{1}{\vaccClass}$, the vaccination cohort $\vaccCounter$ is assigned a time $\tau_{\vaccCounter}$, and we take $\symptomFrac_\vaccCounter(t) = c \, \vaccineEfficacy^*(t-\tau_{\vaccCounter})$
-where $\vaccineEfficacy^*(t)$ is efficacy at time $t$ since vaccination for adults, \old{taken from [4], Table~S4,} \new{a step-function represented in Table~S4 of \cite{lee20}}, and $c=\big(1-(1-0.4688)\times 0.11\big)$ is a correction to allow for reduced efficacy in the 11\% of the population aged under 5 years.
+where $\vaccineEfficacy^*(t)$ is efficacy at time $t$ since vaccination for adults, a step-function represented in Table~S4 of \cite{lee20}, and $c=\big(1-(1-0.4688)\times 0.11\big)$ is a correction to allow for reduced efficacy in the 11\% of the population aged under 5 years.
 Single and double vaccine doses were modeled by changing the waning of protection; protection was modeled as equal between single and double dose until 52 weeks after vaccination, at which point the single dose becomes ineffective.
 
 The latent state vector $\bm{X}(t)$ is initialized by setting the counts for each compartment and vaccination scenario $\vaccCounter \neq 0$ as zero, and introducing initial-value parameters $I_{0,0}$ and $E_{0, 0}$ such that $R_{0}(0) = 0$, $I_{0}(0) = \mathrm{Pop} \times I_{0, 0}$, $E_{0}(0) = \mathrm{Pop} \times E_{0, 0}$ and $S_{0}(0) = \mathrm{Pop} \times (1 - I_{0, 0} - E_{0, 0})$, where $\mathrm{Pop}$ is the total population of Haiti.
@@ -1472,17 +1459,16 @@ In Eq.~\myeqref{model2:transport} the spatial coupling is specified by a gravity
 T_{u\varv} = v_{\mathrm{rate}} \times \frac{\mathrm{Pop}_u \mathrm{Pop}_{\varv}}{D_{u\varv}^2},
 \end{equation}
 where $\mathrm{Pop}_u$ is the mean population for department $u$,
-$D_{u\varv}$ is a distance measure estimating average road distance between randomly chosen members of each population, and $v_{\mathrm{rate}}= 10^{-12} \,\mbox{km$^2$yr$^{-1}$}$ \old{was treated as a fixed constant.}\new{was fixed at the value used in \cite{lee20}.}
+$D_{u\varv}$ is a distance measure estimating average road distance between randomly chosen members of each population, and $v_{\mathrm{rate}}= 10^{-12} \,\mbox{km$^2$yr$^{-1}$}$ was fixed at the value used in \cite{lee20}.
 In Eq.~\myeqref{model2:water_transport}, $T^W_{u\varv}$ is a measure of river flow between departments.
 The unit of $W_u(t)$ is cells per ml, with dose response modeled via a saturation constant of $\Wsat$ in Eq.~\myeqref{model2:lambda}.
-In Eq.~\myeqref{model2:mu_SE}, $\vaccineEfficacy_\vaccCounter$ denotes the vaccine efficacy for each vaccination campaign $\vaccCounter \in \vaccClass$, with \old{$\vaccineEfficacy_0 = 1$, $\vaccineEfficacy_1 = 1 - 0.429 \childReduce$, $\vaccineEfficacy_2 = 1 - 0.519 \childReduce$, $\vaccineEfficacy_3 = 1 - 0.429$, and $\vaccineEfficacy_4 = 1 - 0.519$} \new{$\vaccineEfficacy_0 = 0$, $\vaccineEfficacy_1 = 0.429 \childReduce$, $\vaccineEfficacy_2 = 0.519 \childReduce$, $\vaccineEfficacy_3 = 0.429$, and $\vaccineEfficacy_4 = 0.519$}
+In Eq.~\myeqref{model2:mu_SE}, $\vaccineEfficacy_\vaccCounter$ denotes the vaccine efficacy for each vaccination campaign $\vaccCounter \in \vaccClass$, with $\vaccineEfficacy_0 = 0$, $\vaccineEfficacy_1 = 0.429 \childReduce$, $\vaccineEfficacy_2 = 0.519 \childReduce$, $\vaccineEfficacy_3 = 0.429$, and $\vaccineEfficacy_4 = 0.519$
 Here, $\childReduce = 0.4688$ represents the reduced efficacy of the vaccination for children under the age of five years, and the values $0.429$ and $0.519$ are the median effectiveness of one and two doses over their effective period respectively, according to Table S4 in the supplement material of Lee et al.~\cite{lee20}.
 Because vaccine efficacy remains constant, individuals in this model transition from a vaccinated compartment to the susceptible compartment at the end of the vaccine coverage period.
 
 The starting value for each element of the latent state vector $\bm{X}(0)$ are set to zero except for $I_{u0}(0) = y_u^*(0)/\reportRate$ and $R_{u0}(0) = \mathrm{Pop}_u - I_{u0}(0)$, where $y_u^*(0)$ is the reported number of cholera cases in department $u$ at time $t = 0$.
 Reported cases are described using a log-normal distribution, with the log-scale mean equal to the reporting rate $\reportRate$ times the number of newly infected individuals.
-\old{See the section describing how Model~2 is fit to data and Sec.~S3.2 of the supplement for more details.}
-\new{See the supplement material on model initializations for more details (\nameref{S_init})}
+See the supplement material on model initializations for more details (\nameref{S_init}).
 
 \subsubsection*{Model~3}
 \label{sec:model3}
@@ -1539,20 +1525,20 @@ Specifically, we set $I_{u0}(0) = \frac{y^*_{1u}}{\reportRate(\muDeath + \choler
 all other compartments that represent population counts are set to zero at time $t_0$.
 For each unit $u$ with zero case counts at time $t_1$, this initialization scheme results in having zero individuals in the Infected and Asymptomatic compartments, as well as having no bacteria in the aquatic reservoir.
 In reality, it is plausible that some bacteria or infected individuals were present in unit $u$ but went unreported.
-Therefore, for departments with zero case counts in week 1, we \old{consider estimating}\new{estimate} the number of infected individuals rather then treating this value as a constant (\nameref{S_init}).
-Finally, reported cholera cases are modeled using a negative binomial \old{measurement model} \new{distribution} with mean equal to a fraction ($\reportRate$) of individuals in each unit who develop symptoms and seek healthcare\new{, and with over-dispersion parameter $\obsOverdispersion$} (\nameref{S_meas}).
+Therefore, for departments with zero case counts in week 1, we estimate the number of infected individuals rather then treating this value as a constant (\nameref{S_init}).
+Finally, reported cholera cases are modeled using a negative binomial distribution with mean equal to a fraction ($\reportRate$) of individuals in each unit who develop symptoms and seek healthcare\new{, and with over-dispersion parameter $\obsOverdispersion$} (\nameref{S_meas}).
 
 \subsection*{Model Fitting}\label{sec:model_fitting}
 
-Each of the three models considered in this study describes cholera dynamics as a partially observed Markov process (POMP) \cite{king16}, with the understanding that the deterministic Model~2 is a \old{degenerate case of a stochastic model} \new{special case of a Markov processes solving a stochastic differential equation in the limit as the noise parameter goes to zero.}
+Each of the three models considered in this study describes cholera dynamics as a partially observed Markov process (POMP) \cite{king16}, with the understanding that the deterministic Model~2 is a special case of a Markov processes solving a stochastic differential equation in the limit as the noise parameter goes to zero.
 Each model is indexed by a parameter vector, $\paramVec$, and different values of $\paramVec$ can result in qualitative differences in the predicted behavior of the system.
 Therefore, the choice of $\paramVec$ used to make inference about the system can greatly affect model-based conclusions  \new{\cite{saltelli20}}.
 Elements of $\paramVec$ can be fixed at a constant value based on scientific understanding of the system, but parameters can also be calibrated to data by maximizing a measure of congruency between the observed data and the model's mechanistic structure.
-Calibrating model parameters to observed data does not guarantee that the resulting model successfully approximates real-world mechanisms, since the model description of the dynamic system may be incorrect and \old{do} \new{does} not change as the model is calibrated to data.
+Calibrating model parameters to observed data does not guarantee that the resulting model successfully approximates real-world mechanisms, since the model description of the dynamic system may be incorrect and does not change as the model is calibrated to data.
 However, the congruency between the model and observed data serves as a proxy for the congruency between the model and the true underlying dynamic system.
 As such, it is desirable to obtain the best possible fit of the proposed mechanistic structure to the observed data.
 
-In this article we \old{calibrate} \new{follow \cite{lee20} by calibrating} the parameters of each of our models \old{by maximizing the likelihood} \new{using maximum likelihood}, as described in Eq.~\myeqref{eq:likedef}.
+In this article we follow \cite{lee20} by calibrating the parameters of each of our models using maximum likelihood, as described in Eq.~\myeqref{eq:likedef}.
 The likelihood for each of the fitted models---and the corresponding AIC values for model comparisons that include an adjustment for the number of calibrated parameters---is provided in Table~\ref{tab:likes}.
 In the following subsections we describe in detail our approach to calibrating the three proposed mechanistic models to observed cholera incidence data.
 \new{The main alternative to maximum likelihood estimation is Bayesian inference via Markov chain Monte Carlo, used to analyze the Haiti cholera epidemic by \cite{andrews11,pasetto18,rinaldo12,lewnard16,trevisin22,sallah17,azman12,kuhn14,mari15,gatto12}.}
@@ -1602,23 +1588,21 @@ Number of &
 \hline
 \end{tabular}
 \begin{flushleft}
-Values in parentheses are corresponding values \new{obtained} using \new{the models of \cite{lee20}} \old{Lee et al.~[4] parameter estimates}.  \textsuperscript{1}The reported likelihood is an upper bound of the likelihood of the \old{Lee et al.~[4]} model \new{in \cite{lee20}}. \old{Lee et al.~[4] fit} \textsuperscript{2}\new{In \cite{lee20},} Model~3 \new{was fit} to a subset of the data (March 2014 onward, excluding data from Ouest in 2015-2016).
+Values in parentheses are corresponding values obtained using the models of \cite{lee20}.  \textsuperscript{1}The reported likelihood is an upper bound of the likelihood of the model in \cite{lee20}. \textsuperscript{2}In \cite{lee20}, Model~3 was fit to a subset of the data (March 2014 onward, excluding data from Ouest in 2015-2016).
 On this subset, their model has a likelihood of $\Sexpr{myround(lee3_results$sub_ll_eval, 1)}$.
 On this same subset, our model has a likelihood of $\Sexpr{myround(mod3_eval_res$subset_ll['est'], 1)}$.
-Details of estimating the likelihood of the \old{Lee et al.~[4]} models \new{used in \cite{lee20} are} \old{is} provided in \new{the supplement} (\nameref{S_lee20}).
-\old{See Sec.~S6 of the supplement material for more details on estimating the likelihood of the Lee et al.~[4] models.}
+Details of estimating the likelihood of the models used in \cite{lee20} are provided in the supplement (\nameref{S_lee20}).
 \end{flushleft}
 \end{table}
 
 \subsubsection*{Calibrating Model~1 Parameters}\label{sec:fit1}
 
-\old{Model~1 was developed with the intent of providing a description of cholera dynamics that is scientifically plausible rather than one that is statistically convenient.}
-\new{Model~1 is a highly nonlinear over-dispersed stochastic dynamic model, favoring a scientifically plausible description of cholera dynamics rather than one that is statistically convenient \cite{he10}.}
-This results in the inability to obtain a closed form expression of the \old{non-linear} joint model density---described in Eq.~\myeqref{eq:jointLik}.
+Model~1 is a highly nonlinear over-dispersed stochastic dynamic model, favoring a scientifically plausible description of cholera dynamics rather than one that is statistically convenient \cite{he10}.
+This results in the inability to obtain a closed form expression of the joint model density---described in Eq.~\myeqref{eq:jointLik}.
 Therefore in order to perform likelihood based inference on this model, we are restricted to use parameter estimation techniques that have the \emph{plug-and-play} property, which is that the fitting procedure only requires the ability to simulate the latent process rather than evaluating transition densities \cite{breto09,he10};
 in the context of the notation and definitions employed in this article, this means that we only require the ability to simulate from $f_{\bm{X}_0}\big(\bm{x}_0;\paramVec\big)$ and $f_{\bm{X}_n|\bm{X}_{n-1}}\big(\bm{x}_{n}|\bm{x}_{n-1}; \paramVec\big)$ rather than needing to evaluate these densities.
 Plug-and-play algorithms include Bayesian approaches like ABC and PMCMC \cite{toni09,andrieu10}, but here we use algorithms that enable maximum likelihood estimation.
-To our knowledge, the only plug-and-play methods that \old{can be} \new{have been effectively} used to maximize the likelihood for \new{arbitrary nonlinear} POMP models \old{of this complexity} are iterated filtering algorithms \cite{ionides15}, which modify the well-known \emph{particle filter} \cite{arulampalam02}.
+To our knowledge, the only plug-and-play methods that have been effectively used to maximize the likelihood for arbitrary nonlinear POMP models are iterated filtering algorithms \cite{ionides15}, which modify the well-known \emph{particle filter} \cite{arulampalam02}.
 
 The particle filter, also referred to as sequential Monte Carlo, is a simulation based method that is frequently used in Bayesian inference to approximate the posterior distribution of latent states.
 This algorithm can also be used to accurately approximate the log-likelihood of a POMP model, defined as the integral in Eq.~\myeqref{eq:likedef}.
@@ -1633,10 +1617,10 @@ We demonstrate this capability by proposing a \new{log-}linear trend $\transmiss
 \transmission(t) = \bar{\transmission} \exp\Big(\sum_{j=1}^6 \transmission_s s_j(t) + \transmissionTrend\bar{t}\Big),
 \end{equation}
 where $\bar{t} = \frac{t - (t_N + t_0) / 2}{t_N - (t_N + t_0) / 2}$, so that $\bar{t} \in [-1, 1]$.
-The proposal of a \old{linear} trend in transmission is a result of observing an apparent decrease in reported cholera infections from 2012-2019 in Fig.~\ref{fig:CholeraData}.
+The proposal of a trend in transmission is a result of observing an apparent decrease in reported cholera infections from 2012-2019 in Fig.~\ref{fig:CholeraData}.
 While several factors may contribute to this decrease, one explanation is that case-area targeted interventions (CATIs), which included education sessions, increased monitoring, household decontamination, soap distribution, and water chlorination in infected areas \cite{rebaudet19CATI}, may have substantially reduced cholera transmission over time \cite{rebaudet21}.
 
-We perform a statistical test to determine whether or not the data indicate the presence of a \old{linear} trend in transmissibility.
+We perform a statistical test to determine whether or not the data indicate the presence of a trend in transmissibility.
 To do this, we perform a profile-likelihood search on the parameter $\transmissionTrend$ and obtain a $95\%$ confidence interval via a Monte Carlo Adjusted Profile (MCAP) \cite{ionides17}.
 Lee et al.~\cite{lee20} implemented Model~1 by fitting two distinct phases: an epidemic phase from October 2010 through March 2015, and an endemic phase from March 2015 onward.
 We similarly allow the re-estimation of process and measurement overdispersion parameters ($\sigmaProc^2$ and $\obsOverdispersion$), and require that the latent Markov process $X(t)$ carry over from one phase into the next.
@@ -1676,17 +1660,16 @@ gc()
 
 If a mechanistic model including a feature (such as a representation of a mechanism, or the inclusion of a covariate) fits better than mechanistic models without that feature, and also has competitive fit compared to associative benchmarks, this may be taken as evidence supporting the scientific relevance of the feature.
 As for any analysis of observational data, we must be alert to the possibility of confounding.
-For a covariate, this shows up in a similar way to regression analysis: the covariate under investigation could be a proxy for some other unmodeled \new{phenomenon} or unmeasured covariate.
-\old{For a mechanism, the model feature could in principle explain the data by helping to account for some different unmodeled phenomenon. The statistical evidence of a trend in transmission rate in this model could be explained by any trending variable (such as hygiene improvements, or changes in population behavior), resulting in confounding from collinear covariates. Alternatively, the trend could be attributed to a decreasing reporting rate rather than decreasing transmission rate, resulting in confounded mechanisms. The robust statistical conclusion is that a model which allows for change fits better than one which does not---we argue that a decreasing transmission rate is a plausible way to explain this, but the incidence data themselves do not provide enough information to pin down the mechanism.}
+For a covariate, this shows up in a similar way to regression analysis: the covariate under investigation could be a proxy for some other unmodeled phenomenon or unmeasured covariate.
 
 \new{\editConfound}
 
-We implemented Model~1 using the \code{pomp} package \cite{king16}, relying heavily on the \old{\code{pomp}} source code provided by Lee et al.~\cite{lee20}.
+We implemented Model~1 using the \code{pomp} package \cite{king16}, relying heavily on the source code provided by Lee et al.~\cite{lee20}.
 Both analyses used the \code{mif2} implementation of the IF2 algorithm to estimate $\paramVec$ by maximum likelihood.
 One change we made in the statistical analysis that led to larger model likelihoods was increasing the computational effort in the numerical maximization.
 While IF2 enables parameter estimation for a large class of models, the theoretic ability to maximize the likelihood depends on asymptotics in both the number of particles and the number of filtering iterations.
 Many Monte Carlo replications are then required to quantify and further reduce the error.
-The large increase in the log-likelihood for Model~1 (Table~\ref{tab:likes}) can primarily be attributed to increasing the computational effort \old{in fitting} \new{used to calibrate} the model.
+The large increase in the log-likelihood for Model~1 (Table~\ref{tab:likes}) can primarily be attributed to increasing the computational effort used to calibrate the model.
 This result highlights the importance of carefully determining the necessary computational effort needed to maximize model likelihoods and acting accordingly.
 \new{In this case study, this was done by performing standard diagnostics for the IF2 and particle filter algorithms\cite{king16,li23,pons-salort18,laneri10}. Given the considerable computational costs of simulation-based algorithms, we find it useful to perform an initial assessment using hyperparameter values---such as the number of particles, filtering iterations, and replicates based on different parameter initializations---that enable relatively quick calculations. The insights obtained from this preliminary analysis help in accurately determining the amount of computation that is required to achieve reliable outcomes.}
 Simulations from the initial conditions of our fitted model are plotted against the observed incidence data in Fig.~\ref{fig:mod1fit}.
@@ -1749,7 +1732,7 @@ ggplot() +
 @
 \caption{\label{fig:mod1fit}
 {\figTitle Simulations from Model~1 compared to reported cholera cases.}
-The black curve is observed data, the blue curve is median of 500 simulations from \old{the fitted model} \new{initial conditions using estimated parameters}, and the vertical dashed line represents break-point when parameters are refit.
+The black curve is observed data, the blue curve is median of 500 simulations from initial conditions using estimated parameters, and the vertical dashed line represents break-point when parameters are refit.
 }
 \end{figure}
 
@@ -1763,12 +1746,12 @@ gc()
 Model~2 is a deterministic compartmental model defined by a set of coupled differential equations.
 The use of deterministic compartment models have a long history in the field of infectious disease epidemiology \cite{kermack1927,brauer2017,giordano20},
 and can be justified by asymptotic considerations in a large-population limit \cite{dadlani2020,ndii17}.
-Because the process model of Model~2 is deterministic, maximum likelihood estimation reduces to a least squares calculation when combined with a Gaussian measurement model \old{(see Sec.~S3.2 of the supplement material for details)} \new{(\nameref{S_meas})}.
+Because the process model of Model~2 is deterministic, maximum likelihood estimation reduces to a least squares calculation when combined with a Gaussian measurement model (\nameref{S_meas}).
 Lee et al.~\cite{lee20} fit two versions of Model~2 based on a presupposed change in cholera transmission from a epidemic phase to endemic phase that occurred in March, 2014.
 The inclusion of a change-point in model states and parameters increased the flexibility of the model and hence the ability to fit the observed data.
 The increase in model flexibility, however, resulted in hidden states that were inconsistent between model phases.
-The inclusion of a model break-point by Lee et al.~\cite{lee20} is perhaps due to a challenging feature of fitting a deterministic model via least squares: discrepancies between model trajectories and observed case counts in highly infectious periods of a disease outbreak will result in greater penalty than the discrepancies between model trajectories and observed case counts in times of relatively low infectiousness\new{. This results} \old{resulting} in a bias towards accurately describing periods of high infectiousness.
-This \old{issue} \new{bias} is particularly troublesome for modeling cholera dynamics in Haiti: the inability to accurately fit times of low infectiousness may result in poor model forecasts, as few cases of cholera were observed in the last few years of the epidemic.
+The inclusion of a model break-point by Lee et al.~\cite{lee20} is perhaps due to a challenging feature of fitting a deterministic model via least squares: discrepancies between model trajectories and observed case counts in highly infectious periods of a disease outbreak will result in greater penalty than the discrepancies between model trajectories and observed case counts in times of relatively low infectiousness. This results in a bias towards accurately describing periods of high infectiousness.
+This bias is particularly troublesome for modeling cholera dynamics in Haiti: the inability to accurately fit times of low infectiousness may result in poor model forecasts, as few cases of cholera were observed in the last few years of the epidemic.
 
 To combat this issue, we fit the model to log-transformed case counts, since the log scale stabilizes the variation during periods of high and low incidence.
 An alternative solution is to change the measurement model to include overdispersion, as was done in Models~1 and~3.
@@ -1776,7 +1759,7 @@ This permits the consideration of demographic stochasticity, which is dominant f
 Here we chose to fit the model to transformed case counts rather than adding overdispersion to the measurement model with the goal of minimizing the changes to the model proposed by Lee et al.~\cite{lee20}.
 
 We implemented this model using the \code{spatPomp} \code{R} package \cite{asfaw23arxiv}.
-The model was then fit using the subplex algorithm \old{, implemented in the  \code{subplex} package} \cite{king2020Subplex}.
+The model was then fit using the subplex algorithm \cite{king2020Subplex}.
 A comparison of the trajectory of the fitted model to the data is given in Fig.~\ref{fig:mod2Traj}.
 
 <<Model 2 Trajectory, echo=FALSE>>=
@@ -1880,10 +1863,10 @@ One concern is that cholera dynamics in department $u$ are highly related to the
 calibrating model parameters while conditioning on the observed cases in other departments may therefore lead to an over-dependence on observed cholera cases.
 Another concern is that the two versions of the model are not the same, resulting in sub-optimal parameter estimates for the spatially coupled model,
 as parameters that maximize the likelihood of the decoupled model almost certainly do not maximize the likelihood of the fully coupled model.
-These two concerns may explain the unrealistic forecasts and low likelihood of Model~3 \new{in \cite{lee20}} \old{of Lee et al.~[4]} (see Table~\ref{tab:likes}).
+These two concerns may explain the unrealistic forecasts and low likelihood of Model~3 in \cite{lee20} (Table~\ref{tab:likes}).
 
 At the time Lee et al.~\cite{lee20} conducted their study, there was no known algorithm that could readily be used to maximize the likelihood of an arbitrary meta-population POMP model with coupled spatial dynamics, which justifies the spatial decoupling approximation that was used to calibrate model parameters.
-For our analysis, we calibrate the parameters of the spatially coupled version of Model~3 using the \old{iterated block particle filter (IBPF)} \new{IBPF} algorithm \cite{ionides22}.
+For our analysis, we calibrate the parameters of the spatially coupled version of Model~3 using the IBPF algorithm \cite{ionides22}.
 This algorithm extends the work of Ning and Ionides \cite{ning23}, who provided theoretic justification for the version of the algorithm that only estimates unit-specific parameters.
 The IBPF algorithm enables us to directly estimate the parameters of models describing high-dimensional partially-observed nonlinear dynamic systems via likelihood maximization.
 The ability to directly estimate parameters of Model~3 is responsible for the large increase in model likelihoods reported in Table~\ref{tab:likes}.
@@ -1971,7 +1954,7 @@ gc()
 
 \subsection*{Model Diagnostics}\label{sec:model_diagnostics}
 
-The goal of parameter calibration---whether done using Bayesian or frequentist methods---is to find the best description of the observed data \old{under the assumptions} \new{in the context} of the model.
+The goal of parameter calibration---whether done using Bayesian or frequentist methods---is to find the best description of the observed data in the context of the model.
 Obtaining the best fitting set of parameters for a given model does not, however, guarantee that the model provides an accurate representation of the system under investigation.
 Model misspecification, which may be thought of as the omission of a mechanism in the model that is an important feature of the dynamic system, is inevitable at all levels of model complexity.
 To make progress, while accepting proper limitations, one must bear in mind the much-quoted observation of George Box \cite{box79} that ``all models are wrong but some are useful.''
@@ -1983,7 +1966,7 @@ Goodness-of-fit may provide evidence supporting the causal interpretation of one
 One common approach to assess a mechanistic model's goodness-of-fit is to compare simulations from the fitted model to the observed data.
 Visual inspection may indicate defects in the model, or may  suggest that the observed data are a plausible realization of the fitted model.
 While visual comparisons can be informative, they provide only a weak and informal measure of the goodness-of-fit of a model.
-The study by Lee et al.~\cite{lee20} provides an example of this: their models and parameter estimates resulted in simulations that visually resembled the observed data, yet resulted in model likelihoods that were considerably smaller than likelihoods that can be achieved \old{via the likelihood based optimization techniques that were used} (see Table~\ref{tab:likes}).
+The study by Lee et al.~\cite{lee20} provides an example of this: their models and parameter estimates resulted in simulations that visually resembled the observed data, yet resulted in model likelihoods that were considerably smaller than likelihoods that can be achieved (see Table~\ref{tab:likes}).
 Alternative forms of model validation should therefore be used in conjunction with visual comparisons of simulations to observed data.
 
 Another approach is to compare a quantitative measure of the model fit (such as MSE, predictive accuracy, or model likelihood) among all proposed models.
@@ -2011,9 +1994,9 @@ where $\mathrm{E}\big(Y_n|Y_{n - 1}\big) = \NBintercept + \NBar Y_{n-1}$, and $\
 
 In the case where the case counts are large, an alternative benchmark recommended by He et al.~\cite{he10} is a log-linear Gaussian ARMA model;
 the theory and practice of ARMA models is well developed, and these linear models are appropriate on a log scale due to the exponential growth and decay characteristic of biological dynamics.
-We \old{chose to} use the auto regressive negative binomial model, however, because the large number of weeks with zero recorded cholera cases in department level data makes a benchmark based on a continuous distribution problematic.
-Log-likelihoods and AIC values of Models~1--3 and of their respective \old{ARMA} benchmark models are provided in Table~\ref{tab:likes}.
-\new{Models that are fit to the same datasets can be directly compared using AIC values, making it a useful tool to compare to benchmark models. Though Models~2 and 3 are both fit to department level incidence reports, their AIC values are not directly comparable due to the way Model~3 initializes latent states (\nameref{S_init}).}
+We use the auto regressive negative binomial model, however, because the large number of weeks with zero recorded cholera cases in department level data makes a benchmark based on a continuous distribution problematic.
+Log-likelihoods and AIC values of Models~1--3 and of their respective benchmark models are provided in Table~\ref{tab:likes}.
+Models that are fit to the same datasets can be directly compared using AIC values, making it a useful tool to compare to benchmark models. Though Models~2 and 3 are both fit to department level incidence reports, their AIC values are not directly comparable due to the way Model~3 initializes latent states (\nameref{S_init}).
 
 
 It should be universal practice to present measures of goodness of fit for published models, and mechanistic models should be compared against benchmarks.
@@ -2041,8 +2024,8 @@ In the context of our case study, we demonstrate how the fit of Model~1 corrobor
 Specifically, we examine the results of fitting the flexible cubic spline term in Model~1 (Eqs.~\myeqref{model1:lambda}--\myeqref{model1:beta}).
 The cubic splines permit flexible estimation of seasonality in the force of infection, $\transmission(t)$.
 Fig.~\ref{fig:h1SeasRain} shows that the estimated seasonal transmission rate $\transmission$ mimics the rainfall dynamics in Haiti, despite Model~1 not having access to rainfall data.
-This is consistent with previous studies \old{finding that rainfall played an important role in cholera transmission in Haiti [50, 51]} \new{that incorporated rainfall as an important part of their mechanistic model or otherwise argue that rainfall is an important driver of cholera dynamics in Haiti \cite{hulland19,kirpich17,lee20,moise20,pasetto18,kirpich16,eisenberg13,rinaldo12,mavian20}.}
-The estimated seasonality also features an increased transmission rate during the fall, which was noticed at an earlier stage of the epidemic \cite{rinaldo12}\new{. T}he high transmission rate in the fall may \old{also} be a result of the increase transmission that occurred in the fall of 2016, when hurricane Matthew struck Haiti \cite{ferreirai16}.
+This is consistent with previous studies that incorporated rainfall as an important part of their mechanistic model or otherwise argue that rainfall is an important driver of cholera dynamics in Haiti \cite{hulland19,kirpich17,lee20,moise20,pasetto18,kirpich16,eisenberg13,rinaldo12,mavian20}.
+The estimated seasonality also features an increased transmission rate during the fall, which was noticed at an earlier stage of the epidemic \cite{rinaldo12}. The high transmission rate in the fall may be a result of the increase transmission that occurred in the fall of 2016, when hurricane Matthew struck Haiti \cite{ferreirai16}.
 
 <<Get Model 1 Seasonality>>=
 h1_seas_df <- get_h1_seasonality(h1)
@@ -2122,10 +2105,9 @@ In epidemiological studies, for example, quantitative understanding of individua
 This makes direct interpretation of estimated parameters delicate.
 
 Our case study provides an example of this in the parameter estimate for the duration of natural immunity due to cholera infection, $\muRS^{-1}$.
-Under the framework of Model~2, the best estimate for this parameter is $\Sexpr{signif(1/h2_fit$h2_params["sigma"],3)}$ yr, suggesting that individuals have \old{effectively} permanent immunity to cholera once infected.
-\new{Rather than interpreting this as scientific evidence that individuals have permanent immunity from cholera, this result suggests that Model~2 favors a regime where reinfection events are a negligble part of the dynamics.}
-\old{To interpret this result, we bear in mind that the data ranged from 2010-2019, and therefore estimates of immunity longer than $10\, \mathrm{yr}$---the upper end of previous estimates of natural immunity [101]---effectively result in the same model dynamics.}
-The depletion of susceptible individuals may \old{also} be attributed to confounding mechanisms---such as localized vaccination programs and non-pharmaceutical interventions that reduce cholera transmission \cite{trevisin22, rebaudet21}---that were not accounted for in the model.
+Under the framework of Model~2, the best estimate for this parameter is $\Sexpr{signif(1/h2_fit$h2_params["sigma"],3)}$ yr, suggesting that individuals have permanent immunity to cholera once infected.
+Rather than interpreting this as scientific evidence that individuals have permanent immunity from cholera, this result suggests that Model~2 favors a regime where reinfection events are a negligble part of the dynamics. % TODO: fix typo
+The depletion of susceptible individuals may be attributed to confounding mechanisms---such as localized vaccination programs and non-pharmaceutical interventions that reduce cholera transmission \cite{trevisin22, rebaudet21}---that were not accounted for in the model.
 Perhaps the best interpretation of the estimated parameter, then, is that under the modeling framework that was used, the model most adequately describes the observed data by having a steady decrease in the number of susceptible individuals.
 The weak statistical fit of Model~2 compared to a log-linear benchmark (see Table~\ref{tab:likes}) cautions us against drawing quantitative conclusions from this model.
 A model that has a poor statistical fit may nevertheless provide a useful conceptual framework for thinking about the system under investigation.
@@ -2135,8 +2117,6 @@ A model which aspires to provide quantitative guidance for assessing interventio
 However, strong statistical fit does not guarantee a correct causal structure: it does not even necessarily require the model to assert a causal explanation.
 A causal interpretation is strengthened by corroborative evidence.
 For example, reconstructed latent variables (such as numbers of susceptible and recovered individuals) should make sense in the context of alternative measurements of these variables \cite{grad12}.
-\old{In the context of our case study, by reconstructing the latent states of Model~3, we notice that the calibrated model favors higher levels of cholera transmission than what was typically observed in the incidence data (S5 Text).
-This result hints at the possibility of model mispecification, and should prompt us to be skeptical of the reliability of forecasts from this model.}
 Similarly, parameters that have been calibrated to data should make sense in the context of alternative lines of evidence about the phenomena being modeled, while making allowance for the possibility that the interpretations of parameters may vary when modeling across differing spatial scales.
 
 \new{\editSuppText}
@@ -2148,8 +2128,6 @@ Similarly, parameters that have been calibrated to data should make sense in the
 Forecasts are an attempt to provide an accurate estimate of the future state of a system based on currently available data, together with an assessment of uncertainty.
 Forecasts from mechanistic models that are compatible with current scientific understanding may also provide estimates of the future effects of potential interventions.
 Further, they may enable real-time testing of new scientific hypotheses \cite{lewis22}.
-
-\old{Recent information about a dynamic system should be more relevant for a forecast than older information. This assertion may seem self-evident, but it is not the case for deterministic models, for which the initial conditions together with the parameters are sufficient for forecasting, and so recent data do not have special importance. Epidemiological forecasts based on deterministic models are not uncommon in practice, despite their limitations [34]. That may explain why Lee et al.~[1] chose to obtain forecasts by simulating the calibrated models forward from initial conditions. We obtain forecasts by simulating future values using latent states that are consistent with the most recent observations; this is done by drawing latent states at the last observation time ($t_N$) from the filtering distribution $f_{\bm{X}_N|\bm{Y}_{1:N}}(\bm{x}_{N} | \bm{y}^*_{1:N} ; \hat\paramVec)$. The decision not to do this partially explains the unsuccessful forecasts of Lee et al.~[1]: their Table~S7 shows that the subset of their simulations which were consistent with observing zero cases in 2019 also accurately predicted the prolonged absence of detected cholera.}
 
 \new{\editForecastOne}
 
@@ -2601,10 +2579,9 @@ We therefore do not provide probability of elimination estimates under Model~2, 
 
 \section*{Discussion}\label{sec:discussion}
 
-The ongoing global COVID-19 pandemic has \old{provided a clear example on} \new{demonstrated} how government policy may be affected by the \old{conclusions of scientific models} \new{inferences drawn from mathematical modeling} \cite{saltelli20}.
-\old{This article demonstrates that fitting appropriate scientific models to guide policy is a challenging statistical task.}
-\new{However, the development of credible models---which are supported by data and can provide quantitative insights into a dynamic system---remains a challenging task.
-In this article, we demonstrated opportunities available for raising the current standards of statistical inference for mathematical models of biological systems.}
+The ongoing global COVID-19 pandemic has demonstrated how government policy may be affected by the inferences drawn from mathematical modeling \cite{saltelli20}.
+However, the development of credible models---which are supported by data and can provide quantitative insights into a dynamic system---remains a challenging task.
+In this article, we demonstrated opportunities available for raising the current standards of statistical inference for mathematical models of biological systems.
 
 \new{We presented methodology consistent with existing guidelines \cite{behrend20} but going beyond standard practice.
 In particular, we showed the value of comparing the likelihood of fitted mechanistic models versus non-mechanistic benchmarks, a practice that has been previously advocated for \cite{he10} but was not done by any of the studies in our literature review.
@@ -2626,20 +2603,17 @@ When reaching conclusions, it is important to consider potential consequences of
 
 % \new{\editDiscussionSix}
 
-In our case study, we found that additional attention to statistical details could have resulted in \old{improved} \new{an enhanced} statistical fit to the observed incidence data\old{, leading to improvements in the accuracy of the resulting policy guidance.} \new{This would have improved the accuracy of the policy guidance resulting from the study.}
-\old{We used the same data and models, and even much of the same code, as Lee et al.~[29], and yet ended up with drastically different conclusions.}
-\new{We used the same data, models, and much of the same code used by Lee et al.~\cite{lee20}, but we arrived at drastically different conclusions.}
-\new{Specifically, each of the re-calibrated models predicted with moderate probability that cholera would disappear from Haiti.
-Although there have been new cases of cholera in Haiti, this conclusion aligns more with the prolonged absence of cholera cases from 2019-2022.}
+In our case study, we found that additional attention to statistical details could have resulted in an enhanced statistical fit to the observed incidence data. This would have improved the accuracy of the policy guidance resulting from the study.
+We used the same data, models, and much of the same code used by Lee et al.~\cite{lee20}, but we arrived at drastically different conclusions.
+Specifically, each of the re-calibrated models predicted with moderate probability that cholera would disappear from Haiti.
+Although there have been new cases of cholera in Haiti, this conclusion aligns more with the prolonged absence of cholera cases from 2019-2022.
 We acknowledge the benefit of hindsight: our demonstration of a statistically principled route to obtain better-fitting models resulting in more robust insights does not rule out the possibility of discovering other models that fit well yet predict poorly.
 
-\old{Inference for mechanistic time series} \new{Mechanistic} models offer opportunities for understanding and controlling complex dynamic systems.
+Mechanistic models offer opportunities for understanding and controlling complex dynamic systems.
 This case study has investigated issues requiring attention when applying powerful new statistical techniques that can enable statistically efficient inference for a general class of partially observed Markov process models.
-\old{Researchers should check that the computationally intensive numerical calculations are carried out adequately.}
-\new{Researchers should ensure that intensive numerical calculations are adequately executed.}
-\old{Comparison against benchmarks and alternative model specifications should be considered to evaluate the statistical goodness-of-fit.}
-\new{Using benchmarks and alternative model specifications to assess statistical goodness-of-fit should also should be common practice.}
-Once \old{that is accomplished} \new{a model has been adequately callibrated to data}, care is required to assess what causal conclusions can properly be inferred given the possibility of alternative explanations consistent with the data.
+Researchers should ensure that intensive numerical calculations are adequately executed.
+Using benchmarks and alternative model specifications to assess statistical goodness-of-fit should also should be common practice.
+Once a model has been adequately callibrated to data, care is required to assess what causal conclusions can properly be inferred given the possibility of alternative explanations consistent with the data.
 Studies that combine model development with thoughtful data analysis, supported by a high standard of reproducibility, build knowledge about the system under investigation.
 Cautionary warnings about the difficulties inherent in understanding complex systems \cite{saltelli20,ioannidis20,ganusov16} should motivate us to follow best practices in data analysis, rather than avoiding the challenge.
 
