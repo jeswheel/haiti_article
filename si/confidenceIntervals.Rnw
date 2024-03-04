@@ -222,9 +222,9 @@ for (i in 1:length(prof_params)) {
   } else if (p == 'nu' || p == 'rho') {
     my_lab <- TeX(paste0('$\\', p, '$'))
   } else if (p == 'sig_sq_epi') {
-    my_lab <- TeX('$\\sigma$: Epidemic')
+    my_lab <- TeX('$\\sigma_{proc}$: Epidemic')
   } else if (p == 'sig_sq_end') {
-    my_lab <- TeX('$\\sigma$: Endemic')
+    my_lab <- TeX('$\\sigma_{proc}$: Endemic')
   } else if (p == 'tau_end') {
     my_lab <- TeX('$\\log(\\psi)$: Endemic')
   } else if (p == 'tau_epi') {
@@ -308,7 +308,7 @@ cowplot::plot_grid(
   rel_widths = c(1.25, 1, 1, 1)
 )
 @
-\caption{\label{fig:m1Profs}MCAP confidence intervals for Model 1 parameters.}
+\caption{\label{fig:m1Profs}MCAP confidence intervals for Model 1 parameters. The vertical blue line indicates the smoothed MLE.}
 \end{figure}
 
 \begin{table}[!h]
@@ -773,7 +773,7 @@ cowplot::plot_grid(
   rel_widths = c(1.15, 1, 1)
 )
 @
-\caption{\label{fig:m2Profs}MCAP confidence intervals for Model 2 parameters.}
+\caption{\label{fig:m2Profs}MCAP confidence intervals for Model 2 parameters. The vertical blue line indicates the MLE.}
 \end{figure}
 
 \begin{table}[!h]
@@ -1052,7 +1052,7 @@ cowplot::plot_grid(
   rel_widths = c(1.25, 1, 1, 1)
 )
 @
-\caption{\label{fig:m3Profs}MCAP confidence intervals for Model 3 parameters.}
+\caption{\label{fig:m3Profs}MCAP confidence intervals for Model 3 parameters. The vertical blue line indicates the smoothed MLE.}
 \end{figure}
 
 \begin{table}[!h]
@@ -1084,7 +1084,7 @@ cowplot::plot_grid(
 \\
 \hline
 
- Asymptotic Shedding & $\asymptomRelativeShed$ & $\Sexpr{myround((h3_mles %>% filter(prof_var == 'XthetaA') %>% pull(value))^2, 3)}$
+ Asymptomatic Shedding & $\asymptomRelativeShed$ & $\Sexpr{myround((h3_mles %>% filter(prof_var == 'XthetaA') %>% pull(value))^2, 3)}$
    &
   $(\Sexpr{myround((all_ci %>% filter(prof_var == 'XthetaA') %>% pull(lower))^2, 1)}, \Sexpr{myround((all_ci %>% filter(prof_var == 'XthetaA') %>% pull(upper))^2, 3)})$ 
 \\
