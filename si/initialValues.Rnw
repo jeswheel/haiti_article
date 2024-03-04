@@ -110,7 +110,7 @@ This model for the initial values of the latent states matches that which was us
 Model~2 assumes that the initial values are a deterministic function of the reporting rate and the initial case reports, and so no initial value parameters need to be estimated.
 Initial values for latent state compartments are chosen so as to enforce the model dynamics on the observed number of cases.
 Specifically, the model sets $I_{u0}(0) = y^*_{1u} / \reportRate$ for each unit $u \in 1:10$, where $I_{u0}(t)$ is the number of infected individuals in unit $u$ at time $t$, vaccination scenario $z = 0$, $y^*_{tu}$ is the reported number of cases, and $\reportRate$ is the reporting rate.
-It is futher assumed that there are no individuals in the recovered compartment, as the epidemic has just begun. 
+It is further assumed that there are no individuals in the recovered compartment, as the epidemic has just begun. 
 This model for the initial values of the latent states matches that which was used by \citet{lee20}.
 
 The decision to fix initial values so that they satisfy the dynamics of the model has the benefit of reducing the number of estimated parameters and enforcing latent states at time $t_0$ to be consistent with the calibrated model. 

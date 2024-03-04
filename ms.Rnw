@@ -619,7 +619,7 @@ Advances in OCV technology and vaccine availability, however, raised the possibi
 The possibility of controlling the Haiti cholera outbreak via OCV was considered by various research groups \cite{lee20,ivers17,andrews11,walton11,matias17,chao11,fung13,date11,leung22,azman15}.
 In the Lee et al.~\cite{lee20} study, certain data were shared between the groups, including demography and vaccination history; vaccine efficacy was also fixed at a shared value between groups.
 Beyond this, the groups made autonomous decisions on what to include and exclude from their models.
-Despite their autonomy, the four independent teams obtained a consensus that an extensive nationwide vaccination campaign would be necessary to eliminate cholera from Haiti, estimating that a large number of cumulative cholera cases would be observed in the absense of additional vaccination efforts (Figure~3 and 4 of \cite{lee20}).
+Despite their autonomy, the four independent teams obtained a consensus that an extensive nationwide vaccination campaign would be necessary to eliminate cholera from Haiti, estimating that a large number of cumulative cholera cases would be observed in the absence of additional vaccination efforts (Figure~3 and 4 of \cite{lee20}).
 These forecasts are inconsistent with the prolonged period with no confirmed cholera cases between February, 2019 and September, 2022 \cite{trevisin22}.
 Though cholera has recently reemerged in Haiti \cite{rubin22,PAHO23}, the inability to accurately forecast cholera incidence from 2019-2022 prompts us to consider retrospectively what may have been done differently in order to obtain more reliable conclusions, leading to recommendations for future studies.
 
@@ -912,7 +912,7 @@ benchmarks <- list()
 # Load aggregated data
 m1_agg_data <- haiti1_agg_data()
 
-# Fit Model 1 bechmark:
+# Fit Model 1 benchmark:
 m1_bench <- ar1_NegBinom(m1_agg_data$cases, init = 7364)
 benchmarks[['m1']] <- m1_bench$ll
 
@@ -1312,7 +1312,7 @@ f_{\bm{Y}_{1:N}}\big(\bm{y}_{1:N}^*; \paramVec\big) = \int f_{\bm{X}_{0:N}, \bm{
 
 \noindent When treated as a function of the parameter vector $\paramVec$, this marginal density is called the \emph{likelihood function}, which is the basis of likelihood based statistical inference.
 
-Using the conditional independence of $\bm{Y}_{1:N}$ given $\bm{X}_{0:N}$ and the Markov property of $\bm{X}_{0:N}$, the joint density can be refactored into the useful form given in Eq.~\myeqref{eq:jointLik}:
+Using the conditional independence of $\bm{Y}_{1:N}$ given $\bm{X}_{0:N}$ and the Markov property of $\bm{X}_{0:N}$, the joint density can be re-factored into the useful form given in Eq.~\myeqref{eq:jointLik}:
 
 \begin{eqnarray}
 \label{eq:jointLik}
@@ -1335,7 +1335,7 @@ For this reason, we provide flow chart diagrams for Models~1--3 in supplement fi
 \subsubsection*{Model~1}
 \label{sec:model1}
 The latent state vector $\bm{X}(t) = \big(S_{\vaccCounter}(t),  E_{\vaccCounter}(t), I_{\vaccCounter}(t), A_{\vaccCounter}(t), R_{\vaccCounter}(t), \vaccCounter \in 0:\vaccClass\big)$ describes susceptible, latent (exposed), infected (and symptomatic), asymptomatic, and recovered individuals in vaccine cohort $\vaccCounter$ at time $t$.
-Here, $\vaccCounter=0$ corresponds to unvaccinated individuals, and $\vaccCounter \in \seq{1}{\vaccClass}$ describes hypothetical vaccination programs. Each program $\vaccCounter$ indexes differences in both the number of doses administered (one versus two doses per individual) and the round of vaccine administration, seperating individuals into compartments with distinct dynamics based on vaccination status.
+Here, $\vaccCounter=0$ corresponds to unvaccinated individuals, and $\vaccCounter \in \seq{1}{\vaccClass}$ describes hypothetical vaccination programs. Each program $\vaccCounter$ indexes differences in both the number of doses administered (one versus two doses per individual) and the round of vaccine administration, separating individuals into compartments with distinct dynamics based on vaccination status.
 The force of infection is
 \begin{equation}
 \label{model1:lambda}
@@ -2053,7 +2053,7 @@ mean_rain <- df_rain %>%
   ungroup() %>%
   mutate(mean_rain = (mean_rain - min(mean_rain)) / ((max(mean_rain) - min(mean_rain))))
 
-# Create a figure showing annual rainfal, scaled from 0-1. This is top figure
+# Create a figure showing annual rainfall, scaled from 0-1. This is top figure
 gg_rain <- df_rain %>%
   filter(week != 1, week != max(week)) %>%
   ggplot(aes(x = week_date, y = std_national_rain, group = year, col = year)) +
@@ -2061,7 +2061,7 @@ gg_rain <- df_rain %>%
   theme_bw() +
   guides(color = 'none') +
   ylab('Standardized Weekly\nNational Rain') +
-  theme(  # Remove elements that are un-unsed becuase this is top figure
+  theme(  # Remove elements that are un-unused because this is top figure
     axis.title.x = element_blank(),
     axis.ticks.x = element_blank(),
     axis.text.x = element_blank(),
@@ -2094,7 +2094,7 @@ cowplot::plot_grid(gg_rain, gg_trans, align = "v", ncol = 1)
 {\figTitle Seasonality of Model~1 transmission compared to rainfall data.}
 (Top) weekly rainfall in Haiti, lighter colors representing more recent years.
 (Bottom) estimated seasonality in the transmission rate (dashed line) plotted alongside mean rainfall (solid line).
-The outsided effect of rainfall in the fall may be due to Hurricane Matthew, which struck Haiti in October of 2016 and resulted in an increase of cholera cases in the nation.
+The outsized effect of rainfall in the fall may be due to Hurricane Matthew, which struck Haiti in October of 2016 and resulted in an increase of cholera cases in the nation.
 }
 \end{figure}
 
@@ -2104,7 +2104,7 @@ This makes direct interpretation of estimated parameters delicate.
 
 Our case study provides an example of this in the parameter estimate for the duration of natural immunity due to cholera infection, $\muRS^{-1}$.
 Under the framework of Model~2, the best estimate for this parameter is $\Sexpr{signif(1/h2_fit$h2_params["sigma"],3)}$ yr, suggesting that individuals have permanent immunity to cholera once infected.
-Rather than interpreting this as scientific evidence that individuals have permanent immunity from cholera, this result suggests that Model~2 favors a regime where reinfection events are a negligble part of the dynamics. % TODO: fix typo
+Rather than interpreting this as scientific evidence that individuals have permanent immunity from cholera, this result suggests that Model~2 favors a regime where reinfection events are a negligible part of the dynamics. % TODO: fix typo
 The depletion of susceptible individuals may be attributed to confounding mechanisms---such as localized vaccination programs and non-pharmaceutical interventions that reduce cholera transmission \cite{trevisin22, rebaudet21}---that were not accounted for in the model.
 Perhaps the best interpretation of the estimated parameter, then, is that under the modeling framework that was used, the model most adequately describes the observed data by having a steady decrease in the number of susceptible individuals.
 The weak statistical fit of Model~2 compared to a log-linear benchmark (see Table~\ref{tab:likes}) cautions us against drawing quantitative conclusions from this model.
@@ -2607,7 +2607,7 @@ Mechanistic models offer opportunities for understanding and controlling complex
 This case study has investigated issues requiring attention when applying powerful new statistical techniques that can enable statistically efficient inference for a general class of partially observed Markov process models.
 Researchers should ensure that intensive numerical calculations are adequately executed.
 Using benchmarks and alternative model specifications to assess statistical goodness-of-fit should also should be common practice.
-Once a model has been adequately callibrated to data, care is required to assess what causal conclusions can properly be inferred given the possibility of alternative explanations consistent with the data.
+Once a model has been adequately calibrated to data, care is required to assess what causal conclusions can properly be inferred given the possibility of alternative explanations consistent with the data.
 Studies that combine model development with thoughtful data analysis, supported by a high standard of reproducibility, build knowledge about the system under investigation.
 Cautionary warnings about the difficulties inherent in understanding complex systems \cite{saltelli20,ioannidis20,ganusov16} should motivate us to follow best practices in data analysis, rather than avoiding the challenge.
 

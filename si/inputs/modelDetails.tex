@@ -20,7 +20,7 @@ Each {\em flow} $N_{ij}(t)$ is associated with a {\em rate} function
 $\mu_{ij}=\mu_{ij}(t,X(t))$, where we include the possibility that $i$ or $j$ takes value $\demography$.
 
 There are different ways to use a collection of rate functions to build a fully specified model.
-We proceed to describe the ones we use in this paper: via a system of ordinary differential equations (Sec.~\ref{subsec:ode}), a simple Markov counting system (Sec.~\ref{subsec:smcs}), and an overdispersed Markov counting system (Sec.~\ref{subsec:odmcs}). Other representations include stochastic differential equations driven by Gaussian noise or Gamma noise \citep{bhadra11}.
+We proceed to describe the ones we use in this paper: via a system of ordinary differential equations (Sec.~\ref{subsec:ode}), a simple Markov counting system (Sec.~\ref{subsec:smcs}), and an over-dispersed Markov counting system (Sec.~\ref{subsec:odmcs}). Other representations include stochastic differential equations driven by Gaussian noise or Gamma noise \citep{bhadra11}.
 
 \subsection{Ordinary differential equation (ODE) interpretation}
 \label{subsec:ode}
@@ -69,12 +69,12 @@ We therefore call the Markov chain a simple Markov counting system (SMCS).
 The infinitesimal mean of every flow is equal to its infinitesimal variance \citep{breto11} and so an SMCS is called equidispersed.
 We note that the special case of Model~1 used by \cite{lee20} (with $\sigmaProc = 0$) is an SMCS.
 To permit more general mean-variance relationships for a Markov counting system, we must permit jumps of size greater than one.
-The utility of overdispersed models, where the infinitesimal variance of the flow exceeds the infinitesimal mean, has become widely recognized \citep{stocks20,he10}.
+The utility of over-dispersed models, where the infinitesimal variance of the flow exceeds the infinitesimal mean, has become widely recognized \citep{stocks20,he10}.
 
 \subsection{Overdispersed Markov counting system interpretation}
 \label{subsec:odmcs}
 
-Including white noise in the rate function enables the possibility of an overdispersed Markov counting system \citep{breto11,breto09,he10}.
+Including white noise in the rate function enables the possibility of an over-dispersed Markov counting system \citep{breto11,breto09,he10}.
 Since rates should be non-negative, Gaussian noise is not appropriate and gamma noise is a convenient option that has found various applications \citep{romero-severson15, subramanian20}.
 Specifically, we consider a model given by
 \begin{equation}
@@ -86,9 +86,9 @@ where $\Gamma_{ij}(t)$ is a stochastic process having independent gamma distribu
 \label{eq:odmcs2}
 \E\big[\Gamma_{ij}(t)\big] = t, \quad \var\big[\Gamma_{ij}(t)\big] = \sigma_{ij}^2 t.
 \end{equation}
-Formally interpreting the meaning of \myeqref{eq:odmcs1} is not trivial, and we do so by constructing a Markov process $X(t)$ as the limit of the Euler scheme descrived in Section~\ref{sec:numerics}, below.
+Formally interpreting the meaning of \myeqref{eq:odmcs1} is not trivial, and we do so by constructing a Markov process $X(t)$ as the limit of the Euler scheme described in Section~\ref{sec:numerics}, below.
 Therefore, the numerical scheme in Sec.~\ref{sec:numerics} can be taken as a definition of the meaning of \myeqref{eq:odmcs1}.
-The Markov chain defined by the limit of this Euler scheme as the step size decreases is an overdispersed Markov counting system, with the possibility of instantaneous jumps of size greater than one \citep{breto11}.
+The Markov chain defined by the limit of this Euler scheme as the step size decreases is an over-dispersed Markov counting system, with the possibility of instantaneous jumps of size greater than one \citep{breto11}.
 
 \section{Numerical solutions to compartment models}
 \label{sec:numerics}
@@ -122,7 +122,7 @@ p_{ii} &=& 1 - \sum_{j\neq i} p_{ij}.
 \end{eqnarray}
 These probabilities correspond to competing hazards for every individual in compartment $i$ to transition to some compartment $j$, interpreting $j=i$ to mean that the individual remains in $i$.
 Then, $\big(\Delta N_{i1},\dots,\Delta N_{ic},\Delta N_{i\demography}\big)$ has the multinomial distribution where $X_i(t)$ individuals are allocated independently to $\seq{1}{c}\cup\{\demography\}$ with probabilities given by \eqref{eq:numerics3} and \eqref{eq:numerics4}.
-We use the \code{reulermultinom} function in the \code{pomp} package to draw from this multionomial distribution.
+We use the \code{reulermultinom} function in the \code{pomp} package to draw from this multinomial distribution.
 
 Different treatments of demographic flows---such as birth, death, immigration and emigration---are possible.
 For the case $i=\demography$, the treatment used by Model~1 is to set

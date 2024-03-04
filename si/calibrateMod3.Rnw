@@ -673,7 +673,7 @@ coef(h3)[names(sub_params)] <- sub_params
 
 registerDoRNG(40765101)  # for modular, reproducible results
 
-# Perform block partical filter with fitted model, to get conditional
+# Perform block particle filter with fitted model, to get conditional
 # log-likelihoods.
 bpf_sub3_out <- bake(
   file = "../model3/si/noHur_cond_LL.rds", {
@@ -793,7 +793,7 @@ coef(h3)[names(h3_final_mod_pars)] <- h3_final_mod_pars
 
 registerDoRNG(731955)  # for modular, reproducible results
 
-# Perform block partical filter with fitted model, to get conditional
+# Perform block particle filter with fitted model, to get conditional
 # log-likelihoods.
 bpf_final3_out <- bake(
   file = "../model3/si/h3_cond_LL.rds", {
@@ -913,7 +913,7 @@ Each of these departments also exhibited the most sustained cholera transmission
 Specifically, these four departments have zero cholera cases recorded in less than $4\%$ of the available data, and all remaining departments---except for Nord-Ouest, which has approximately $9.5\%$ of cases that are zeros and also exhibits the next smallest difference in log-likelihoods---have zero cases recorded in at least $14\%$ of the available weekly data.
 This result suggests that the quantitative advantage Model~3 has over its respective benchmark is primarily due to the model's ability to describe a resurgence of cases after a department records a week of zero cholera cases.
 This result may be unsurprising in the context of the models that we are comparing.
-Because the cholera transmission in individual departments likely depends on the national prevalence of cholera and the Vibrio cholerae bacteria, our spatially-independnet benchmark model that relies exclusively on the previous number of case within any given unit has a difficult time predicting a resurgence of cases.
+Because the cholera transmission in individual departments likely depends on the national prevalence of cholera and the Vibrio cholerae bacteria, our spatially-independent benchmark model that relies exclusively on the previous number of case within any given unit has a difficult time predicting a resurgence of cases.
 
 \begin{figure}[!ht]
 <<finalUnitLLFig, fig.height=3, fig.width=5.5, echo=FALSE>>=
@@ -954,7 +954,7 @@ This results hints at the possibility of model mispecification, and warrants a d
 
 <<h3SusFigSetup, echo=FALSE, message=FALSE, include=FALSE>>=
 
-# This bake perfoms the following:
+# This bake performs the following:
 #  (1) simulates the model from initial conditions
 #  (2) get the values of the hidden states at the end of each simulation, and
 #      saves these for later use.
