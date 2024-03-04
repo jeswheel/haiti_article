@@ -32,6 +32,8 @@ setupProfiles3.R
 model*/profileReg_RL*/*
 sessionInfo_tmp.txt
 analyzeH1Profiles.R
+analyzeH*Profiles.R
 model1/run_level_1/*
 model3/run_level_1/*
 refs/*
+r1/*
