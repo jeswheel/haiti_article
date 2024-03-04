@@ -34,3 +34,4 @@ sessionInfo_tmp.txt
 analyzeH1Profiles.R
 model1/run_level_1/*
 model3/run_level_1/*
+refs/*
