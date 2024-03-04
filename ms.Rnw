@@ -1,7 +1,7 @@
 \documentclass[10pt,letterpaper]{article}
 \usepackage[top=0.85in,left=2.75in,footskip=0.75in]{geometry}
 
-\input{edits.tex}
+% \input{edits.tex}
 
 % amsmath and amssymb packages, useful for mathematical formulas and symbols
 \usepackage{amsmath,amssymb}
@@ -545,7 +545,7 @@ We assess current methodological approaches to these issues via a case study of 
 We consider three dynamic models developed by expert teams to advise on vaccination policies.
 We evaluate previous methods used for fitting these models, and we demonstrate modified data analysis strategies leading to improved statistical fit.
 Specifically, we present approaches for diagnosing model misspecification and the consequent development of improved models.
-Additionally, we demonstrate the utility of recent advances in likelihood maximization for high-dimensional nonlinear dynamic models, enabling likelihood-based inference for high-dimensional models for spatiotemporal incidence data.
+Additionally, we demonstrate the utility of recent advances in likelihood maximization for high-dimensional nonlinear dynamic models, enabling likelihood-based inference for spatiotemporal incidence data using this class of models.
 Our workflow is reproducible and extendable, facilitating future investigations of this disease system.
 
 \section*{Author summary}
