@@ -612,7 +612,7 @@ unitLikesM3 <- best_mod %>%
   arrange(unit)
 @
 
-<<M3_bench, echo=FALSE, message=FALSE, include=FALSE, cache=TRUE>>=
+<<M3_bench, echo=FALSE, message=FALSE, include=FALSE, cache=FALSE>>=
 h3 <- haiti3_spatPomp()
 deps <- h3@unit_names
 
