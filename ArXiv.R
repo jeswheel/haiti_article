@@ -12,7 +12,7 @@ ms_to_ArXiv <- function(file_name) {
   # tmp_file[geometry_line] <- "\\usepackage[top=0.85in,left=1.5in,footskip=0.75in]{geometry}"
   # tmp_file <- gsub("bib-haiti", 'ms', tmp_file)
 
-  bib_spot <- which(grepl("\\bibliography{bib-haiti}", tmp_file, fixed = TRUE))
+  bib_spot <- which(grepl("\\bibliography{bib-haiti,bib-lit}", tmp_file, fixed = TRUE))
   bib_content <- readLines(gsub("\\.tex", "\\.bbl", file_name))
 
   new_file <- c(tmp_file[1:(bib_spot - 1)], bib_content, tmp_file[(bib_spot + 1):length(tmp_file)])
