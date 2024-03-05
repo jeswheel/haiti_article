@@ -82,6 +82,8 @@ ArXiv: ms.tex ms.bbl si/si.tex si/calibrateMod3Out.tex si/ReplicateLee20Out.tex
 	cp -r si/figure/ ArXiv/
 	cp si/calibrateMod3Out.tex ArXiv/
 	cp si/ReplicateLee20Out.tex ArXiv/
+	cp si/confidenceIntervalsOut.tex ArXiv/
+	cp si/initialValuesOut.tex ArXiv/
 	Rscript --vanilla ArXiv.R ArXiv/ms.tex
 	rm ArXiv/ms.bbl
 	rm ArXiv/si.bbl

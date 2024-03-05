@@ -3,7 +3,7 @@ COMPILEFILES:= calibrateMod3Out.tex ReplicateLee20Out.tex confidenceIntervalsOut
 # INPUTFILES:= inputs/header.tex inputs/mod1diagram.tex inputs/mod2diagram.tex inputs/mod3diagram.tex inputs/modelDetails.tex inputs/measurementModels.tex inputs/initialValues.tex inputs/paramUncertainty.tex
 
 create:
-	$(MAKE) si.Rnw
+	$(MAKE) si.pdf
 	$(MAKE) sifiles
 	$(MAKE) clean
 
@@ -16,7 +16,7 @@ fresh: ReplicateLee20.Rnw calibrateMod3.Rnw $(INPUTFILES)
 	rm -f si.tex calibrateMod3*.tex ReplicateLee20*.tex confidenceIntervals*.tex initialValues*.tex
 	rm -rf si_files
 
-si.Rnw: | $(COMPILEFILES) inputs/translateTab.tex
+si.pdf: | $(COMPILEFILES) inputs/translateTab.tex si.Rnw
 	Rscript -e "library(knitr); knit2pdf('si.Rnw')"
 
 %Out.tex: %.Rnw
@@ -27,7 +27,7 @@ si.Rnw: | $(COMPILEFILES) inputs/translateTab.tex
 	rm $*.tex
 
 clean:
-	rm -f *.bbl *.log *-concordance.tex *.gz *.toc *.aux *.blg
+	rm -f *.log *-concordance.tex *.gz *.toc *.aux *.blg
 
 si_files/%.pdf: inputs/%.tex utilityFuns.R make_si_file.R
 	if ! [ -d "si_files" ]; then mkdir si_files; fi
@@ -41,8 +41,7 @@ si_files/%.pdf: inputs/%.tex utilityFuns.R make_si_file.R
 		rm $*.tmp ; \
 	fi;
 	mv $*.pdf si_files/$*.pdf
-	$(MAKE) clean
-	rm $*.tex
+	rm -f $*.bbl $*.log $*-concordance.tex $*.gz $*.toc $*.aux $*.blg $*.tex
 
 sifiles:
 	for f in $(SUPFILES); do (make si_files/$$f.pdf); done
