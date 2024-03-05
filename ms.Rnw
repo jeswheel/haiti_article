@@ -901,7 +901,7 @@ mod3_eval_res$subset_aic <- 2 * mod3_n_params - 2 * mod3_eval_res$subset_ll['se'
 rm(NREPS_EVAL, NP_EVAL)
 @
 
-<<Calculate Bench Likelihood, echo=FALSE, message=FALSE, include=FALSE, cache=TRUE>>=
+<<Calculate Bench Likelihood, echo=FALSE, message=FALSE, include=FALSE, cache=FALSE>>=
 
 benchmarks <- list()
 
