@@ -56,7 +56,8 @@ clean:
 
 tifs: $(TIF_FILES)
 
-submission: ms.tex
+submission: 
+	Rscript -e "library(knitr); knit2pdf('ms.Rnw')"
 	Rscript --vanilla remove_knitrout.R ms.tex
 	pdflatex ms-submission.tex
 	bibtex ms-submission.aux
@@ -67,6 +68,10 @@ submission: ms.tex
 	if ! [ -d "submission" ]; then mkdir submission; fi
 	mv ms-submission.pdf submission/
 	mv ms-submission.tex submission/
+	$(MAKE) tifs
+	cp -r figure submission/.
+	rm -r submission/figure/*.pdf
+	
 
 ArXiv: ms.tex ms.bbl si/si.tex si/calibrateMod3Out.tex si/ReplicateLee20Out.tex
 	if ! [ -d "ArXiv" ]; then mkdir ArXiv; fi
