@@ -91,7 +91,7 @@ Each of the dynamic models considered in this manuscript can be fully described 
 Despite this, diagrams of dynamic systems are often helpful to understand the equations.
 In this section, we give three diagrams representing Models~1--3, respectively.
 Because the models are defined by their mathematical equations and numeric implementation, these diagrams are not unique visual representations of the model.
-Alternative representations that may be helpful in understanding the models explored in this paper were made by \citet{lee20sup}.
+Alternative representations that may be helpful in understanding the models explored in this paper were made by Lee et al. (2020) \cite{lee20sup}.
 
 \subsection{Model~1}
 
@@ -123,9 +123,9 @@ Alternative representations that may be helpful in understanding the models expl
 
 \input{inputs/paramUncertainty}
 
-\section{Translating to \citet{lee20} notation}
+\section{Translating to Lee et al. (2020) \cite{lee20} notation}
 
-Since the models of \citet{lee20} were developed independently, the choice of notation varies inconsistently between models.
+Since the models of Lee et al. (2020) \cite{lee20} were developed independently, the choice of notation varies inconsistently between models.
 For our reanalysis, we rename parameters to provide a unified notation facilitating comparison between models.
 Table~\ref{tab:translate} maps this notation back to the original notations, for reference.
 

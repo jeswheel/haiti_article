@@ -201,8 +201,10 @@
 
 %%%%%%%%%%%%%%%% END OF USER DEFINITIONSS %%%%%%%%%%%%%%%
 
-\bibliographystyle{apalike}
-\usepackage{natbib}
+% \bibliographystyle{apalike}
+\bibliographystyle{plos2015}
+% \usepackage{natbib}
+\usepackage{cite}
 \usepackage{fullpage}
 % \usepackage[aboveskip=1pt,labelfont=bf,labelsep=period,justification=raggedright,singlelinecheck=off]{caption}
 % \usepackage[labelfont=bf,labelsep=period]{caption} % For some reason this doesn't work with .Rnw file, but it does with just the tex file, so after compiling you can edit this so that it works.
@@ -211,7 +213,7 @@
 \newcommand\myeqref[1]{(\ref{#1})}
 
 \renewcommand{\contentsname}{Supplementary Content}
-\renewcommand{\refname}{Supplementary References}
+\renewcommand{\refname}{References}
 \renewcommand\thefigure{S-\arabic{figure}}
 \renewcommand\thetable{S-\arabic{table}}
 \renewcommand\thesection{S\arabic{section}}

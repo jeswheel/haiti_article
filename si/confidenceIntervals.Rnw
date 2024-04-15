@@ -79,10 +79,10 @@ myround <- function(x, digits = 1) {
 \section{Confidence Intervals for Model Parameters}\label{sec:ci}
 
 In this section we provide confidence intervals for all model parameters, excluding those that take unique values for each spatial unit.
-For each model and parameter, we use principles of profile likelihood to obtain confidence intervals \citep{pawitan01}.
+For each model and parameter, we use principles of profile likelihood to obtain confidence intervals \cite{pawitan01}.
 Due to the non-linear and stochastic nature of Models~1 and 3, exact evaluations of the profile log-likelihood are difficult to obtain.
 Instead, the log-likelihood at each point of the profile is estimated using via Monte-Carlo based particle filter methods.
-We therefore obtain confidence intervals for the parameters of Model~1 and Model~3 using the Monte Carlo adjust profile (MCAP) algorithm \citep{ionides17}.
+We therefore obtain confidence intervals for the parameters of Model~1 and Model~3 using the Monte Carlo adjust profile (MCAP) algorithm \cite{ionides17}.
 
 Profile confidence intervals for nonlinear POMP models are require a large number of computations. In the Model~1 and Model~3 subsections, we mention the total computational expense of each profile log-likelihood evaluation. Each subsection also provide figures that show the curvature of the profile log-likelihood near the MLE (Figures~\ref{fig:m1Profs}--\ref{fig:m3Profs}).
 In these figures, the parameter values are shown on the transformed scale in which the profile was calculated.
@@ -91,7 +91,7 @@ In these figures, the parameter values are shown on the transformed scale in whi
 
 Parameter estimates for Model~1, along with the MCAP confidence intervals for the estimate, are given in Table~\ref{tab:mod1CI}.
 Figure~\ref{fig:m1Profs} displays the Monte Carlo evaluations of the profile likelihood values, obtained using a particle filter.
-The total computational burden of this profile likelihood search was 3631 hours, which was computed in parallel using 9675 separate jobs via the \texttt{batchtools} R package \citep{batchtools}.
+The total computational burden of this profile likelihood search was 3631 hours, which was computed in parallel using 9675 separate jobs via the \texttt{batchtools} R package \cite{batchtools}.
 
 <<Load Model 1 Confidence Intervals, include=FALSE, message=FALSE, echo=FALSE>>=
 H1_profiles <- readRDS("../model1/run_level_3/h1_profiles.rds")
@@ -834,7 +834,7 @@ Immunity {\small (yr)} & $\muRS^{-1}$ & $\Sexpr{signif(1/h2_mles['sigma'], 3)}$\
 
 Parameter estimates for Model~3, along with the MCAP confidence intervals for the estimate, are given in Table~\ref{tab:mod3CI}.
 Figure~\ref{fig:m3Profs} displays the Monte Carlo evaluations of the profile likelihood values, obtained using a particle filter.
-The total computational burden of this profile likelihood search was 28938 hours, which was computed in parallel using 7568 separate jobs via the \texttt{batchtools} R package \citep{batchtools}.
+The total computational burden of this profile likelihood search was 28938 hours, which was computed in parallel using 7568 separate jobs via the \texttt{batchtools} R package \cite{batchtools}.
 
 <<Load Model 3 Profiles, include=FALSE, message=FALSE, echo=FALSE>>=
 H3_profiles1 <- readRDS('../model3/run_level_3/h3_profiles.rds') %>%

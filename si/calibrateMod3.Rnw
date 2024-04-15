@@ -74,7 +74,7 @@ if (!dir.exists("../model3/si")) {
 <<DefineH3FitFunction>>=
 
 # This function is how the model was fit before doing profiles. The commit id
-# that this function was copied from, for reference, is 49b52e3 of haitipkg. 
+# that this function was copied from, for reference, is 49b52e3 of haitipkg.
 fit_haiti3_si <- function(
     search1 = NULL,
     search2 = NULL,
@@ -697,18 +697,18 @@ bpf_sub3_out <- bake(
 In this section, we provide more detail on the process that was used to estimate the coefficients of Model~3.
 In particular, we discuss why we decided to include additional model parameters---those that are associated with the behavior of the system during Hurricane Matthew---that were not considered by \cite{lee20}.
 To calibrate this model, we used the iterated block particle filter (IBPF) method of \cite{ionides22}.
-Due to the novelty of this algorithm, there exists only a few examples where the IBPF algorithm is used for data analysis \citep{li23,ionides22}, which is one motivation of the inclusion additional details related to fitting and diagnosing the model fit provided here.
+Due to the novelty of this algorithm, there exists only a few examples where the IBPF algorithm is used for data analysis \cite{li23,ionides22}, which is one motivation of the inclusion additional details related to fitting and diagnosing the model fit provided here.
 
-\cite{lee20} only estimated model parameters to a simplified version of Model~3 on a subset of the available data, as no method existed at the time of their publication to fit a fully coupled meta-population model to disease incidence data.
+Lee et al. (2020)~\cite{lee20} only estimated model parameters to a simplified version of Model~3 on a subset of the available data, as no method existed at the time of their publication to fit a fully coupled meta-population model to disease incidence data.
 Building on their results, we fit the fully coupled version of Model~3 to (nearly) all available data, reserving only a few observations to use to calibrate the initial conditions of the model (see the supplement for initialization models for more details).
 To maximize model likelihoods, we relied on parameter estimates obtained while calculating profile-likelihood confidence intervals, as this calculation requires many replicated IBPF searches.
 In our preliminary investigations that were done prior to conducting a profile likelihood search, we found that it was necessary to use multiple searches for the MLE, periodically pruning away less successful searches.
 To do this, the first collection of searches is performed by obtaining initial values for the parameters by uniformly sampling values from a predefined hypercube.
 A subsequent refinement search used parameter values corresponding to the largest model likelihoods as starting parameter values.
-The need for multiple searches does not appear to be uncommon, as a similar approach was used by \cite{ionides22}.
-While computationally intensive, profile likelihoods proved to be an effective alternative to maximizing model likelihoods without the need to apply this multistage heuristic. 
+The need for multiple searches does not appear to be uncommon, as a similar approach was used in \cite{ionides22}.
+While computationally intensive, profile likelihoods proved to be an effective alternative to maximizing model likelihoods without the need to apply this multistage heuristic.
 
-We use the iterative fitting / pruning technique described above to fit the fully coupled version of Model~3 proposed by \cite{lee20}.
+We use the iterative fitting / pruning technique described above to fit the fully coupled version of Model~3 proposed in \cite{lee20}.
 The maximum likelihood we obtained after two rounds of searching was $\Sexpr{round(max(haiti3_sub_fit$search2$logLiks$logLik))}$, which is higher than the benchmark model ($\Sexpr{round(sum(unitLikes_bench$ll))}$).
 While beating a simple associative benchmark is promising, this does not immediately imply that the model is a good description of the system.
 Additional investigation of parameters estimates and their corresponding implications on model based conclusions should always be conducted.
@@ -775,7 +775,7 @@ t(bpf_sub3_out$block.cond.loglik) %>%
 Fig.~\ref{fig:condLL} reveals that the fitted model poorly describes certain features of the data.
 For example, many departments (in particular Sud) have observations with lower conditional log-likelihoods near October 2016 than at other time points.
 Further investigation of the model output reveals that the model is struggling to explain the sudden surge in cholera cases that occurred at this time, which coincides with the time that Hurricane Matthew struck Haiti.
-While the model does include a mechanism to account for increased cholera transmission due to large rainfall events, the mechanism does not appear to be sufficient to capture the damaging effects of the hurricane, which had the greatest impact in the the Sud and Grand'Anse departments \citep{ferreirai16}.
+While the model does include a mechanism to account for increased cholera transmission due to large rainfall events, the mechanism does not appear to be sufficient to capture the damaging effects of the hurricane, which had the greatest impact in the the Sud and Grand'Anse departments \cite{ferreirai16}.
 This result led us to include parameters $\Whur{u}$ and $\hHur{u}$ in Eq.~23 of the main text, which allows for an increase in the transmission rate between environmental cholera and humans for in Sud and Grand'Anse during and after the hurricane.
 The effect of the hurricane on cholera transmission is assumed to have an exponential decay, where the magnitude is determined by $\Whur{u}$ and the duration of the effect determined by $\hHur{u}$.
 
@@ -814,10 +814,10 @@ bpf_final3_out <- bake(
 )
 
 unitLikesM3_final <- readRDS("../model3/run_level_3/mod3_eval_res.rds")[['u_cond_ll']] %>%
-  t() %>% 
-  as_tibble() %>% 
-  rename(ll_est = est, ll_se = se) %>% 
-  mutate(unit = 1:10) %>% 
+  t() %>%
+  as_tibble() %>%
+  rename(ll_est = est, ll_se = se) %>%
+  mutate(unit = 1:10) %>%
   select(unit, ll_est, ll_se)
 
 # Combine model likelihood table to benchmarks
@@ -858,7 +858,7 @@ The addition of the Hurricane parameters also increases in conditional likelihoo
 # block particle filter to get conditional log-likelihoods.
 bpf_final3_out <- bake(
   file = "../model3/si/h3_final_bpf_cond_ll.rds", {
-    
+
     # Set the model parameters to the best results from previous search
     coef(h3)[names(h3_final_mod_pars)] <- h3_final_mod_pars
 
@@ -939,17 +939,17 @@ This is particularly worrisome given that these four departments account for mor
 
 For mechanistic models, beating a suitable statistical benchmark does not alone guarantee that the model provides an accurate description of a dynamic process.
 Indeed, a good statistical fit does not require the model to assert a causal explanation.
-For example, reconstructed latent variables should make sense in the context of alternative measurements of these variables \citep{grad12}.
+For example, reconstructed latent variables should make sense in the context of alternative measurements of these variables \cite{grad12}.
 We demonstrate this principle by examining the latent state of the calibrated model.
 In particular, we examine the compartment of susceptible individuals under various scenarios.
-This analysis can also provide insight into why the calibrated model fails to outperform the benchmark model on the four departments with the most sustained cholera transmission. 
+This analysis can also provide insight into why the calibrated model fails to outperform the benchmark model on the four departments with the most sustained cholera transmission.
 
 Recall that the filtering distribution for the calibrated version of Model~3 at time $t_k$ is defined as the distribution of the latent state at time $t_k$ given the data from times $t_{1}:t_{k}$, i.e. $f^{(3)}_{\bm{X}_k|\bm{Y}_{1:k}}(\bm{x}_{k} | \bm{y}^*_{1:k} ; \hat\theta)$.
 In general, one may expect simulations from the filtering distribution of a model with a good statistical fit to result in hidden states that are highly consistent with the observed data because the filtering distribution is conditioned on the observed data.
 Fig.~\ref{fig:h3Sus} shows the percentage of individuals that are in the susceptible compartment from various simulations of the model:
 simulations from Model~3 under initial conditions are displayed in red; simulations from the filtering distribution of model are displayed in blue.
 This figure shows that simulations from initial conditions tends to result in a much more rapid depletion of susceptible individuals at the start of the epidemic than simulations from the filtering distribution, suggesting the calibrated model has a propensity to predict larger outbreaks than what is typically seen in the data.
-This result demonstrates that the calibrated model favors a more rapid growth in cholera cases than what is typically seen in the observed data, providing a possible explanation as to why the model fails to beat the simple benchmark for each spatial unit. 
+This result demonstrates that the calibrated model favors a more rapid growth in cholera cases than what is typically seen in the observed data, providing a possible explanation as to why the model fails to beat the simple benchmark for each spatial unit.
 This results hints at the possibility of model mispecification, and warrants a degree of caution in interpreting the model's outputs.
 
 <<h3SusFigSetup, echo=FALSE, message=FALSE, include=FALSE>>=
@@ -961,7 +961,7 @@ This results hints at the possibility of model mispecification, and warrants a d
 #  (3) Obtain quantiles for the Susceptible pool from the simulations.
 init_conditions_results <- bake(
   file = "../model3/si/InitSimsQuants.rds", {
-    
+
     # Set the model parameters to the best results from previous search
     coef(h3)[names(h3_final_mod_pars)] <- h3_final_mod_pars
 
@@ -1052,7 +1052,7 @@ mod3_V0_initcond_res <- bake(
     h3_S0_par <- get_model3_vacc_scenario_params(scenario = "noVacc")
     h3Spat <- h3
     p3 <- h3_final_mod_pars
-    
+
     coef(h3Spat) <- p3
     coef(h3Spat)[names(h3_S0_par)] <- h3_S0_par
 

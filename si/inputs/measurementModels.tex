@@ -30,7 +30,7 @@ where $\Delta N_{E_{u\cdot}I_{u\cdot}}(n)$ is the sum total of individuals acros
 Therefore, because the natural logarithm of observed case counts (plus one, to avoid taking the logarithm of zero) has a normal distribution, $Y_{u, n} + 1$ is assumed to follow a log-normal distribution with log-mean parameter $\log\big(\reportRate \Delta N_{E_{u\cdot}I_{u\cdot}}(n) + 1\big)$ and log-variance $\obsOverdispersion^2$.
 We note that fitting a model with this measurement model is equivalent to fitting using least squares, with $\log(Y_{u, n} + 1)$ as the response variable.
 
-This measurement model differs from that used by \citet{lee20}, who fit the model in two stages: epidemic and endemic phases.
+This measurement model differs from that used by Lee et al. (2020) \cite{lee20}, who fit the model in two stages: epidemic and endemic phases.
 Although their text and supplement material do not explicitly describe the measurement model used, inspection of the code provided with their submission suggests a change in measurement model between the epidemic and endemic phases.
 % In the file \code{choleraEqsPublic.py}, \citet{lee20} create several functions, where each function represents a set of coupled differential equations that could potentially be used to model cholera incidence data.
 % Each function returns a vector (or \code{numpy} array) that represents the change in each state variable for a single time step, including the variable \code{dC}, which tracks the number of new infections and is used to obtain the reported case counts.
